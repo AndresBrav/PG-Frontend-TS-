@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
-import { TokenContext } from "../Context/TokenContext";
-import { loginuser } from "../Services/authService";
+import { TokenContext } from "../../Context/TokenContext";
+import { loginuser } from "../../Services/authService";
 
 const Login = () => {
     const [username, setUsername] = useState<string>("");
@@ -20,7 +20,7 @@ const Login = () => {
     const handleLogin = async () => {
         try {
             
-            const data = await loginuser(username, password);
+            const data = await loginuser(username, password);  /* make a request to the backend */
             setClaveAcceso(data.token);     //we store the token in the context
             setMessage("Token almacenado correctamente");
 

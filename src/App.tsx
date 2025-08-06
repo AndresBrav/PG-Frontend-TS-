@@ -1,7 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Login from "./components/users/Login";
-import SignUp from "./components/users/SignUp";
-import { TokenProvider } from "./components/Context/TokenProvider";
+import { TokenProvider } from "./Context/TokenProvider";
+import Login from "./pages/users/Login";
+import SignUp from "./pages/users/SignUp";
+import Dashboard from "./pages/Games/Presentation/Dashboard";
 
 function App() {
     return (
@@ -11,6 +12,7 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Login />} />
                         <Route path="/registro" element={<SignUp />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
                     </Routes>
                 </BrowserRouter>
             </TokenProvider>
