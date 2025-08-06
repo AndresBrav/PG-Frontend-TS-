@@ -1,11 +1,19 @@
-import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Login from "./components/users/Login";
+import SignUp from "./components/users/SignUp";
+import { TokenProvider } from "./components/Context/TokenProvider";
 
 function App() {
-    const [count, setCount] = useState(0);
-
     return (
         <>
-          <h1>Hola</h1>
+            <TokenProvider>
+                <BrowserRouter>
+                    <Routes>
+                        <Route path="/" element={<Login />} />
+                        <Route path="/registro" element={<SignUp />} />
+                    </Routes>
+                </BrowserRouter>
+            </TokenProvider>
         </>
     );
 }
