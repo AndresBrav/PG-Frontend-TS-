@@ -1,14 +1,15 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { TokenContext } from "../../Context/TokenContext";
 import { loginuser } from "../../Services/authService";
-// import "../../assets/styles/stylesUsers/styleLogin.css";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const navigate = useNavigate();
     // const [message, setMessage] = useState<string>("");
 
-    const { setClaveAcceso } = useContext(TokenContext);
+    const { claveAcceso, setClaveAcceso } = useContext(TokenContext);
 
     const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setUsername(e.target.value);
@@ -30,6 +31,12 @@ const Login = () => {
             // setMessage("Error en el login");
         }
     };
+
+    useEffect(() => {
+        if (claveAcceso) {    /* Esta línea verifica si claveAcceso tiene un valor "truthy". En JavaScript, un valor es considerado "truthy" si no es false, 0, "", null, undefined, o NaN. */
+            navigate("/dashboard");
+        }
+    }, [claveAcceso, navigate]);
 
     const handleSignup = () => {};
 
