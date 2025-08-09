@@ -20,3 +20,17 @@ export const loginuser = async (
     );
     return data;
 };
+
+export const registerUser = async (
+    username: string,
+    edad: string,
+    password: string
+): Promise<LoginResponse> => {
+    const res = await axios.post<LoginResponse>(
+        `${API}/usuarios/login/registrar`,
+        { username, edad, password },
+        { headers: { "Content-Type": "application/json" } }
+    );
+    // console.log(res.data);
+    return res.data;
+};

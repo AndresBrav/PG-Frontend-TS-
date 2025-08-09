@@ -38,7 +38,9 @@ const Login = () => {
         }
     }, [claveAcceso, navigate]);
 
-    const handleSignup = () => {};
+    const handleSignup = () => {
+        navigate("/registro"); // Navigate to the SignUp page
+    };
 
     return (
         <div className="flex-container-login">
