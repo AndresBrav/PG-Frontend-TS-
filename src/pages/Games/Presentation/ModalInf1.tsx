@@ -9,6 +9,10 @@ interface ModalProps {
 const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
+    const manejarClick = () => {
+        alert("Has hecho clic en la imagen.");
+    };
+
     return (
         <div
             style={{
@@ -69,6 +73,41 @@ const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                         proceso, sistema o algoritmo informático.
                     </h1>
                 </div>
+
+                <br />
+                <div className="contenedor-diagramaflujo-ejercicio1-imagen-flex">
+                    <img
+                        src="https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png"
+                        alt="Símbolo de inicio/fin del diagrama de flujo"
+                        onClick={manejarClick}
+                    />
+                    <img
+                        src="https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png"
+                        alt="Símbolo de inicio/fin del diagrama de flujo"
+                        onClick={manejarClick}
+                    />
+                    <img
+                        src="https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png"
+                        alt="Símbolo de inicio/fin del diagrama de flujo"
+                        onClick={manejarClick}
+                    />
+                    <img
+                        src="https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png"
+                        alt="Símbolo de inicio/fin del diagrama de flujo"
+                        onClick={manejarClick}
+                    />
+                    <img
+                        src="https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png"
+                        alt="Símbolo de inicio/fin del diagrama de flujo"
+                        onClick={manejarClick}
+                    />
+                    <img
+                        src="https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png"
+                        alt="Símbolo de inicio/fin del diagrama de flujo"
+                        onClick={manejarClick}
+                    />
+                </div>
+                <br />
             </div>
         </div>
     );

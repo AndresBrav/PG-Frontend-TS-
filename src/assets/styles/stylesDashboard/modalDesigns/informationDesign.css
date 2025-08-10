@@ -18,20 +18,37 @@
 }
 
 .contenedor-diagramaflujo-ejercicio1-explicacion > h1 {
-
     color: white;
     margin-left: 2vw;
     font-size: 1rem;
 }
 
+.contenedor-diagramaflujo-ejercicio1-imagen-flex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    
+}
 
+.contenedor-diagramaflujo-ejercicio1-imagen-flex > img {
+    margin-left: 15px;
+    height: 150px;
+    width: 150px;
+}
 
 @media (max-width: 480px) {
-    .contenedor-diagramaflujo-ejercicio1 >h1{
-        font-size: 0.7rem;  /* 1 rem 16 px */
+    .contenedor-diagramaflujo-ejercicio1 > h1 {
+        font-size: 0.7rem; /* 1 rem 16 px */
     }
 
-    .contenedor-diagramaflujo-ejercicio1-explicacion > h1{
+    .contenedor-diagramaflujo-ejercicio1-explicacion > h1 {
         font-size: 0.8rem;
     }
+
+    .contenedor-diagramaflujo-ejercicio1-imagen-flex > img {
+    height: 80px;
+    width: 80px;
+}
 }
