@@ -1,0 +1,103 @@
+.information-design-level-style-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    padding: 20px;
+    background-color: #d9d9d9;
+    border-radius: 15px;
+    margin-left: 5vw; /* 5% del ancho de la ventana */
+    margin-right: 25vw; /* 5% del ancho de la ventana */
+    margin-top: 5vh;
+    height: 25vh;
+}
+
+.information-design-level-style-container-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+    grid-template-rows: 1fr; /* 1 fila */
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    margin-top: 50px;
+}
+
+.item-information-design-level-style-1 {
+    background-color: #d9d9d9;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-left: 5vw;
+}
+.item-information-design-level-style-2 {
+    background-color: #d9d9d9;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    margin-right: 16vw;
+    display: flex;
+    justify-content: flex-end; /* empuja todo a la derecha */
+    align-items: center;
+}
+
+.item-information-design {
+    height: 120px;
+    width: 120px;
+    margin-right: 5%; /* 5% del ancho de la ventana */
+}
+
+.design-font-information-1 {
+    font-size: 26px;
+    color: black;
+    /* margin-bottom: 10px; */
+}
+
+.design-font-information-2 {
+    font-size: 37px;
+    color: black;
+    /* margin-bottom: 10px; */
+}
+
+@media (max-width: 480px) {
+    .information-design-level-style-container {
+        margin-left: 3vw; /* menos margen lateral */
+        margin-right: 3vw; /* menos margen lateral */
+        height: auto; /* que crezca según contenido */
+        padding: 10px; /* menos padding para móvil */
+    }
+
+    .information-design-level-style-container-grid {
+        margin-top: 30px; /* menos espacio arriba */
+        grid-template-columns: 1fr 1fr; /* igual 2 columnas, tamaño automático */
+    }
+
+    .item-information-design-level-style-1 {
+        margin-left: 3vw; /* reducir margen */
+        border-radius: 15px 0 0 15px; /* mantengo bordes izquierdos redondeados */
+    }
+
+    .item-information-design-level-style-2 {
+        margin-right: 3vw; /* menos margen derecho */
+        border-radius: 0 15px 15px 0; /* bordes derechos redondeados */
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .item-information-design {
+        width: 90px; /* tamaño un poco menor para móvil */
+        height: 90px;
+        margin-right: 3vw;
+    }
+
+    .design-font-information-1 {
+        font-size: 16px;
+        color: black;
+        /* margin-bottom: 10px; */
+    }
+
+    .design-font-information-2 {
+    font-size: 27px;
+    color: black;
+    /* margin-bottom: 10px; */
+}
+}
