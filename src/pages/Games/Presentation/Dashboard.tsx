@@ -1,8 +1,14 @@
 import useAuthRedirect from "../../../hooks/useAuthRedirect";
 import profileIcon from "../../../assets/filesSvg/filesdashboardSvg/profile.svg";
+import { useState } from "react";
+import ModalInf1 from "./ModalInf1"; // 👈 Importamos el modal fijo
 
 const Dashboard = () => {
-    useAuthRedirect(); // Custom hook to handle redirection if not authenticated
+    useAuthRedirect();
+
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const alternarModal = () => setModalAbierto(!modalAbierto);
+
     return (
         <>
             <div className="header-dashboard-container">
@@ -24,17 +30,24 @@ const Dashboard = () => {
                     <img src={profileIcon} alt="Profile Icon" />
                 </div>
             </div>
+
             <div className="information-design-level-style-container-grid">
                 <div className="item-information-design-level-style-1">
-                    <h1 className="design-font-information-1">Etapa 1, Seccion 1</h1>
-                    <h1 className="design-font-information-2">Diagramas de flujo</h1>
+                    <h1 className="design-font-information-1">
+                        Etapa 1, Seccion 1
+                    </h1>
+                    <h1 className="design-font-information-2">
+                        Diagramas de flujo
+                    </h1>
                 </div>
                 <div className="item-information-design-level-style-2">
                     <svg
                         className="item-information-design"
+                        onClick={alternarModal}
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
+                        style={{ cursor: "pointer" }}
                     >
                         <path
                             d="M21 16C21 18.8284 21 20.2426 20.1213 21.1213C19.2426 22 17.8284 22 15 22H9C6.17157 22 4.75736 22 3.87868 21.1213C3 20.2426 3 18.8284 3 16V8C3 5.17157 3 3.75736 3.87868 2.87868C4.75736 2 6.17157 2 9 2H15C17.8284 2 19.2426 2 20.1213 2.87868C21 3.75736 21 5.17157 21 8V12"
@@ -81,6 +94,9 @@ const Dashboard = () => {
                     </svg>
                 </div>
             </div>
+
+            {/* Modal fijo */}
+            <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
         </>
     );
 };
