@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import "../../../assets/styles/stylesDashboard/modalDesigns/informationDesign.css";
+import ExplicationModal from "./ExplicationModal";
 
 interface ModalProps {
     isOpen: boolean;
@@ -7,111 +8,133 @@ interface ModalProps {
 }
 
 const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     if (!isOpen) return null;
 
-    
-
-    const manejarClick = () => {
-        alert("Has hecho clic en la imagen.");
+    const manejarClick1 = () => {
+        setIsModalOpen(true); /* abrimos el segundo modal */
+    };
+    const manejarClick2 = () => {
+        setIsModalOpen(true); /* abrimos el segundo modal */
+    };
+    const manejarClick3 = () => {
+        setIsModalOpen(true); /* abrimos el segundo modal */
+    };
+    const manejarClick4 = () => {
+        setIsModalOpen(true); /* abrimos el segundo modal */
+    };
+    const manejarClick5 = () => {
+        setIsModalOpen(true); /* abrimos el segundo modal */
+    };
+    const manejarClick6 = () => {
+        setIsModalOpen(true); /* abrimos el segundo modal */
     };
 
     return (
-        <div
-            style={{
-                position: "fixed",
-                inset: 0,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 9999,
-            }}
-        >
+        <>
             <div
                 style={{
-                    background: "rgba(24, 24, 24, 1)",
-                    borderRadius: 15,
-                    width: "80vw",
-                    height: "80vh",
-                    overflowY: "auto",
-                    border: "2px solid white",
+                    position: "fixed",
+                    inset: 0,
                     display: "flex",
-                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 9999,
                 }}
             >
-                {/* 🔹 Encabezado con flex */}
                 <div
                     style={{
+                        background: "rgba(24, 24, 24, 1)",
+                        borderRadius: 15,
+                        width: "80vw",
+                        height: "80vh",
+                        overflowY: "auto",
+                        border: "2px solid white",
                         display: "flex",
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                        padding: "10px 15px",
+                        flexDirection: "column",
                     }}
                 >
-                    <svg
-                        fill="#E11919"
-                        onClick={onClose}
-                        width="30px"
-                        height="30px"
-                        viewBox="0 0 32 32"
-                        xmlns="http://www.w3.org/2000/svg"
+                    {/* 🔹 Encabezado con flex */}
+                    <div
                         style={{
-                            cursor: "pointer",
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            alignItems: "center",
+                            padding: "10px 15px",
                         }}
                     >
-                        <title>cancel</title>
-                        <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
-                    </svg>
-                </div>
+                        <svg
+                            fill="#E11919"
+                            onClick={onClose}
+                            width="30px"
+                            height="30px"
+                            viewBox="0 0 32 32"
+                            xmlns="http://www.w3.org/2000/svg"
+                            style={{
+                                cursor: "pointer",
+                            }}
+                        >
+                            <title>cancel</title>
+                            <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
+                        </svg>
+                    </div>
 
-                {/* 🔹 Contenido */}
-                <div className="contenedor-diagramaflujo-ejercicio1">
-                    <h1>Diagramas de Flujo</h1>
-                </div>
-                <br />
+                    {/* 🔹 Contenido */}
+                    <div className="contenedor-diagramaflujo-ejercicio1">
+                        <h1>Diagramas de Flujo</h1>
+                    </div>
+                    <br />
 
-                <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
-                    <h1>
-                        Un diagrama de flujo es un diagrama que describe un
-                        proceso, sistema o algoritmo informático.
-                    </h1>
-                </div>
+                    <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
+                        <h1>
+                            Un diagrama de flujo es un diagrama que describe un
+                            proceso, sistema o algoritmo informático.
+                        </h1>
+                    </div>
 
-                <br />
-                <div className="contenedor-diagramaflujo-ejercicio1-imagen-flex">
-                    <img
-                        src="https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png"
-                        alt="Símbolo de inicio/fin del diagrama de flujo"
-                        onClick={manejarClick}
-                    />
-                    <img
-                        src="https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png"
-                        alt="Símbolo de inicio/fin del diagrama de flujo"
-                        onClick={manejarClick}
-                    />
-                    <img
-                        src="https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png"
-                        alt="Símbolo de inicio/fin del diagrama de flujo"
-                        onClick={manejarClick}
-                    />
-                    <img
-                        src="https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png"
-                        alt="Símbolo de inicio/fin del diagrama de flujo"
-                        onClick={manejarClick}
-                    />
-                    <img
-                        src="https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png"
-                        alt="Símbolo de inicio/fin del diagrama de flujo"
-                        onClick={manejarClick}
-                    />
-                    <img
-                        src="https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png"
-                        alt="Símbolo de inicio/fin del diagrama de flujo"
-                        onClick={manejarClick}
-                    />
+                    <br />
+                    <div className="contenedor-diagramaflujo-ejercicio1-imagen-flex">
+                        <img
+                            src="https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png"
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick1}
+                        />
+                        <img
+                            src="https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png"
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick2}
+                        />
+                        <img
+                            src="https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png"
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick3}
+                        />
+                        <img
+                            src="https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png"
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick4}
+                        />
+                        <img
+                            src="https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png"
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick5}
+                        />
+                        <img
+                            src="https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png"
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick6}
+                        />
+                    </div>
+                    <br />
                 </div>
-                <br />
             </div>
-        </div>
+
+            <ExplicationModal isOpenSecondModal={isModalOpen} onCloseSecondModal={() => setIsModalOpen(false)}>
+
+
+            </ExplicationModal>
+        </>
     );
 };
 
