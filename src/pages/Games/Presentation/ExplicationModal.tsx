@@ -3,11 +3,17 @@ import React from "react";
 interface ModalPropsInf {
     isOpenSecondModal: boolean;
     onCloseSecondModal: () => void;
+    title: string;
+    images?: string;
+    descripcion?: string;
 }
 
 const ExplicationModal: React.FC<ModalPropsInf> = ({
     isOpenSecondModal,
     onCloseSecondModal,
+    title,
+    images,
+    descripcion,
 }) => {
     if (!isOpenSecondModal) return null; // No renderizar si no está abierto
 
@@ -22,9 +28,6 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
                 background: "rgba(24, 24, 24, 1)",
                 borderRadius: 15,
                 border: "2px solid white",
-                /* display: "flex",
-                justifyContent: "center",
-                alignItems: "flex-start", */
                 zIndex: 10000,
             }}
         >
@@ -53,7 +56,17 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
             </div>
             <br />
             <div style={{ display: "flex", justifyContent: "center" }}>
-                <h1 style={{color:"white"}}>hola como estas</h1>
+                <h1 style={{ color: "white" }}>{title}</h1>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <img
+                    style={{ height: "150px", width: "150px" }}
+                    src={images}
+                    alt="Símbolo de inicio/fin del diagrama de flujo"
+                />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+                <h1 style={{font:"1.5rem",color:"white"}}>{descripcion}</h1>
             </div>
         </div>
     );

@@ -7,27 +7,76 @@ interface ModalProps {
     onClose: () => void;
 }
 
+const Titulos = {
+    a: "Símbolo de Inicio / Final",
+    b: "Símbolo de Proceso / Acción",
+    c: "Símbolo de Documento",
+    d: "Símbolo de Decisión",
+    e: "Símbolo de Entrada / Salida",
+    f: "Símbolo de Conector",
+} as const;
+
+const Descripciones = {
+    a: "El símbolo de terminación marca el punto inicial o final del sistema. Por lo general, contiene la palabra Inicio o Fin.",
+    b: "Un rectangulo solo puede representar un solo paso dentro de un processo (agregar dos tazas de harina), o un subproceso completo (hacer pan) dentro de un proceso más grande.",
+    c: "Un documento o informe impreso",
+    d: "Un punto de decisión o ramificación. Las líneas que representan diferentes decisiones surgen de diferentes puntos del diamante.",
+    e: "Representa el material o la información que entra o sale del sistema, como una orden del cliente (entrada) o un producto (salida).",
+    f: "Indica que el flujo continúa donde se ha colocado un símbolo identico (que contiene la misma letra).",
+};
+
+const Enlaces = {
+    a: "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
+    b: "https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png",
+    c: "https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png",
+    d: "https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png",
+    e: "https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png",
+    f: "https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png",
+    g: "https://www.smartdraw.com/flowchart/img/predefined-process-flowchart-symbol.png",
+} as const;
+
 const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [titulo, setTitulo] = useState<string>("");
+    const [images, setimages] = useState<string>("");
+    const [descripcion, setDescripcion] = useState<string>("");
 
     if (!isOpen) return null;
 
     const manejarClick1 = () => {
+        setTitulo(Titulos.a);
+        setimages(Enlaces.a);
+        setDescripcion(Descripciones.a);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
     const manejarClick2 = () => {
+        setTitulo(Titulos.b);
+        setimages(Enlaces.b);
+        setDescripcion(Descripciones.b);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
     const manejarClick3 = () => {
+        setTitulo(Titulos.c);
+        setimages(Enlaces.c);
+        setDescripcion(Descripciones.c);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
     const manejarClick4 = () => {
+        setTitulo(Titulos.d);
+        setimages(Enlaces.d);
+        setDescripcion(Descripciones.d);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
     const manejarClick5 = () => {
+        setTitulo(Titulos.e);
+        setimages(Enlaces.e);
+        setDescripcion(Descripciones.e);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
     const manejarClick6 = () => {
+        setTitulo(Titulos.f);
+        setimages(Enlaces.f);
+        setDescripcion(Descripciones.f);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
 
@@ -96,32 +145,32 @@ const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                     <br />
                     <div className="contenedor-diagramaflujo-ejercicio1-imagen-flex">
                         <img
-                            src="https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png"
+                            src={Enlaces.a}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick1}
                         />
                         <img
-                            src="https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png"
+                            src={Enlaces.b}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick2}
                         />
                         <img
-                            src="https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png"
+                            src={Enlaces.c}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick3}
                         />
                         <img
-                            src="https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png"
+                            src={Enlaces.d}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick4}
                         />
                         <img
-                            src="https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png"
+                            src={Enlaces.e}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick5}
                         />
                         <img
-                            src="https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png"
+                            src={Enlaces.f}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick6}
                         />
@@ -130,10 +179,13 @@ const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 </div>
             </div>
 
-            <ExplicationModal isOpenSecondModal={isModalOpen} onCloseSecondModal={() => setIsModalOpen(false)}>
-
-
-            </ExplicationModal>
+            <ExplicationModal
+                isOpenSecondModal={isModalOpen}
+                onCloseSecondModal={() => setIsModalOpen(false)}
+                title={titulo}
+                images={images}
+                descripcion={descripcion}
+            ></ExplicationModal>
         </>
     );
 };
