@@ -9,6 +9,8 @@ interface ModalProps {
 const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
+    
+
     const manejarClick = () => {
         alert("Has hecho clic en la imagen.");
     };

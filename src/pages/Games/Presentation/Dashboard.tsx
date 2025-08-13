@@ -4,7 +4,7 @@ import { useState } from "react";
 import ModalInf1 from "./ModalInf1"; // 👈 Importamos el modal fijo
 
 const Dashboard = () => {
-    useAuthRedirect();
+    // useAuthRedirect();
 
     const [modalAbierto, setModalAbierto] = useState(false);
     const alternarModal = () => setModalAbierto(!modalAbierto);
