@@ -97,6 +97,7 @@ const Dashboard = () => {
 
             {/* Modal fijo */}
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
+            
         </>
     );
 };
