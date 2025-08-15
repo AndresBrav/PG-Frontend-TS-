@@ -1,3 +1,38 @@
+.header-dashboard-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.item-header-dashboard {
+    margin-top: 10px;
+    color: white;
+    margin-right: 40px;
+    border-radius: 5px;
+    margin-left: 0px;
+    font-size: 20px;
+}
+
+.item-header-dashboard-profile {
+    margin-top: 10px;
+    color: white;
+    margin-right: 30px;
+    margin-left: 70px;
+}
+
+.item-header-dashboard-profile img {
+    /* modificamos el ancho de la imagen */
+    width: 50px;
+    height: 50px;
+}
+
+.dashboard-icon-fire {
+    width: 50px;
+    height: 50px;
+}
+
 .information-design-level-style-container {
     display: flex;
     flex-direction: column;
@@ -58,7 +93,25 @@
     /* margin-bottom: 10px; */
 }
 
+/* 📱 Ajuste solo para pantallas pequeñas */
 @media (max-width: 480px) {
+    .item-header-dashboard {
+        padding: 10px; /* Menos relleno */
+        margin-right: 15px; /* Menos espacio entre elementos */
+        font-size: 14px; /* Texto un poco más pequeño */
+    }
+
+    .item-header-dashboard-profile > img {
+        /* > todos los hijos directos  */
+        width: 30px; /* Nuevo ancho para pantallas pequeñas */
+        height: 30px; /* Nueva altura para pantallas pequeñas */
+    }
+
+    .dashboard-icon-fire {
+        width: 30px;
+        height: 30px;
+    }
+
     .information-design-level-style-container {
         margin-left: 3vw; /* menos margen lateral */
         margin-right: 3vw; /* menos margen lateral */
@@ -96,8 +149,8 @@
     }
 
     .design-font-information-2 {
-    font-size: 27px;
-    color: black;
-    /* margin-bottom: 10px; */
-}
+        font-size: 27px;
+        color: black;
+        /* margin-bottom: 10px; */
+    }
 }

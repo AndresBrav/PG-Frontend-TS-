@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../../assets/styles/stylesDashboard/modalDesigns/informationDesign.css";
+import "../../../assets/styles/stylesModal/designModals.css";
 import ExplicationModal from "./ExplicationModal";
 
 interface ModalProps {

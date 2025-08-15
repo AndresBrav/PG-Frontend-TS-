@@ -50,10 +50,10 @@
 /* SOLO ajustes para pantallas pequeñas */
 @media (max-width: 480px) {
     .flex-container-login {
-        width: 90vw;              /* más ancho en móvil */
-        height: auto;             /* altura automática para que no corte */
-        padding: 2rem 0;           /* espacio interior */
-        margin: 10vh auto;         /* menos margen superior */
+        width: 90vw; /* más ancho en móvil */
+        height: auto; /* altura automática para que no corte */
+        padding: 2rem 0; /* espacio interior */
+        margin: 10vh auto; /* menos margen superior */
         background-size: 90% auto; /* imagen más grande */
     }
 

@@ -3,20 +3,3 @@ body {
     margin: 0;
     font-family: sans-serif;
 }
-
-.widget-box {
-    border: 1px solid #333; /* para ver el contorno */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #f0f0f0;
-}
-
-.grid-stack {
-    min-height: 500px; /* o el alto que necesites */
-}
-
-.widget-box img {
-    max-width: 90%;
-    max-height: 90%;
-}
