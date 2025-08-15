@@ -1,63 +1,69 @@
 import React, { useEffect, useRef } from "react";
 import { GridStack } from "gridstack";
 import "gridstack/dist/gridstack.min.css";
-import "../../../assets/Exercise1Widgets.css";
 
 const Exercise1: React.FC = () => {
-    const gridRef = useRef<GridStack | null>(null); // referencia para usar el grid luego
+    const gridContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Crear cuadrícula
-        const grid = GridStack.init({ cellHeight: 100, column: 6 });
-        gridRef.current = grid;
+        if (!gridContainerRef.current) return;
 
-        // Lista de textos
-        const widgets = [
-            "hola", "como", "estas",
-            "estoy", "bien", "gracias",
-            "como", "te", "sientes"
+        // Inicializamos GridStack sobre el div referenciado
+        const grid = GridStack.init(
+            { cellHeight: 120, column: 6, float: true },
+            gridContainerRef.current
+        );
+
+        const imageUrls = [
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Google_Chrome_icon_%28February_2022%29.svg/800px-Google_Chrome_icon_%28February_2022%29.svg.png",
+            "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
+            "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
+            "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
+            "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
+            "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
+            "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
+            "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
         ];
 
-        // Agregar widgets
-        widgets.forEach((texto, i) => {
-            grid.addWidget({
+        // Agregamos widgets con contenido inline
+        imageUrls.forEach((url, i) => {
+            const widget = document.createElement("div");
+            widget.style.border = "1px solid #333";
+            widget.style.display = "flex";
+            widget.style.justifyContent = "center";
+            widget.style.alignItems = "center";
+            widget.style.background = "#f0f0f0";
+            widget.style.width = "100%";
+            widget.style.height = "100%";
+            widget.style.boxSizing = "border-box";
+
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = `img-${i}`;
+            img.style.maxWidth = "90%";
+            img.style.maxHeight = "90%";
+            img.style.objectFit = "contain";
+
+            widget.appendChild(img);
+
+            grid.addWidget(widget, {
                 x: i % 6,
                 y: Math.floor(i / 6),
                 w: 1,
                 h: 1,
-                content: `<div class="widget-box">${texto}</div>`,
             });
         });
+
+        // Limpiar al desmontar
+        return () => grid.destroy();
     }, []);
 
-    // Función para mostrar filas agrupadas
-    const mostrarFilas = () => {
-        const grid = gridRef.current;
-        if (!grid) return;
-
-        const ordenados = [...grid.engine.nodes]
-            .sort((a, b) => (a.y ?? 0) - (b.y ?? 0) || (a.x ?? 0) - (b.x ?? 0));
-
-        // Agrupar por fila
-        const filas: Record<number, string[]> = {};
-        ordenados.forEach(item => {
-            const fila = item.y ?? 0;
-            const texto = item.el?.textContent?.trim() || "";
-            if (!filas[fila]) filas[fila] = [];
-            filas[fila].push(texto);
-        });
-
-        console.log("Widgets agrupados por fila:");
-        Object.keys(filas).forEach(fila =>
-            console.log(`Fila ${fila}:`, filas[parseInt(fila)].join(", "))
-        );
-    };
-
     return (
-        <div>
-            <div className="grid-stack"></div>
-            <button onClick={mostrarFilas}>Mostrar filas</button>
-        </div>
+        <div
+            ref={gridContainerRef}
+            className="grid-stack"
+            style={{ minHeight: "500px" }}
+        ></div>
     );
 };
 
