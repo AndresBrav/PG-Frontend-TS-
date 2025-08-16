@@ -5,7 +5,6 @@ import "./assets/styles/designBackground.css";
 import "./assets/styles/stylesUsers/designUsers.css";
 import "./assets/styles/stylesDashboard/designDashboard.css";
 
-import "gridstack/dist/gridstack.min.css";
 
 
 createRoot(document.getElementById("root")!).render(
