@@ -253,6 +253,7 @@ import GridLayout from "react-grid-layout";
 import type { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
+import { useNavigate } from "react-router-dom";
 
 interface Widget {
     id: number;
@@ -285,6 +286,8 @@ const initialWidgets: Widget[] = [
 ];
 
 const ExerciseRGL: React.FC = () => {
+    const navigate = useNavigate(); // Hook que te da la función navigate
+
     const [layout, setLayout] = useState<Layout[]>(
         initialWidgets.map((w, idx) => ({
             i: w.id.toString(),
@@ -304,20 +307,55 @@ const ExerciseRGL: React.FC = () => {
         });
     };
 
+    const returnDashboard = () => {
+        navigate("/dashboard");
+    };
+
     return (
         <>
-            <button
-                onClick={imprimirPosiciones}
+            <div
                 style={{
-                    marginBottom: "10px",
-                    padding: "6px 12px",
-                    cursor: "pointer",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    padding: "10px 15px",
                 }}
             >
-                Imprimir posiciones
-            </button>
+                <svg
+                    fill="#E11919"
+                    onClick={returnDashboard}
+                    width="30px"
+                    height="30px"
+                    viewBox="0 0 32 32"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{
+                        cursor: "pointer",
+                    }}
+                >
+                    <title>cancel</title>
+                    <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
+                </svg>
+            </div>
 
-            <h1></h1>
+            <div className="contenedor-diagramaflujo-ejercicio1">
+                <h1>Diagramas de Flujo</h1>
+            </div>
+
+            <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
+                <h1>
+                    Diseñar el diagrama de flujo que recibe 2 numeros e imprime
+                    si son iguales y si no son iguales
+                </h1>
+            </div>
+
+            <div className="contenedor-diagramaflujo-boton">
+                <button
+                    onClick={imprimirPosiciones}
+                    className="button-execute-flowchart"
+                >
+                    <h1>Ejecutar</h1>
+                </button>
+            </div>
 
             <div
                 style={{
@@ -366,8 +404,6 @@ const ExerciseRGL: React.FC = () => {
                     ))}
                 </GridLayout>
             </div>
-
-            
         </>
     );
 };

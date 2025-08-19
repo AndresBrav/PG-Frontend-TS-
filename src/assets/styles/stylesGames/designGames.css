@@ -1,0 +1,19 @@
+.contenedor-diagramaflujo-boton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* margin-top: px; */
+    margin: 0px;
+}
+.button-execute-flowchart {
+    background-color: rgba(32, 251, 16, 0.5); /* 0.5 = 50% opacidad */
+    border-radius: 75px;
+}
+
+.button-execute-flowchart > h1 {
+    padding: 5px;
+    margin-left: 20px;
+    margin-right: 20px;
+    font-size: 20px;
+    color: white;
+}
