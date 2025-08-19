@@ -317,6 +317,8 @@ const ExerciseRGL: React.FC = () => {
                 Imprimir posiciones
             </button>
 
+            <h1></h1>
+
             <div
                 style={{
                     background: "white",

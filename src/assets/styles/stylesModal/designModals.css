@@ -8,7 +8,7 @@
 .contenedor-diagramaflujo-ejercicio1 > h1 {
     color: white;
     margin-left: 2vw;
-    font-size: 1.5rem;
+    font-size: 24px;
 }
 
 .contenedor-diagramaflujo-ejercicio1-explicacion {
@@ -20,7 +20,7 @@
 .contenedor-diagramaflujo-ejercicio1-explicacion > h1 {
     color: white;
     margin-left: 2vw;
-    font-size: 1rem;
+    font-size: 16px;
 }
 
 .contenedor-diagramaflujo-ejercicio1-imagen-flex {
@@ -40,11 +40,11 @@
 
 @media (max-width: 480px) {
     .contenedor-diagramaflujo-ejercicio1 > h1 {
-        font-size: 0.7rem; /* 1 rem 16 px */
+        font-size: 16px; /* 1 rem 16 px */
     }
 
     .contenedor-diagramaflujo-ejercicio1-explicacion > h1 {
-        font-size: 0.8rem;
+        font-size: 16px;
     }
 
     .contenedor-diagramaflujo-ejercicio1-imagen-flex > img {

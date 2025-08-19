@@ -56,7 +56,7 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
             </div>
             <br />
             <div style={{ display: "flex", justifyContent: "center" }}>
-                <h1 style={{ color: "white" }}>{title}</h1>
+                <h1 style={{ fontSize:"24px",color: "white"}}>{title}</h1>
             </div>
             <div style={{ display: "flex", justifyContent: "center" }}>
                 <img
@@ -66,7 +66,7 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
                 />
             </div>
             <div style={{ display: "flex", justifyContent: "center" }}>
-                <h1 style={{font:"1.5rem",color:"white"}}>{descripcion}</h1>
+                <h1 style={{fontSize:"20px",color:"white"}}>{descripcion} </h1> 
             </div>
         </div>
     );
