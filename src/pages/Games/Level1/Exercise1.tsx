@@ -269,22 +269,22 @@ const CELL_HEIGHT = 50; // alto de cada celda */
 const WIDGET_SCALE = 1; // escala de imagen
 
 const initialWidgets: Widget[] = [
-    { id: 20, content: "https://i.imgur.com/yxr4QMR.png" },
-    { id: 21, content: "https://i.imgur.com/2n11hJn.png" },
-    { id: 22, content: "https://i.imgur.com/DtUtPZK.png" },
-    { id: 23, content: "https://i.imgur.com/YmsczfQ.png" },
-    { id: 24, content: "https://i.imgur.com/hgPQ06G.png" },
-    { id: 25, content: "https://i.imgur.com/oRp6iv2.png" },
-    { id: 26, content: "https://i.imgur.com/BUGBEOc.png" },
-    { id: 27, content: "https://i.imgur.com/hNUaZS0.jpeg" },
-    { id: 28, content: "https://i.imgur.com/hNUaZS0.jpeg" },
-    { id: 29, content: "https://i.imgur.com/hNUaZS0.jpeg" },
-    { id: 30, content: "https://i.imgur.com/Now9q9e.png" },
-    { id: 31, content: "https://i.imgur.com/iuyJU46.png" },
-    { id: 32, content: "https://i.imgur.com/9as8FXr.png" },
-    { id: 33, content: "https://i.imgur.com/BUGBEOc.png" },
-    { id: 34, content: "https://i.imgur.com/BUGBEOc.png" },
-    { id: 35, content: "https://i.imgur.com/BUGBEOc.png" },
+    { id: 1, content: "https://i.imgur.com/yxr4QMR.png" },
+    { id: 2, content: "https://i.imgur.com/2n11hJn.png" },
+    { id: 3, content: "https://i.imgur.com/DtUtPZK.png" },
+    { id: 4, content: "https://i.imgur.com/YmsczfQ.png" },
+    { id: 5, content: "https://i.imgur.com/hgPQ06G.png" },
+    { id: 6, content: "https://i.imgur.com/oRp6iv2.png" },
+    { id: 7, content: "https://i.imgur.com/BUGBEOc.png" },
+    { id: 8, content: "https://i.imgur.com/hNUaZS0.jpeg" },
+    { id: 9, content: "https://i.imgur.com/hNUaZS0.jpeg" },
+    { id: 10, content: "https://i.imgur.com/hNUaZS0.jpeg" },
+    { id: 11, content: "https://i.imgur.com/Now9q9e.png" },
+    { id: 12, content: "https://i.imgur.com/iuyJU46.png" },
+    { id: 13, content: "https://i.imgur.com/9as8FXr.png" },
+    { id: 14, content: "https://i.imgur.com/BUGBEOc.png" },
+    { id: 15, content: "https://i.imgur.com/BUGBEOc.png" },
+    { id: 16, content: "https://i.imgur.com/BUGBEOc.png" },
 ];
 
 const ExerciseRGL: React.FC = () => {
