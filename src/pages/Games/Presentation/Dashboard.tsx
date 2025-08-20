@@ -2,12 +2,19 @@ import useAuthRedirect from "../../../hooks/useAuthRedirect";
 import profileIcon from "../../../assets/filesSvg/filesdashboardSvg/profile.svg";
 import { useState } from "react";
 import ModalInf1 from "./ModalInf1"; // 👈 Importamos el modal fijo
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
     // useAuthRedirect();
 
     const [modalAbierto, setModalAbierto] = useState(false);
     const alternarModal = () => setModalAbierto(!modalAbierto);
+
+    const navigate = useNavigate(); // Hook que te da la función navigate
+
+    const irEjercicio1 = () => {
+        navigate("/exercise1");
+    }
 
     return (
         <>
@@ -97,7 +104,12 @@ const Dashboard = () => {
 
             {/* Modal fijo */}
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
-            
+
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer" onClick={irEjercicio1}>
+                    <div className="circle-inner">1</div>
+                </div>
+            </div>
         </>
     );
 };

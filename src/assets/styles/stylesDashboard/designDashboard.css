@@ -93,6 +93,39 @@
     /* margin-bottom: 10px; */
 }
 
+.contenedo-diagrama-flujo-primer-ejercicio {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.circle-outer {
+    width: 100px;
+    height: 100px;
+    background: #d9d9d9;
+    margin-top: 15px;
+    margin-left: 1px;
+    border: 3px solid black;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circle-inner {
+    width: 80px;
+    height: 80px;
+    background: #d9d9d9;
+    border: 3px solid black;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+
 /* 📱 Ajuste solo para pantallas pequeñas */
 @media (max-width: 480px) {
     .item-header-dashboard {
@@ -152,5 +185,16 @@
         font-size: 24px;
         color: black;
         /* margin-bottom: 10px; */
+    }
+
+    .circle-outer{
+        width: 70px;
+        height: 70px;
+        border: 3px solid black;
+    }
+
+    .circle-inner{
+        width: 50px;
+        height: 50px;
     }
 }
