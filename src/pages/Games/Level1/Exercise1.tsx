@@ -264,6 +264,8 @@ const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
 const CELL_WIDTH = 200; // ancho de cada celda
 const CELL_HEIGHT = 100; // alto de cada celda
+/* const CELL_WIDTH = 150; // ancho de cada celda
+const CELL_HEIGHT = 50; // alto de cada celda */
 const WIDGET_SCALE = 1; // escala de imagen
 
 const initialWidgets: Widget[] = [

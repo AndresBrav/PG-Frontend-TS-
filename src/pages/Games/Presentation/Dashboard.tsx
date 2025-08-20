@@ -14,7 +14,7 @@ const Dashboard = () => {
 
     const irEjercicio1 = () => {
         navigate("/exercise1");
-    }
+    };
 
     return (
         <>
@@ -106,10 +106,31 @@ const Dashboard = () => {
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer" onClick={irEjercicio1}>
+                <div className="circle-outer-1" onClick={irEjercicio1}>
                     <div className="circle-inner">1</div>
                 </div>
             </div>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-2" >
+                    <div className="circle-inner">2</div>
+                </div>
+            </div>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-1" >
+                    <div className="circle-inner">3</div>
+                </div>
+            </div>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-2" >
+                    <div className="circle-inner">4</div>
+                </div>
+            </div>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-1" >
+                    <div className="circle-inner">5</div>
+                </div>
+            </div>
+            
         </>
     );
 };
