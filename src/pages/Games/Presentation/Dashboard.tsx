@@ -13,7 +13,18 @@ const Dashboard = () => {
     const navigate = useNavigate(); // Hook que te da la función navigate
 
     const irEjercicio1 = () => {
-        navigate("/exercise1");
+        // navigate("/exercise1");
+        if (window.innerWidth <= 480) {
+            // Si la pantalla es pequeña, redirige a la versión con celdas pequeñas
+            // navigate("/exercise1-small");
+            alert(window.innerWidth);
+            alert("la pantalla es pequeña");
+        } else {
+            // Si la pantalla es grande, redirige a la versión normal
+            // navigate("/exercise1");
+            alert(window.innerWidth);
+            alert("la pantalla es grande");
+        }
     };
 
     return (
@@ -111,26 +122,25 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2" >
+                <div className="circle-outer-2">
                     <div className="circle-inner">2</div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" >
+                <div className="circle-outer-1">
                     <div className="circle-inner">3</div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2" >
+                <div className="circle-outer-2">
                     <div className="circle-inner">4</div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" >
+                <div className="circle-outer-1">
                     <div className="circle-inner">5</div>
                 </div>
             </div>
-            
         </>
     );
 };
