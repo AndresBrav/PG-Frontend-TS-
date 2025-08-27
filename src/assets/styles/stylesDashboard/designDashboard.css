@@ -139,7 +139,7 @@
 }
 
 /* 📱 Ajuste solo para pantallas pequeñas */
-@media (max-width: 480px) {
+@media (max-width: 480px) { /* Ajustes para pantallas pequeñas  ancho menor o igual a 480*/
     .item-header-dashboard {
         padding: 10px; /* Menos relleno */
         margin-right: 15px; /* Menos espacio entre elementos */

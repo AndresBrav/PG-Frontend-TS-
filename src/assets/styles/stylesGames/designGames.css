@@ -17,3 +17,11 @@
     font-size: 20px;
     color: white;
 }
+
+@media (max-width: 480px) {
+    .button-execute-flowchart > h1 {
+        font-size: 16px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}

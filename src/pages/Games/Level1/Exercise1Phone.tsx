@@ -12,10 +12,8 @@ interface Widget {
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
-const CELL_WIDTH = 200; // ancho de cada celda
-const CELL_HEIGHT = 100; // alto de cada celda
-/* const CELL_WIDTH = 150; // ancho de cada celda
-const CELL_HEIGHT = 50; // alto de cada celda */
+const CELL_WIDTH = 100; // ancho de cada celda
+const CELL_HEIGHT = 50; // alto de cada celda
 const WIDGET_SCALE = 1; // escala de imagen
 
 const initialWidgets: Widget[] = [
@@ -51,6 +49,7 @@ const Exercise1: React.FC = () => {
     );
 
     const imprimirPosiciones = () => {
+        alert("Se han impreso las posiciones en la consola");
         console.log("📋 Posiciones de widgets:");
         layout.forEach((l) => {
             console.log(
@@ -125,7 +124,8 @@ const Exercise1: React.FC = () => {
                     margin={[0, 0]}
                     containerPadding={[0, 0]}
                     onLayoutChange={(newLayout) => setLayout(newLayout)}
-                    isResizable={false}  // 🔹 Desactiva el redimensionamiento
+                    // isResizable={true}
+                    isResizable={false}
                     compactType={null}
                     preventCollision={true}
                     style={{

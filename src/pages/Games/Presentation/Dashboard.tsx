@@ -17,13 +17,15 @@ const Dashboard = () => {
         if (window.innerWidth <= 480) {
             // Si la pantalla es pequeña, redirige a la versión con celdas pequeñas
             // navigate("/exercise1-small");
-            alert(window.innerWidth);
-            alert("la pantalla es pequeña");
+            /* alert(window.innerWidth);
+            alert("la pantalla es pequeña"); */
+            navigate("/exercise1Phone");
         } else {
             // Si la pantalla es grande, redirige a la versión normal
             // navigate("/exercise1");
-            alert(window.innerWidth);
-            alert("la pantalla es grande");
+            /* alert(window.innerWidth);
+            alert("la pantalla es grande"); */
+            navigate("/exercise1");
         }
     };
 
