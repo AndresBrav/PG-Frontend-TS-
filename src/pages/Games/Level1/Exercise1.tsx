@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import useIsMobile from "../../../hooks/useIsMobile";
 
 import { initialWidgets } from "./widgetsDataLevel1";
+import { verificarReultado } from "./VerificarResultado";
 
 // interface Widget {
 //     id: number;
@@ -55,11 +56,19 @@ const Exercise1: React.FC = () => {
 
     const imprimirPosiciones = () => {
         console.log("📋 Posiciones de widgets:");
+        const widgetIds: number[] = [];
+        const columnaWidget: number[] = [];
+        const filaWidget: number[] = [];
+
         layout.forEach((l) => {
-            console.log(
-                `Widget ${l.i} → Columna: ${l.x}, Fila: ${l.y}, Ancho: ${l.w}, Alto: ${l.h}`
-            );
+            //console.log(`Widget ${l.i} → Columna: ${l.x}, Fila: ${l.y}`);
+            widgetIds.push(Number(l.i));
+            columnaWidget.push(l.x);
+            filaWidget.push(l.y);
         });
+        let resultado:boolean[] =  verificarReultado(widgetIds, columnaWidget, filaWidget);
+        console.log("el resultado es: ", resultado);
+        
     };
 
     const returnDashboard = () => {
