@@ -13,15 +13,15 @@ const Dashboard = () => {
     const navigate = useNavigate(); // Hook que te da la función navigate
 
     const irEjercicio1 = () => {
-        // navigate("/exercise1");
-        if (window.innerWidth <= 480) {
-            // Si la pantalla es pequeña, redirige a la versión con celdas pequeñas
+        navigate("/exercise1");
+        // if (window.innerWidth <= 480) {
+        //     // Si la pantalla es pequeña, redirige a la versión con celdas pequeñas
 
-            navigate("/exercise1Phone");
-        } else {
-            // Si la pantalla es grande, redirige a la versión normal
-            navigate("/exercise1");
-        }
+        //     navigate("/exercise1Phone");
+        // } else {
+        //     // Si la pantalla es grande, redirige a la versión normal
+        //     navigate("/exercise1");
+        // }
     };
 
     return (
