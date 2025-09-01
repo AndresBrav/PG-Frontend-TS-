@@ -66,9 +66,12 @@ const Exercise1: React.FC = () => {
             columnaWidget.push(l.x);
             filaWidget.push(l.y);
         });
-        let resultado:boolean[] =  verificarReultado(widgetIds, columnaWidget, filaWidget);
+        let resultado: boolean[] = verificarReultado(
+            widgetIds,
+            columnaWidget,
+            filaWidget
+        );
         console.log("el resultado es: ", resultado);
-        
     };
 
     const returnDashboard = () => {
