@@ -50,30 +50,6 @@ const Exercise1Laptop: React.FC = () => {
     };
 
     const verificarRespuesta = (resultado: boolean[]) => {
-        /* const pasos = [
-            { texto: "El inicio", estado: resultado[0] },
-            { texto: "El paso 2", estado: resultado[1] },
-            { texto: "El paso 3", estado: resultado[2] },
-            { texto: "El paso 4", estado: resultado[3] },
-            { texto: "El paso 5", estado: resultado[4] },
-            { texto: "El paso 6", estado: resultado[5] },
-            { texto: "El paso 7", estado: resultado[6] },
-            { texto: "El paso 8", estado: resultado[7] },
-            { texto: "El paso 9", estado: resultado[8] },
-            { texto: "El paso 10", estado: resultado[9] },
-            { texto: "El paso 11", estado: resultado[10] },
-            { texto: "El paso 12", estado: resultado[11] },
-            { texto: "El paso 13", estado: resultado[12] },
-            { texto: "El paso 14", estado: resultado[13] },
-            { texto: "El paso 15", estado: resultado[14] },
-            { texto: "El paso 16", estado: resultado[15] },
-        ]; */
-        // // Construimos el array de pasos dinámicamente
-        // const pasos = Array.from({ length: 16 }, (_, index) => ({
-        //     imagen: "https://i.imgur.com/yxr4QMR.png",
-        //     estado: resultado[index],
-        // }));
-
         const pasos = [
             { imagen: "https://i.imgur.com/YmsczfQ.png", estado: resultado[0] },
             { imagen: "https://i.imgur.com/DtUtPZK.png", estado: resultado[2] },
