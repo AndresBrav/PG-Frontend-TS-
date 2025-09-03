@@ -217,13 +217,13 @@ const Exercise1Laptop: React.FC = () => {
         Swal.fire({
             title: "¡Hola!",
             html: `
-                <div style="text-align:center; padding:10px;">
-                  <h1 style="font-size:16px; margin:6px 0; color:green;">1) El inicio está correcto</h1>
-                  <h1 style="font-size:16px; margin:6px 0; color:green;">2) El paso dos está correcto</h1>
-                  <h1 style="font-size:16px; margin:6px 0; color:red;">3) El paso cuatro está mal</h1>
-                  <h1 style="font-size:16px; margin:6px 0; color:red;">4) El paso cinco está mal</h1>
-                </div>
-            `,
+        <div style="text-align:center; padding:10px;">
+          <h1 style="font-size:16px; margin:6px 0; color:green;">1) El inicio está correcto</h1>
+          <h1 style="font-size:16px; margin:6px 0; color:green;">2) El paso dos está correcto</h1>
+          <h1 style="font-size:16px; margin:6px 0; color:red;">3) El paso cuatro está mal</h1>
+          <h1 style="font-size:16px; margin:6px 0; color:red;">4) El paso cinco está mal</h1>
+        </div>
+      `,
             icon: "success",
             confirmButtonText: "Aceptar",
             confirmButtonColor: "rgba(32, 251, 16, 1)",
@@ -231,7 +231,16 @@ const Exercise1Laptop: React.FC = () => {
                 popup: "swal-popup-laptop",
                 confirmButton: "swal-confirm-laptop",
             },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ejecutarOtroMetodo(); // Aquí llamas a tu método
+            }
         });
+    };
+
+    const ejecutarOtroMetodo = () => {
+        console.log("Se presionó Aceptar, ejecutando otro método...");
+        // Aquí pones la lógica que deseas
     };
 
     const returnDashboard = () => {
