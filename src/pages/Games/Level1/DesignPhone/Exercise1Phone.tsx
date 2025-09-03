@@ -44,26 +44,115 @@ const Exercise1Phone: React.FC = () => {
             columnaWidget,
             filaWidget
         );
-        console.log("el resultado es: ", resultado);
+        //console.log("el resultado es: ", resultado);
 
-        Swal.fire({
-            title: "¡Hola!",
-            html: `
-                <div style="text-align:center; padding:10px;">
-                  <h1 style="font-size:16px; margin:6px 0; color:green;">1) El inicio está correcto</h1>
-                  <h1 style="font-size:16px; margin:6px 0; color:green;">2) El paso dos está correcto</h1>
-                  <h1 style="font-size:16px; margin:6px 0; color:red;">3) El paso cuatro está mal</h1>
-                  <h1 style="font-size:16px; margin:6px 0; color:red;">4) El paso cinco está mal</h1>
-                </div>
-            `,
-            icon: "success",
-            confirmButtonText: "Aceptar",
-            confirmButtonColor: "rgba(32, 251, 16, 1)",
-            customClass: {
-                popup: "swal-popup-laptop",
-                confirmButton: "swal-confirm-laptop",
-            },
-        });
+        verificarRespuesta(resultado);
+    };
+
+    const verificarRespuesta = (resultado: boolean[]) => {
+        const pasos = [
+            { imagen: "https://i.imgur.com/YmsczfQ.png", estado: resultado[0] },
+            { imagen: "https://i.imgur.com/DtUtPZK.png", estado: resultado[2] },
+            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[1] },
+            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[5] },
+            { imagen: "https://i.imgur.com/yxr4QMR.png", estado: resultado[4] },
+            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[7] },
+            { imagen: "https://i.imgur.com/9as8FXr.png", estado: resultado[8] },
+            { imagen: "https://i.imgur.com/Now9q9e.png", estado: resultado[9] },
+            {
+                imagen: "https://i.imgur.com/hNUaZS0.jpeg",
+                estado: resultado[13],
+            }, // linea
+            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[3] }, //linea abajo
+            {
+                imagen: "https://i.imgur.com/hNUaZS0.jpeg",
+                estado: resultado[11],
+            }, // linea
+            { imagen: "https://i.imgur.com/2n11hJn.png", estado: resultado[6] }, //son iguales
+            {
+                imagen: "https://i.imgur.com/oRp6iv2.png",
+                estado: resultado[10],
+            }, // no son iguales
+            {
+                imagen: "https://i.imgur.com/hNUaZS0.jpeg",
+                estado: resultado[12],
+            }, // linea
+            {
+                imagen: "https://i.imgur.com/hgPQ06G.png",
+                estado: resultado[14],
+            }, // esquina
+            {
+                imagen: "https://i.imgur.com/iuyJU46.png",
+                estado: resultado[15],
+            }, // linea izquierda
+        ];
+
+        const htmlContenido = pasos
+            .map((paso, index) => {
+                const borderColor = paso.estado ? "green" : "red";
+                return `
+              <div style="margin:10px 0;">
+                <img src="${paso.imagen}" alt="Paso ${
+                    index + 1
+                }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
+                
+              </div>
+            `;
+            })
+            .join("");
+
+        if (
+            resultado[0] === true &&
+            resultado[1] === true &&
+            resultado[2] === true &&
+            resultado[3] === true &&
+            resultado[4] === true &&
+            resultado[5] === true &&
+            resultado[6] === true &&
+            resultado[7] === true &&
+            resultado[8] === true &&
+            resultado[9] === true &&
+            resultado[10] === true &&
+            resultado[11] === true &&
+            resultado[12] === true &&
+            resultado[13] === true &&
+            resultado[14] === true &&
+            resultado[15] === true
+        ) {
+            Swal.fire({
+                title: "Ejercicio completado",
+                html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
+                icon: "success",
+                confirmButtonText: "Siguiente",
+                confirmButtonColor: "rgba(32, 251, 16, 1)",
+                customClass: {
+                    popup: "swal-popup-laptop",
+                    confirmButton: "swal-confirm-laptop",
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ejecutarOtroMetodo();
+                }
+            });
+        } else {
+            Swal.fire({
+                title: "Ejercicio incompleto",
+                html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
+                icon: "error",
+                /* confirmButtonText: "Siguiente",
+                    confirmButtonColor: "rgba(32, 251, 16, 1)",
+                    customClass: {
+                        popup: "swal-popup-laptop",
+                        confirmButton: "swal-confirm-laptop",
+                    }, */
+            });
+        }
+
+        //console.log("el resultado es: ", resultado);
+    };
+
+    const ejecutarOtroMetodo = () => {
+        navigate("/ejercicio2");
     };
 
     const returnDashboard = () => {
