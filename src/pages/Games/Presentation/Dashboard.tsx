@@ -14,15 +14,11 @@ const Dashboard = () => {
 
     const irEjercicio1 = () => {
         navigate("/exercise1");
-        // if (window.innerWidth <= 480) {
-        //     // Si la pantalla es pequeña, redirige a la versión con celdas pequeñas
-
-        //     navigate("/exercise1Phone");
-        // } else {
-        //     // Si la pantalla es grande, redirige a la versión normal
-        //     navigate("/exercise1");
-        // }
     };
+
+    const irEjercicio2 = () => {
+        navigate("/ejercicio2");
+    }
 
     return (
         <>
@@ -119,7 +115,7 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2">
+                <div className="circle-outer-2" onClick={irEjercicio2}>
                     <div className="circle-inner">2</div>
                 </div>
             </div>
