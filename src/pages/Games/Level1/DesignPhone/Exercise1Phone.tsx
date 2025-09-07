@@ -123,12 +123,15 @@ const Exercise1Phone: React.FC = () => {
                 title: "Ejercicio completado",
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: "success",
+                iconColor: "green",
                 confirmButtonText: "Siguiente",
-                confirmButtonColor: "rgba(32, 251, 16, 1)",
+
                 customClass: {
-                    popup: "swal-popup-laptop",
-                    confirmButton: "swal-confirm-laptop",
+                    title: "titulo-celular",
+                    confirmButton: "btn-semitransparente",
+                    icon: "icono-celular"
                 },
+                width: "50%",
             }).then((result) => {
                 if (result.isConfirmed) {
                     ejecutarOtroMetodo();
@@ -139,12 +142,12 @@ const Exercise1Phone: React.FC = () => {
                 title: "Ejercicio incompleto",
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: "error",
-                /* confirmButtonText: "Siguiente",
-                    confirmButtonColor: "rgba(32, 251, 16, 1)",
-                    customClass: {
-                        popup: "swal-popup-laptop",
-                        confirmButton: "swal-confirm-laptop",
-                    }, */
+                iconColor: "red",
+                width: "50%",
+                confirmButtonText: "Cerrar", // Cambia el texto del botón
+                customClass: {
+                    confirmButton: "btn-cierre",
+                },
             });
         }
 

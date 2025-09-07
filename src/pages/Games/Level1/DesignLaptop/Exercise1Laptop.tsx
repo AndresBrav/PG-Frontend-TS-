@@ -123,12 +123,12 @@ const Exercise1Laptop: React.FC = () => {
                 title: "Ejercicio completado",
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: "success",
+                iconColor: "green", // Verde personalizado,
                 confirmButtonText: "Siguiente",
-                confirmButtonColor: "rgba(32, 251, 16, 1)",
                 customClass: {
-                    popup: "swal-popup-laptop",
-                    confirmButton: "swal-confirm-laptop",
+                    confirmButton: "btn-semitransparente",
                 },
+                width: "50%",
             }).then((result) => {
                 if (result.isConfirmed) {
                     ejecutarOtroMetodo();
@@ -139,16 +139,14 @@ const Exercise1Laptop: React.FC = () => {
                 title: "Ejercicio incompleto",
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: "error",
-                /* confirmButtonText: "Siguiente",
-                confirmButtonColor: "rgba(32, 251, 16, 1)",
+                iconColor: "red", // Rojo personalizado
+                width: "50%",
+                confirmButtonText: "Cerrar", // Cambia el texto del botón
                 customClass: {
-                    popup: "swal-popup-laptop",
-                    confirmButton: "swal-confirm-laptop",
-                }, */
+                    confirmButton: "btn-cierre",
+                },
             });
         }
-
-        //console.log("el resultado es: ", resultado);
     };
 
     const ejecutarOtroMetodo = () => {
