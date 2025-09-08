@@ -5,7 +5,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useNavigate } from "react-router-dom";
 import { initialWidgetsEjercicio2 } from "../widgetsDataLevel1";
-import { verificarReultado } from "../VerificarResultado";
+import { verificarResultadoEjercicio2 } from "../VerificarResultado";
 import Swal from "sweetalert2";
 
 const GRID_COLS = 10; // columnas fijas
@@ -39,52 +39,76 @@ const Ejercicio2Laptop: React.FC = () => {
             filaWidget.push(l.y);
         });
 
-        const resultado: boolean[] = verificarReultado(
+        const resultado: boolean[] = verificarResultadoEjercicio2(
             widgetIds,
             columnaWidget,
             filaWidget
         );
-        //console.log("el resultado es: ", resultado);
+
+        /* console.log(widgetIds);
+        console.log(columnaWidget);
+        console.log(filaWidget); */
+        console.log("el resultado es: ", resultado);
 
         verificarRespuesta(resultado);
     };
 
     const verificarRespuesta = (resultado: boolean[]) => {
         const pasos = [
-            { imagen: "https://i.imgur.com/YmsczfQ.png", estado: resultado[0] },
-            { imagen: "https://i.imgur.com/DtUtPZK.png", estado: resultado[2] },
-            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[1] },
-            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[5] },
-            { imagen: "https://i.imgur.com/yxr4QMR.png", estado: resultado[4] },
-            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[7] },
-            { imagen: "https://i.imgur.com/9as8FXr.png", estado: resultado[8] },
-            { imagen: "https://i.imgur.com/Now9q9e.png", estado: resultado[9] },
+            { imagen: "https://i.imgur.com/3MzUgfA.png", estado: resultado[0] }, //inicio
+            { imagen: "https://i.imgur.com/v8uvFLP.png", estado: resultado[4] }, //leer n1,n2
+            { imagen: "https://i.imgur.com/r8r7BIt.png", estado: resultado[2] }, //introdusca dos numeros distintos n1,n2
+            { imagen: "https://i.imgur.com/oC9J3TN.png", estado: resultado[3] }, //flecha abajo 2
+            { imagen: "https://i.imgur.com/oC9J3TN.png", estado: resultado[1] }, //flecha abajo 1
+            { imagen: "https://i.imgur.com/cJqYyTX.png", estado: resultado[9] }, // doblada izquierda 1
             {
-                imagen: "https://i.imgur.com/hNUaZS0.jpeg",
-                estado: resultado[13],
-            }, // linea
-            { imagen: "https://i.imgur.com/BUGBEOc.png", estado: resultado[3] }, //linea abajo
-            {
-                imagen: "https://i.imgur.com/hNUaZS0.jpeg",
-                estado: resultado[11],
-            }, // linea
-            { imagen: "https://i.imgur.com/2n11hJn.png", estado: resultado[6] }, //son iguales
-            {
-                imagen: "https://i.imgur.com/oRp6iv2.png",
+                imagen: "https://i.imgur.com/goRKMj3.png",
                 estado: resultado[10],
-            }, // no son iguales
+            }, // n1 es mayor
+            { imagen: "https://i.imgur.com/oC9J3TN.png", estado: resultado[5] }, //flecha abajo 3
+            { imagen: "https://i.imgur.com/oC9J3TN.png", estado: resultado[7] }, //flecha abajo 4
             {
-                imagen: "https://i.imgur.com/hNUaZS0.jpeg",
+                imagen: "https://i.imgur.com/sFAFzl4.png",
                 estado: resultado[12],
-            }, // linea
+            }, // n2 es mayor
+            { imagen: "https://i.imgur.com/L8yntMk.png", estado: resultado[8] }, //descicion 2
+            { imagen: "https://i.imgur.com/8wCxpum.png", estado: resultado[6] }, //descicion 1
             {
-                imagen: "https://i.imgur.com/hgPQ06G.png",
-                estado: resultado[14],
-            }, // esquina
+                imagen: "https://i.imgur.com/Y7okYCi.png",
+                estado: resultado[11],
+            }, // derecha 3
             {
-                imagen: "https://i.imgur.com/iuyJU46.png",
+                imagen: "https://i.imgur.com/jnKoRnc.png",
+                estado: resultado[13],
+            }, // izquierda 2
+            {
+                imagen: "https://i.imgur.com/mt4Z8y1.png",
                 estado: resultado[15],
-            }, // linea izquierda
+            }, // fin
+            {
+                imagen: "https://i.imgur.com/Od4jxIE.png",
+                estado: resultado[16],
+            }, // derecha 1
+            {
+                imagen: "https://i.imgur.com/42u2BvY.png",
+                estado: resultado[14],
+            }, // derecha 4
+            {
+                imagen: "https://i.imgur.com/L2Z7DVd.jpeg",
+                estado: resultado[17],
+            }, // linea recta  1
+            {
+                imagen: "https://i.imgur.com/L2Z7DVd.jpeg",
+                estado: resultado[18],
+            }, // linea recta  2
+            {
+                imagen: "https://i.imgur.com/L2Z7DVd.jpeg",
+                estado: resultado[19],
+            }, // linea recta  3
+            {
+                imagen: "https://i.imgur.com/MSjy0TA.png",
+                estado: resultado[20],
+            }, // esquina derecha 2
         ];
 
         const htmlContenido = pasos
@@ -117,7 +141,12 @@ const Ejercicio2Laptop: React.FC = () => {
             resultado[12] === true &&
             resultado[13] === true &&
             resultado[14] === true &&
-            resultado[15] === true
+            resultado[15] === true &&
+            resultado[16] === true &&
+            resultado[17] === true &&
+            resultado[18] === true &&
+            resultado[19] === true &&
+            resultado[20] === true
         ) {
             Swal.fire({
                 title: "Ejercicio completado",
@@ -150,7 +179,7 @@ const Ejercicio2Laptop: React.FC = () => {
     };
 
     const ejecutarOtroMetodo = () => {
-        navigate("/ejercicio2");
+        //navigate("/ejercicio2");
     };
 
     const returnDashboard = () => {
