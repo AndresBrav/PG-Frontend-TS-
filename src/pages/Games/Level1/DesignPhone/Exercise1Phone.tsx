@@ -146,6 +146,7 @@ const Exercise1Phone: React.FC = () => {
                 width: "50%",
                 confirmButtonText: "Cerrar", // Cambia el texto del botón
                 customClass: {
+                    title: "titulo-celular",
                     confirmButton: "btn-cierre",
                 },
             });

@@ -179,7 +179,7 @@ const Ejercicio2Laptop: React.FC = () => {
     };
 
     const ejecutarOtroMetodo = () => {
-        //navigate("/ejercicio2");
+        navigate("/ejercicio3");
     };
 
     const returnDashboard = () => {
