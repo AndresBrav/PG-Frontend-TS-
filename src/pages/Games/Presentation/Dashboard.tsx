@@ -18,7 +18,11 @@ const Dashboard = () => {
 
     const irEjercicio2 = () => {
         navigate("/ejercicio2");
-    }
+    };
+
+    const irEjercicio3 = () => {
+        navigate("/ejercicio3");
+    };
 
     return (
         <>
@@ -120,7 +124,7 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1">
+                <div className="circle-outer-1" onClick={irEjercicio3}>
                     <div className="circle-inner">3</div>
                 </div>
             </div>
