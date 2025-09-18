@@ -60,74 +60,100 @@ const Ejercicio3Laptop: React.FC = () => {
             { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[3] }, // flecha abajo2
             { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[5] }, // flecha abajo6
             { imagen: "https://i.imgur.com/RYGH9tV.png", estado: resultado[2] }, // suma = 0
-            // {
-            //     imagen: "https://i.imgur.com/AGMK3q1.png",
-            //     estado: resultado[10],
-            // }, // mostrar suma
+            {
+                imagen: "https://i.imgur.com/AGMK3q1.png",
+                estado: resultado[19],
+            }, // mostrar suma
             { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[9] }, // flecha abajo3
             { imagen: "https://i.imgur.com/FZLtIRu.png", estado: resultado[6] }, // decisión
-            // { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[4] }, // flecha abajo4
+            {
+                imagen: "https://i.imgur.com/L0MV75y.png",
+                estado: resultado[20],
+            }, // flecha abajo4
             { imagen: "https://i.imgur.com/x7IcPAY.png", estado: resultado[0] }, // inicio
-            // { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[5] }, // flecha abajo5
+            {
+                imagen: "https://i.imgur.com/L0MV75y.png",
+                estado: resultado[11],
+            }, // flecha abajo5
             {
                 imagen: "https://i.imgur.com/KC2On76.png",
                 estado: resultado[10],
             }, // suma = suma + número
-            // {
-            //     imagen: "https://i.imgur.com/qgZYFaK.png",
-            //     estado: resultado[14],
-            // }, // contador = contador + 1
+            {
+                imagen: "https://i.imgur.com/qgZYFaK.png",
+                estado: resultado[12],
+            }, // contador = contador + 1
             {
                 imagen: "https://i.imgur.com/UvuCO4L.png",
                 estado: resultado[8],
             }, // leer número
-            // {
-            //     imagen: "https://i.imgur.com/2JpAMKr.png",
-            //     estado: resultado[11],
-            // }, // fin
-            // {
-            //     imagen: "https://i.imgur.com/U57Uh8j.png",
-            //     estado: resultado[15],
-            // }, // izquierda arriba doblada
-            // {
-            //     imagen: "https://i.imgur.com/jNXzpFf.png",
-            //     estado: resultado[19],
-            // }, // flecha arriba
-            // {
-            //     imagen: "https://i.imgur.com/MTL5zju.jpeg",
-            //     estado: resultado[16],
-            // }, // línea 1
-            // {
-            //     imagen: "https://i.imgur.com/MTL5zju.jpeg",
-            //     estado: resultado[17],
-            // }, // línea 2
-            // {
-            //     imagen: "https://i.imgur.com/ICyFXrP.png",
-            //     estado: resultado[21],
-            // }, // esquina izquierda
-            // {
-            //     imagen: "https://i.imgur.com/MTL5zju.jpeg",
-            //     estado: resultado[18],
-            // }, // línea 3
+            {
+                imagen: "https://i.imgur.com/2JpAMKr.png",
+                estado: resultado[21],
+            }, // fin
+            {
+                imagen: "https://i.imgur.com/U57Uh8j.png",
+                estado: resultado[13],
+            }, // izquierda arriba doblada
+            {
+                imagen: "https://i.imgur.com/jNXzpFf.png",
+                estado: resultado[17],
+            }, // flecha arriba
+            {
+                imagen: "https://i.imgur.com/MTL5zju.jpeg",
+                estado: resultado[14],
+            }, // línea 1
+            {
+                imagen: "https://i.imgur.com/MTL5zju.jpeg",
+                estado: resultado[15],
+            }, // línea 2
+            {
+                imagen: "https://i.imgur.com/ICyFXrP.png",
+                estado: resultado[18],
+            }, // esquina izquierda
+            {
+                imagen: "https://i.imgur.com/MTL5zju.jpeg",
+                estado: resultado[16],
+            }, // línea 3
             {
                 imagen: "https://i.imgur.com/TMDvptF.png",
                 estado: resultado[7],
             }, // esquina derecha
         ];
 
-        const htmlContenido = pasos
-            .map((paso, index) => {
-                const borderColor = paso.estado ? "green" : "red";
-                return `
-          <div style="margin:10px 0;">
-            <img src="${paso.imagen}" alt="Paso ${
-                    index + 1
-                }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
-            
-          </div>
-        `;
-            })
-            .join("");
+        // const htmlContenido = pasos
+        //     .map((paso, index) => {
+        //         const borderColor = paso.estado ? "green" : "red";
+        //         return `
+        //   <div style="margin:10px 0;">
+        //     <img src="${paso.imagen}" alt="Paso ${
+        //             index + 1
+        //         }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
+
+        //   </div>
+        // `;
+        //     })
+        //     .join("");
+
+        const htmlContenido = `
+  <div style="
+      display: grid; 
+      grid-template-columns: repeat(3, 150px); 
+      gap: 50px; 
+      margin: 10px 0;
+  ">
+    ${pasos
+        .map((paso, index) => {
+            const borderColor = paso.estado ? "green" : "red";
+            return `
+              <img src="${paso.imagen}" 
+                   alt="Paso ${index + 1}" 
+                   style="width:150px; height:100px; border:4px solid ${borderColor}; border-radius:8px;" />
+            `;
+        })
+        .join("")}
+  </div>
+`;
 
         if (
             resultado[0] === true &&
@@ -150,7 +176,8 @@ const Ejercicio3Laptop: React.FC = () => {
             resultado[17] === true &&
             resultado[18] === true &&
             resultado[19] === true &&
-            resultado[20] === true
+            resultado[20] === true &&
+            resultado[21] === true
         ) {
             Swal.fire({
                 title: "Ejercicio completado",
@@ -241,7 +268,7 @@ const Ejercicio3Laptop: React.FC = () => {
                     height: GRID_ROWS * CELL_HEIGHT,
                     border: "5px solid #000",
                     margin: "0 auto",
-                    overflowX: "auto", // scroll horizontal si hace falta
+                    // overflowX: "auto", // scroll horizontal si hace falta   //esto lo hace ver mal
                 }}
             >
                 <GridLayout
