@@ -108,19 +108,40 @@ const Ejercicio2Phone: React.FC = () => {
             }, // esquina derecha 2
         ];
 
-        const htmlContenido = pasos
-            .map((paso, index) => {
-                const borderColor = paso.estado ? "green" : "red";
-                return `
-          <div style="margin:10px 0;">
-            <img src="${paso.imagen}" alt="Paso ${
-                    index + 1
-                }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
-            
-          </div>
-        `;
-            })
-            .join("");
+        // const htmlContenido = pasos
+        //     .map((paso, index) => {
+        //         const borderColor = paso.estado ? "green" : "red";
+        //         return `
+        //   <div style="margin:10px 0;">
+        //     <img src="${paso.imagen}" alt="Paso ${
+        //             index + 1
+        //         }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
+
+        //   </div>
+        // `;
+        //     })
+        //     .join("");
+
+        const htmlContenido = `
+  <div style="
+      display: grid; 
+      grid-template-columns: 150px; 
+      grid-template-rows:auto;
+      gap: 20px; 
+      margin: 10px 0;
+  ">
+    ${pasos
+        .map((paso, index) => {
+            const borderColor = paso.estado ? "green" : "red";
+            return `
+              <img src="${paso.imagen}" 
+                   alt="Paso ${index + 1}" 
+                   style="width:100px; height:50px; border:4px solid ${borderColor}; border-radius:8px;" />
+            `;
+        })
+        .join("")}
+  </div>
+`;
 
         if (
             resultado[0] === true &&
@@ -173,6 +194,7 @@ const Ejercicio2Phone: React.FC = () => {
                 customClass: {
                     title: "titulo-celular",
                     confirmButton: "btn-cierre",
+                    icon: "icono-celular",
                 },
             });
         }

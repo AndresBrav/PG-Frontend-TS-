@@ -87,7 +87,7 @@ const Exercise1Phone: React.FC = () => {
             }, // linea izquierda
         ];
 
-        const htmlContenido = pasos
+        /* const htmlContenido = pasos
             .map((paso, index) => {
                 const borderColor = paso.estado ? "green" : "red";
                 return `
@@ -99,7 +99,28 @@ const Exercise1Phone: React.FC = () => {
               </div>
             `;
             })
-            .join("");
+            .join(""); */
+
+        const htmlContenido = `
+  <div style="
+      display: grid; 
+      grid-template-columns: 150px; 
+      grid-template-rows:auto;
+      gap: 20px; 
+      margin: 10px 0;
+  ">
+    ${pasos
+        .map((paso, index) => {
+            const borderColor = paso.estado ? "green" : "red";
+            return `
+              <img src="${paso.imagen}" 
+                   alt="Paso ${index + 1}" 
+                   style="width:100px; height:50px; border:4px solid ${borderColor}; border-radius:8px;" />
+            `;
+        })
+        .join("")}
+  </div>
+`;
 
         if (
             resultado[0] === true &&
@@ -129,7 +150,7 @@ const Exercise1Phone: React.FC = () => {
                 customClass: {
                     title: "titulo-celular",
                     confirmButton: "btn-semitransparente",
-                    icon: "icono-celular"
+                    icon: "icono-celular",
                 },
                 width: "50%",
             }).then((result) => {
@@ -148,6 +169,7 @@ const Exercise1Phone: React.FC = () => {
                 customClass: {
                     title: "titulo-celular",
                     confirmButton: "btn-cierre",
+                    icon: "icono-celular",
                 },
             });
         }

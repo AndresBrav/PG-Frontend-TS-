@@ -87,7 +87,7 @@ const Exercise1Laptop: React.FC = () => {
             }, // linea izquierda
         ];
 
-                const htmlContenido = `
+        const htmlContenido = `
   <div style="
       display: grid; 
       grid-template-columns: repeat(3, 150px); 

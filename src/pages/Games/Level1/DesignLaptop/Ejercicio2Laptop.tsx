@@ -111,7 +111,6 @@ const Ejercicio2Laptop: React.FC = () => {
             }, // esquina derecha 2
         ];
 
-        
         const htmlContenido = `
   <div style="
       display: grid; 
