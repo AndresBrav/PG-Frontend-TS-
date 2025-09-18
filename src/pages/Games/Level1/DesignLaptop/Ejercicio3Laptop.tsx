@@ -210,7 +210,8 @@ const Ejercicio3Laptop: React.FC = () => {
     };
 
     const ejecutarOtroMetodo = () => {
-        navigate("/ejercicio3");
+        // navigate("/ejercicio3");
+        alert("iremos al ejercicio 4 cuando se implemente")
     };
 
     const returnDashboard = () => {
@@ -268,7 +269,8 @@ const Ejercicio3Laptop: React.FC = () => {
                     height: GRID_ROWS * CELL_HEIGHT,
                     border: "5px solid #000",
                     margin: "0 auto",
-                    // overflowX: "auto", // scroll horizontal si hace falta   //esto lo hace ver mal
+                    overflowX: "auto", // 
+                    // overflowY: "auto", // 
                 }}
             >
                 <GridLayout
