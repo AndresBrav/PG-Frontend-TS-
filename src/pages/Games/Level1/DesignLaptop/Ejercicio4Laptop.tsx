@@ -5,7 +5,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useNavigate } from "react-router-dom";
 import { initialWidgetsEjercicio4 } from "../widgetsDataLevel1";
-import { verificarResultadoEjercicio3 } from "../VerificarResultado";
+import { verificarResultadoEjercicio4 } from "../VerificarResultado";
 import Swal from "sweetalert2";
 
 const GRID_COLS = 10; // columnas fijas
@@ -39,7 +39,7 @@ const Ejercicio4Laptop: React.FC = () => {
             filaWidget.push(l.y);
         });
 
-        const resultado: boolean[] = verificarResultadoEjercicio3(
+        const resultado: boolean[] = verificarResultadoEjercicio4(
             widgetIds,
             columnaWidget,
             filaWidget
@@ -50,7 +50,7 @@ const Ejercicio4Laptop: React.FC = () => {
         console.log(filaWidget);
         console.log("el resultado es: ", resultado);
 
-        verificarRespuesta(resultado);
+        //verificarRespuesta(resultado);
     };
 
     const verificarRespuesta = (resultado: boolean[]) => {
@@ -121,19 +121,6 @@ const Ejercicio4Laptop: React.FC = () => {
             }, // esquina derecha
         ];
 
-        // const htmlContenido = pasos
-        //     .map((paso, index) => {
-        //         const borderColor = paso.estado ? "green" : "red";
-        //         return `
-        //   <div style="margin:10px 0;">
-        //     <img src="${paso.imagen}" alt="Paso ${
-        //             index + 1
-        //         }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
-
-        //   </div>
-        // `;
-        //     })
-        //     .join("");
 
         const htmlContenido = `
   <div style="

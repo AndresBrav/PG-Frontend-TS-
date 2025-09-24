@@ -1250,17 +1250,15 @@ export const verificarResultadoEjercicio3 = (
     }
 
     //final
-     const indiceFin = ids.indexOf(12); // id del widget "inicio"
+    const indiceFin = ids.indexOf(12); // id del widget "inicio"
     const filaindiceFin = fila[indiceFin];
     const columnaindiceFin = columna[indiceFin];
 
-    if (filaindiceFin === 9 && columnaindiceFin === columnaInicio-1) {
+    if (filaindiceFin === 9 && columnaindiceFin === columnaInicio - 1) {
         boolean22 = true;
     } else {
         boolean22 = false;
     }
-
-
 
     return [
         boolean1,
@@ -1285,5 +1283,269 @@ export const verificarResultadoEjercicio3 = (
         boolean20,
         boolean21,
         boolean22,
+    ];
+};
+
+export const verificarResultadoEjercicio4 = (
+    ids: number[],
+    columna: number[],
+    fila: number[]
+): boolean[] => {
+    let boolean1: boolean = false;
+    let boolean2: boolean = false;
+    let boolean3: boolean = false;
+    let boolean4: boolean = false;
+    let boolean5: boolean = false;
+    let boolean6: boolean = false;
+    let boolean7: boolean = false;
+    let boolean8: boolean = false;
+    let boolean9: boolean = false;
+    let boolean10: boolean = false;
+    let boolean11: boolean = false;
+
+    //widget inicio
+    const indiceInicio = ids.indexOf(1); // id del widget "inicio"
+    const filaInicio = fila[indiceInicio];
+    const columnaInicio = columna[indiceInicio];
+
+    if (filaInicio === 0) {
+        boolean1 = true;
+    } else {
+        boolean1 = false;
+    }
+
+    //flecha hacia abajo
+    //flecha abajo
+    const indiceLineaAbajo1 = ids.indexOf(7); // id del widget "linea abajo"
+    const filaLineaAbajo1 = fila[indiceLineaAbajo1];
+    const columnaLineaAbajo1 = columna[indiceLineaAbajo1];
+    const indiceLineaAbajo2 = ids.indexOf(8); // id del widget "linea abajo"
+    const filaLineaAbajo2 = fila[indiceLineaAbajo2];
+    const columnaLineaAbajo2 = columna[indiceLineaAbajo2];
+    const indiceLineaAbajo3 = ids.indexOf(9); // id del widget "linea abajo"
+    const filaLineaAbajo3 = fila[indiceLineaAbajo3];
+    const columnaLineaAbajo3 = columna[indiceLineaAbajo3];
+    const indiceLineaAbajo4 = ids.indexOf(10); // id del widget "linea abajo"
+    const filaLineaAbajo4 = fila[indiceLineaAbajo4];
+    const columnaLineaAbajo4 = columna[indiceLineaAbajo4];
+    const indiceLineaAbajo5 = ids.indexOf(11); // id del widget "linea abajo"
+    const filaLineaAbajo5 = fila[indiceLineaAbajo5];
+    const columnaLineaAbajo5 = columna[indiceLineaAbajo5];
+
+    if (
+        (columnaLineaAbajo1 === columnaInicio && filaLineaAbajo1 === 1) ||
+        (columnaLineaAbajo2 === columnaInicio && filaLineaAbajo2 === 1) ||
+        (columnaLineaAbajo3 === columnaInicio && filaLineaAbajo3 === 1) ||
+        (columnaLineaAbajo4 === columnaInicio && filaLineaAbajo4 === 1) ||
+        (columnaLineaAbajo5 === columnaInicio && filaLineaAbajo5 === 1)
+    ) {
+        boolean2 = true; /* la linea abajo es correcta */
+    } else {
+        boolean2 = false;
+    }
+
+    //inicio de variables
+    //widget inicio
+    const InicioVariables = ids.indexOf(4); // inicio de variables
+    const filaInicioVariables = fila[InicioVariables];
+    const columnaInicioVariables = columna[InicioVariables];
+
+    if (filaInicioVariables === 2 && columnaInicioVariables === columnaInicio) {
+        boolean3 = true;
+    } else {
+        boolean3 = false;
+    }
+
+    //flecha hacia abajo
+    // flecha abajo
+    const indiceAbajo1 = ids.indexOf(7); // id del widget "línea abajo"
+    const filaAbajo1 = fila[indiceAbajo1];
+    const colAbajo1 = columna[indiceAbajo1];
+
+    const indiceAbajo2 = ids.indexOf(8); // id del widget "línea abajo"
+    const filaAbajo2 = fila[indiceAbajo2];
+    const colAbajo2 = columna[indiceAbajo2];
+
+    const indiceAbajo3 = ids.indexOf(9); // id del widget "línea abajo"
+    const filaAbajo3 = fila[indiceAbajo3];
+    const colAbajo3 = columna[indiceAbajo3];
+
+    const indiceAbajo4 = ids.indexOf(10); // id del widget "línea abajo"
+    const filaAbajo4 = fila[indiceAbajo4];
+    const colAbajo4 = columna[indiceAbajo4];
+
+    const indiceAbajo5 = ids.indexOf(11); // id del widget "línea abajo"
+    const filaAbajo5 = fila[indiceAbajo5];
+    const colAbajo5 = columna[indiceAbajo5];
+
+    if (
+        (colAbajo1 === columnaInicio && filaAbajo1 === 3) ||
+        (colAbajo2 === columnaInicio && filaAbajo2 === 3) ||
+        (colAbajo3 === columnaInicio && filaAbajo3 === 3) ||
+        (colAbajo4 === columnaInicio && filaAbajo4 === 3) ||
+        (colAbajo5 === columnaInicio && filaAbajo5 === 3)
+    ) {
+        boolean4 = true; /* la línea abajo es correcta */
+    } else {
+        boolean4 = false;
+    }
+
+    //leer base y altura
+    const LeerBaseAltura = ids.indexOf(6);
+    const filaLeerBaseAltura = fila[LeerBaseAltura];
+    const columnaLeerBaseAltura = columna[LeerBaseAltura];
+
+    if (filaLeerBaseAltura === 4 && columnaLeerBaseAltura === columnaInicio) {
+        boolean5 = true;
+    } else {
+        boolean5 = false;
+    }
+
+    //flecha hacia abajo
+    // flecha abajo
+    const indiceFlechaAbajo1 = ids.indexOf(7); // id del widget "flecha abajo"
+    const filaFlechaAbajo1 = fila[indiceFlechaAbajo1];
+    const columnaFlechaAbajo1 = columna[indiceFlechaAbajo1];
+
+    const indiceFlechaAbajo2 = ids.indexOf(8); // id del widget "flecha abajo"
+    const filaFlechaAbajo2 = fila[indiceFlechaAbajo2];
+    const columnaFlechaAbajo2 = columna[indiceFlechaAbajo2];
+
+    const indiceFlechaAbajo3 = ids.indexOf(9); // id del widget "flecha abajo"
+    const filaFlechaAbajo3 = fila[indiceFlechaAbajo3];
+    const columnaFlechaAbajo3 = columna[indiceFlechaAbajo3];
+
+    const indiceFlechaAbajo4 = ids.indexOf(10); // id del widget "flecha abajo"
+    const filaFlechaAbajo4 = fila[indiceFlechaAbajo4];
+    const columnaFlechaAbajo4 = columna[indiceFlechaAbajo4];
+
+    const indiceFlechaAbajo5 = ids.indexOf(11); // id del widget "flecha abajo"
+    const filaFlechaAbajo5 = fila[indiceFlechaAbajo5];
+    const columnaFlechaAbajo5 = columna[indiceFlechaAbajo5];
+
+    if (
+        (columnaFlechaAbajo1 === columnaInicio && filaFlechaAbajo1 === 5) ||
+        (columnaFlechaAbajo2 === columnaInicio && filaFlechaAbajo2 === 5) ||
+        (columnaFlechaAbajo3 === columnaInicio && filaFlechaAbajo3 === 5) ||
+        (columnaFlechaAbajo4 === columnaInicio && filaFlechaAbajo4 === 5) ||
+        (columnaFlechaAbajo5 === columnaInicio && filaFlechaAbajo5 === 5)
+    ) {
+        boolean6 = true; /* la flecha abajo es correcta */
+    } else {
+        boolean6 = false;
+    }
+
+    //calcular area
+    const CalcularArea = ids.indexOf(5);
+    const filaCalcularArea = fila[CalcularArea];
+    const columnaCalcularArea = columna[CalcularArea];
+
+    if (filaCalcularArea === 6 && columnaCalcularArea === columnaInicio) {
+        boolean7 = true;
+    } else {
+        boolean7 = false;
+    }
+
+    //flecha hacia abajo
+    // flecha abajo
+    const flechaAbajoIndice1 = ids.indexOf(7); // id del widget "flecha abajo"
+    const flechaAbajoFila1 = fila[flechaAbajoIndice1];
+    const flechaAbajoCol1 = columna[flechaAbajoIndice1];
+
+    const flechaAbajoIndice2 = ids.indexOf(8); // id del widget "flecha abajo"
+    const flechaAbajoFila2 = fila[flechaAbajoIndice2];
+    const flechaAbajoCol2 = columna[flechaAbajoIndice2];
+
+    const flechaAbajoIndice3 = ids.indexOf(9); // id del widget "flecha abajo"
+    const flechaAbajoFila3 = fila[flechaAbajoIndice3];
+    const flechaAbajoCol3 = columna[flechaAbajoIndice3];
+
+    const flechaAbajoIndice4 = ids.indexOf(10); // id del widget "flecha abajo"
+    const flechaAbajoFila4 = fila[flechaAbajoIndice4];
+    const flechaAbajoCol4 = columna[flechaAbajoIndice4];
+
+    const flechaAbajoIndice5 = ids.indexOf(11); // id del widget "flecha abajo"
+    const flechaAbajoFila5 = fila[flechaAbajoIndice5];
+    const flechaAbajoCol5 = columna[flechaAbajoIndice5];
+
+    if (
+        (flechaAbajoCol1 === columnaInicio && flechaAbajoFila1 === 7) ||
+        (flechaAbajoCol2 === columnaInicio && flechaAbajoFila2 === 7) ||
+        (flechaAbajoCol3 === columnaInicio && flechaAbajoFila3 === 7) ||
+        (flechaAbajoCol4 === columnaInicio && flechaAbajoFila4 === 7) ||
+        (flechaAbajoCol5 === columnaInicio && flechaAbajoFila5 === 7)
+    ) {
+        boolean8 = true; /* la flecha abajo es correcta */
+    } else {
+        boolean8 = false;
+    }
+
+    //calcular area
+    const MostrarArea = ids.indexOf(3);
+    const filaMostrarArea = fila[MostrarArea];
+    const columnaMostrarArea = columna[MostrarArea];
+
+    if (filaMostrarArea === 8 && columnaMostrarArea === columnaInicio) {
+        boolean9 = true;
+    } else {
+        boolean9 = false;
+    }
+
+    //flecha hacia abajo
+    // flecha abajo
+    const faIndice1 = ids.indexOf(7); // id del widget "flecha abajo"
+    const faFila1 = fila[faIndice1];
+    const faCol1 = columna[faIndice1];
+
+    const faIndice2 = ids.indexOf(8); // id del widget "flecha abajo"
+    const faFila2 = fila[faIndice2];
+    const faCol2 = columna[faIndice2];
+
+    const faIndice3 = ids.indexOf(9); // id del widget "flecha abajo"
+    const faFila3 = fila[faIndice3];
+    const faCol3 = columna[faIndice3];
+
+    const faIndice4 = ids.indexOf(10); // id del widget "flecha abajo"
+    const faFila4 = fila[faIndice4];
+    const faCol4 = columna[faIndice4];
+
+    const faIndice5 = ids.indexOf(11); // id del widget "flecha abajo"
+    const faFila5 = fila[faIndice5];
+    const faCol5 = columna[faIndice5];
+
+    if (
+        (faCol1 === columnaInicio && faFila1 === 9) ||
+        (faCol2 === columnaInicio && faFila2 === 9) ||
+        (faCol3 === columnaInicio && faFila3 === 9) ||
+        (faCol4 === columnaInicio && faFila4 === 9) ||
+        (faCol5 === columnaInicio && faFila5 === 9)
+    ) {
+        boolean10 = true; /* la flecha abajo es correcta */
+    } else {
+        boolean10 = false;
+    }
+
+    //final
+    const indiceFin = ids.indexOf(2);
+    const filaindiceFin = fila[indiceFin];
+    const columnaindiceFin = columna[indiceFin];
+    if (filaindiceFin === 10 && columnaindiceFin === columnaInicio) {
+        boolean11 = true;
+    } else {
+        boolean11 = false;
+    }
+
+    return [
+        boolean1,
+        boolean2,
+        boolean3,
+        boolean4,
+        boolean5,
+        boolean6,
+        boolean7,
+        boolean8,
+        boolean9,
+        boolean10,
+        boolean11,
     ];
 };
