@@ -50,77 +50,26 @@ const Ejercicio4Laptop: React.FC = () => {
         console.log(filaWidget);
         console.log("el resultado es: ", resultado);
 
-        //verificarRespuesta(resultado);
+        verificarRespuesta(resultado);
     };
 
     const verificarRespuesta = (resultado: boolean[]) => {
         const pasos = [
-            { imagen: "https://i.imgur.com/A1aTCPU.png", estado: resultado[4] }, // contador = 1
-            { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[1] }, // flecha abajo1
-            { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[3] }, // flecha abajo2
-            { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[5] }, // flecha abajo6
-            { imagen: "https://i.imgur.com/RYGH9tV.png", estado: resultado[2] }, // suma = 0
+            { imagen: "https://i.imgur.com/8Oalgpj.png", estado: resultado[0] }, //inicio
+            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[3] }, //flecha 2
+            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[7] }, //flecha 4
+            { imagen: "https://i.imgur.com/nigQnxc.png", estado: resultado[4] }, //leer base y altura /////
+            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[9] }, //flecha 5
+            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[5] }, //flecha 3
+            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[1] }, //flecha 1
+            { imagen: "https://i.imgur.com/duXzF5m.png", estado: resultado[6] }, //calcular area
+            { imagen: "https://i.imgur.com/I9rPg9Q.png", estado: resultado[8] }, //Mostrar area
+            { imagen: "https://i.imgur.com/hUCWk5Q.png", estado: resultado[2] }, //inicio de variables
             {
-                imagen: "https://i.imgur.com/AGMK3q1.png",
-                estado: resultado[19],
-            }, // mostrar suma
-            { imagen: "https://i.imgur.com/L0MV75y.png", estado: resultado[9] }, // flecha abajo3
-            { imagen: "https://i.imgur.com/FZLtIRu.png", estado: resultado[6] }, // decisión
-            {
-                imagen: "https://i.imgur.com/L0MV75y.png",
-                estado: resultado[20],
-            }, // flecha abajo4
-            { imagen: "https://i.imgur.com/x7IcPAY.png", estado: resultado[0] }, // inicio
-            {
-                imagen: "https://i.imgur.com/L0MV75y.png",
-                estado: resultado[11],
-            }, // flecha abajo5
-            {
-                imagen: "https://i.imgur.com/KC2On76.png",
+                imagen: "https://i.imgur.com/RESU9Wb.png",
                 estado: resultado[10],
-            }, // suma = suma + número
-            {
-                imagen: "https://i.imgur.com/qgZYFaK.png",
-                estado: resultado[12],
-            }, // contador = contador + 1
-            {
-                imagen: "https://i.imgur.com/UvuCO4L.png",
-                estado: resultado[8],
-            }, // leer número
-            {
-                imagen: "https://i.imgur.com/2JpAMKr.png",
-                estado: resultado[21],
-            }, // fin
-            {
-                imagen: "https://i.imgur.com/U57Uh8j.png",
-                estado: resultado[13],
-            }, // izquierda arriba doblada
-            {
-                imagen: "https://i.imgur.com/jNXzpFf.png",
-                estado: resultado[17],
-            }, // flecha arriba
-            {
-                imagen: "https://i.imgur.com/MTL5zju.jpeg",
-                estado: resultado[14],
-            }, // línea 1
-            {
-                imagen: "https://i.imgur.com/MTL5zju.jpeg",
-                estado: resultado[15],
-            }, // línea 2
-            {
-                imagen: "https://i.imgur.com/ICyFXrP.png",
-                estado: resultado[18],
-            }, // esquina izquierda
-            {
-                imagen: "https://i.imgur.com/MTL5zju.jpeg",
-                estado: resultado[16],
-            }, // línea 3
-            {
-                imagen: "https://i.imgur.com/TMDvptF.png",
-                estado: resultado[7],
-            }, // esquina derecha
+            }, //fin
         ];
-
 
         const htmlContenido = `
   <div style="
@@ -153,18 +102,7 @@ const Ejercicio4Laptop: React.FC = () => {
             resultado[7] === true &&
             resultado[8] === true &&
             resultado[9] === true &&
-            resultado[10] === true &&
-            resultado[11] === true &&
-            resultado[12] === true &&
-            resultado[13] === true &&
-            resultado[14] === true &&
-            resultado[15] === true &&
-            resultado[16] === true &&
-            resultado[17] === true &&
-            resultado[18] === true &&
-            resultado[19] === true &&
-            resultado[20] === true &&
-            resultado[21] === true
+            resultado[10] === true 
         ) {
             Swal.fire({
                 title: "Ejercicio completado",
@@ -198,7 +136,7 @@ const Ejercicio4Laptop: React.FC = () => {
 
     const ejecutarOtroMetodo = () => {
         // navigate("/ejercicio3");
-        alert("iremos al ejercicio 4 cuando se implemente");
+        alert("iremos al ejercicio 5 cuando se implemente");
     };
 
     const returnDashboard = () => {
@@ -235,7 +173,7 @@ const Ejercicio4Laptop: React.FC = () => {
 
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                 <h1>
-                    Diagrama de Flujo para sumar 100 números leídos por teclado.
+                    Diagrama de Flujo para calcular el área de un triángulo
                 </h1>
             </div>
 
