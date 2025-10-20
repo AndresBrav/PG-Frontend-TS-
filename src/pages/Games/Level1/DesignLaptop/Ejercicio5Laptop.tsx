@@ -5,7 +5,7 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useNavigate } from "react-router-dom";
 import { initialWidgetsEjercicio5 } from "../widgetsDataLevel1";
-import { verificarResultadoEjercicio4 } from "../VerificarResultado";
+import { verificarResultadoEjercicio5 } from "../VerificarResultado";
 import Swal from "sweetalert2";
 
 const GRID_COLS = 10; // columnas fijas
@@ -39,7 +39,7 @@ const Ejercicio5Laptop: React.FC = () => {
             filaWidget.push(l.y);
         });
 
-        const resultado: boolean[] = verificarResultadoEjercicio4(
+        const resultado: boolean[] = verificarResultadoEjercicio5(
             widgetIds,
             columnaWidget,
             filaWidget,
@@ -50,13 +50,13 @@ const Ejercicio5Laptop: React.FC = () => {
         console.log(filaWidget);
         console.log("el resultado es: ", resultado);
 
-        verificarRespuesta(resultado);
+        //verificarRespuesta(resultado);
     };
 
     const verificarRespuesta = (resultado: boolean[]) => {
         const pasos = [
             { imagen: "https://i.imgur.com/8Oalgpj.png", estado: resultado[0] }, //inicio
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[3] }, //flecha 2
+           /*  { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[3] }, //flecha 2
             { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[7] }, //flecha 4
             { imagen: "https://i.imgur.com/nigQnxc.png", estado: resultado[4] }, //leer base y altura /////
             { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[9] }, //flecha 5
@@ -68,7 +68,8 @@ const Ejercicio5Laptop: React.FC = () => {
             {
                 imagen: "https://i.imgur.com/RESU9Wb.png",
                 estado: resultado[10],
-            }, //fin
+            }, //fin */
+            
         ];
 
         const htmlContenido = `

@@ -1549,3 +1549,78 @@ export const verificarResultadoEjercicio4 = (
         boolean11,
     ];
 };
+
+export const verificarResultadoEjercicio5 = (
+    ids: number[],
+    columna: number[],
+    fila: number[]
+): boolean[] => {
+    let boolean1: boolean = false;
+    let boolean2: boolean = false;
+    let boolean3: boolean = false;
+    let boolean4: boolean = false;
+    let boolean5: boolean = false;
+    let boolean6: boolean = false;
+    let boolean7: boolean = false;
+    let boolean8: boolean = false;
+    let boolean9: boolean = false;
+    let boolean10: boolean = false;
+    let boolean11: boolean = false;
+    let boolean12: boolean = false;
+    let boolean13: boolean = false;
+    let boolean14: boolean = false;
+    let boolean15: boolean = false;
+    let boolean16: boolean = false;
+    let boolean17: boolean = false;
+    let boolean18: boolean = false;
+    let boolean19: boolean = false;
+    let boolean20: boolean = false;
+    let boolean21: boolean = false;
+    let boolean22: boolean = false;
+    let boolean23: boolean = false;
+    let boolean24: boolean = false;
+    let boolean25: boolean = false;
+    let boolean26: boolean = false;
+    let boolean27: boolean = false;
+
+    //widget inicio
+    const indiceInicio = ids.indexOf(1); // id del widget "inicio"
+    const filaInicio = fila[indiceInicio];
+    const columnaInicio = columna[indiceInicio];
+
+    if (filaInicio === 0) {
+        boolean1 = true;
+    } else {
+        boolean1 = false;
+    }
+
+    return [
+        boolean1,
+        boolean2,
+        boolean3,
+        boolean4,
+        boolean5,
+        boolean6,
+        boolean7,
+        boolean8,
+        boolean9,
+        boolean10,
+        boolean11,
+        boolean12,
+        boolean13,
+        boolean14,
+        boolean15,
+        boolean16,
+        boolean17,
+        boolean18,
+        boolean19,
+        boolean20,
+        boolean21,
+        boolean22,
+        boolean23,
+        boolean24,
+        boolean25,
+        boolean26,
+        boolean27,
+    ];
+};
