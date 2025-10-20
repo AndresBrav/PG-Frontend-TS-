@@ -1696,6 +1696,15 @@ export const verificarResultadoEjercicio5 = (
         boolean6 = false;
     }
 
+    //No es primo
+    const indiceNoesPrimo1 = ids.indexOf(11); // id del widget "linea abajo"
+    const filaindiceNoesPrimo1 = fila[indiceNoesPrimo1];
+    const columnaindiceNoesPrimo1 = columna[indiceNoesPrimo1];
+
+    const indiceNoesPrimo2 = ids.indexOf(12); // id del widget "linea abajo"
+    const filaindiceNoesPrimo2 = fila[indiceNoesPrimo2];
+    const columnaindiceNoesPrimo2 = columna[indiceNoesPrimo2];
+
     return [
         boolean1,
         boolean2,
