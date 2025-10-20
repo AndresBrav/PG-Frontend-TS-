@@ -24,7 +24,7 @@ const Ejercicio4Laptop: React.FC = () => {
             y: idx % GRID_ROWS,
             w: 1,
             h: 1,
-        }))
+        })),
     );
 
     const imprimirPosiciones = () => {
@@ -42,7 +42,7 @@ const Ejercicio4Laptop: React.FC = () => {
         const resultado: boolean[] = verificarResultadoEjercicio4(
             widgetIds,
             columnaWidget,
-            filaWidget
+            filaWidget,
         );
 
         console.log(widgetIds);
@@ -73,17 +73,17 @@ const Ejercicio4Laptop: React.FC = () => {
 
         const htmlContenido = `
   <div style="
-      display: grid; 
-      grid-template-columns: repeat(3, 150px); 
-      gap: 50px; 
+      display: grid;
+      grid-template-columns: repeat(3, 150px);
+      gap: 50px;
       margin: 10px 0;
   ">
     ${pasos
         .map((paso, index) => {
             const borderColor = paso.estado ? "green" : "red";
             return `
-              <img src="${paso.imagen}" 
-                   alt="Paso ${index + 1}" 
+              <img src="${paso.imagen}"
+                   alt="Paso ${index + 1}"
                    style="width:150px; height:100px; border:4px solid ${borderColor}; border-radius:8px;" />
             `;
         })
@@ -102,7 +102,7 @@ const Ejercicio4Laptop: React.FC = () => {
             resultado[7] === true &&
             resultado[8] === true &&
             resultado[9] === true &&
-            resultado[10] === true 
+            resultado[10] === true
         ) {
             Swal.fire({
                 title: "Ejercicio completado",
@@ -135,8 +135,7 @@ const Ejercicio4Laptop: React.FC = () => {
     };
 
     const ejecutarOtroMetodo = () => {
-        // navigate("/ejercicio3");
-        alert("iremos al ejercicio 5 cuando se implemente");
+        navigate("/ejercicio5");
     };
 
     const returnDashboard = () => {
@@ -172,9 +171,7 @@ const Ejercicio4Laptop: React.FC = () => {
             </div>
 
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
-                <h1>
-                    Diagrama de Flujo para calcular el área de un triángulo
-                </h1>
+                <h1>Diagrama de Flujo para calcular el área de un triángulo</h1>
             </div>
 
             <div className="contenedor-diagramaflujo-boton">

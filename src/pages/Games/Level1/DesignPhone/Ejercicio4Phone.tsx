@@ -24,7 +24,7 @@ const Ejercicio4Phone: React.FC = () => {
             y: idx % GRID_ROWS,
             w: 1,
             h: 1,
-        }))
+        })),
     );
 
     const imprimirPosiciones = () => {
@@ -42,7 +42,7 @@ const Ejercicio4Phone: React.FC = () => {
         const resultado: boolean[] = verificarResultadoEjercicio4(
             widgetIds,
             columnaWidget,
-            filaWidget
+            filaWidget,
         );
 
         console.log(widgetIds);
@@ -73,18 +73,18 @@ const Ejercicio4Phone: React.FC = () => {
 
         const htmlContenido = `
   <div style="
-      display: grid; 
-      grid-template-columns: 150px; 
+      display: grid;
+      grid-template-columns: 150px;
       grid-template-rows:auto;
-      gap: 20px; 
+      gap: 20px;
       margin: 10px 0;
   ">
     ${pasos
         .map((paso, index) => {
             const borderColor = paso.estado ? "green" : "red";
             return `
-              <img src="${paso.imagen}" 
-                   alt="Paso ${index + 1}" 
+              <img src="${paso.imagen}"
+                   alt="Paso ${index + 1}"
                    style="width:100px; height:50px; border:4px solid ${borderColor}; border-radius:8px;" />
             `;
         })
@@ -140,8 +140,7 @@ const Ejercicio4Phone: React.FC = () => {
     };
 
     const ejecutarOtroMetodo = () => {
-        // navigate("/ejercicio3");
-        alert("iremos al ejercicio 5 cuando se implemente");
+        navigate("/ejercicio5");
     };
 
     const returnDashboard = () => {
