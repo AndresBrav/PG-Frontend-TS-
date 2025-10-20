@@ -4,7 +4,7 @@ import type { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useNavigate } from "react-router-dom";
-import { initialWidgetsEjercicio4 } from "../widgetsDataLevel1";
+import { initialWidgetsEjercicio5 } from "../widgetsDataLevel1";
 import { verificarResultadoEjercicio4 } from "../VerificarResultado";
 import Swal from "sweetalert2";
 
@@ -18,7 +18,7 @@ const Ejercicio5Laptop: React.FC = () => {
     const navigate = useNavigate();
 
     const [layout, setLayout] = useState<Layout[]>(
-        initialWidgetsEjercicio4.map((w, idx) => ({
+        initialWidgetsEjercicio5.map((w, idx) => ({
             i: w.id.toString(),
             x: Math.floor(idx / GRID_ROWS),
             y: idx % GRID_ROWS,
@@ -213,7 +213,7 @@ const Ejercicio5Laptop: React.FC = () => {
                         padding: "0px",
                     }}
                 >
-                    {initialWidgetsEjercicio4.map((w) => (
+                    {initialWidgetsEjercicio5.map((w) => (
                         <div
                             key={w.id}
                             style={{
