@@ -3,7 +3,7 @@
 export const verificarReultado = (
     ids: number[],
     columna: number[],
-    fila: number[],
+    fila: number[]
 ): boolean[] => {
     let boolean1: boolean = false;
     let boolean2: boolean = false;
@@ -355,7 +355,7 @@ export const verificarReultado = (
 export const verificarResultadoEjercicio2 = (
     ids: number[],
     columna: number[],
-    fila: number[],
+    fila: number[]
 ): boolean[] => {
     let boolean1: boolean = false;
     let boolean2: boolean = false;
@@ -743,7 +743,7 @@ export const verificarResultadoEjercicio2 = (
 export const verificarResultadoEjercicio3 = (
     ids: number[],
     columna: number[],
-    fila: number[],
+    fila: number[]
 ): boolean[] => {
     let boolean1: boolean = false;
     let boolean2: boolean = false;
@@ -1289,7 +1289,7 @@ export const verificarResultadoEjercicio3 = (
 export const verificarResultadoEjercicio4 = (
     ids: number[],
     columna: number[],
-    fila: number[],
+    fila: number[]
 ): boolean[] => {
     let boolean1: boolean = false;
     let boolean2: boolean = false;
@@ -1553,7 +1553,7 @@ export const verificarResultadoEjercicio4 = (
 export const verificarResultadoEjercicio5 = (
     ids: number[],
     columna: number[],
-    fila: number[],
+    fila: number[]
 ): boolean[] => {
     let boolean1: boolean = false;
     let boolean2: boolean = false;
@@ -1704,6 +1704,65 @@ export const verificarResultadoEjercicio5 = (
     const indiceNoesPrimo2 = ids.indexOf(12); // id del widget "linea abajo"
     const filaindiceNoesPrimo2 = fila[indiceNoesPrimo2];
     const columnaindiceNoesPrimo2 = columna[indiceNoesPrimo2];
+
+    if (
+        (columnaindiceNoesPrimo1 === columnaInicio - 1 &&
+            columnaindiceNoesPrimo1 === columnaDescicion1 - 1 &&
+            filaindiceNoesPrimo1 === 5) ||
+        (columnaindiceNoesPrimo2 === columnaInicio - 1 &&
+            columnaindiceNoesPrimo2 === columnaDescicion1 - 1 &&
+            filaindiceNoesPrimo2 === 5)
+    ) {
+        boolean7 = true;
+    } else {
+        boolean7 = false;
+    }
+
+    //Antes final 1
+    const antesFinal1 = ids.indexOf(25);
+    const filaantesFinal1 = fila[antesFinal1];
+    const columnaantesFinal1 = columna[antesFinal1];
+
+    //Antes final 2
+    const antesFinal2 = ids.indexOf(26);
+    const filaantesFinal2 = fila[antesFinal2];
+    const columnaantesFinal2 = columna[antesFinal2];
+
+    //Antes final 3
+    const antesFinal3 = ids.indexOf(27);
+    const filaantesFinal3 = fila[antesFinal3];
+    const columnaantesFinal3 = columna[antesFinal3];
+
+    if (
+        (columnaantesFinal1 === columnaInicio - 1 &&
+            columnaantesFinal1 === columnaDescicion1 - 1 &&
+            filaantesFinal1 === 6) ||
+        (columnaantesFinal2 === columnaInicio - 1 &&
+            columnaantesFinal2 === columnaDescicion1 - 1 &&
+            filaantesFinal2 === 6) ||
+        (columnaantesFinal3 === columnaInicio - 1 &&
+            columnaantesFinal3 === columnaDescicion1 - 1 &&
+            filaantesFinal3 === 6)
+    ) {
+        boolean8 = true;
+    } else {
+        boolean8 = false;
+    }
+
+    //fin 1
+    const fin1 = ids.indexOf(16);
+    const filafin1 = fila[fin1];
+    const columnafin1 = columna[fin1];
+
+    if (
+        columnafin1 === columnaInicio - 2 &&
+        columnafin1 === columnaDescicion1 - 2 &&
+        filafin1 === 6
+    ) {
+        boolean9 = true;
+    } else {
+        boolean9 = false;
+    }
 
     return [
         boolean1,
