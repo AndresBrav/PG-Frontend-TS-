@@ -3,7 +3,7 @@ import { TokenProvider } from "./Context/TokenProvider";
 import Login from "./pages/users/Login";
 import SignUp from "./pages/users/SignUp";
 import Dashboard from "./pages/Games/Presentation/Dashboard";
-import Exercise1 from "./pages/Games/Level1/Exercise1";
+import Ejercicio1 from "./pages/Games/Level1/Ejercicio1";
 import Ejercicio2 from "./pages/Games/Level1/Ejercicio2";
 import Ejercicio3 from "./pages/Games/Level1/Ejercicio3";
 import Ejercicio4 from "./pages/Games/Level1/Ejercicio4";
@@ -18,7 +18,7 @@ function App() {
                         <Route path="/" element={<Login />} />
                         <Route path="/registro" element={<SignUp />} />
                         <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/exercise1" element={<Exercise1 />} />
+                        <Route path="/ejercicio1" element={<Ejercicio1 />} />
                         <Route path="/ejercicio2" element={<Ejercicio2 />} />
                         <Route path="/ejercicio3" element={<Ejercicio3 />} />
                         <Route path="/ejercicio4" element={<Ejercicio4 />} />

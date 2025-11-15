@@ -13,7 +13,7 @@ const Dashboard = () => {
     const navigate = useNavigate(); // Hook que te da la función navigate
 
     const irEjercicio1 = () => {
-        navigate("/exercise1");
+        navigate("/ejercicio1");
     };
 
     const irEjercicio2 = () => {

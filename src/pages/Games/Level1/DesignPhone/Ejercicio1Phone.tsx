@@ -10,11 +10,11 @@ import Swal from "sweetalert2";
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
-const CELL_WIDTH = 200; // ancho de cada celda
-const CELL_HEIGHT = 100; // alto de cada celda
+const CELL_WIDTH = 100; // ancho de cada celda
+const CELL_HEIGHT = 50; // alto de cada celda
 const WIDGET_SCALE = 1; // escala de imagen
 
-const Exercise1Laptop: React.FC = () => {
+const Ejercicio1Phone: React.FC = () => {
     const navigate = useNavigate();
 
     const [layout, setLayout] = useState<Layout[]>(
@@ -87,11 +87,26 @@ const Exercise1Laptop: React.FC = () => {
             }, // linea izquierda
         ];
 
+        /* const htmlContenido = pasos
+            .map((paso, index) => {
+                const borderColor = paso.estado ? "green" : "red";
+                return `
+              <div style="margin:10px 0;">
+                <img src="${paso.imagen}" alt="Paso ${
+                    index + 1
+                }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
+                
+              </div>
+            `;
+            })
+            .join(""); */
+
         const htmlContenido = `
   <div style="
       display: grid; 
-      grid-template-columns: repeat(3, 150px); 
-      gap: 50px; 
+      grid-template-columns: 150px; 
+      grid-template-rows:auto;
+      gap: 20px; 
       margin: 10px 0;
   ">
     ${pasos
@@ -100,7 +115,7 @@ const Exercise1Laptop: React.FC = () => {
             return `
               <img src="${paso.imagen}" 
                    alt="Paso ${index + 1}" 
-                   style="width:150px; height:100px; border:4px solid ${borderColor}; border-radius:8px;" />
+                   style="width:100px; height:50px; border:4px solid ${borderColor}; border-radius:8px;" />
             `;
         })
         .join("")}
@@ -129,10 +144,13 @@ const Exercise1Laptop: React.FC = () => {
                 title: "Ejercicio completado",
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: "success",
-                iconColor: "green", // Verde personalizado,
+                iconColor: "green",
                 confirmButtonText: "Siguiente",
+
                 customClass: {
+                    title: "titulo-celular",
                     confirmButton: "btn-semitransparente",
+                    icon: "icono-celular",
                 },
                 width: "50%",
             }).then((result) => {
@@ -145,14 +163,18 @@ const Exercise1Laptop: React.FC = () => {
                 title: "Ejercicio incompleto",
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: "error",
-                iconColor: "red", // Rojo personalizado
+                iconColor: "red",
                 width: "50%",
                 confirmButtonText: "Cerrar", // Cambia el texto del botón
                 customClass: {
+                    title: "titulo-celular",
                     confirmButton: "btn-cierre",
+                    icon: "icono-celular",
                 },
             });
         }
+
+        //console.log("el resultado es: ", resultado);
     };
 
     const ejecutarOtroMetodo = () => {
@@ -261,4 +283,4 @@ const Exercise1Laptop: React.FC = () => {
     );
 };
 
-export default Exercise1Laptop;
+export default Ejercicio1Phone;
