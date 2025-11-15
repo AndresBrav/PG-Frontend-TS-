@@ -228,6 +228,7 @@ const Ejercicio1Phone: React.FC = () => {
                     <h1>Ejecutar</h1>
                 </button>
             </div>
+            <br />
 
             <div
                 style={{
@@ -253,7 +254,7 @@ const Ejercicio1Phone: React.FC = () => {
                     preventCollision={true}
                     style={{
                         background: "white",
-                        border: "3px solid #ffffffff",
+                        border: "10px solid #000000",
                         padding: "0px",
                     }}
                 >

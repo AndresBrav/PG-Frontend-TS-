@@ -205,8 +205,9 @@ const Ejercicio1Laptop: React.FC = () => {
                 >
                     <h1>Ejecutar</h1>
                 </button>
+                
             </div>
-
+                <br />
             <div
                 style={{
                     background: "white",
@@ -231,7 +232,7 @@ const Ejercicio1Laptop: React.FC = () => {
                     preventCollision={true}
                     style={{
                         background: "white",
-                        border: "3px solid #ffffffff",
+                        border: "20px solid #000000",
                         padding: "0px",
                     }}
                 >
