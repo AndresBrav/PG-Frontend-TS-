@@ -49,7 +49,6 @@ export const initialWidgetsEjercicio2: Widget[] = [
 ];
 
 export const initialWidgetsEjercicio3: Widget[] = [
-    { id: 1, content: "https://i.imgur.com/x7IcPAY.png" }, //inicio
     { id: 2, content: "https://i.imgur.com/L0MV75y.png" }, //flecha abajo1
     { id: 3, content: "https://i.imgur.com/L0MV75y.png" }, //flecha abajo2
     { id: 4, content: "https://i.imgur.com/L0MV75y.png" }, //flecha abajo3
@@ -70,6 +69,7 @@ export const initialWidgetsEjercicio3: Widget[] = [
     { id: 19, content: "https://i.imgur.com/MTL5zju.jpeg" }, // linea 3
     { id: 20, content: "https://i.imgur.com/jNXzpFf.png" }, // flecha arriba
     { id: 21, content: "https://i.imgur.com/TMDvptF.png" }, // esquina derecha
+    { id: 1, content: "https://i.imgur.com/x7IcPAY.png" }, //inicio
     { id: 22, content: "https://i.imgur.com/ICyFXrP.png" }, // esquina izquierda
 ];
 
