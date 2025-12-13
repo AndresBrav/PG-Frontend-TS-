@@ -38,13 +38,13 @@ export const initialWidgetsEjercicio2: Widget[] = [
     { id: 11, content: "https://i.imgur.com/42u2BvY.png" }, //esquina derecha 4
     { id: 12, content: "https://i.imgur.com/cJqYyTX.png" }, //esquina izquierda 1
     { id: 13, content: "https://i.imgur.com/jnKoRnc.png" }, //esquina izquierda 2
-    { id: 14, content: "https://i.imgur.com/L2Z7DVd.jpeg" }, //linea 1
-    { id: 15, content: "https://i.imgur.com/L2Z7DVd.jpeg" }, //linea 2
-    { id: 16, content: "https://i.imgur.com/L2Z7DVd.jpeg" }, //linea 3
     { id: 17, content: "https://i.imgur.com/goRKMj3.png" }, //n1 es mayor
     { id: 18, content: "https://i.imgur.com/sFAFzl4.png" }, //n2 es mayor
     { id: 19, content: "https://i.imgur.com/oC9J3TN.png" }, //flecha abajo 2
     { id: 20, content: "https://i.imgur.com/oC9J3TN.png" }, //flecha abajo 3
+    { id: 14, content: "https://i.imgur.com/L2Z7DVd.jpeg" }, //linea 1
+    { id: 15, content: "https://i.imgur.com/L2Z7DVd.jpeg" }, //linea 2
+    { id: 16, content: "https://i.imgur.com/L2Z7DVd.jpeg" }, //linea 3
     { id: 21, content: "https://i.imgur.com/oC9J3TN.png" }, //flecha abajo 4
 ];
 
