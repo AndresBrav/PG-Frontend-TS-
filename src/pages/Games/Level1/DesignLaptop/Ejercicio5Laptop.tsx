@@ -24,7 +24,7 @@ const Ejercicio5Laptop: React.FC = () => {
             y: idx % GRID_ROWS,
             w: 1,
             h: 1,
-        })),
+        }))
     );
 
     const imprimirPosiciones = () => {
@@ -42,7 +42,7 @@ const Ejercicio5Laptop: React.FC = () => {
         const resultado: boolean[] = verificarResultadoEjercicio5(
             widgetIds,
             columnaWidget,
-            filaWidget,
+            filaWidget
         );
 
         console.log(widgetIds);
@@ -50,26 +50,22 @@ const Ejercicio5Laptop: React.FC = () => {
         console.log(filaWidget);
         console.log("el resultado es: ", resultado);
 
-        //verificarRespuesta(resultado);
+        verificarRespuesta(resultado);
     };
 
     const verificarRespuesta = (resultado: boolean[]) => {
         const pasos = [
-            { imagen: "https://i.imgur.com/8Oalgpj.png", estado: resultado[0] }, //inicio
-           /*  { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[3] }, //flecha 2
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[7] }, //flecha 4
-            { imagen: "https://i.imgur.com/nigQnxc.png", estado: resultado[4] }, //leer base y altura /////
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[9] }, //flecha 5
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[5] }, //flecha 3
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[1] }, //flecha 1
-            { imagen: "https://i.imgur.com/duXzF5m.png", estado: resultado[6] }, //calcular area
-            { imagen: "https://i.imgur.com/I9rPg9Q.png", estado: resultado[8] }, //Mostrar area
-            { imagen: "https://i.imgur.com/hUCWk5Q.png", estado: resultado[2] }, //inicio de variables
-            {
-                imagen: "https://i.imgur.com/RESU9Wb.png",
-                estado: resultado[10],
-            }, //fin */
-            
+            { imagen: "https://i.imgur.com/zweLKEX.png", estado: resultado[0] }, //inicio
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[1] }, //flecha abajo 1
+            { imagen: "https://i.imgur.com/BwMrDVL.png", estado: resultado[2] }, //Ingresar N
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[3] }, //flecha abajo 2
+            { imagen: "https://i.imgur.com/PwPIo74.png", estado: resultado[4] }, //desicion 1
+            { imagen: "https://i.imgur.com/VqytbNj.png", estado: resultado[5] }, //diagonal izquierda
+            { imagen: "https://i.imgur.com/ue7FrUg.png", estado: resultado[6] }, //No es primo 
+            { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[7] }, //Ir al final 1
+            { imagen: "https://i.imgur.com/GKkw3jK.png", estado: resultado[8] }, //Fin 1
+
+
         ];
 
         const htmlContenido = `
@@ -173,7 +169,14 @@ const Ejercicio5Laptop: React.FC = () => {
             </div>
 
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
-                <h1>Diagrama de Flujo para calcular el área de un triángulo</h1>
+                <h1>
+                    Crea un diagrama de flujo que solicite un número y verifique
+                    si es primo. El proceso debe comenzar solicitando un número,
+                    verificar si es menor que 2 (no primo), inicializar un
+                    contador en 2, verificar si el número es divisible por el
+                    contador hasta n-1, y mostrar un mensaje indicando si es
+                    "Primo" o "No Primo", finalizando el flujo.
+                </h1>
             </div>
 
             <div className="contenedor-diagramaflujo-boton">

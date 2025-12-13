@@ -1671,7 +1671,7 @@ export const verificarResultadoEjercicio5 = (
         boolean4 = false;
     }
 
-    //ingresar N
+    //ingresar Descicion1
     const Descicion1 = ids.indexOf(8); // inicio de variables
     const filaDescicion1 = fila[Descicion1];
     const columnaDescicion1 = columna[Descicion1];
@@ -1682,7 +1682,7 @@ export const verificarResultadoEjercicio5 = (
         boolean5 = false;
     }
 
-    //Diagonal 1
+    //Diagonal 1 izquierda abajo
     const esquina1 = ids.indexOf(19);
     const filaEsquina1 = fila[esquina1];
     const columnaEsquina1 = columna[esquina1];
