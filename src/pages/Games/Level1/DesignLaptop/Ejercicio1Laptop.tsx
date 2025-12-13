@@ -214,7 +214,7 @@ const Ejercicio1Laptop: React.FC = () => {
                     width: "100%", // adaptativo
                     maxWidth: GRID_COLS * CELL_WIDTH,
                     height: GRID_ROWS * CELL_HEIGHT,
-                    border: "5px solid #000",
+                    border: "10px solid #000",
                     margin: "0 auto",
                     overflowX: "auto", // scroll horizontal si hace falta
                 }}
@@ -232,7 +232,7 @@ const Ejercicio1Laptop: React.FC = () => {
                     preventCollision={true}
                     style={{
                         background: "white",
-                        border: "20px solid #000000",
+                        border: "4px solid #ffffffff",
                         padding: "0px",
                     }}
                 >
