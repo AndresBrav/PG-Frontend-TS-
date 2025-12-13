@@ -1585,6 +1585,7 @@ export const verificarResultadoEjercicio5 = (
 
     //widget inicio
     const indiceInicio = ids.indexOf(1); // id del widget "inicio"
+    console.log("lo que trae inicio es " + indiceInicio);
     const filaInicio = fila[indiceInicio];
     const columnaInicio = columna[indiceInicio];
 
@@ -1751,6 +1752,7 @@ export const verificarResultadoEjercicio5 = (
 
     //fin 1
     const fin1 = ids.indexOf(16);
+    console.log("lo que esta trayendo fin es " + fin1);
     const filafin1 = fila[fin1];
     const columnafin1 = columna[fin1];
 
@@ -1762,6 +1764,200 @@ export const verificarResultadoEjercicio5 = (
         boolean9 = true;
     } else {
         boolean9 = false;
+    }
+
+    //Diagonal 1 der descicion1
+    const elementoDerecha = ids.indexOf(20);
+    const filaEsquina1Der = fila[elementoDerecha];
+    const columnaEsquina1Der = columna[elementoDerecha];
+    console.log("lo que esta trayendo es " + elementoDerecha);
+    console.log("pos fila " + filaEsquina1Der);
+    console.log("pos columna " + columnaEsquina1Der);
+    if (
+        filaEsquina1Der === 4 &&
+        columnaEsquina1Der === columnaInicio + 1 &&
+        columnaEsquina1Der === columnaDescicion1 + 1
+    ) {
+        boolean10 = true;
+    } else {
+        boolean10 = false;
+    }
+
+    // flecha hacia abajo
+    const idxLineaAbajo1 = ids.indexOf(2); // id del widget "linea abajo"
+    const rowLineaAbajo1 = fila[idxLineaAbajo1];
+    const colLineaAbajo1 = columna[idxLineaAbajo1];
+
+    const idxLineaAbajo2 = ids.indexOf(3);
+    const rowLineaAbajo2 = fila[idxLineaAbajo2];
+    const colLineaAbajo2 = columna[idxLineaAbajo2];
+
+    const idxLineaAbajo3 = ids.indexOf(4);
+    const rowLineaAbajo3 = fila[idxLineaAbajo3];
+    const colLineaAbajo3 = columna[idxLineaAbajo3];
+
+    const idxLineaAbajo4 = ids.indexOf(5);
+    const rowLineaAbajo4 = fila[idxLineaAbajo4];
+    const colLineaAbajo4 = columna[idxLineaAbajo4];
+
+    const idxLineaAbajo5 = ids.indexOf(6);
+    const rowLineaAbajo5 = fila[idxLineaAbajo5];
+    const colLineaAbajo5 = columna[idxLineaAbajo5];
+
+    if (
+        (colLineaAbajo1 === columnaInicio + 1 && rowLineaAbajo1 === 5) ||
+        (colLineaAbajo2 === columnaInicio + 1 && rowLineaAbajo2 === 5) ||
+        (colLineaAbajo3 === columnaInicio + 1 && rowLineaAbajo3 === 5) ||
+        (colLineaAbajo4 === columnaInicio + 1 && rowLineaAbajo4 === 5) ||
+        (colLineaAbajo5 === columnaInicio + 1 && rowLineaAbajo5 === 5)
+    ) {
+        boolean11 = true; // la línea abajo es correcta
+    } else {
+        boolean11 = false;
+    }
+
+    //Diagonal 1 der descicion1
+    const contadorAux = ids.indexOf(14);
+    const filacontadoraux = fila[contadorAux];
+    const columnacontadoraux = columna[contadorAux];
+
+    if (
+        filacontadoraux === 6 &&
+        columnacontadoraux === columnaInicio + 1 &&
+        columnacontadoraux === columnaDescicion1 + 1
+    ) {
+        boolean12 = true;
+    } else {
+        boolean12 = false;
+    }
+
+    // flecha de abajo
+    const idxWidget1 = ids.indexOf(2); // id del widget "linea abajo"
+    const rowWidget1 = fila[idxWidget1];
+    const colWidget1 = columna[idxWidget1];
+
+    const idxWidget2 = ids.indexOf(3);
+    const rowWidget2 = fila[idxWidget2];
+    const colWidget2 = columna[idxWidget2];
+
+    const idxWidget3 = ids.indexOf(4);
+    const rowWidget3 = fila[idxWidget3];
+    const colWidget3 = columna[idxWidget3];
+
+    const idxWidget4 = ids.indexOf(5);
+    const rowWidget4 = fila[idxWidget4];
+    const colWidget4 = columna[idxWidget4];
+
+    const idxWidget5 = ids.indexOf(6);
+    const rowWidget5 = fila[idxWidget5];
+    const colWidget5 = columna[idxWidget5];
+
+    if (
+        (colWidget1 === columnaInicio + 1 && rowWidget1 === 7) ||
+        (colWidget2 === columnaInicio + 1 && rowWidget2 === 7) ||
+        (colWidget3 === columnaInicio + 1 && rowWidget3 === 7) ||
+        (colWidget4 === columnaInicio + 1 && rowWidget4 === 7) ||
+        (colWidget5 === columnaInicio + 1 && rowWidget5 === 7)
+    ) {
+        boolean13 = true; // la línea abajo es correcta
+    } else {
+        boolean13 = false;
+    }
+
+    //Descicion 2
+    const descicion2 = ids.indexOf(9);
+    const filadescicion2 = fila[descicion2];
+    const columnadescicion2 = columna[descicion2];
+
+    if (
+        filadescicion2 === 8 &&
+        columnadescicion2 === columnaInicio + 1 &&
+        columnadescicion2 === columnaDescicion1 + 1
+    ) {
+        boolean14 = true;
+    } else {
+        boolean14 = false;
+    }
+
+    // flecha hacia la izquierda
+    const flechaizq1 = ids.indexOf(23); // id del widget "linea abajo"
+    const rowflechaizq1 = fila[flechaizq1];
+    const colflechaizq1 = columna[flechaizq1];
+
+    const flechaizq2 = ids.indexOf(24);
+    const rowflechaizq2 = fila[flechaizq2];
+    const colflechaizq2 = columna[flechaizq2];
+    if (
+        (colflechaizq1 === columnaInicio && rowflechaizq1 === 8) ||
+        (colflechaizq2 === columnaInicio && rowflechaizq2 === 8)
+    ) {
+        boolean15 = true; // la línea abajo es correcta
+    } else {
+        boolean15 = false;
+    }
+
+    //es primo
+    //Descicion 2
+    const esprimo = ids.indexOf(13);
+    const filaesprimo = fila[esprimo];
+    const columnaesprimo = columna[esprimo];
+
+    if (
+        filaesprimo === 8 &&
+        columnaesprimo === columnaInicio - 1 &&
+        columnaesprimo === columnaDescicion1 - 1
+    ) {
+        boolean16 = true;
+    } else {
+        boolean16 = false;
+    }
+
+    //ir al final 2
+    // Pre-final 1
+    const idxPreFinal1 = ids.indexOf(25);
+    const rowPreFinal1 = fila[idxPreFinal1];
+    const colPreFinal1 = columna[idxPreFinal1];
+
+    // Pre-final 2
+    const idxPreFinal2 = ids.indexOf(26);
+    const rowPreFinal2 = fila[idxPreFinal2];
+    const colPreFinal2 = columna[idxPreFinal2];
+
+    // Pre-final 3
+    const idxPreFinal3 = ids.indexOf(27);
+    const rowPreFinal3 = fila[idxPreFinal3];
+    const colPreFinal3 = columna[idxPreFinal3];
+
+    if (
+        (colPreFinal1 === columnaInicio - 1 &&
+            colPreFinal1 === columnaDescicion1 - 1 &&
+            rowPreFinal1 === 9) ||
+        (colPreFinal2 === columnaInicio - 1 &&
+            colPreFinal2 === columnaDescicion1 - 1 &&
+            rowPreFinal2 === 9) ||
+        (colPreFinal3 === columnaInicio - 1 &&
+            colPreFinal3 === columnaDescicion1 - 1 &&
+            rowPreFinal3 === 9)
+    ) {
+        boolean17 = true;
+    } else {
+        boolean17 = false;
+    }
+
+    //fin 2
+    const fin2 = ids.indexOf(17);
+    console.log("lo que esta trayendo fin es " + fin2);
+    const filafin2 = fila[fin2];
+    const columnafin2 = columna[fin2];
+
+    if (
+        columnafin2 === columnaInicio - 2 &&
+        columnafin2 === columnaDescicion1 - 2 &&
+        filafin2 === 9
+    ) {
+        boolean18 = true;
+    } else {
+        boolean18 = false;
     }
 
     return [
