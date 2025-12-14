@@ -176,8 +176,8 @@ const Ejercicio1Laptop: React.FC = () => {
                 <svg
                     fill="#E11919"
                     onClick={returnDashboard}
-                    width="30px"
-                    height="30px"
+                    width="35px"
+                    height="35px"
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
                     style={{ cursor: "pointer" }}

@@ -205,8 +205,8 @@ const Ejercicio2Laptop: React.FC = () => {
                 <svg
                     fill="#E11919"
                     onClick={returnDashboard}
-                    width="30px"
-                    height="30px"
+                    width="35px"
+                    height="35px"
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
                     style={{ cursor: "pointer" }}
@@ -242,7 +242,7 @@ const Ejercicio2Laptop: React.FC = () => {
                     width: "100%", // adaptativo
                     maxWidth: GRID_COLS * CELL_WIDTH,
                     height: GRID_ROWS * CELL_HEIGHT,
-                    border: "5px solid #000",
+                    border: "10px solid #000",
                     margin: "0 auto",
                     overflowX: "auto", // scroll horizontal si hace falta
                 }}
