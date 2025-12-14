@@ -87,19 +87,7 @@ const Ejercicio1Phone: React.FC = () => {
             }, // linea izquierda
         ];
 
-        /* const htmlContenido = pasos
-            .map((paso, index) => {
-                const borderColor = paso.estado ? "green" : "red";
-                return `
-              <div style="margin:10px 0;">
-                <img src="${paso.imagen}" alt="Paso ${
-                    index + 1
-                }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
-                
-              </div>
-            `;
-            })
-            .join(""); */
+        
 
         const htmlContenido = `
   <div style="
@@ -254,7 +242,7 @@ const Ejercicio1Phone: React.FC = () => {
                     preventCollision={true}
                     style={{
                         background: "white",
-                        border: "10px solid #000000",
+                        border: "3px solid #ffffffff",
                         padding: "0px",
                     }}
                 >

@@ -215,8 +215,7 @@ const Ejercicio3Phone: React.FC = () => {
     };
 
     const ejecutarOtroMetodo = () => {
-        // navigate("/ejercicio3");
-        alert("iremos al ejercicio 4 cuando se implemente");
+        navigate("/ejercicio4");
     };
 
     const returnDashboard = () => {

@@ -118,7 +118,24 @@ const Ejercicio5Laptop: React.FC = () => {
             resultado[7] === true &&
             resultado[8] === true &&
             resultado[9] === true &&
-            resultado[10] === true
+            resultado[10] === true &&
+            resultado[11] === true &&
+            resultado[12] === true &&
+            resultado[13] === true &&
+            resultado[14] === true &&
+            resultado[15] === true &&
+            resultado[16] === true &&
+            resultado[17] === true &&
+            resultado[18] === true &&
+            resultado[19] === true &&
+            resultado[20] === true &&
+            resultado[21] === true &&
+            resultado[22] === true &&
+            resultado[23] === true &&
+            resultado[24] === true &&
+            resultado[25] === true &&
+            resultado[26] === true
+
         ) {
             Swal.fire({
                 title: "Ejercicio completado",
@@ -152,7 +169,7 @@ const Ejercicio5Laptop: React.FC = () => {
 
     const ejecutarOtroMetodo = () => {
         // navigate("/ejercicio3");
-        alert("iremos al ejercicio 5 cuando se implemente");
+        alert("iremos a la siguiente seccion cuando se implemente");
     };
 
     const returnDashboard = () => {

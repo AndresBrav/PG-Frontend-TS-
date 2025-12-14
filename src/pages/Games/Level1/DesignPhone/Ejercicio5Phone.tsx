@@ -4,8 +4,8 @@ import type { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { useNavigate } from "react-router-dom";
-import { initialWidgetsEjercicio4 } from "../widgetsDataLevel1";
-import { verificarResultadoEjercicio4 } from "../VerificarResultado";
+import { initialWidgetsEjercicio5 } from "../widgetsDataLevel1";
+import { verificarResultadoEjercicio5 } from "../VerificarResultado";
 import Swal from "sweetalert2";
 
 const GRID_COLS = 10; // columnas fijas
@@ -18,7 +18,7 @@ const Ejercicio5Phone: React.FC = () => {
     const navigate = useNavigate();
 
     const [layout, setLayout] = useState<Layout[]>(
-        initialWidgetsEjercicio4.map((w, idx) => ({
+        initialWidgetsEjercicio5.map((w, idx) => ({
             i: w.id.toString(),
             x: Math.floor(idx / GRID_ROWS),
             y: idx % GRID_ROWS,
@@ -39,7 +39,7 @@ const Ejercicio5Phone: React.FC = () => {
             filaWidget.push(l.y);
         });
 
-        const resultado: boolean[] = verificarResultadoEjercicio4(
+        const resultado: boolean[] = verificarResultadoEjercicio5(
             widgetIds,
             columnaWidget,
             filaWidget,
@@ -55,20 +55,34 @@ const Ejercicio5Phone: React.FC = () => {
 
     const verificarRespuesta = (resultado: boolean[]) => {
         const pasos = [
-            { imagen: "https://i.imgur.com/8Oalgpj.png", estado: resultado[0] }, //inicio
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[3] }, //flecha 2
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[7] }, //flecha 4
-            { imagen: "https://i.imgur.com/nigQnxc.png", estado: resultado[4] }, //leer base y altura /////
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[9] }, //flecha 5
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[5] }, //flecha 3
-            { imagen: "https://i.imgur.com/G9A6r4u.png", estado: resultado[1] }, //flecha 1
-            { imagen: "https://i.imgur.com/duXzF5m.png", estado: resultado[6] }, //calcular area
-            { imagen: "https://i.imgur.com/I9rPg9Q.png", estado: resultado[8] }, //Mostrar area
-            { imagen: "https://i.imgur.com/hUCWk5Q.png", estado: resultado[2] }, //inicio de variables
-            {
-                imagen: "https://i.imgur.com/RESU9Wb.png",
-                estado: resultado[10],
-            }, //fin
+            { imagen: "https://i.imgur.com/zweLKEX.png", estado: resultado[0] }, //inicio
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[1] }, //flecha abajo 1
+            { imagen: "https://i.imgur.com/BwMrDVL.png", estado: resultado[2] }, //Ingresar N
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[3] }, //flecha abajo 2
+            { imagen: "https://i.imgur.com/PwPIo74.png", estado: resultado[4] }, //desicion 1
+            { imagen: "https://i.imgur.com/VqytbNj.png", estado: resultado[5] }, //diagonal izquierda
+            { imagen: "https://i.imgur.com/ue7FrUg.png", estado: resultado[6] }, //No es primo 
+            { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[7] }, //Ir al final 1
+            { imagen: "https://i.imgur.com/GKkw3jK.png", estado: resultado[8] }, //Fin 1
+            { imagen: "https://i.imgur.com/ZR9Z8MJ.png", estado: resultado[9] }, //derecha descicion1
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[10] }, //flecha abajo 2
+            { imagen: "https://i.imgur.com/rfDPtA3.png", estado: resultado[11] }, //contador =2
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[12] }, //flecha abajo 3
+            { imagen: "https://i.imgur.com/0SSFhh7.png", estado: resultado[13] }, //descicion 2
+            { imagen: "https://i.imgur.com/cxdXkSx.png", estado: resultado[14] }, //flecha izquierda 1
+            { imagen: "https://i.imgur.com/dHDnrEA.png", estado: resultado[15] }, //es primo
+            { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[16] }, //Ir al final 2
+            { imagen: "https://i.imgur.com/ASMoZbM.png", estado: resultado[17] }, //final 2
+            { imagen: "https://i.imgur.com/j6t9al9.png", estado: resultado[18] }, //ezquina derecha descicion2
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[19] }, //flecha abajo
+            { imagen: "https://i.imgur.com/SVOl5q9.png", estado: resultado[20] }, //descicion 3
+            { imagen: "https://i.imgur.com/cxdXkSx.png", estado: resultado[21] }, //flecha izquierda 2
+            { imagen: "https://i.imgur.com/ue7FrUg.png", estado: resultado[22] }, //no es primo
+            { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[23] }, //pre final
+            { imagen: "https://i.imgur.com/3qDWaU4.png", estado: resultado[24] }, //fin
+            { imagen: "https://i.imgur.com/z0qDiIh.png", estado: resultado[25] }, //derecha descicion3
+            { imagen: "https://i.imgur.com/YgzpNdS.png", estado: resultado[26] }, //contador ++
+
         ];
 
         const htmlContenido = `
@@ -103,7 +117,23 @@ const Ejercicio5Phone: React.FC = () => {
             resultado[7] === true &&
             resultado[8] === true &&
             resultado[9] === true &&
-            resultado[10] === true
+            resultado[10] === true &&
+            resultado[11] === true &&
+            resultado[12] === true &&
+            resultado[13] === true &&
+            resultado[14] === true &&
+            resultado[15] === true &&
+            resultado[16] === true &&
+            resultado[17] === true &&
+            resultado[18] === true &&
+            resultado[19] === true &&
+            resultado[20] === true &&
+            resultado[21] === true &&
+            resultado[22] === true &&
+            resultado[23] === true &&
+            resultado[24] === true &&
+            resultado[25] === true &&
+            resultado[26] === true
         ) {
             Swal.fire({
                 title: "Ejercicio completado",
@@ -141,7 +171,7 @@ const Ejercicio5Phone: React.FC = () => {
 
     const ejecutarOtroMetodo = () => {
         // navigate("/ejercicio3");
-        alert("iremos al ejercicio 5 cuando se implemente");
+        alert("iremos a la siguiente seccion cuando se implemente");
     };
 
     const returnDashboard = () => {
@@ -218,7 +248,7 @@ const Ejercicio5Phone: React.FC = () => {
                         padding: "0px",
                     }}
                 >
-                    {initialWidgetsEjercicio4.map((w) => (
+                    {initialWidgetsEjercicio5.map((w) => (
                         <div
                             key={w.id}
                             style={{
