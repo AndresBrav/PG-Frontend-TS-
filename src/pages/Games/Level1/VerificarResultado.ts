@@ -1960,6 +1960,188 @@ export const verificarResultadoEjercicio5 = (
         boolean18 = false;
     }
 
+    //esquina der 2
+    const esquinaderdes2 = ids.indexOf(21);
+    const filaesquinaderdes2 = fila[esquinaderdes2];
+    const columnaesquinaderdes2 = columna[esquinaderdes2];
+
+    if (
+        columnaesquinaderdes2 === columnaInicio + 2 &&
+        columnaesquinaderdes2 === columnaDescicion1 + 2 &&
+        filaesquinaderdes2 === 8
+    ) {
+        boolean19 = true;
+    } else {
+        boolean19 = false;
+    }
+
+    // flecha hacia abajo
+    const idxArrowDown1 = ids.indexOf(2); // id del widget "línea abajo"
+    const rowArrowDown1 = fila[idxArrowDown1];
+    const colArrowDown1 = columna[idxArrowDown1];
+
+    const idxArrowDown2 = ids.indexOf(3);
+    const rowArrowDown2 = fila[idxArrowDown2];
+    const colArrowDown2 = columna[idxArrowDown2];
+
+    const idxArrowDown3 = ids.indexOf(4);
+    const rowArrowDown3 = fila[idxArrowDown3];
+    const colArrowDown3 = columna[idxArrowDown3];
+
+    const idxArrowDown4 = ids.indexOf(5);
+    const rowArrowDown4 = fila[idxArrowDown4];
+    const colArrowDown4 = columna[idxArrowDown4];
+
+    const idxArrowDown5 = ids.indexOf(6);
+    const rowArrowDown5 = fila[idxArrowDown5];
+    const colArrowDown5 = columna[idxArrowDown5];
+
+    if (
+        (colArrowDown1 === columnadescicion2 && rowArrowDown1 === 9) ||
+        (colArrowDown2 === columnadescicion2 && rowArrowDown2 === 9) ||
+        (colArrowDown3 === columnadescicion2 && rowArrowDown3 === 9) ||
+        (colArrowDown4 === columnadescicion2 && rowArrowDown4 === 9) ||
+        (colArrowDown5 === columnadescicion2 && rowArrowDown5 === 9)
+    ) {
+        boolean20 = true; // la línea abajo es correcta
+    } else {
+        boolean20 = false;
+    }
+
+    //descicion 3
+    const descicion3comparador = ids.indexOf(10);
+    const filadescicion3comparador = fila[descicion3comparador];
+    const columnadescicion3comparador = columna[descicion3comparador];
+
+    if (
+        columnadescicion3comparador === columnaInicio + 1 &&
+        columnadescicion3comparador === columnadescicion2 &&
+        filadescicion3comparador === 10
+    ) {
+        boolean21 = true;
+    } else {
+        boolean21 = false;
+    }
+
+    // flecha hacia la izquierda
+    const idxArrowLeft1 = ids.indexOf(23); // id del widget "línea izquierda"
+    const rowArrowLeft1 = fila[idxArrowLeft1];
+    const colArrowLeft1 = columna[idxArrowLeft1];
+
+    const idxArrowLeft2 = ids.indexOf(24);
+    const rowArrowLeft2 = fila[idxArrowLeft2];
+    const colArrowLeft2 = columna[idxArrowLeft2];
+
+    if (
+        (colArrowLeft1 === columnadescicion3comparador - 1 &&
+            rowArrowLeft1 === 10) ||
+        (colArrowLeft2 === columnadescicion3comparador - 1 &&
+            rowArrowLeft2 === 10)
+    ) {
+        boolean22 = true; // la línea izquierda es correcta
+    } else {
+        boolean22 = false;
+    }
+
+    // no es primo
+    const idxNotPrime1 = ids.indexOf(11); // id del widget "no es primo"
+    const rowNotPrime1 = fila[idxNotPrime1];
+    const colNotPrime1 = columna[idxNotPrime1];
+
+    const idxNotPrime2 = ids.indexOf(12);
+    const rowNotPrime2 = fila[idxNotPrime2];
+    const colNotPrime2 = columna[idxNotPrime2];
+
+    if (
+        (colNotPrime1 === columnaInicio - 1 &&
+            colNotPrime1 === columnadescicion3comparador - 2 &&
+            rowNotPrime1 === 10) ||
+        (colNotPrime2 === columnaInicio - 1 &&
+            colNotPrime2 === columnadescicion3comparador - 2 &&
+            rowNotPrime2 === 10)
+    ) {
+        boolean23 = true;
+    } else {
+        boolean23 = false;
+    }
+
+    // ir al final 2
+    // pre-final
+    const idxGoToEnd2_1 = ids.indexOf(25);
+    const rowGoToEnd2_1 = fila[idxGoToEnd2_1];
+    const colGoToEnd2_1 = columna[idxGoToEnd2_1];
+
+    const idxGoToEnd2_2 = ids.indexOf(26);
+    const rowGoToEnd2_2 = fila[idxGoToEnd2_2];
+    const colGoToEnd2_2 = columna[idxGoToEnd2_2];
+
+    const idxGoToEnd2_3 = ids.indexOf(27);
+    const rowGoToEnd2_3 = fila[idxGoToEnd2_3];
+    const colGoToEnd2_3 = columna[idxGoToEnd2_3];
+
+    if (
+        (colGoToEnd2_1 === columnaInicio - 1 &&
+            colGoToEnd2_1 === columnadescicion3comparador - 2 &&
+            rowGoToEnd2_1 === 11) ||
+        (colGoToEnd2_2 === columnaInicio - 1 &&
+            colGoToEnd2_2 === columnadescicion3comparador - 2 &&
+            rowGoToEnd2_2 === 11) ||
+        (colGoToEnd2_3 === columnaInicio - 1 &&
+            colGoToEnd2_3 === columnadescicion3comparador - 2 &&
+            rowGoToEnd2_3 === 11)
+    ) {
+        boolean24 = true;
+    } else {
+        boolean24 = false;
+    }
+
+
+    //fin 3
+    const fin3 = ids.indexOf(18);
+    const filafin3 = fila[fin3];
+    const columnafin3 = columna[fin3];
+
+    if (
+        columnafin3 === columnaInicio - 2 &&
+        columnafin3 === columnadescicion3comparador - 3 &&
+        filafin3 === 11
+    ) {
+        boolean25 = true;
+    } else {
+        boolean25 = false;
+    }
+
+    // derecha desicion 3
+    const derechaDes3 = ids.indexOf(22);
+    const filaderechaDes3 = fila[derechaDes3];
+    const columnaderechaDes3 = columna[derechaDes3];
+
+    if (
+        columnaderechaDes3 === columnaInicio + 2 &&
+        columnaderechaDes3 === columnadescicion3comparador +1 &&
+        filaderechaDes3 === 10
+    ) {
+        boolean26 = true;
+    } else {
+        boolean26 = false;
+    }
+
+    // contador ++
+    const contadormasmas = ids.indexOf(15);
+    const filacontadormasmas = fila[contadormasmas];
+    const columnacontadormasmas = columna[contadormasmas];
+
+    if (
+        columnacontadormasmas === columnaInicio + 2 &&
+        columnacontadormasmas === columnadescicion3comparador +1 &&
+        filacontadormasmas === 9
+    ) {
+        boolean27 = true;
+    } else {
+        boolean27 = false;
+    }
+
+
     return [
         boolean1,
         boolean2,

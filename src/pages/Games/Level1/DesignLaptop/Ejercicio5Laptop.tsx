@@ -73,6 +73,16 @@ const Ejercicio5Laptop: React.FC = () => {
             { imagen: "https://i.imgur.com/dHDnrEA.png", estado: resultado[15] }, //es primo
             { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[16] }, //Ir al final 2
             { imagen: "https://i.imgur.com/ASMoZbM.png", estado: resultado[17] }, //final 2
+            { imagen: "https://i.imgur.com/j6t9al9.png", estado: resultado[18] }, //ezquina derecha descicion2
+            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[19] }, //flecha abajo
+            { imagen: "https://i.imgur.com/SVOl5q9.png", estado: resultado[20] }, //descicion 3
+            { imagen: "https://i.imgur.com/cxdXkSx.png", estado: resultado[21] }, //flecha izquierda 2
+            { imagen: "https://i.imgur.com/ue7FrUg.png", estado: resultado[22] }, //no es primo
+            { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[23] }, //pre final
+            { imagen: "https://i.imgur.com/3qDWaU4.png", estado: resultado[24] }, //fin
+            { imagen: "https://i.imgur.com/z0qDiIh.png", estado: resultado[25] }, //derecha descicion3
+            { imagen: "https://i.imgur.com/YgzpNdS.png", estado: resultado[26] }, //contador ++
+
 
 
         ];
