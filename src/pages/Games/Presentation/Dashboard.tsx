@@ -3,9 +3,11 @@ import profileIcon from "../../../assets/filesSvg/filesdashboardSvg/profile.svg"
 import { useState } from "react";
 import ModalInf1 from "./ModalInf1"; // 👈 Importamos el modal fijo
 import { useNavigate } from "react-router-dom";
+import useCerrarSesion from "../../../hooks/useCerrarSesion";
 
 const Dashboard = () => {
-    // useAuthRedirect();
+    useAuthRedirect(); //redirecciona si no hay token
+    const a = useCerrarSesion(); // Hook para cerrar sesión
 
     const [modalAbierto, setModalAbierto] = useState(false);
     const alternarModal = () => setModalAbierto(!modalAbierto);
@@ -64,6 +66,9 @@ const Dashboard = () => {
                     {open && (
                         <div className="modal">
                             <div className="modal-box">
+                                <button onClick={() => setOpen(false)}>
+                                    Cerrar
+                                </button>
                                 <p>
                                     Nombre:
                                     <br />
@@ -76,8 +81,9 @@ const Dashboard = () => {
                                     <input type="text" />
                                 </p>
 
-                                <button onClick={() => setOpen(false)}>
-                                    Cerrar
+
+                                <button onClick={a}> {/* ejecuta cerrarSesion */}
+                                    Cerrar Sesion
                                 </button>
                             </div>
                         </div>
