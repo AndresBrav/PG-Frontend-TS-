@@ -9,6 +9,7 @@ const Dashboard = () => {
 
     const [modalAbierto, setModalAbierto] = useState(false);
     const alternarModal = () => setModalAbierto(!modalAbierto);
+    const [open, setOpen] = useState(false);
 
     const navigate = useNavigate(); // Hook que te da la función navigate
 
@@ -50,7 +51,37 @@ const Dashboard = () => {
                 </div>
                 <div className="item-header-dashboard">500 pts</div>
                 <div className="item-header-dashboard-profile">
-                    <img src={profileIcon} alt="Profile Icon" />
+                    {/* <img src={profileIcon} alt="Profile Icon" /> */}
+                    <div className="item-header-dashboard-profile">
+                        <img
+                            src={profileIcon}
+                            alt="Profile Icon"
+                            onClick={() => setOpen(true)}
+                            style={{ cursor: "pointer" }}
+                        />
+                    </div>
+
+                    {open && (
+                        <div className="modal">
+                            <div className="modal-box">
+                                <p>
+                                    Nombre:
+                                    <br />
+                                    <input type="text" />
+                                </p>
+
+                                <p>
+                                    Edad:
+                                    <br />
+                                    <input type="text" />
+                                </p>
+
+                                <button onClick={() => setOpen(false)}>
+                                    Cerrar
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

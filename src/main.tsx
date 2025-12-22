@@ -6,6 +6,7 @@ import "./assets/styles/stylesUsers/designUsers.css";
 import "./assets/styles/stylesDashboard/designDashboard.css";
 import "./assets/styles/stylesGames/designGames.css"
 import "./assets/styles/stylesSweetAlert2/designSweetAlert2.css";
+import "./assets/styles/stylesUsers/disenioPefil.css";
 
 
 

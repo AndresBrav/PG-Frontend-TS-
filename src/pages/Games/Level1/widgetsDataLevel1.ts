@@ -2,6 +2,7 @@ import type { Widget } from "./typesLevel1";
 
 //Ejercicio 1
 export const initialWidgets: Widget[] = [
+    // { id: 2, content: "https://u.pcloud.link/publink/show?code=XZfgYx5ZTyn9Yly93qFzC6lkfFhtKBz8mE1X" } /* son iguales */,
     { id: 2, content: "https://i.imgur.com/2n11hJn.png" } /* son iguales */,
     { id: 1, content: "https://i.imgur.com/yxr4QMR.png" } /* desicion si no */,
     { id: 4, content: "https://i.imgur.com/YmsczfQ.png" } /* inicio */,
