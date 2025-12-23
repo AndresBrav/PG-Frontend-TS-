@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import useCerrarSesion from "../../../hooks/useCerrarSesion";
 
 const Dashboard = () => {
-    useAuthRedirect(); //redirecciona si no hay token
+    // useAuthRedirect(); //redirecciona si no hay token
     const a = useCerrarSesion(); // Hook para cerrar sesión
 
     const [modalAbierto, setModalAbierto] = useState(false);
@@ -66,9 +66,26 @@ const Dashboard = () => {
                     {open && (
                         <div className="modal">
                             <div className="modal-box">
-                                <button onClick={() => setOpen(false)}>
-                                    Cerrar
-                                </button>
+                                <svg
+                                    className="modal-close"
+                                    fill="#E11919"
+                                    onClick={() => {
+                                        setOpen(false);
+                                    }}
+                                    width="35px"
+                                    height="35px"
+                                    viewBox="0 0 32 32"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <title>cancel</title>
+                                    <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
+                                </svg>
+
+                                <br />
+                                <br />
+                                <br />
+                                <br />
                                 <p>
                                     Nombre:
                                     <br />
@@ -81,8 +98,9 @@ const Dashboard = () => {
                                     <input type="text" />
                                 </p>
 
-
-                                <button onClick={a}> {/* ejecuta cerrarSesion */}
+                                <button onClick={a}>
+                                    {" "}
+                                    {/* ejecuta cerrarSesion */}
                                     Cerrar Sesion
                                 </button>
                             </div>

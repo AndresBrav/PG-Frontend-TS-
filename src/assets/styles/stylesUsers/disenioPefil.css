@@ -9,12 +9,22 @@
     justify-content: flex-end;
 }
 
+
+
 .modal-box {
-    width: 25vw; /* 👈 ancho del modal */
-    height: 50vh; /* 👈 alto completo */
+    position: relative;
+    width: 25vw;
+    height: 50vh;
     background: rgba(24, 24, 24, 1);
     padding: 20px;
 }
+
+.modal-close {
+    position: fixed;
+    top: 25px;
+    right: 15px;
+}
+
 
 @media (max-width:480px) {
 
