@@ -1,13 +1,39 @@
 import useAuthRedirect from "../../../hooks/useAuthRedirect";
 import profileIcon from "../../../assets/filesSvg/filesdashboardSvg/profile.svg";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ModalInf1 from "./ModalInf1"; // 👈 Importamos el modal fijo
 import { useNavigate } from "react-router-dom";
 import useCerrarSesion from "../../../hooks/useCerrarSesion";
+import { TokenContext } from "../../../Context/TokenContext";
+import { traerUsuarios } from "../../../api/usuarioApi";
 
 const Dashboard = () => {
     // useAuthRedirect(); //redirecciona si no hay token
     const a = useCerrarSesion(); // Hook para cerrar sesión
+    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
+    const [nombre, setNombre] = useState<string>("");
+    const [edad, setEdad] = useState<number>(0);
+    const [idAvatar, setIdAvatar] = useState<string>("");
+
+    useEffect(() => {
+        const obtenerDatosUsuario = async () => {
+            if (claveAcceso) {
+                console.log("la clave de acceso es " + claveAcceso);
+                const data = await traerUsuarios(claveAcceso);
+                setNombre(data?.nombre ?? "");
+                setEdad(data?.edad ?? 0);
+                setIdAvatar(data?.idAvatar ?? "");
+            }
+        };
+        obtenerDatosUsuario();
+    }, [claveAcceso]);
+
+    // Opción A: Otro useEffect que se ejecuta cuando cambian los estados
+    // useEffect(() => {
+    //     console.log("El nombre del usuario es: " + nombre);
+    //     console.log("La edad del usuario es: " + edad);
+    //     console.log("El idAvatar del usuario es: " + idAvatar);
+    // }, [nombre, edad, idAvatar]); // Se ejecuta cada vez que alguno cambie
 
     const [modalAbierto, setModalAbierto] = useState(false);
     const alternarModal = () => setModalAbierto(!modalAbierto);
@@ -56,10 +82,15 @@ const Dashboard = () => {
                     {/* <img src={profileIcon} alt="Profile Icon" /> */}
                     <div className="item-header-dashboard-profile">
                         <img
-                            src={profileIcon}
+                            src={idAvatar ? idAvatar : profileIcon}
                             alt="Profile Icon"
                             onClick={() => setOpen(true)}
-                            style={{ cursor: "pointer" }}
+                            style={{
+                                cursor: "pointer",
+                                width: "70px", // tamaño que tú quieras
+                                height: "70px", // mismo que width para que sea círculo
+                                borderRadius: "10%",
+                            }}
                         />
                     </div>
 
@@ -86,16 +117,28 @@ const Dashboard = () => {
                                 <br />
                                 <br />
                                 <br />
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <img
+                                        style={{
+                                            height: "150px",
+                                            width: "150px",
+                                        }}
+                                        src={idAvatar ? idAvatar : profileIcon}
+                                        alt="imagen de avatar usuario"
+                                    />
+                                </div>
+
                                 <p>
-                                    Nombre:
-                                    <br />
-                                    <input type="text" />
+                                    <strong>Nombre:</strong> {nombre}
                                 </p>
 
                                 <p>
-                                    Edad:
-                                    <br />
-                                    <input type="text" />
+                                    <strong>Edad:</strong> {edad}
                                 </p>
 
                                 <button onClick={a}>
