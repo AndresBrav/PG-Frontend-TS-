@@ -10,15 +10,18 @@ interface Puntos {
     puntuacionTotal: number;
 }
 
+const API = import.meta.env.VITE_API_URL;
+
 export const traerUsuarios = async (
     clave: string
 ): Promise<UsuarioPerfil | null> => {
     try {
         const response = await axios.get<UsuarioPerfil>(
-            "http://localhost:3000/usuarios/traerDatosUsuario",
+            `${API}/usuarios/traerDatosUsuario`,
             {
                 headers: {
                     Authorization: clave,
+                    "ngrok-skip-browser-warning": "true",  // ← ESTA LÍNEA ES LA CLAVE
                 },
             }
         );
@@ -38,14 +41,15 @@ export const traerPuntuacion = async (
 ): Promise<Puntos | null> => {
     try {
         const response = await axios.get<Puntos>(
-            "http://localhost:3000/usuarios/traerPuntuacion",
+            `${API}/usuarios/traerPuntuacion`,
             {
                 headers: {
                     Authorization: clave,
+                    "ngrok-skip-browser-warning": "true",  // ← ESTA LÍNEA ES LA CLAVE
                 },
             }
         );
-        console.log(response.data)
+        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching score:", error);
