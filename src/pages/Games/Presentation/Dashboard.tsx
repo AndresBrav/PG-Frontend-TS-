@@ -5,7 +5,7 @@ import ModalInf1 from "./ModalInf1"; // 👈 Importamos el modal fijo
 import { useNavigate } from "react-router-dom";
 import useCerrarSesion from "../../../hooks/useCerrarSesion";
 import { TokenContext } from "../../../Context/TokenContext";
-import { traerUsuarios } from "../../../api/usuarioApi";
+import { traerPuntuacion, traerUsuarios } from "../../../api/usuarioApi";
 
 const Dashboard = () => {
     // useAuthRedirect(); //redirecciona si no hay token
@@ -14,8 +14,10 @@ const Dashboard = () => {
     const [nombre, setNombre] = useState<string>("");
     const [edad, setEdad] = useState<number>(0);
     const [idAvatar, setIdAvatar] = useState<string>("");
+    const [puntuacion, setPuntuacion] = useState<number>(0);
 
     useEffect(() => {
+        //obtener la informacion del usuario
         const obtenerDatosUsuario = async () => {
             if (claveAcceso) {
                 console.log("la clave de acceso es " + claveAcceso);
@@ -26,14 +28,19 @@ const Dashboard = () => {
             }
         };
         obtenerDatosUsuario();
-    }, [claveAcceso]);
 
-    // Opción A: Otro useEffect que se ejecuta cuando cambian los estados
-    // useEffect(() => {
-    //     console.log("El nombre del usuario es: " + nombre);
-    //     console.log("La edad del usuario es: " + edad);
-    //     console.log("El idAvatar del usuario es: " + idAvatar);
-    // }, [nombre, edad, idAvatar]); // Se ejecuta cada vez que alguno cambie
+        // obtener los puntos del usuario
+
+        const traerPuntosUsuario = async () => {
+            if (claveAcceso) {
+                const data = await traerPuntuacion(claveAcceso);
+                console.log(data);
+                setPuntuacion(data?.puntuacionTotal ?? 0);
+            }
+        };
+
+        traerPuntosUsuario();
+    }, [claveAcceso]);
 
     const [modalAbierto, setModalAbierto] = useState(false);
     const alternarModal = () => setModalAbierto(!modalAbierto);
@@ -77,7 +84,7 @@ const Dashboard = () => {
                         />
                     </svg>
                 </div>
-                <div className="item-header-dashboard">500 pts</div>
+                <div className="item-header-dashboard">{puntuacion} pts</div>
                 <div className="item-header-dashboard-profile">
                     {/* <img src={profileIcon} alt="Profile Icon" /> */}
                     <div className="item-header-dashboard-profile">
