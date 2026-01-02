@@ -5,16 +5,24 @@ import ModalInf1 from "./ModalInf1"; // 👈 Importamos el modal fijo
 import { useNavigate } from "react-router-dom";
 import useCerrarSesion from "../../../hooks/useCerrarSesion";
 import { TokenContext } from "../../../Context/TokenContext";
-import { traerPuntuacion, traerUsuarios } from "../../../api/usuarioApi";
+import {
+    actualizarFotoPerfil,
+    traerPuntuacion,
+    traerUsuarios,
+} from "../../../api/usuarioApi";
+import avatars from "../../users/avatars";
 
 const Dashboard = () => {
-    useAuthRedirect(); //redirecciona si no hay token
+    // useAuthRedirect(); //redirecciona si no hay token
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
     const [nombre, setNombre] = useState<string>("");
     const [edad, setEdad] = useState<number>(0);
     const [idAvatar, setIdAvatar] = useState<string>("");
     const [puntuacion, setPuntuacion] = useState<number>(0);
+
+    const [openAvatarModal, setOpenAvatarModal] = useState(false);
+    const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
 
     useEffect(() => {
         //obtener la informacion del usuario
@@ -203,6 +211,7 @@ const Dashboard = () => {
                                                 console.log(
                                                     "Abrir selector de foto"
                                                 );
+                                                setOpenAvatarModal(true);
                                                 // Ejemplo: document.getElementById('input-foto')?.click();
                                             }}
                                         >
@@ -235,6 +244,122 @@ const Dashboard = () => {
                                 >
                                     Cerrar Sesion
                                 </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {openAvatarModal && (
+                        <div className="modal">
+                            <div className="modal-box">
+                                <h2 style={{ textAlign: "center" }}>
+                                    Selecciona un avatar
+                                </h2>
+
+                                <div
+                                    style={{
+                                        display: "grid",
+                                        gridTemplateColumns: "repeat(3, 1fr)",
+                                        gap: "15px",
+                                        marginTop: "20px",
+                                    }}
+                                >
+                                    {avatars.map((avatar) => (
+                                        <img
+                                            key={avatar.id}
+                                            src={avatar.url}
+                                            alt={`avatar-${avatar.id}`}
+                                            onClick={() =>
+                                                setSelectedAvatar(avatar.id)
+                                            }
+                                            style={{
+                                                width: "80px",
+                                                height: "80px",
+                                                borderRadius: "50%",
+                                                cursor: "pointer",
+                                                border:
+                                                    selectedAvatar === avatar.id
+                                                        ? "4px solid #FF7C02"
+                                                        : "2px solid transparent",
+                                                boxShadow:
+                                                    selectedAvatar === avatar.id
+                                                        ? "0 0 10px rgba(255,124,2,0.8)"
+                                                        : "none",
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        marginTop: "30px",
+                                    }}
+                                >
+                                    <button
+                                        className="cerrar-sesion-usuario"
+                                        onClick={() => {
+                                            setOpenAvatarModal(false);
+                                            setSelectedAvatar(null);
+                                        }}
+                                    >
+                                        Cancelar
+                                    </button>
+
+                                    {/* <button
+                                        className="aceptar-seccion"
+                                        disabled={!selectedAvatar}
+                                        onClick={() => {
+                                            const avatarElegido = avatars.find(
+                                                (a) => a.id === selectedAvatar
+                                            );
+
+                                            if (avatarElegido) {
+                                                // Actualiza la imagen principal
+                                                // setIdAvatar(avatarElegido.url);
+                                            }
+
+                                            setOpenAvatarModal(false);
+                                            setSelectedAvatar(null);
+                                        }}
+                                    >
+                                        Guardar imagen
+                                    </button> */}
+                                    <button
+                                        className="aceptar-seccion-avatar"
+                                        onClick={async () => {
+                                            if (!selectedAvatar) return;
+
+                                            const avatarElegido = avatars.find(
+                                                (a) => a.id === selectedAvatar
+                                            );
+
+                                            if (!avatarElegido || !claveAcceso)
+                                                return;
+
+                                            try {
+                                                // esperar a que se guarde en backend
+                                                await actualizarFotoPerfil(
+                                                    claveAcceso,
+                                                    String(avatarElegido.id)
+                                                );
+
+                                                // actualizar UI SOLO si backend respondió bien
+                                                setIdAvatar(avatarElegido.url);
+
+                                                setOpenAvatarModal(false);
+                                                setSelectedAvatar(null);
+                                            } catch (error) {
+                                                console.error(
+                                                    "Error al actualizar avatar",
+                                                    error
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        Guardar imagen
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}

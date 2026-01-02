@@ -155,6 +155,21 @@
     background-color: darkred; /* Cambia a un rojo más oscuro al pasar el mouse */
 }
 
+.aceptar-seccion-avatar {
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 10px; /* Bordes redondeados */
+    padding: 5px 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.5s; /* Opcional: efecto suave al hover */
+}
+
+.aceptar-seccion-avatar:hover {
+    background-color: darkgreen; /* Cambia a un verde más oscuro al pasar el mouse */
+}
+
 /* 📱 Ajuste solo para pantallas pequeñas */
 @media (max-width: 480px) {
     /* Ajustes para pantallas pequeñas  ancho menor o igual a 480*/
