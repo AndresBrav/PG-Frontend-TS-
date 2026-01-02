@@ -8,7 +8,7 @@ import { TokenContext } from "../../../Context/TokenContext";
 import { traerPuntuacion, traerUsuarios } from "../../../api/usuarioApi";
 
 const Dashboard = () => {
-    // useAuthRedirect(); //redirecciona si no hay token
+    useAuthRedirect(); //redirecciona si no hay token
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
     const [nombre, setNombre] = useState<string>("");
@@ -124,7 +124,7 @@ const Dashboard = () => {
                                 <br />
                                 <br />
                                 <br />
-                                <div
+                                {/* <div
                                     style={{
                                         display: "flex",
                                         justifyContent: "center",
@@ -138,6 +138,87 @@ const Dashboard = () => {
                                         src={idAvatar ? idAvatar : profileIcon}
                                         alt="imagen de avatar usuario"
                                     />
+                                </div> */}
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        position: "relative", // Importante para posicionar el botón encima
+                                        margin: "20px 0",
+                                    }}
+                                    onMouseEnter={(e) =>
+                                        (e.currentTarget.style.cursor =
+                                            "pointer")
+                                    } // opcional: cursor pointer
+                                >
+                                    {/* Contenedor de la imagen con overlay */}
+                                    <div
+                                        style={{
+                                            position: "relative",
+                                            display: "inline-block",
+                                        }}
+                                    >
+                                        <img
+                                            style={{
+                                                height: "150px",
+                                                width: "150px",
+                                                borderRadius: "50%", // círculo perfecto
+                                                objectFit: "cover",
+                                                border: "4px solid #fff",
+                                                boxShadow:
+                                                    "0 4px 10px rgba(0,0,0,0.2)",
+                                            }}
+                                            src={idAvatar || profileIcon}
+                                            alt="Foto de perfil"
+                                        />
+
+                                        {/* Overlay oscuro + botón que aparece al hover */}
+                                        <div
+                                            style={{
+                                                position: "absolute",
+                                                top: 0,
+                                                left: 0,
+                                                width: "100%",
+                                                height: "100%",
+                                                borderRadius: "50%",
+                                                backgroundColor:
+                                                    "rgba(0, 0, 0, 0.5)", // fondo oscuro semi-transparente
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                opacity: 0, // oculto por defecto
+                                                transition: "opacity 0.3s ease", // animación suave
+                                            }}
+                                            className="overlay-boton-avatar"
+                                            onMouseEnter={(e) =>
+                                                (e.currentTarget.style.opacity =
+                                                    "1")
+                                            }
+                                            onMouseLeave={(e) =>
+                                                (e.currentTarget.style.opacity =
+                                                    "0")
+                                            }
+                                            onClick={() => {
+                                                // Aquí pones la lógica para cambiar la foto (abrir input file, etc.)
+                                                console.log(
+                                                    "Abrir selector de foto"
+                                                );
+                                                // Ejemplo: document.getElementById('input-foto')?.click();
+                                            }}
+                                        >
+                                            <span
+                                                style={{
+                                                    color: "white",
+                                                    fontWeight: "bold",
+                                                    fontSize: "14px",
+                                                    textAlign: "center",
+                                                    padding: "10px",
+                                                }}
+                                            >
+                                                Cambiar foto de perfil
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <p>
@@ -147,10 +228,11 @@ const Dashboard = () => {
                                 <p>
                                     <strong>Edad:</strong> {edad}
                                 </p>
-
-                                <button onClick={a}>
-                                    {" "}
-                                    {/* ejecuta cerrarSesion */}
+                                <br />
+                                <button
+                                    className="cerrar-sesion-usuario"
+                                    onClick={a}
+                                >
                                     Cerrar Sesion
                                 </button>
                             </div>
