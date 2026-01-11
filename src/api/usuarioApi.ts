@@ -57,22 +57,6 @@ export const traerPuntuacion = async (
     }
 };
 
-// export const actualizarFotoPerfil = async (clave: string, idAvatar: string) => {
-//     console.log("la clave de acceso es ",clave)
-//     try {
-//         const response = await axios.put(`${API}/usuarios/actualizarPefilFoto/${idAvatar}`, {
-//             headers: {
-//                 Authorization: clave,
-//                 "ngrok-skip-browser-warning": "true", // ← ESTA LÍNEA ES LA CLAVE
-//             },
-//         });
-
-//         console.log(response)
-//     } catch (error) {
-//         console.log("error fetching data");
-//     }
-// };
-
 export const actualizarFotoPerfil = async (clave: string, idAvatar: string) => {
     console.log("la clave de acceso es ", clave);
     try {
@@ -94,5 +78,26 @@ export const actualizarFotoPerfil = async (clave: string, idAvatar: string) => {
             error.response?.status,
             error.response?.data
         );
+    }
+};
+
+export const incrementarPuntuacionApi = async (
+    clave: string,
+    juego_id: string
+) => {
+    try {
+        const response = await axios.put(
+            `${API}/usuarios/incrpuntos/${juego_id}`, // ruta correcta
+            {}, // body vacío
+            {
+                headers: {
+                    Authorization: clave, // 🔑 agrega Bearer si tu backend lo espera
+                    "ngrok-skip-browser-warning": "true",
+                },
+            }
+        );
+        console.log(response.data);
+    } catch (error: any) {
+        ("error fetching data:");
     }
 };

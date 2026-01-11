@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import GridLayout from "react-grid-layout";
 import type { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { initialWidgets } from "../widgetsDataLevel1";
 import { verificarReultado } from "../VerificarResultado";
 import Swal from "sweetalert2";
+import { TokenContext } from "../../../../Context/TokenContext";
+import { incrementarPuntuacionApi } from "../../../../api/usuarioApi";
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
@@ -16,6 +18,7 @@ const WIDGET_SCALE = 1; // escala de imagen
 
 const Ejercicio1Laptop: React.FC = () => {
     const navigate = useNavigate();
+    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
 
     const [layout, setLayout] = useState<Layout[]>(
         initialWidgets.map((w, idx) => ({
@@ -26,6 +29,13 @@ const Ejercicio1Laptop: React.FC = () => {
             h: 1,
         }))
     );
+
+    useEffect(() => {
+        if (claveAcceso) {
+                console.log("la clave de acceso es " + claveAcceso);
+        }
+        
+    },[claveAcceso])
 
     const imprimirPosiciones = () => {
         console.log("📋 Posiciones de widgets:");
@@ -44,7 +54,6 @@ const Ejercicio1Laptop: React.FC = () => {
             columnaWidget,
             filaWidget
         );
-        //console.log("el resultado es: ", resultado);
 
         verificarRespuesta(resultado);
     };
@@ -155,7 +164,10 @@ const Ejercicio1Laptop: React.FC = () => {
         }
     };
 
-    const ejecutarOtroMetodo = () => {
+
+    const ejecutarOtroMetodo = async() => {
+        console.log("la clave de acceso va ser ",claveAcceso);
+        await incrementarPuntuacionApi(claveAcceso,"1")
         navigate("/ejercicio2");
     };
 
