@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import GridLayout from "react-grid-layout";
 import type { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { initialWidgetsEjercicio5 } from "../widgetsDataLevel1";
 import { verificarResultadoEjercicio5 } from "../VerificarResultado";
 import Swal from "sweetalert2";
+import { TokenContext } from "../../../../Context/TokenContext";
+import { incrementarPuntuacionApi } from "../../../../api/usuarioApi";
+useContext;
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
@@ -16,6 +19,7 @@ const WIDGET_SCALE = 1; // escala de imagen
 
 const Ejercicio5Laptop: React.FC = () => {
     const navigate = useNavigate();
+    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
 
     const [layout, setLayout] = useState<Layout[]>(
         initialWidgetsEjercicio5.map((w, idx) => ({
@@ -61,30 +65,78 @@ const Ejercicio5Laptop: React.FC = () => {
             { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[3] }, //flecha abajo 2
             { imagen: "https://i.imgur.com/PwPIo74.png", estado: resultado[4] }, //desicion 1
             { imagen: "https://i.imgur.com/VqytbNj.png", estado: resultado[5] }, //diagonal izquierda
-            { imagen: "https://i.imgur.com/ue7FrUg.png", estado: resultado[6] }, //No es primo 
+            { imagen: "https://i.imgur.com/ue7FrUg.png", estado: resultado[6] }, //No es primo
             { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[7] }, //Ir al final 1
             { imagen: "https://i.imgur.com/GKkw3jK.png", estado: resultado[8] }, //Fin 1
             { imagen: "https://i.imgur.com/ZR9Z8MJ.png", estado: resultado[9] }, //derecha descicion1
-            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[10] }, //flecha abajo 2
-            { imagen: "https://i.imgur.com/rfDPtA3.png", estado: resultado[11] }, //contador =2
-            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[12] }, //flecha abajo 3
-            { imagen: "https://i.imgur.com/0SSFhh7.png", estado: resultado[13] }, //descicion 2
-            { imagen: "https://i.imgur.com/cxdXkSx.png", estado: resultado[14] }, //flecha izquierda 1
-            { imagen: "https://i.imgur.com/dHDnrEA.png", estado: resultado[15] }, //es primo
-            { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[16] }, //Ir al final 2
-            { imagen: "https://i.imgur.com/ASMoZbM.png", estado: resultado[17] }, //final 2
-            { imagen: "https://i.imgur.com/j6t9al9.png", estado: resultado[18] }, //ezquina derecha descicion2
-            { imagen: "https://i.imgur.com/QRehLgq.png", estado: resultado[19] }, //flecha abajo
-            { imagen: "https://i.imgur.com/SVOl5q9.png", estado: resultado[20] }, //descicion 3
-            { imagen: "https://i.imgur.com/cxdXkSx.png", estado: resultado[21] }, //flecha izquierda 2
-            { imagen: "https://i.imgur.com/ue7FrUg.png", estado: resultado[22] }, //no es primo
-            { imagen: "https://i.imgur.com/Rxl6UGT.png", estado: resultado[23] }, //pre final
-            { imagen: "https://i.imgur.com/3qDWaU4.png", estado: resultado[24] }, //fin
-            { imagen: "https://i.imgur.com/z0qDiIh.png", estado: resultado[25] }, //derecha descicion3
-            { imagen: "https://i.imgur.com/YgzpNdS.png", estado: resultado[26] }, //contador ++
-
-
-
+            {
+                imagen: "https://i.imgur.com/QRehLgq.png",
+                estado: resultado[10],
+            }, //flecha abajo 2
+            {
+                imagen: "https://i.imgur.com/rfDPtA3.png",
+                estado: resultado[11],
+            }, //contador =2
+            {
+                imagen: "https://i.imgur.com/QRehLgq.png",
+                estado: resultado[12],
+            }, //flecha abajo 3
+            {
+                imagen: "https://i.imgur.com/0SSFhh7.png",
+                estado: resultado[13],
+            }, //descicion 2
+            {
+                imagen: "https://i.imgur.com/cxdXkSx.png",
+                estado: resultado[14],
+            }, //flecha izquierda 1
+            {
+                imagen: "https://i.imgur.com/dHDnrEA.png",
+                estado: resultado[15],
+            }, //es primo
+            {
+                imagen: "https://i.imgur.com/Rxl6UGT.png",
+                estado: resultado[16],
+            }, //Ir al final 2
+            {
+                imagen: "https://i.imgur.com/ASMoZbM.png",
+                estado: resultado[17],
+            }, //final 2
+            {
+                imagen: "https://i.imgur.com/j6t9al9.png",
+                estado: resultado[18],
+            }, //ezquina derecha descicion2
+            {
+                imagen: "https://i.imgur.com/QRehLgq.png",
+                estado: resultado[19],
+            }, //flecha abajo
+            {
+                imagen: "https://i.imgur.com/SVOl5q9.png",
+                estado: resultado[20],
+            }, //descicion 3
+            {
+                imagen: "https://i.imgur.com/cxdXkSx.png",
+                estado: resultado[21],
+            }, //flecha izquierda 2
+            {
+                imagen: "https://i.imgur.com/ue7FrUg.png",
+                estado: resultado[22],
+            }, //no es primo
+            {
+                imagen: "https://i.imgur.com/Rxl6UGT.png",
+                estado: resultado[23],
+            }, //pre final
+            {
+                imagen: "https://i.imgur.com/3qDWaU4.png",
+                estado: resultado[24],
+            }, //fin
+            {
+                imagen: "https://i.imgur.com/z0qDiIh.png",
+                estado: resultado[25],
+            }, //derecha descicion3
+            {
+                imagen: "https://i.imgur.com/YgzpNdS.png",
+                estado: resultado[26],
+            }, //contador ++
         ];
 
         const htmlContenido = `
@@ -135,7 +187,6 @@ const Ejercicio5Laptop: React.FC = () => {
             resultado[24] === true &&
             resultado[25] === true &&
             resultado[26] === true
-
         ) {
             Swal.fire({
                 title: "Ejercicio completado",
@@ -167,8 +218,10 @@ const Ejercicio5Laptop: React.FC = () => {
         }
     };
 
-    const ejecutarOtroMetodo = () => {
+    const ejecutarOtroMetodo = async () => {
         // navigate("/ejercicio3");
+        console.log("la clave de acceso va ser ", claveAcceso);
+        await incrementarPuntuacionApi(claveAcceso, "5");
         alert("iremos a la siguiente seccion cuando se implemente");
     };
 

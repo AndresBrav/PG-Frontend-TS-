@@ -30,12 +30,12 @@ const Ejercicio1Laptop: React.FC = () => {
         }))
     );
 
-    useEffect(() => {
-        if (claveAcceso) {
-                console.log("la clave de acceso es " + claveAcceso);
-        }
+    // useEffect(() => {
+    //     if (claveAcceso) {
+    //             console.log("la clave de acceso es " + claveAcceso);
+    //     }
         
-    },[claveAcceso])
+    // },[claveAcceso])
 
     const imprimirPosiciones = () => {
         console.log("📋 Posiciones de widgets:");

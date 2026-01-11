@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import GridLayout from "react-grid-layout";
 import type { Layout } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { initialWidgetsEjercicio3 } from "../widgetsDataLevel1";
 import { verificarResultadoEjercicio3 } from "../VerificarResultado";
 import Swal from "sweetalert2";
+import { TokenContext } from "../../../../Context/TokenContext";
+import { incrementarPuntuacionApi } from "../../../../api/usuarioApi";
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
@@ -16,6 +18,7 @@ const WIDGET_SCALE = 1; // escala de imagen
 
 const Ejercicio3Laptop: React.FC = () => {
     const navigate = useNavigate();
+    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
 
     const [layout, setLayout] = useState<Layout[]>(
         initialWidgetsEjercicio3.map((w, idx) => ({
@@ -209,8 +212,10 @@ const Ejercicio3Laptop: React.FC = () => {
         }
     };
 
-    const ejecutarOtroMetodo = () => {
-        navigate("/ejercicio4")
+    const ejecutarOtroMetodo = async () => {
+        console.log("la clave de acceso va ser ", claveAcceso);
+        await incrementarPuntuacionApi(claveAcceso, "3");
+        navigate("/ejercicio4");
     };
 
     const returnDashboard = () => {
@@ -268,8 +273,8 @@ const Ejercicio3Laptop: React.FC = () => {
                     height: GRID_ROWS * CELL_HEIGHT,
                     border: "10px solid #000",
                     margin: "0 auto",
-                    overflowX: "auto", // 
-                    // overflowY: "auto", // 
+                    overflowX: "auto", //
+                    // overflowY: "auto", //
                 }}
             >
                 <GridLayout
