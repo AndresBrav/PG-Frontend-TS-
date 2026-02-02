@@ -12,8 +12,8 @@ import { incrementarPuntuacionApi } from "../../../../api/usuarioApi";
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
-const CELL_WIDTH = 200; // ancho de cada celda
-const CELL_HEIGHT = 100; // alto de cada celda
+const CELL_WIDTH = 150; // ancho de cada celda
+const CELL_HEIGHT = 80; // alto de cada celda
 const WIDGET_SCALE = 1; // escala de imagen
 
 const Ejercicio3Laptop: React.FC = () => {
@@ -124,19 +124,7 @@ const Ejercicio3Laptop: React.FC = () => {
             }, // esquina derecha
         ];
 
-        // const htmlContenido = pasos
-        //     .map((paso, index) => {
-        //         const borderColor = paso.estado ? "green" : "red";
-        //         return `
-        //   <div style="margin:10px 0;">
-        //     <img src="${paso.imagen}" alt="Paso ${
-        //             index + 1
-        //         }" style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:8px;" />
-
-        //   </div>
-        // `;
-        //     })
-        //     .join("");
+        
 
         const htmlContenido = `
   <div style="
@@ -151,7 +139,7 @@ const Ejercicio3Laptop: React.FC = () => {
             return `
               <img src="${paso.imagen}" 
                    alt="Paso ${index + 1}" 
-                   style="width:150px; height:100px; border:4px solid ${borderColor}; border-radius:8px;" />
+                   style="width:150px; height:80px; border:4px solid ${borderColor}; border-radius:8px;" />
             `;
         })
         .join("")}
@@ -307,9 +295,9 @@ const Ejercicio3Laptop: React.FC = () => {
                                 src={w.content}
                                 alt=""
                                 style={{
-                                    width: CELL_WIDTH * WIDGET_SCALE,
-                                    height: CELL_HEIGHT * WIDGET_SCALE,
-                                    objectFit: "contain",
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "fill",
                                 }}
                             />
                         </div>

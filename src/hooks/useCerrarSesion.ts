@@ -1,11 +1,14 @@
-import { useNavigate } from "react-router-dom";
+import { useContext } from "react"; 
+import { TokenContext } from "../Context/TokenContext";
+
 
 const useCerrarSesion = () => {
-    const navigate = useNavigate();
+    const { setClaveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
+    
 
     const cerrarSesion = () => {
-        // navigate("/", { replace: true });
         localStorage.removeItem("token");
+        setClaveAcceso(""); // Limpiar el token en el contexto
     };
 
     return cerrarSesion;

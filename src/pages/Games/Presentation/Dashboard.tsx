@@ -13,7 +13,9 @@ import {
 import avatars from "../../users/avatars";
 
 const Dashboard = () => {
-    useAuthRedirect(); //redirecciona si no hay token
+    // useAuthRedirect(); //redirecciona si no hay token
+    const redirectToHome = useAuthRedirect();
+
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
     const [nombre, setNombre] = useState<string>("");
@@ -25,29 +27,28 @@ const Dashboard = () => {
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
 
     useEffect(() => {
-        //obtener la informacion del usuario
-        const obtenerDatosUsuario = async () => {
-            if (claveAcceso) {
+        // console.log("la calve de accesssooooo es " + claveAcceso);
+
+        if (!claveAcceso) {
+            console.log("no tienes una clave valida");
+            redirectToHome();
+        } else {
+            const obtenerDatosUsuario = async () => {
                 console.log("la clave de acceso es " + claveAcceso);
                 const data = await traerUsuarios(claveAcceso);
                 setNombre(data?.nombre ?? "");
                 setEdad(data?.edad ?? 0);
                 setIdAvatar(data?.idAvatar ?? "");
-            }
-        };
-        obtenerDatosUsuario();
+            };
 
-        // obtener los puntos del usuario
-
-        const traerPuntosUsuario = async () => {
-            if (claveAcceso) {
+            const traerPuntosUsuario = async () => {
                 const data = await traerPuntuacion(claveAcceso);
-                console.log(data);
                 setPuntuacion(data?.puntuacionTotal ?? 0);
-            }
-        };
+            };
 
-        traerPuntosUsuario();
+            obtenerDatosUsuario();
+            traerPuntosUsuario();
+        }
     }, [claveAcceso]);
 
     const [modalAbierto, setModalAbierto] = useState(false);
@@ -132,7 +133,7 @@ const Dashboard = () => {
                                 <br />
                                 <br />
                                 <br />
-                                
+
                                 <div
                                     style={{
                                         display: "flex",
@@ -195,7 +196,7 @@ const Dashboard = () => {
                                             onClick={() => {
                                                 // Aquí pones la lógica para cambiar la foto (abrir input file, etc.)
                                                 console.log(
-                                                    "Abrir selector de foto"
+                                                    "Abrir selector de foto",
                                                 );
                                                 setOpenAvatarModal(true);
                                                 // Ejemplo: document.getElementById('input-foto')?.click();
@@ -317,7 +318,7 @@ const Dashboard = () => {
                                             if (!selectedAvatar) return;
 
                                             const avatarElegido = avatars.find(
-                                                (a) => a.id === selectedAvatar
+                                                (a) => a.id === selectedAvatar,
                                             );
 
                                             if (!avatarElegido || !claveAcceso)
@@ -327,7 +328,7 @@ const Dashboard = () => {
                                                 // esperar a que se guarde en backend
                                                 await actualizarFotoPerfil(
                                                     claveAcceso,
-                                                    String(avatarElegido.id)
+                                                    String(avatarElegido.id),
                                                 );
 
                                                 // actualizar UI SOLO si backend respondió bien
@@ -338,7 +339,7 @@ const Dashboard = () => {
                                             } catch (error) {
                                                 console.error(
                                                     "Error al actualizar avatar",
-                                                    error
+                                                    error,
                                                 );
                                             }
                                         }}
