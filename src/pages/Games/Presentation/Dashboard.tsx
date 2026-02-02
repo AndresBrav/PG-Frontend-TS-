@@ -13,7 +13,7 @@ import {
 import avatars from "../../users/avatars";
 
 const Dashboard = () => {
-    // useAuthRedirect(); //redirecciona si no hay token
+    useAuthRedirect(); //redirecciona si no hay token
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
     const [nombre, setNombre] = useState<string>("");
@@ -132,21 +132,7 @@ const Dashboard = () => {
                                 <br />
                                 <br />
                                 <br />
-                                {/* <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <img
-                                        style={{
-                                            height: "150px",
-                                            width: "150px",
-                                        }}
-                                        src={idAvatar ? idAvatar : profileIcon}
-                                        alt="imagen de avatar usuario"
-                                    />
-                                </div> */}
+                                
                                 <div
                                     style={{
                                         display: "flex",
