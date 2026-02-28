@@ -21,14 +21,7 @@ const initialCode: CodeLine[] = [
 const EjercicioP1Laptop = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
-    const [output, setOutput] = useState("");
     const navigate = useNavigate();
-
-    const [showInputs, setShowInputs] = useState(false);
-    const [num1, setNum1] = useState("");
-    const [num2, setNum2] = useState("");
-    const [calcResult, setCalcResult] = useState<number | null>(null);
-
     const returnDashboard = () => {
         navigate("/dashboard");
     };
@@ -58,11 +51,14 @@ const EjercicioP1Laptop = () => {
     };
 
     const printOrder = () => {
-        setOutput(selected.map((l) => l.content).join("\n"));
-        setShowInputs(true);
-    };
+        console.log("=== ORDEN ACTUAL ===");
 
-    const calculate = () => setCalcResult(Number(num1) + Number(num2));
+        selected.forEach((line, index) => {
+            console.log(
+                `Posición ${index + 1} -> ID: ${line.id} | CONTENT: ${line.content}`,
+            );
+        });
+    };
 
     const cardStyle: React.CSSProperties = {
         padding: "10px 10px",
@@ -213,8 +209,7 @@ const EjercicioP1Laptop = () => {
             <br />
 
             {/* ================= SALIDA (ABAJO) ================= */}
-            <div>
-                <h3 style={{ margin: "0 0 10px 0" }}>Salida</h3>
+            <div style={{ display:"flex", justifyContent:"center"}}>
 
                 <button
                     onClick={printOrder}
@@ -227,48 +222,6 @@ const EjercicioP1Laptop = () => {
                 >
                     Verificar
                 </button>
-
-                {showInputs && (
-                    <div style={{ marginTop: "10px" }}>
-                        <input
-                            type="number"
-                            placeholder="Número 1"
-                            value={num1}
-                            onChange={(e) => setNum1(e.target.value)}
-                            style={{ marginRight: "10px", padding: "6px" }}
-                        />
-                        <input
-                            type="number"
-                            placeholder="Número 2"
-                            value={num2}
-                            onChange={(e) => setNum2(e.target.value)}
-                            style={{ marginRight: "10px", padding: "6px" }}
-                        />
-
-                        <button
-                            onClick={calculate}
-                            style={{
-                                padding: "6px 14px",
-                                backgroundColor: "#22c55e",
-                                color: "white",
-                                borderRadius: "6px",
-                            }}
-                        >
-                            Calcular
-                        </button>
-
-                        {calcResult !== null && (
-                            <div
-                                style={{
-                                    marginTop: "10px",
-                                    fontWeight: "bold",
-                                }}
-                            >
-                                Resultado: {calcResult}
-                            </div>
-                        )}
-                    </div>
-                )}
             </div>
         </div>
     );
