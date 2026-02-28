@@ -11,6 +11,7 @@ import {
     traerUsuarios,
 } from "../../../api/usuarioApi";
 import avatars from "../../users/avatars";
+import ModalInf2 from "./ModalInf2";
 
 const Dashboard = () => {
     // useAuthRedirect(); //redirecciona si no hay token
@@ -55,6 +56,10 @@ const Dashboard = () => {
     const alternarModal = () => setModalAbierto(!modalAbierto);
     const [open, setOpen] = useState(false);
 
+    // ahora haremos lo mismo para el segundo modal
+    const [modalAbierto2, setModalAbierto2] = useState(false);
+    const alternarModal2 = () => setModalAbierto2(!modalAbierto2);
+
     const navigate = useNavigate(); // Hook que te da la función navigate
 
     const irEjercicio1 = () => {
@@ -76,6 +81,10 @@ const Dashboard = () => {
     const irEjercicio5 = () => {
         navigate("/ejercicio5");
     };
+
+    const irEjercicio1Pseudocodigo = () => {
+        navigate("/ejercicio1-pseudocodigo");
+    }
 
     return (
         <>
@@ -355,9 +364,7 @@ const Dashboard = () => {
 
             <div className="information-design-level-style-container-grid">
                 <div className="item-information-design-level-style-1">
-                    <h1 className="design-font-information-1">
-                        Etapa 1, Seccion 1
-                    </h1>
+                    <h1 className="design-font-information-1">Etapa 1</h1>
                     <h1 className="design-font-information-2">
                         Diagramas de flujo
                     </h1>
@@ -447,17 +454,16 @@ const Dashboard = () => {
             </div>
             <br />
 
+            {/* Seccion de los otros ejercicios */}
             <div className="information-design-level-style-container-grid">
                 <div className="item-information-design-level-style-1">
-                    <h1 className="design-font-information-1">
-                        Etapa 2, Seccion 1
-                    </h1>
+                    <h1 className="design-font-information-1">Etapa 2</h1>
                     <h1 className="design-font-information-2">Pseudocodigo</h1>
                 </div>
                 <div className="item-information-design-level-style-2">
                     <svg
                         className="item-information-design"
-                        // onClick={alternarModal}
+                        onClick={alternarModal2}
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -508,6 +514,35 @@ const Dashboard = () => {
                     </svg>
                 </div>
             </div>
+
+            <ModalInf2 isOpen={modalAbierto2} onClose={alternarModal2} />
+
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-1" onClick={irEjercicio1Pseudocodigo}>
+                    <div className="circle-inner">1</div>
+                </div>
+            </div>
+            {/* <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-2" onClick={irEjercicio2}>
+                    <div className="circle-inner">2</div>
+                </div>
+            </div>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-1" onClick={irEjercicio3}>
+                    <div className="circle-inner">3</div>
+                </div>
+            </div>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-2" onClick={irEjercicio4}>
+                    <div className="circle-inner">4</div>
+                </div>
+            </div>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div className="circle-outer-1" onClick={irEjercicio5}>
+                    <div className="circle-inner">5</div>
+                </div>
+            </div> */}
+            <br />
         </>
     );
 };

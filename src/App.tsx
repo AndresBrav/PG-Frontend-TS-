@@ -8,6 +8,8 @@ import Ejercicio2 from "./pages/Games/Level1/Ejercicio2";
 import Ejercicio3 from "./pages/Games/Level1/Ejercicio3";
 import Ejercicio4 from "./pages/Games/Level1/Ejercicio4";
 import Ejercicio5 from "./pages/Games/Level1/Ejercicio5";
+import EjercicioP1 from "./pages/Games/Nivel2/EjercicioP1";
+
 
 function App() {
     return (
@@ -23,6 +25,7 @@ function App() {
                         <Route path="/ejercicio3" element={<Ejercicio3 />} />
                         <Route path="/ejercicio4" element={<Ejercicio4 />} />
                         <Route path="/ejercicio5" element={<Ejercicio5 />} />
+                        <Route path="/ejercicio1-pseudocodigo" element={<EjercicioP1 />} />
                     </Routes>
                 </BrowserRouter>
             </TokenProvider>
