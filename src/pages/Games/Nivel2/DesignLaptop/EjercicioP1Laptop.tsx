@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
+import { verificarResultadoPseudocodigo1 } from "../VerificarResultadoPseudo";
 
 interface CodeLine {
     id: string;
@@ -53,12 +54,16 @@ const EjercicioP1Laptop = () => {
     const printOrder = () => {
         console.log("=== ORDEN ACTUAL ===");
 
-        selected.forEach((line, index) => {
-            console.log(
-                `Posición ${index + 1} -> ID: ${line.id} | CONTENT: ${line.content}`,
-            );
-        });
+        // Crear nuevo arreglo solo con los IDs
+        const ids = selected.map((line) => line.id);
+
+        // Imprimir el arreglo completo
+        console.log("IDs en orden:", ids);
+        const resultados:boolean[] = verificarResultadoPseudocodigo1(ids);
+        console.log("Resultados:", resultados);
     };
+
+    
 
     const cardStyle: React.CSSProperties = {
         padding: "10px 10px",

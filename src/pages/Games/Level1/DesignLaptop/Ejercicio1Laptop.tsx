@@ -27,9 +27,8 @@ const Ejercicio1Laptop: React.FC = () => {
             y: idx % GRID_ROWS,
             w: 1,
             h: 1,
-        }))
+        })),
     );
-
 
     const imprimirPosiciones = () => {
         console.log("📋 Posiciones de widgets:");
@@ -46,7 +45,7 @@ const Ejercicio1Laptop: React.FC = () => {
         const resultado: boolean[] = verificarReultado(
             widgetIds,
             columnaWidget,
-            filaWidget
+            filaWidget,
         );
 
         verificarRespuesta(resultado);
@@ -158,10 +157,9 @@ const Ejercicio1Laptop: React.FC = () => {
         }
     };
 
-
-    const ejecutarOtroMetodo = async() => {
-        console.log("la clave de acceso va ser ",claveAcceso);
-        await incrementarPuntuacionApi(claveAcceso,"1")
+    const ejecutarOtroMetodo = async () => {
+        console.log("la clave de acceso va ser ", claveAcceso);
+        await incrementarPuntuacionApi(claveAcceso, "1");
         navigate("/ejercicio2");
     };
 
@@ -211,9 +209,8 @@ const Ejercicio1Laptop: React.FC = () => {
                 >
                     <h1>Ejecutar</h1>
                 </button>
-                
             </div>
-                <br />
+            <br />
             <div
                 style={{
                     background: "white",
