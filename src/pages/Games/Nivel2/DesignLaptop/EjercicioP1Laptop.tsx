@@ -143,7 +143,7 @@ const EjercicioP1Laptop: React.FC = () => {
                 </div>
 
                 <label style="color:#000;">num1</label>
-                <input 
+                <input
                     id="swal-num1"
                     type="number"
                     step="1"
@@ -155,7 +155,7 @@ const EjercicioP1Laptop: React.FC = () => {
                 />
 
                 <label style="color:#000;">num2</label>
-                <input 
+                <input
                     id="swal-num2"
                     type="number"
                     step="1"
@@ -237,7 +237,99 @@ const EjercicioP1Laptop: React.FC = () => {
                 // 🔹 Si quieres navegar después:
                 // navigate("/ejercicio2");
             });
-        } else {
+        }
+        // if (todoCorrecto) { simular 10 entradas
+        //     Swal.fire({
+        //         title: "Ejercicio completado",
+        //         icon: "success",
+        //         iconColor: "green",
+        //         confirmButtonText: "Simular ciclo",
+        //         width: "50%",
+        //         customClass: {
+        //             confirmButton: "btn-semitransparente",
+        //         },
+        //         html: `<div style="padding:8px;">${htmlContenido}</div>`,
+        //     }).then(async (r) => {
+        //         if (!r.isConfirmed) return;
+
+        //         let suma = 0;
+        //         const numeros: number[] = [];
+
+        //         // 🔁 Simulación del ciclo (10 iteraciones)
+        //         for (let i = 1; i <= 10; i++) {
+        //             const { value } = await Swal.fire({
+        //                 title: `Iteración ${i} de 10`,
+        //                 text: `Ingresa el número ${i}`,
+        //                 input: "number",
+        //                 inputAttributes: {
+        //                     step: "1",
+        //                     inputmode: "numeric",
+        //                 },
+        //                 confirmButtonText: "Siguiente",
+        //                 allowOutsideClick: false,
+        //                 allowEscapeKey: false,
+        //                 customClass: {
+        //                     confirmButton: "btn-semitransparente",
+        //                 },
+        //                 preConfirm: (val) => {
+        //                     if (val === "" || val === null) {
+        //                         Swal.showValidationMessage(
+        //                             "Debes ingresar un número.",
+        //                         );
+        //                         return;
+        //                     }
+
+        //                     const n = Number(val);
+
+        //                     if (Number.isNaN(n)) {
+        //                         Swal.showValidationMessage("Número inválido.");
+        //                         return;
+        //                     }
+
+        //                     if (!Number.isInteger(n)) {
+        //                         Swal.showValidationMessage(
+        //                             "Solo se permiten enteros.",
+        //                         );
+        //                         return;
+        //                     }
+
+        //                     return n;
+        //                 },
+        //             });
+
+        //             if (value === undefined) return; // seguridad
+
+        //             numeros.push(value);
+        //             suma += value;
+        //         }
+
+        //         // ✅ Mostrar resultado final
+        //         await Swal.fire({
+        //             title: "Resultado Final",
+        //             icon: "success",
+        //             width: "45%",
+        //             confirmButtonText: "Cerrar",
+        //             customClass: {
+        //                 confirmButton: "btn-semitransparente",
+        //             },
+        //             html: `
+        //         <div style="color:#000; text-align:left;">
+        //             <div style="margin-bottom:10px;">
+        //                 <b>Números ingresados:</b>
+        //                 ${numeros.join(", ")}
+        //             </div>
+        //             <div style="font-size:16px;">
+        //                 <b>Suma total:</b> ${suma}
+        //             </div>
+        //         </div>
+        //     `,
+        //         });
+
+        //         // 🔹 Si quieres navegar:
+        //         // navigate("/ejercicio2");
+        //     });
+        // }
+        else {
             Swal.fire({
                 title: "Ejercicio incompleto",
                 html: `<div style="padding:8px;">${htmlContenido}</div>`,
