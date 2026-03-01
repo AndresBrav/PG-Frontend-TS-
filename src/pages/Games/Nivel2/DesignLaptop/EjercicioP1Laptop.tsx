@@ -94,21 +94,148 @@ const EjercicioP1Laptop: React.FC = () => {
 
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
+        // if (todoCorrecto) {
+        //     Swal.fire({
+        //         title: "Ejercicio completado",
+        //         html: `<div style="padding:8px;">${htmlContenido}</div>`,
+        //         icon: "success",
+        //         iconColor: "green",
+        //         confirmButtonText: "Siguiente",
+        //         customClass: {
+        //             confirmButton: "btn-semitransparente",
+        //         },
+        //         width: "50%",
+        //     }).then((r) => {
+        //         if (r.isConfirmed) {
+        //             navigate("/ejercicio2");
+        //         }
+        //     });
+        // }
         if (todoCorrecto) {
             Swal.fire({
                 title: "Ejercicio completado",
-                html: `<div style="padding:8px;">${htmlContenido}</div>`,
                 icon: "success",
                 iconColor: "green",
-                confirmButtonText: "Siguiente",
+                width: "55%",
+                confirmButtonText: "Calcular",
+                showCancelButton: true,
+                cancelButtonText: "Cerrar",
                 customClass: {
                     confirmButton: "btn-semitransparente",
+                    cancelButton: "btn-cierre",
                 },
-                width: "50%",
-            }).then((r) => {
-                if (r.isConfirmed) {
-                    navigate("/ejercicio2");
-                }
+
+                html: `
+        <div style="padding:8px;">
+            ${htmlContenido}
+
+            <div style="
+                margin-top: 14px;
+                padding-top: 12px;
+                border-top: 1px solid #e5e7eb;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                text-align: left;
+            ">
+                <div style="font-weight:700; color:#000;">
+                    Prueba el algoritmo (ingresa 2 números enteros):
+                </div>
+
+                <label style="color:#000;">num1</label>
+                <input 
+                    id="swal-num1"
+                    type="number"
+                    step="1"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    class="swal2-input"
+                    style="margin:0; width:100%;"
+                    placeholder="Ej: 5"
+                />
+
+                <label style="color:#000;">num2</label>
+                <input 
+                    id="swal-num2"
+                    type="number"
+                    step="1"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    class="swal2-input"
+                    style="margin:0; width:100%;"
+                    placeholder="Ej: 7"
+                />
+            </div>
+        </div>
+        `,
+
+                focusConfirm: false,
+
+                preConfirm: () => {
+                    const num1Str = (
+                        document.getElementById("swal-num1") as HTMLInputElement
+                    )?.value;
+
+                    const num2Str = (
+                        document.getElementById("swal-num2") as HTMLInputElement
+                    )?.value;
+
+                    if (!num1Str || !num2Str) {
+                        Swal.showValidationMessage("Completa ambos números.");
+                        return;
+                    }
+
+                    const num1 = Number(num1Str);
+                    const num2 = Number(num2Str);
+
+                    if (Number.isNaN(num1) || Number.isNaN(num2)) {
+                        Swal.showValidationMessage("Ingresa números válidos.");
+                        return;
+                    }
+
+                    // 🚫 SOLO ENTEROS
+                    if (!Number.isInteger(num1) || !Number.isInteger(num2)) {
+                        Swal.showValidationMessage(
+                            "Solo se permiten números enteros.",
+                        );
+                        return;
+                    }
+
+                    return {
+                        num1,
+                        num2,
+                        suma: num1 + num2,
+                    };
+                },
+            }).then(async (r) => {
+                if (!r.isConfirmed || !r.value) return;
+
+                // ✅ SEGUNDO SWAL → mostrar resultado
+                await Swal.fire({
+                    title: "Resultado",
+                    icon: "success",
+                    width: "40%",
+                    confirmButtonText: "Cerrar",
+                    customClass: {
+                        confirmButton: "btn-semitransparente",
+                    },
+                    html: `
+            <div style="color:#000; font-size:14px; text-align:left;">
+                <div style="margin-bottom:8px;">
+                    <b>num1:</b> ${r.value.num1}
+                </div>
+                <div style="margin-bottom:8px;">
+                    <b>num2:</b> ${r.value.num2}
+                </div>
+                <div style="margin-top:12px; font-size:16px;">
+                    <b>resultado:</b> ${r.value.suma}
+                </div>
+            </div>
+            `,
+                });
+
+                // 🔹 Si quieres navegar después:
+                // navigate("/ejercicio2");
             });
         } else {
             Swal.fire({
