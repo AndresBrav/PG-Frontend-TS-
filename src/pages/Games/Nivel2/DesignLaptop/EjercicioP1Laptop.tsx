@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import { verificarResultadoPseudocodigo1 } from "../VerificarResultadoPseudo";
 
 interface CodeLine {
@@ -19,10 +20,11 @@ const initialCode: CodeLine[] = [
     { id: "5", content: "  resultado <- num1 + num2" },
 ];
 
-const EjercicioP1Laptop = () => {
+const EjercicioP1Laptop: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
+
     const returnDashboard = () => {
         navigate("/dashboard");
     };
@@ -51,19 +53,92 @@ const EjercicioP1Laptop = () => {
         });
     };
 
-    const printOrder = () => {
-        console.log("=== ORDEN ACTUAL ===");
+    // ✅ Similar a tu verificarRespuesta: muestra Swal con tarjetas verde/rojo
+    const verificarRespuestaPseudo = (resultados: boolean[]) => {
+        const pasos = selected.map((line, index) => ({
+            id: line.id,
+            texto: line.content,
+            estado: resultados[index] ?? false,
+        }));
 
+        const htmlContenido = `
+      <div style="
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+          text-align:left;
+          margin-top:10px;
+      ">
+        ${pasos
+            .map((p) => {
+                const borderColor = p.estado ? "#16a34a" : "#dc2626";
+
+                return `
+                  <div style="
+                      border:2px solid ${borderColor};
+                      border-radius:6px;
+                      padding:4px 6px;
+                      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace;
+                      white-space: pre;
+                      font-size: 13px;
+                      color: #000000;
+                      background: #ffffff;
+                  ">
+                    ${p.texto}
+                  </div>
+                `;
+            })
+            .join("")}
+      </div>
+    `;
+
+        const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
+
+        if (todoCorrecto) {
+            Swal.fire({
+                title: "Ejercicio completado",
+                html: `<div style="padding:8px;">${htmlContenido}</div>`,
+                icon: "success",
+                iconColor: "green",
+                confirmButtonText: "Siguiente",
+                customClass: {
+                    confirmButton: "btn-semitransparente",
+                },
+                width: "50%",
+            }).then((r) => {
+                if (r.isConfirmed) {
+                    navigate("/ejercicio2");
+                }
+            });
+        } else {
+            Swal.fire({
+                title: "Ejercicio incompleto",
+                html: `<div style="padding:8px;">${htmlContenido}</div>`,
+                icon: "error",
+                iconColor: "red",
+                confirmButtonText: "Cerrar",
+                customClass: {
+                    confirmButton: "btn-cierre",
+                },
+                width: "50%",
+            });
+        }
+    };
+
+    // Ejecutar verificación
+    const printOrder = () => {
         // Crear nuevo arreglo solo con los IDs
         const ids = selected.map((line) => line.id);
 
-        // Imprimir el arreglo completo
-        console.log("IDs en orden:", ids);
-        const resultados:boolean[] = verificarResultadoPseudocodigo1(ids);
-        console.log("Resultados:", resultados);
-    };
+        // Validar con tu función
+        const resultados: boolean[] = verificarResultadoPseudocodigo1(ids);
 
-    
+        console.log("IDs en orden:", ids);
+        console.log("Resultados:", resultados);
+
+        // Mostrar Swal estilo flowchart
+        verificarRespuestaPseudo(resultados);
+    };
 
     const cardStyle: React.CSSProperties = {
         padding: "10px 10px",
@@ -79,13 +154,14 @@ const EjercicioP1Laptop = () => {
 
     // ✅ Estilo SOLO para el texto, para respetar espacios
     const codeTextStyle: React.CSSProperties = {
-        whiteSpace: "pre", // ✅ respeta espacios
+        whiteSpace: "pre",
         fontFamily:
             "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
     };
 
     return (
         <div>
+            {/* Botón salir */}
             <div
                 style={{
                     display: "flex",
@@ -112,7 +188,7 @@ const EjercicioP1Laptop = () => {
             <div>
                 <br />
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                    <h3 style={{ color: "white", margin: "0 0 0 0" }}>
+                    <h3 style={{ color: "white", margin: 0 }}>
                         Banco de líneas
                     </h3>
                 </div>
@@ -134,7 +210,6 @@ const EjercicioP1Laptop = () => {
                             style={{
                                 ...cardStyle,
                                 backgroundColor: "#f8fafc",
-                                // Mantén tu look de tarjeta:
                                 height: "35px",
                                 display: "flex",
                                 alignItems: "center",
@@ -142,14 +217,16 @@ const EjercicioP1Laptop = () => {
                             }}
                             title="Click para enviar a Construcción"
                         >
-                            {/* ✅ Aquí se respetan los espacios */}
                             <span style={codeTextStyle}>{line.content}</span>
                         </div>
                     ))}
                 </div>
             </div>
+
             <br />
             <br />
+
+            {/* Botón ejecutar */}
             <div className="contenedor-diagramaflujo-boton">
                 <button
                     onClick={printOrder}
@@ -162,6 +239,7 @@ const EjercicioP1Laptop = () => {
             {/* ================= CONSTRUCCIÓN ================= */}
             <br />
             <br />
+
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="builder">
                     {(drop) => (
@@ -197,17 +275,13 @@ const EjercicioP1Laptop = () => {
                                                 ...cardStyle,
                                                 marginBottom: "10px",
                                                 border: "1px solid #3b82f6",
-
-                                                // ✅ tus reglas UI:
                                                 height: "40px",
                                                 display: "flex",
                                                 alignItems: "center",
                                                 overflow: "hidden",
-
                                                 ...drag.draggableProps.style,
                                             }}
                                         >
-                                            {/* ✅ Aquí también se respetan los espacios */}
                                             <span style={codeTextStyle}>
                                                 {line.content}
                                             </span>
