@@ -143,6 +143,16 @@ const EjercicioP1Laptop = () => {
                     ))}
                 </div>
             </div>
+            <br />
+            <br />
+            <div className="contenedor-diagramaflujo-boton">
+                <button
+                    onClick={printOrder}
+                    className="button-execute-flowchart"
+                >
+                    <h1>Ejecutar</h1>
+                </button>
+            </div>
 
             {/* ================= CONSTRUCCIÓN ================= */}
             <br />
@@ -154,7 +164,7 @@ const EjercicioP1Laptop = () => {
                             ref={drop.innerRef}
                             {...drop.droppableProps}
                             style={{
-                                width: "80vw",
+                                width: "50vw",
                                 height: "70vh",
                                 margin: "0 auto",
                                 padding: "20px",
@@ -205,24 +215,6 @@ const EjercicioP1Laptop = () => {
                     )}
                 </Droppable>
             </DragDropContext>
-
-            <br />
-
-            {/* ================= SALIDA (ABAJO) ================= */}
-            <div style={{ display:"flex", justifyContent:"center"}}>
-
-                <button
-                    onClick={printOrder}
-                    style={{
-                        marginBottom: "10px",
-                        padding: "8px 16px",
-                        backgroundColor: "#3b82f6",
-                        color: "white",
-                    }}
-                >
-                    Verificar
-                </button>
-            </div>
         </div>
     );
 };
