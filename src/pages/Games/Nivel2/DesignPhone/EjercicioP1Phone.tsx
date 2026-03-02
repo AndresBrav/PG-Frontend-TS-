@@ -53,29 +53,6 @@ const EjercicioP1Phone: React.FC = () => {
             estado: resultados[index] ?? false,
         }));
 
-        // ✅ CORREGIDO: sin indentación interna que empuje el texto
-        // const htmlContenido = `
-        // <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
-        //     ${pasos
-        //         .map((p) => {
-        //             const borderColor = p.estado ? "#16a34a" : "#dc2626";
-        //             return `<div style="
-        //                 border:2px solid ${borderColor};
-        //                 border-radius:6px;
-        //                 padding:6px 8px;
-        //                 width:100%;
-        //                 box-sizing:border-box;
-        //                 font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
-        //                 white-space: pre-wrap;
-        //                 word-break: break-word;
-        //                 font-size: 12px;
-        //                 color:#000;
-        //                 background:#fff;
-        //             ">${p.texto}</div>`;
-        //         })
-        //         .join("")}
-        // </div>
-        // `;
         const htmlContenido = `
   <div style="
       display:flex;
@@ -258,19 +235,32 @@ const EjercicioP1Phone: React.FC = () => {
                 style={{
                     display: "flex",
                     justifyContent: "flex-end",
+                    alignItems: "center",
                     padding: "10px 15px",
                 }}
             >
                 <svg
                     fill="#E11919"
                     onClick={returnDashboard}
-                    width="35px"
-                    height="35px"
+                    width="30px"
+                    height="30px"
                     viewBox="0 0 32 32"
+                    xmlns="http://www.w3.org/2000/svg"
                     style={{ cursor: "pointer" }}
                 >
-                    <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571z" />
+                    <title>cancel</title>
+                    <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
                 </svg>
+            </div>
+
+            <div className="contenedor-diagramaflujo-ejercicio1">
+                <h1>Pseudocodigo</h1>
+            </div>
+
+            <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
+                <h1>
+                    Pon en orden las líneas de pseudocodigo para sumar dos números y mostrar el resultado.
+                </h1>
             </div>
 
             <div style={{ textAlign: "center", marginBottom: "10px" }}>
@@ -295,15 +285,18 @@ const EjercicioP1Phone: React.FC = () => {
                     </div>
                 ))}
             </div>
+            <br />
+            <br />
 
-            <div style={{ textAlign: "center", margin: "20px 0" }}>
+            <div className="contenedor-diagramaflujo-boton">
                 <button
                     onClick={printOrder}
                     className="button-execute-flowchart"
                 >
-                    Ejecutar
+                    <h1>Ejecutar</h1>
                 </button>
             </div>
+            <br />
 
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="builder">
