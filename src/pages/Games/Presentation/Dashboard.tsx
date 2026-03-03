@@ -84,7 +84,11 @@ const Dashboard = () => {
 
     const irEjercicio1Pseudocodigo = () => {
         navigate("/ejercicio1-pseudocodigo");
-    }
+    };
+
+    const irEjercicio2Pseudocodigo = () => {
+        navigate("/ejercicio2-pseudocodigo");
+    };
 
     return (
         <>
@@ -518,15 +522,22 @@ const Dashboard = () => {
             <ModalInf2 isOpen={modalAbierto2} onClose={alternarModal2} />
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio1Pseudocodigo}>
+                <div
+                    className="circle-outer-1"
+                    onClick={irEjercicio1Pseudocodigo}
+                >
                     <div className="circle-inner">1</div>
                 </div>
             </div>
-            {/* <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2" onClick={irEjercicio2}>
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div
+                    className="circle-outer-2"
+                    onClick={irEjercicio2Pseudocodigo}
+                >
                     <div className="circle-inner">2</div>
                 </div>
             </div>
+            {/*
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div className="circle-outer-1" onClick={irEjercicio3}>
                     <div className="circle-inner">3</div>
