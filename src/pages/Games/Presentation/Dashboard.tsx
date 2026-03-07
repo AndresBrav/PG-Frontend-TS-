@@ -90,6 +90,10 @@ const Dashboard = () => {
         navigate("/ejercicio2-pseudocodigo");
     };
 
+    const irEjercicio3Pseudocodigo = () => {
+        navigate("/ejercicio3-pseudocodigo");
+    }
+
     return (
         <>
             <div className="header-dashboard-container">
@@ -537,12 +541,13 @@ const Dashboard = () => {
                     <div className="circle-inner">2</div>
                 </div>
             </div>
-            {/*
+            
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio3}>
+                <div className="circle-outer-1" onClick={irEjercicio3Pseudocodigo}>
                     <div className="circle-inner">3</div>
                 </div>
             </div>
+            {/*
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div className="circle-outer-2" onClick={irEjercicio4}>
                     <div className="circle-inner">4</div>

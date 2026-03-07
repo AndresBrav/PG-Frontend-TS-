@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { verificarResultadoPseudocodigo2 } from "../VerificarResultadoPseudo";
+import { verificarResultadoPseudocodigo3 } from "../VerificarResultadoPseudo";
 
 interface CodeLine {
     id: string;
@@ -11,25 +11,23 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: "1", content: "Proceso MayorDeDosNumeros" },
-    { id: "4", content: "  Leer num1" },
-    { id: "2", content: "  Definir num1, num2 Como Entero" },
-    { id: "6", content: "  Leer num2" },
-    { id: "7", content: "  Si num1 > 0 Y num2 > 0 Entonces" },
-    { id: "3", content: '  Escribir "Ingresa el primer número:"' },
-    { id: "5", content: '  Escribir "Ingresa el segundo número:"' },
-    { id: "8", content: "    Si num1 > num2 Entonces" },
-    { id: "9", content: '      Escribir  num1,  "Es mayor"' },
-    { id: "10", content: "    SiNo" },
-    { id: "11", content: '      Escribir num2,  "Es mayor"' },
-    { id: "12", content: "    Fin Si" },
-    { id: "13", content: "  SiNo" },
-    { id: "14", content: '    Escribir  "Ingresa numeros positivos"' },
-    { id: "15", content: "  Fin Si" },
-    { id: "16", content: "Fin Proceso" },
+    { id: "1", content: "Proceso EvaluarCalificacion" },
+    { id: "4", content: "  Leer nota" },
+    { id: "2", content: "  Definir nota Como Entero" },
+    { id: "6", content: '    Escribir "El estudiante APROBO la materia"' },
+    { id: "7", content: "  Sino" },
+    { id: "3", content: '  Escribir "Ingrese la nota del estudiante (0 - 100):"' },
+    { id: "5", content: '  Si nota >= 51 Entonces' },
+    { id: "8", content: "    Si nota >= 40 Entonces" },
+    { id: "9", content: '      Escribir "El estudiante esta en RECUPERACION"' },
+    { id: "10", content: "    Sino" },
+    { id: "11", content: '      Escribir "El estudiante REPROBO la materia"' },
+    { id: "12", content: "    FinSi" },
+    { id: "13", content: "  FinSi" },
+    { id: "14", content: 'FinProceso' },
 ];
 
-const EjercicioP2Laptop: React.FC = () => {
+const EjercicioP3Laptop: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
@@ -63,8 +61,10 @@ const EjercicioP2Laptop: React.FC = () => {
     };
 
     // ✅ Similar a tu verificarRespuesta: muestra Swal con tarjetas verde/rojo
-    // Modificar la lógica de Swal para obtener los números y mostrar el mayor
-    const verificarRespuestaPseudo = (resultados: boolean[]) => {
+
+
+    // ✅ Similar a tu verificarRespuesta: muestra Swal con tarjetas verde/rojo
+    const verificarRespuestaPseudo = async (resultados: boolean[]) => {
         const pasos = selected.map((line, index) => ({
             id: line.id,
             texto: line.content,
@@ -72,100 +72,100 @@ const EjercicioP2Laptop: React.FC = () => {
         }));
 
         const htmlContenido = `
-    <div style="display:flex; flex-direction:column; gap:6px; text-align:left; margin-top:10px;">
-        ${pasos
+        <div style="display:flex; flex-direction:column; gap:6px; text-align:left; margin-top:10px;">
+            ${pasos
                 .map((p) => {
                     const borderColor = p.estado ? "#16a34a" : "#dc2626";
 
-                    return `  
-                  <div style="border:2px solid ${borderColor}; border-radius:6px; padding:4px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; white-space: pre; font-size: 13px; color: #000000; background: #ffffff;">
-                    ${p.texto}
-                  </div>
-                `;
+                    return `
+                    <div style="border:2px solid ${borderColor}; border-radius:6px; padding:4px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; white-space: pre; font-size: 13px; color: #000000; background: #ffffff;">
+                        ${p.texto}
+                    </div>
+                    `;
                 })
                 .join("")}
-    </div>`;
+        </div>`;
 
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            Swal.fire({
+            const result = await Swal.fire({
                 title: "Ejercicio completado",
                 icon: "success",
                 iconColor: "green",
                 width: "55%",
-                confirmButtonText: "Calcular",
+                confirmButtonText: "Evaluar",
                 showCancelButton: true,
                 cancelButtonText: "Cerrar",
                 customClass: {
                     confirmButton: "btn-semitransparente",
                     cancelButton: "btn-cierre",
                 },
-
                 html: `
-            <div style="padding:8px;">
-                ${htmlContenido}
+                <div style="padding:8px;">
+                    ${htmlContenido}
 
-                <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 10px; text-align: left;">
-                    <div style="font-weight:700; color:#000;">Prueba el algoritmo (ingresa 2 números enteros):</div>
+                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 10px; text-align: left;">
+                        <div style="font-weight:700; color:#000;">
+                            Prueba el algoritmo (ingresa la nota del estudiante):
+                        </div>
 
-                    <label style="color:#000;">num1</label>
-                    <input id="swal-num1" type="number" step="1" inputmode="numeric" pattern="[0-9]*" class="swal2-input" style="margin:0; width:100%;" placeholder="Ej: 5" />
-
-                    <label style="color:#000;">num2</label>
-                    <input id="swal-num2" type="number" step="1" inputmode="numeric" pattern="[0-9]*" class="swal2-input" style="margin:0; width:100%;" placeholder="Ej: 7" />
+                        <label style="color:#000;">nota</label>
+                        <input
+                            id="swal-nota"
+                            type="number"
+                            step="1"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            class="swal2-input"
+                            style="margin:0; width:100%;"
+                            placeholder="Ej: 75"
+                        />
+                    </div>
                 </div>
-            </div>
-        `,
-
+                `,
                 focusConfirm: false,
                 preConfirm: () => {
-                    const num1Str = (
-                        document.getElementById("swal-num1") as HTMLInputElement
-                    )?.value;
-                    const num2Str = (
-                        document.getElementById("swal-num2") as HTMLInputElement
+                    const notaStr = (
+                        document.getElementById("swal-nota") as HTMLInputElement
                     )?.value;
 
-                    if (!num1Str || !num2Str) {
-                        Swal.showValidationMessage("Completa ambos números.");
+                    if (!notaStr) {
+                        Swal.showValidationMessage("Ingresa la nota.");
                         return;
                     }
 
-                    const num1 = Number(num1Str);
-                    const num2 = Number(num2Str);
+                    const nota = Number(notaStr);
 
-                    if (Number.isNaN(num1) || Number.isNaN(num2)) {
-                        Swal.showValidationMessage("Ingresa números válidos.");
+                    if (Number.isNaN(nota)) {
+                        Swal.showValidationMessage("Ingresa una nota válida.");
                         return;
                     }
 
-                    if (!Number.isInteger(num1) || !Number.isInteger(num2)) {
+                    if (!Number.isInteger(nota)) {
                         Swal.showValidationMessage(
-                            "Solo se permiten números enteros.",
+                            "Solo se permiten notas enteras.",
                         );
                         return;
                     }
 
-                    // Verificar si los números son positivos
-                    if (num1 <= 0 || num2 <= 0) {
+                    if (nota < 0 || nota > 100) {
                         Swal.showValidationMessage(
-                            "Ingresa números positivos.",
+                            "La nota debe estar entre 0 y 100.",
                         );
                         return;
                     }
 
-                    // Mostrar el número mayor
-                    mostrarMayorNumero(num1, num2);
-
-                    return {
-                        num1,
-                        num2,
-                    };
+                    return { nota };
                 },
             });
+
+            if (result.isConfirmed && result.value) {
+                const { nota } = result.value;
+                await mostrarResultadoCalificacion(nota);
+            }
         } else {
-            Swal.fire({
+            await Swal.fire({
                 title: "Ejercicio incompleto",
                 html: `<div style="padding:8px;">${htmlContenido}</div>`,
                 icon: "error",
@@ -179,13 +179,20 @@ const EjercicioP2Laptop: React.FC = () => {
         }
     };
 
-    // Mostrar el resultado del número mayor
-    const mostrarMayorNumero = async (num1: number, num2: number) => {
-        const mayor = num1 > num2 ? num1 : num2; // Determinar el número mayor
+    // Mostrar el resultado según la nota
+    const mostrarResultadoCalificacion = async (nota: number) => {
+        let estado = "";
 
-        // Mostrar el número mayor en el Swal
+        if (nota >= 51) {
+            estado = "El estudiante APROBO la materia";
+        } else if (nota >= 40) {
+            estado = "El estudiante esta en RECUPERACION";
+        } else {
+            estado = "El estudiante REPROBO la materia";
+        }
+
         await Swal.fire({
-            title: "Número Mayor",
+            title: "Resultado de la evaluación",
             icon: "success",
             width: "40%",
             confirmButtonText: "Cerrar",
@@ -193,20 +200,19 @@ const EjercicioP2Laptop: React.FC = () => {
                 confirmButton: "btn-semitransparente",
             },
             html: `
-        <div style="color:#000; font-size:14px; text-align:left;">
-            <div style="margin-bottom:8px;">
-                <b>num1:</b> ${num1}
+            <div style="color:#000; font-size:14px; text-align:left;">
+                <div style="margin-bottom:8px;">
+                    <b>Nota ingresada:</b> ${nota}
+                </div>
+                <div style="margin-top:12px; font-size:16px;">
+                    <b>${estado}</b>
+                </div>
             </div>
-            <div style="margin-bottom:8px;">
-                <b>num2:</b> ${num2}
-            </div>
-            <div style="margin-top:12px; font-size:16px;">
-                <b>El número mayor es:</b> ${mayor}
-            </div>
-        </div>
-        `,
+            `,
         });
     };
+
+
 
     // Ejecutar verificación
     const printOrder = () => {
@@ -214,7 +220,7 @@ const EjercicioP2Laptop: React.FC = () => {
         const ids = selected.map((line) => line.id);
 
         // Validar con tu función
-        const resultados: boolean[] = verificarResultadoPseudocodigo2(ids);
+        const resultados: boolean[] = verificarResultadoPseudocodigo3(ids);
 
         console.log("IDs en orden:", ids);
         console.log("Resultados:", resultados);
@@ -383,4 +389,4 @@ const EjercicioP2Laptop: React.FC = () => {
     );
 };
 
-export default EjercicioP2Laptop;
+export default EjercicioP3Laptop;
