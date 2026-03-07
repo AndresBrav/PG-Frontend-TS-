@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { verificarResultadoPseudocodigo4 } from "../VerificarResultadoPseudo";
+import { verificarResultadoPseudocodigo5 } from "../VerificarResultadoPseudo";
 
 interface CodeLine {
     id: string;
@@ -11,21 +11,21 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: "1", content: "Proceso SumarDiezNumeros" },
-    { id: "4", content: "  contador <- 1" },
-    { id: "2", content: "  Definir numero, suma, contador Como Entero " },
-    { id: "6", content: '    Escribir "Ingrese un numero:"' },
-    { id: "7", content: "    Leer numero" },
+    { id: "1", content: "Proceso SumarHastaNegativo" },
+    { id: "4", content: '  Escribir "Ingrese un numero positivo (un negativo para terminar):"' },
+    { id: "2", content: "  Definir numero, suma Como Entero" },
+    { id: "6", content: '  Mientras numero >= 0 Hacer' },
+    { id: "7", content: "    suma <- suma + numero" },
     { id: "3", content: "  suma <- 0" },
-    { id: "5", content: "  Mientras contador <= 10 Hacer " },
-    { id: "8", content: "    suma <- suma + numero" },
-    { id: "9", content: "    contador <- contador + 1 " },
+    { id: "5", content: "  Leer numero" },
+    { id: "8", content: '    Escribir "Ingrese un numero positivo (un negativo para terminar):"' },
+    { id: "9", content: "    Leer numero" },
     { id: "10", content: "  FinMientras" },
     { id: "11", content: '  Escribir "La suma total es: ", suma' },
     { id: "12", content: "FinProceso" },
 ];
 
-const EjercicioP4Laptop: React.FC = () => {
+const EjercicioP5Laptop: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
@@ -79,9 +79,9 @@ const EjercicioP4Laptop: React.FC = () => {
                         padding:4px 6px;
                         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace;
                         white-space: pre;
-                        font-size: 13px;
-                        color: #000000;
-                        background: #ffffff;
+                        font-size:13px;
+                        color:#000000;
+                        background:#ffffff;
                     ">
                         ${p.texto}
                     </div>
@@ -110,16 +110,17 @@ const EjercicioP4Laptop: React.FC = () => {
                     ${htmlContenido}
 
                     <div style="
-                        margin-top: 14px;
-                        padding-top: 12px;
-                        border-top: 1px solid #e5e7eb;
-                        text-align: left;
-                        color: #000;
-                        font-size: 14px;
-                        line-height: 1.5;
+                        margin-top:14px;
+                        padding-top:12px;
+                        border-top:1px solid #e5e7eb;
+                        text-align:left;
+                        color:#000;
+                        font-size:14px;
+                        line-height:1.5;
                     ">
-                        Se simularán las 10 iteraciones del ciclo <b>Mientras contador <= 10</b>.<br/>
-                        En cada iteración ingresarás un número entero y al final se mostrará la suma total.
+                        Se pedirán números enteros uno por uno.<br/>
+                        El ciclo continuará mientras el número ingresado sea <b>mayor o igual a 0</b>.<br/>
+                        Cuando ingreses un número negativo, el ciclo terminará y se mostrará la suma total.
                     </div>
                 </div>
                 `,
@@ -128,19 +129,24 @@ const EjercicioP4Laptop: React.FC = () => {
             if (!primerSwal.isConfirmed) return;
 
             let suma = 0;
-            const numeros: number[] = [];
+            const numerosValidos: number[] = [];
+            // let numeroActual: number | null = null;
+            let numeroActual=0;
+            let iteracion = 1;
 
-            // 🔁 Simulación del ciclo (10 iteraciones)
-            for (let i = 1; i <= 10; i++) {
+            while (true) {
                 const { value } = await Swal.fire({
-                    title: `Iteración ${i} de 10`,
+                    title: `Iteración ${iteracion}`,
                     html: `
                     <div style="color:#000; text-align:left; font-size:14px;">
                         <div style="margin-bottom:10px;">
-                            Ingresa el número <b>${i}</b>
+                            Ingresa un número entero
+                        </div>
+                        <div style="margin-bottom:8px; color:#374151;">
+                            El ciclo termina cuando ingreses un número <b>negativo</b>.
                         </div>
                         <div style="font-size:13px; color:#374151;">
-                            Valor actual de suma: <b>${suma}</b>
+                            Suma actual: <b>${suma}</b>
                         </div>
                     </div>
                     `,
@@ -150,9 +156,9 @@ const EjercicioP4Laptop: React.FC = () => {
                         inputmode: "numeric",
                         pattern: "[0-9-]*",
                     },
-                    inputPlaceholder: `Ej: ${i}`,
+                    inputPlaceholder: "Ej: 8 o -1 para terminar",
                     width: "40%",
-                    confirmButtonText: i === 10 ? "Finalizar" : "Siguiente",
+                    confirmButtonText: "Continuar",
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     customClass: {
@@ -186,11 +192,22 @@ const EjercicioP4Laptop: React.FC = () => {
 
                 if (value === undefined) return;
 
-                numeros.push(value);
-                suma += value;
+                numeroActual = value;
+
+                if (numeroActual < 0) {
+                    break;
+                }
+
+                numerosValidos.push(numeroActual);
+                suma += numeroActual;
+                iteracion++;
             }
 
-            await mostrarResultadoSuma(numeros, suma);
+            await mostrarResultadoSumaHastaNegativo(
+                numerosValidos,
+                suma,
+                numeroActual,
+            );
         } else {
             await Swal.fire({
                 title: "Ejercicio incompleto",
@@ -206,8 +223,12 @@ const EjercicioP4Laptop: React.FC = () => {
         }
     };
 
-    // Mostrar resultado final de la suma
-    const mostrarResultadoSuma = async (numeros: number[], suma: number) => {
+    // Mostrar resultado final del ciclo
+    const mostrarResultadoSumaHastaNegativo = async (
+        numerosValidos: number[],
+        suma: number,
+        numeroFinal: number | null,
+    ) => {
         await Swal.fire({
             title: "Resultado Final",
             icon: "success",
@@ -219,7 +240,7 @@ const EjercicioP4Laptop: React.FC = () => {
             html: `
             <div style="color:#000; text-align:left; font-size:14px;">
                 <div style="margin-bottom:10px;">
-                    <b>Números ingresados:</b>
+                    <b>Números sumados:</b>
                 </div>
 
                 <div style="
@@ -232,7 +253,11 @@ const EjercicioP4Laptop: React.FC = () => {
                     line-height:1.6;
                     word-break:break-word;
                 ">
-                    ${numeros.join(", ")}
+                    ${numerosValidos.length > 0 ? numerosValidos.join(", ") : "No se ingresaron números no negativos"}
+                </div>
+
+                <div style="margin-bottom:10px;">
+                    <b>Número que terminó el ciclo:</b> ${numeroFinal}
                 </div>
 
                 <div style="font-size:16px;">
@@ -246,7 +271,7 @@ const EjercicioP4Laptop: React.FC = () => {
     // Ejecutar verificación
     const printOrder = () => {
         const ids = selected.map((line) => line.id);
-        const resultados: boolean[] = verificarResultadoPseudocodigo4(ids);
+        const resultados: boolean[] = verificarResultadoPseudocodigo5(ids);
 
         console.log("IDs en orden:", ids);
         console.log("Resultados:", resultados);
@@ -407,9 +432,8 @@ const EjercicioP4Laptop: React.FC = () => {
                     )}
                 </Droppable>
             </DragDropContext>
-            <br /><br /><br />
         </div>
     );
 };
 
-export default EjercicioP4Laptop;
+export default EjercicioP5Laptop;

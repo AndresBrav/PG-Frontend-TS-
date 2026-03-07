@@ -12,6 +12,7 @@ import EjercicioP1 from "./pages/Games/Nivel2/EjercicioP1";
 import EjercicioP2 from "./pages/Games/Nivel2/EjercicioP2";
 import EjercicioP3 from "./pages/Games/Nivel2/EjercicioP3";
 import EjercicioP4 from "./pages/Games/Nivel2/EjercicioP4";
+import EjercicioP5 from "./pages/Games/Nivel2/EjercicioP5";
 
 function App() {
     return (
@@ -42,6 +43,10 @@ function App() {
                         <Route
                             path="/ejercicio4-pseudocodigo"
                             element={<EjercicioP4 />}
+                        />
+                        <Route
+                            path="/ejercicio5-pseudocodigo"
+                            element={<EjercicioP5 />}
                         />
                     </Routes>
                 </BrowserRouter>
