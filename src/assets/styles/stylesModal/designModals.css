@@ -2,7 +2,7 @@
     background: rgba(217, 217, 217, 0.5);
     border-radius: 75px;
     margin-left: 2vw;
-    margin-right: 45vw;
+    margin-right: 60vw;
 }
 
 .contenedor-diagramaflujo-ejercicio1 > h1 {
@@ -15,14 +15,17 @@
 .contenedor-diagramaflujo-ejercicio1-explicacion {
     background: rgba(217, 217, 217, 0.5);
     margin-left: 2vw;
-    margin-right: 15vw;
+    margin-right: 30vw;
 }
 
 .contenedor-diagramaflujo-ejercicio1-explicacion > h1 {
     color: white;
+    text-align: justify;
     margin-left: 2vw;
+    margin-right: 2vw;
     font-size: 20px;
     padding: 10px;
+    margin-bottom: 20px;
 }
 
 .contenedor-diagramaflujo-ejercicio1-imagen-flex {
@@ -31,7 +34,6 @@
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 20px;
-    
 }
 
 .contenedor-diagramaflujo-ejercicio1-imagen-flex > img {
@@ -50,7 +52,7 @@
     }
 
     .contenedor-diagramaflujo-ejercicio1-imagen-flex > img {
-    height: 80px;
-    width: 80px;
-}
+        height: 80px;
+        width: 80px;
+    }
 }

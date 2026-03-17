@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import type { DropResult } from "@hello-pangea/dnd";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import { verificarResultadoPseudocodigo2 } from "../VerificarResultadoPseudo";
+import React, { useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { verificarResultadoPseudocodigo2 } from '../VerificarResultadoPseudo';
 
 interface CodeLine {
     id: string;
@@ -11,22 +11,22 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: "1", content: "Proceso MayorDeDosNumeros" },
-    { id: "4", content: "  Leer num1" },
-    { id: "2", content: "  Definir num1, num2 Como Entero" },
-    { id: "6", content: "  Leer num2" },
-    { id: "7", content: "  Si num1 > 0 Y num2 > 0 Entonces" },
-    { id: "3", content: '  Escribir "Ingresa el primer número:"' },
-    { id: "5", content: '  Escribir "Ingresa el segundo número:"' },
-    { id: "8", content: "    Si num1 > num2 Entonces" },
-    { id: "9", content: '      Escribir  num1,  "Es mayor"' },
-    { id: "10", content: "    SiNo" },
-    { id: "11", content: '      Escribir num2,  "Es mayor"' },
-    { id: "12", content: "    Fin Si" },
-    { id: "13", content: "  SiNo" },
-    { id: "14", content: '    Escribir  "Ingresa numeros positivos"' },
-    { id: "15", content: "  Fin Si" },
-    { id: "16", content: "Fin Proceso" },
+    { id: '1', content: 'Proceso MayorDeDosNumeros' },
+    { id: '4', content: '  Leer num1' },
+    { id: '2', content: '  Definir num1, num2 Como Entero' },
+    { id: '6', content: '  Leer num2' },
+    { id: '7', content: '  Si num1 > 0 Y num2 > 0 Entonces' },
+    { id: '3', content: '  Escribir "Ingresa el primer número:"' },
+    { id: '5', content: '  Escribir "Ingresa el segundo número:"' },
+    { id: '8', content: '    Si num1 > num2 Entonces' },
+    { id: '9', content: '      Escribir  num1,  "Es mayor"' },
+    { id: '10', content: '    SiNo' },
+    { id: '11', content: '      Escribir num2,  "Es mayor"' },
+    { id: '12', content: '    Fin Si' },
+    { id: '13', content: '  SiNo' },
+    { id: '14', content: '    Escribir  "Ingresa numeros positivos"' },
+    { id: '15', content: '  Fin Si' },
+    { id: '16', content: 'Fin Proceso' },
 ];
 
 const EjercicioP2Phone: React.FC = () => {
@@ -35,7 +35,7 @@ const EjercicioP2Phone: React.FC = () => {
     const navigate = useNavigate();
 
     const returnDashboard = () => {
-        navigate("/dashboard");
+        navigate('/dashboard');
     };
 
     // Click en banco -> pasa a construcción
@@ -79,7 +79,7 @@ const EjercicioP2Phone: React.FC = () => {
         ">
             ${pasos
                 .map((p) => {
-                    const borderColor = p.estado ? "#16a34a" : "#dc2626";
+                    const borderColor = p.estado ? '#16a34a' : '#dc2626';
                     return `<div style="
                         border:2px solid ${borderColor};
                         border-radius:6px;
@@ -100,25 +100,25 @@ const EjercicioP2Phone: React.FC = () => {
                         background:#fff;
                     ">${p.texto}</div>`;
                 })
-                .join("")}
+                .join('')}
         </div>`;
 
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
             Swal.fire({
-                title: "Ejercicio completado",
-                icon: "success",
-                iconColor: "green",
-                width: "95%",
-                padding: "12px",
+                title: 'Ejercicio completado',
+                icon: 'success',
+                iconColor: 'green',
+                width: '95%',
+                padding: '12px',
                 heightAuto: false,
-                confirmButtonText: "Calcular",
+                confirmButtonText: 'Calcular',
                 showCancelButton: true,
-                cancelButtonText: "Cerrar",
+                cancelButtonText: 'Cerrar',
                 customClass: {
-                    confirmButton: "btn-semitransparente",
-                    cancelButton: "btn-cierre",
+                    confirmButton: 'btn-semitransparente',
+                    cancelButton: 'btn-cierre',
                 },
                 html: `
                 <div style="padding:4px;">
@@ -165,25 +165,25 @@ const EjercicioP2Phone: React.FC = () => {
                     const num1 = Number(
                         (
                             document.getElementById(
-                                "swal-num1",
+                                'swal-num1'
                             ) as HTMLInputElement
-                        )?.value,
+                        )?.value
                     );
                     const num2 = Number(
                         (
                             document.getElementById(
-                                "swal-num2",
+                                'swal-num2'
                             ) as HTMLInputElement
-                        )?.value,
+                        )?.value
                     );
 
                     if (Number.isNaN(num1) || Number.isNaN(num2)) {
-                        Swal.showValidationMessage("Completa ambos números.");
+                        Swal.showValidationMessage('Completa ambos números.');
                         return;
                     }
 
                     if (!Number.isInteger(num1) || !Number.isInteger(num2)) {
-                        Swal.showValidationMessage("Solo enteros.");
+                        Swal.showValidationMessage('Solo enteros.');
                         return;
                     }
 
@@ -193,10 +193,10 @@ const EjercicioP2Phone: React.FC = () => {
                 if (!r.isConfirmed || !r.value) return;
 
                 await Swal.fire({
-                    title: "Resultado",
-                    icon: "success",
-                    width: "92%",
-                    padding: "12px",
+                    title: 'Resultado',
+                    icon: 'success',
+                    width: '92%',
+                    padding: '12px',
                     html: `
                         <div style="color:#000;text-align:left;font-size:14px;">
                             <div><b>num1:</b> ${r.value.num1}</div>
@@ -210,11 +210,11 @@ const EjercicioP2Phone: React.FC = () => {
             });
         } else {
             Swal.fire({
-                title: "Ejercicio incompleto",
-                icon: "error",
-                iconColor: "red",
-                width: "95%",
-                padding: "12px",
+                title: 'Ejercicio incompleto',
+                icon: 'error',
+                iconColor: 'red',
+                width: '95%',
+                padding: '12px',
                 html: `<div style="max-height:55vh;overflow-y:auto;">${htmlContenido}</div>`,
             });
         }
@@ -228,19 +228,19 @@ const EjercicioP2Phone: React.FC = () => {
     };
 
     const cardStyle: React.CSSProperties = {
-        padding: "10px",
-        borderRadius: "10px",
-        fontSize: "13px",
+        padding: '10px',
+        borderRadius: '10px',
+        fontSize: '13px',
         fontWeight: 500,
-        color: "#111",
-        backgroundColor: "#ffffff",
-        border: "1px solid #e2e8f0",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-        cursor: "pointer",
+        color: '#111',
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+        cursor: 'pointer',
     };
 
     const codeTextStyle: React.CSSProperties = {
-        whiteSpace: "pre",
+        whiteSpace: 'pre',
         fontFamily:
             "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace",
     };
@@ -249,10 +249,10 @@ const EjercicioP2Phone: React.FC = () => {
         <div>
             <div
                 style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    padding: "10px 15px",
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    padding: '10px 15px',
                 }}
             >
                 <svg
@@ -262,7 +262,7 @@ const EjercicioP2Phone: React.FC = () => {
                     height="30px"
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: 'pointer' }}
                 >
                     <title>cancel</title>
                     <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
@@ -275,21 +275,30 @@ const EjercicioP2Phone: React.FC = () => {
 
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                 <h1>
-                    Pon en orden las líneas de pseudocodigo para sumar dos
-                    números y mostrar el resultado.
+                    Diseñar el pseudocódigo que permita identificar el mayor de
+                    dos números enteros positivos ingresados por el usuario.
+                    Este algoritmo solicita la entrada de dos valores numéricos
+                    y utiliza una estructura condicional anidada para determinar
+                    cuál es el mayor; primero, verifica mediante una validación
+                    lógica que ambos números sean mayores a cero para asegurar
+                    que el proceso trabaje solo con números positivos, y en caso
+                    de cumplir esta condición, procede a comparar los valores
+                    entre sí para imprimir el número más alto, de lo contrario,
+                    muestra un mensaje de advertencia indicando que solo se
+                    admiten entradas positivas.
                 </h1>
             </div>
 
-            <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                <h3 style={{ color: "white" }}>Banco de líneas</h3>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                <h3 style={{ color: 'white' }}>Banco de líneas</h3>
             </div>
 
             <div
                 style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "10px",
-                    justifyContent: "center",
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '10px',
+                    justifyContent: 'center',
                 }}
             >
                 {available.map((line) => (
@@ -322,14 +331,14 @@ const EjercicioP2Phone: React.FC = () => {
                             ref={drop.innerRef}
                             {...drop.droppableProps}
                             style={{
-                                width: "95vw",
-                                height: "65vh",
-                                margin: "0 auto",
-                                padding: "15px",
-                                borderRadius: "16px",
-                                background: "#ffffff",
-                                border: "2px dashed #cbd5e1",
-                                overflowY: "auto",
+                                width: '95vw',
+                                height: '65vh',
+                                margin: '0 auto',
+                                padding: '15px',
+                                borderRadius: '16px',
+                                background: '#ffffff',
+                                border: '2px dashed #cbd5e1',
+                                overflowY: 'auto',
                             }}
                         >
                             {selected.map((line, index) => (
@@ -346,8 +355,8 @@ const EjercicioP2Phone: React.FC = () => {
                                             onClick={() => returnToBank(line)}
                                             style={{
                                                 ...cardStyle,
-                                                marginBottom: "8px",
-                                                border: "1px solid #3b82f6",
+                                                marginBottom: '8px',
+                                                border: '1px solid #3b82f6',
                                                 ...drag.draggableProps.style,
                                             }}
                                         >

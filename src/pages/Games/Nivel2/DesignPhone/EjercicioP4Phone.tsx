@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import type { DropResult } from "@hello-pangea/dnd";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import { verificarResultadoPseudocodigo4 } from "../VerificarResultadoPseudo";
+import React, { useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { verificarResultadoPseudocodigo4 } from '../VerificarResultadoPseudo';
 
 interface CodeLine {
     id: string;
@@ -11,24 +11,24 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: "1", content: "Proceso SumarDiezNumeros" },
-    { id: "4", content: "  contador <- 1" },
-    { id: "2", content: "  Definir numero, suma, contador Como Entero " },
-    { id: "6", content: '    Escribir "Ingrese un numero:"' },
-    { id: "7", content: "    Leer numero" },
+    { id: '1', content: 'Proceso SumarDiezNumeros' },
+    { id: '4', content: '  contador <- 1' },
+    { id: '2', content: '  Definir numero, suma, contador Como Entero ' },
+    { id: '6', content: '    Escribir "Ingrese un numero:"' },
+    { id: '7', content: '    Leer numero' },
     {
-        id: "3",
+        id: '3',
         content: '  suma <- 0',
     },
-    { id: "5", content: "  Mientras contador <= 10 Hacer " },
-    { id: "8", content: "    suma <- suma + numero" },
+    { id: '5', content: '  Mientras contador <= 10 Hacer ' },
+    { id: '8', content: '    suma <- suma + numero' },
     {
-        id: "9",
+        id: '9',
         content: '    contador <- contador + 1 ',
     },
-    { id: "10", content: "  FinMientras" },
-    { id: "11", content: '  Escribir "La suma total es: ", suma' },
-    { id: "12", content: "FinProceso" },
+    { id: '10', content: '  FinMientras' },
+    { id: '11', content: '  Escribir "La suma total es: ", suma' },
+    { id: '12', content: 'FinProceso' },
 ];
 
 const EjercicioP4Phone: React.FC = () => {
@@ -37,7 +37,7 @@ const EjercicioP4Phone: React.FC = () => {
     const navigate = useNavigate();
 
     const returnDashboard = () => {
-        navigate("/dashboard");
+        navigate('/dashboard');
     };
 
     // Click en banco -> pasa a construcción
@@ -81,7 +81,7 @@ const EjercicioP4Phone: React.FC = () => {
         ">
             ${pasos
                 .map((p) => {
-                    const borderColor = p.estado ? "#16a34a" : "#dc2626";
+                    const borderColor = p.estado ? '#16a34a' : '#dc2626';
                     return `<div style="
                         border:2px solid ${borderColor};
                         border-radius:6px;
@@ -102,25 +102,25 @@ const EjercicioP4Phone: React.FC = () => {
                         background:#fff;
                     ">${p.texto}</div>`;
                 })
-                .join("")}
+                .join('')}
         </div>`;
 
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
             const primerSwal = await Swal.fire({
-                title: "Ejercicio completado",
-                icon: "success",
-                iconColor: "green",
-                width: "95%",
-                padding: "12px",
+                title: 'Ejercicio completado',
+                icon: 'success',
+                iconColor: 'green',
+                width: '95%',
+                padding: '12px',
                 heightAuto: false,
-                confirmButtonText: "Simular ciclo",
+                confirmButtonText: 'Simular ciclo',
                 showCancelButton: true,
-                cancelButtonText: "Cerrar",
+                cancelButtonText: 'Cerrar',
                 customClass: {
-                    confirmButton: "btn-semitransparente",
-                    cancelButton: "btn-cierre",
+                    confirmButton: 'btn-semitransparente',
+                    cancelButton: 'btn-cierre',
                 },
                 html: `
                 <div style="padding:4px;">
@@ -163,26 +163,26 @@ const EjercicioP4Phone: React.FC = () => {
                         </div>
                     </div>
                     `,
-                    input: "number",
+                    input: 'number',
                     inputAttributes: {
-                        step: "1",
-                        inputmode: "numeric",
-                        pattern: "[0-9-]*",
+                        step: '1',
+                        inputmode: 'numeric',
+                        pattern: '[0-9-]*',
                     },
                     inputPlaceholder: `Ej: ${i}`,
-                    width: "92%",
-                    padding: "12px",
+                    width: '92%',
+                    padding: '12px',
                     heightAuto: false,
-                    confirmButtonText: i === 10 ? "Finalizar" : "Siguiente",
+                    confirmButtonText: i === 10 ? 'Finalizar' : 'Siguiente',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     customClass: {
-                        confirmButton: "btn-semitransparente",
+                        confirmButton: 'btn-semitransparente',
                     },
                     preConfirm: (val) => {
-                        if (val === "" || val === null) {
+                        if (val === '' || val === null) {
                             Swal.showValidationMessage(
-                                "Debes ingresar un número.",
+                                'Debes ingresar un número.'
                             );
                             return;
                         }
@@ -190,13 +190,13 @@ const EjercicioP4Phone: React.FC = () => {
                         const n = Number(val);
 
                         if (Number.isNaN(n)) {
-                            Swal.showValidationMessage("Número inválido.");
+                            Swal.showValidationMessage('Número inválido.');
                             return;
                         }
 
                         if (!Number.isInteger(n)) {
                             Swal.showValidationMessage(
-                                "Solo se permiten enteros.",
+                                'Solo se permiten enteros.'
                             );
                             return;
                         }
@@ -214,15 +214,15 @@ const EjercicioP4Phone: React.FC = () => {
             await mostrarResultadoSuma(numeros, suma);
         } else {
             await Swal.fire({
-                title: "Ejercicio incompleto",
-                icon: "error",
-                iconColor: "red",
-                width: "95%",
-                padding: "12px",
+                title: 'Ejercicio incompleto',
+                icon: 'error',
+                iconColor: 'red',
+                width: '95%',
+                padding: '12px',
                 html: `<div style="max-height:55vh; overflow-y:auto;">${htmlContenido}</div>`,
-                confirmButtonText: "Cerrar",
+                confirmButtonText: 'Cerrar',
                 customClass: {
-                    confirmButton: "btn-cierre",
+                    confirmButton: 'btn-cierre',
                 },
             });
         }
@@ -231,13 +231,13 @@ const EjercicioP4Phone: React.FC = () => {
     // Mostrar resultado final de la suma
     const mostrarResultadoSuma = async (numeros: number[], suma: number) => {
         await Swal.fire({
-            title: "Resultado Final",
-            icon: "success",
-            width: "92%",
-            padding: "12px",
-            confirmButtonText: "Cerrar",
+            title: 'Resultado Final',
+            icon: 'success',
+            width: '92%',
+            padding: '12px',
+            confirmButtonText: 'Cerrar',
             customClass: {
-                confirmButton: "btn-semitransparente",
+                confirmButton: 'btn-semitransparente',
             },
             html: `
             <div style="color:#000; text-align:left; font-size:14px;">
@@ -255,7 +255,7 @@ const EjercicioP4Phone: React.FC = () => {
                     line-height:1.5;
                     word-break:break-word;
                 ">
-                    ${numeros.join(", ")}
+                    ${numeros.join(', ')}
                 </div>
 
                 <div style="font-size:16px;">
@@ -274,19 +274,19 @@ const EjercicioP4Phone: React.FC = () => {
     };
 
     const cardStyle: React.CSSProperties = {
-        padding: "10px",
-        borderRadius: "10px",
-        fontSize: "13px",
+        padding: '10px',
+        borderRadius: '10px',
+        fontSize: '13px',
         fontWeight: 500,
-        color: "#111",
-        backgroundColor: "#ffffff",
-        border: "1px solid #e2e8f0",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-        cursor: "pointer",
+        color: '#111',
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
+        cursor: 'pointer',
     };
 
     const codeTextStyle: React.CSSProperties = {
-        whiteSpace: "pre",
+        whiteSpace: 'pre',
         fontFamily:
             "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace",
     };
@@ -295,10 +295,10 @@ const EjercicioP4Phone: React.FC = () => {
         <div>
             <div
                 style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    padding: "10px 15px",
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    padding: '10px 15px',
                 }}
             >
                 <svg
@@ -308,7 +308,7 @@ const EjercicioP4Phone: React.FC = () => {
                     height="30px"
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: 'pointer' }}
                 >
                     <title>cancel</title>
                     <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
@@ -321,22 +321,29 @@ const EjercicioP4Phone: React.FC = () => {
 
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                 <h1>
-                    Pon en orden las líneas de pseudocodigo para evaluar una
-                    calificación y mostrar si el estudiante aprobó, está en
-                    recuperación o reprobó.
+                    Diseñar el pseudocódigo que permita calcular la suma total
+                    de diez números ingresados por el usuario mediante una
+                    estructura de control repetitiva. Este algoritmo inicializa
+                    un acumulador en cero y un contador para ejecutar un ciclo
+                    iterativo que se repite diez veces, solicitando en cada
+                    vuelta la entrada de un valor numérico que se suma
+                    progresivamente al total acumulado, incrementando el
+                    contador en cada paso hasta finalizar la condición del bucle
+                    y mostrar en pantalla el resultado final de la suma de todos
+                    los elementos procesados.
                 </h1>
             </div>
 
-            <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                <h3 style={{ color: "white" }}>Banco de líneas</h3>
+            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                <h3 style={{ color: 'white' }}>Banco de líneas</h3>
             </div>
 
             <div
                 style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "10px",
-                    justifyContent: "center",
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '10px',
+                    justifyContent: 'center',
                 }}
             >
                 {available.map((line) => (
@@ -371,14 +378,14 @@ const EjercicioP4Phone: React.FC = () => {
                             ref={drop.innerRef}
                             {...drop.droppableProps}
                             style={{
-                                width: "95vw",
-                                height: "65vh",
-                                margin: "0 auto",
-                                padding: "15px",
-                                borderRadius: "16px",
-                                background: "#ffffff",
-                                border: "2px dashed #cbd5e1",
-                                overflowY: "auto",
+                                width: '95vw',
+                                height: '65vh',
+                                margin: '0 auto',
+                                padding: '15px',
+                                borderRadius: '16px',
+                                background: '#ffffff',
+                                border: '2px dashed #cbd5e1',
+                                overflowY: 'auto',
                             }}
                         >
                             {selected.map((line, index) => (
@@ -395,8 +402,8 @@ const EjercicioP4Phone: React.FC = () => {
                                             onClick={() => returnToBank(line)}
                                             style={{
                                                 ...cardStyle,
-                                                marginBottom: "8px",
-                                                border: "1px solid #3b82f6",
+                                                marginBottom: '8px',
+                                                border: '1px solid #3b82f6',
                                                 ...drag.draggableProps.style,
                                             }}
                                         >
