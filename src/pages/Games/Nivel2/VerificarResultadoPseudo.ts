@@ -295,3 +295,38 @@ export const verificarResultadoPseudocodigo6 = (ids: string[]): boolean[] => {
         boolean18,
     ];
 };
+
+export const verificarResultadoPseudocodigo7 = (ids: string[]): boolean[] => {
+    let b1 = false,
+        b2 = false,
+        b3 = false,
+        b4 = false,
+        b5 = false;
+    let b6 = false,
+        b7 = false,
+        b8 = false,
+        b9 = false,
+        b10 = false;
+    let b11 = false,
+        b12 = false,
+        b13 = false;
+    let b14 = false;
+
+    if (ids[0] === '1') b1 = true; // Proceso TablaDeMultiplicar
+    if (ids[1] === '2') b2 = true; // Definir numero, i Como Entero
+    if (ids[2] === '3') b3 = true; // Escribir "Ingrese un número...
+    if (ids[3] === '4') b4 = true; // Leer numero
+    if (ids[4] === '5') b5 = true; // Mientras numero < 1 O numero > 10 Hacer
+    if (ids[5] === '6') b6 = true; // Escribir "Error: ...
+    if (ids[6] === '7') b7 = true; // Leer numero
+    if (ids[7] === '8') b8 = true; // FinMientras
+    if (ids[8] === '9') b9 = true; // Escribir ""
+    if (ids[9] === '10') b10 = true; // Escribir "Tabla del ", numero, ":"
+    if (ids[10] === '11') b11 = true; // Para i <- 1 Hasta 10 Hacer
+    if (ids[11] === '12') b12 = true; // Escribir numero, " x ", i, " = ", numero * i
+    if (ids[12] === '13') b13 = true; // FinPara
+    if (ids[13] === '14') b14 = true; // FinProceso
+    // FinProceso se valida por la cantidad de líneas
+
+    return [b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14];
+};
