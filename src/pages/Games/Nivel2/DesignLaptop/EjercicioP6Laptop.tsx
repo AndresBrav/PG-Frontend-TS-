@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { verificarResultadoPseudocodigo5 } from '../VerificarResultadoPseudo';
+import { verificarResultadoPseudocodigo6 } from '../VerificarResultadoPseudo';
 
 interface CodeLine {
     id: string;
@@ -11,29 +11,30 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: '1', content: 'Proceso SumarHastaNegativo' },
+    { id: '1', content: 'Proceso ContarParesImpares' },
+    { id: '4', content: '  pares <- 0' },
     {
-        id: '4',
-        content:
-            '  Escribir "Ingrese un numero positivo (un negativo para terminar):"',
+        id: '2',
+        content: '  Definir numero, contador, pares, impares Como Entero',
     },
-    { id: '2', content: '  Definir numero, suma Como Entero' },
-    { id: '6', content: '  Mientras numero >= 0 Hacer' },
-    { id: '7', content: '    suma <- suma + numero' },
-    { id: '3', content: '  suma <- 0' },
-    { id: '5', content: '  Leer numero' },
-    {
-        id: '8',
-        content:
-            '    Escribir "Ingrese un numero positivo (un negativo para terminar):"',
-    },
-    { id: '9', content: '    Leer numero' },
-    { id: '10', content: '  FinMientras' },
-    { id: '11', content: '  Escribir "La suma total es: ", suma' },
-    { id: '12', content: 'FinProceso' },
+    { id: '6', content: '  Mientras contador < 5 Hacer' },
+    { id: '7', content: '    Escribir "Ingrese un numero:"' },
+    { id: '3', content: '  contador <- 0' },
+    { id: '5', content: '  impares <- 0' },
+    { id: '8', content: '    Leer numero' },
+    { id: '9', content: '    Si numero % 2 = 0 Entonces' },
+    { id: '10', content: '      pares <- pares + 1' },
+    { id: '11', content: '    SiNo' },
+    { id: '12', content: '      impares <- impares + 1' },
+    { id: '13', content: '    FinSi' },
+    { id: '14', content: '    contador <- contador + 1' },
+    { id: '15', content: '  FinMientras' },
+    { id: '16', content: '  Escribir "Cantidad de pares: ", pares' },
+    { id: '17', content: '  Escribir "Cantidad de impares: ", impares' },
+    { id: '18', content: 'FinProceso' },
 ];
 
-const EjercicioP5Laptop: React.FC = () => {
+const EjercicioP6Laptop: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
@@ -126,9 +127,9 @@ const EjercicioP5Laptop: React.FC = () => {
                         font-size:14px;
                         line-height:1.5;
                     ">
-                        Se pedirán números enteros uno por uno.<br/>
-                        El ciclo continuará mientras el número ingresado sea <b>mayor o igual a 0</b>.<br/>
-                        Cuando ingreses un número negativo, el ciclo terminará y se mostrará la suma total.
+                        Se pedirán exactamente 5 números enteros.<br/>
+                        El sistema contará cuántos de ellos son pares y cuántos impares.<br/>
+                        Al finalizar se mostrarán ambos conteos.
                     </div>
                 </div>
                 `,
@@ -136,25 +137,20 @@ const EjercicioP5Laptop: React.FC = () => {
 
             if (!primerSwal.isConfirmed) return;
 
-            let suma = 0;
-            const numerosValidos: number[] = [];
-            // let numeroActual: number | null = null;
-            let numeroActual = 0;
-            let iteracion = 1;
+            let pares = 0;
+            let impares = 0;
 
-            while (true) {
+            for (let i = 1; i <= 5; i++) {
                 const { value } = await Swal.fire({
-                    title: `Iteración ${iteracion}`,
+                    title: `Iteración ${i}`,
                     html: `
                     <div style="color:#000; text-align:left; font-size:14px;">
                         <div style="margin-bottom:10px;">
                             Ingresa un número entero
                         </div>
-                        <div style="margin-bottom:8px; color:#374151;">
-                            El ciclo termina cuando ingreses un número <b>negativo</b>.
-                        </div>
                         <div style="font-size:13px; color:#374151;">
-                            Suma actual: <b>${suma}</b>
+                            Pares actuales: <b>${pares}</b><br/>
+                            Impares actuales: <b>${impares}</b>
                         </div>
                     </div>
                     `,
@@ -164,7 +160,7 @@ const EjercicioP5Laptop: React.FC = () => {
                         inputmode: 'numeric',
                         pattern: '[0-9-]*',
                     },
-                    inputPlaceholder: 'Ej: 8 o -1 para terminar',
+                    inputPlaceholder: 'Ej: 8 o -3',
                     width: '40%',
                     confirmButtonText: 'Continuar',
                     allowOutsideClick: false,
@@ -200,22 +196,32 @@ const EjercicioP5Laptop: React.FC = () => {
 
                 if (value === undefined) return;
 
-                numeroActual = value;
-
-                if (numeroActual < 0) {
-                    break;
+                if (value % 2 === 0) {
+                    pares++;
+                } else {
+                    impares++;
                 }
-
-                numerosValidos.push(numeroActual);
-                suma += numeroActual;
-                iteracion++;
             }
 
-            await mostrarResultadoSumaHastaNegativo(
-                numerosValidos,
-                suma,
-                numeroActual
-            );
+            await Swal.fire({
+                title: 'Resultado Final',
+                icon: 'success',
+                width: '45%',
+                confirmButtonText: 'Cerrar',
+                customClass: {
+                    confirmButton: 'btn-semitransparente',
+                },
+                html: `
+                <div style="color:#000; text-align:left; font-size:14px;">
+                    <div style="margin-bottom:12px;">
+                        <b>Cantidad de números pares:</b> ${pares}
+                    </div>
+                    <div>
+                        <b>Cantidad de números impares:</b> ${impares}
+                    </div>
+                </div>
+                `,
+            });
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -231,55 +237,10 @@ const EjercicioP5Laptop: React.FC = () => {
         }
     };
 
-    // Mostrar resultado final del ciclo
-    const mostrarResultadoSumaHastaNegativo = async (
-        numerosValidos: number[],
-        suma: number,
-        numeroFinal: number | null
-    ) => {
-        await Swal.fire({
-            title: 'Resultado Final',
-            icon: 'success',
-            width: '45%',
-            confirmButtonText: 'Cerrar',
-            customClass: {
-                confirmButton: 'btn-semitransparente',
-            },
-            html: `
-            <div style="color:#000; text-align:left; font-size:14px;">
-                <div style="margin-bottom:10px;">
-                    <b>Números sumados:</b>
-                </div>
-
-                <div style="
-                    background:#f8fafc;
-                    border:1px solid #e5e7eb;
-                    border-radius:8px;
-                    padding:10px;
-                    margin-bottom:12px;
-                    font-size:13px;
-                    line-height:1.6;
-                    word-break:break-word;
-                ">
-                    ${numerosValidos.length > 0 ? numerosValidos.join(', ') : 'No se ingresaron números no negativos'}
-                </div>
-
-                <div style="margin-bottom:10px;">
-                    <b>Número que terminó el ciclo:</b> ${numeroFinal}
-                </div>
-
-                <div style="font-size:16px;">
-                    <b>La suma total es:</b> ${suma}
-                </div>
-            </div>
-            `,
-        });
-    };
-
     // Ejecutar verificación
     const printOrder = () => {
         const ids = selected.map((line) => line.id);
-        const resultados: boolean[] = verificarResultadoPseudocodigo5(ids);
+        const resultados: boolean[] = verificarResultadoPseudocodigo6(ids);
 
         console.log('IDs en orden:', ids);
         console.log('Resultados:', resultados);
@@ -337,19 +298,11 @@ const EjercicioP5Laptop: React.FC = () => {
 
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                 <h1>
-                    Diseñar el pseudocódigo que permita calcular la suma
-                    acumulada de una serie de números positivos ingresados por
-                    el usuario, finalizando el proceso al introducir un valor
-                    negativo. Este algoritmo utiliza una estructura de control
-                    repetitiva que condiciona la permanencia en el ciclo a que
-                    el número ingresado sea mayor o igual a cero, permitiendo
-                    que el usuario sume una cantidad indeterminada de valores
-                    que se acumulan progresivamente en una variable, deteniendo
-                    la ejecución y mostrando el resultado total obtenido justo
-                    en el momento en que se detecta una entrada negativa como
-                    señal de cierre.
+                    Diseñar un algoritmo que lea 5 números y determine cuántos
+                    son pares y cuántos impares.
                 </h1>
             </div>
+
             {/* ================= BANCO ================= */}
             <div>
                 <br />
@@ -460,8 +413,9 @@ const EjercicioP5Laptop: React.FC = () => {
                     )}
                 </Droppable>
             </DragDropContext>
+            <br />
         </div>
     );
 };
 
-export default EjercicioP5Laptop;
+export default EjercicioP6Laptop;

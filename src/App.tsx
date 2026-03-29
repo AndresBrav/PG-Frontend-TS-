@@ -1,18 +1,19 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { TokenProvider } from "./Context/TokenProvider";
-import Login from "./pages/users/Login";
-import SignUp from "./pages/users/SignUp";
-import Dashboard from "./pages/Games/Presentation/Dashboard";
-import Ejercicio1 from "./pages/Games/Level1/Ejercicio1";
-import Ejercicio2 from "./pages/Games/Level1/Ejercicio2";
-import Ejercicio3 from "./pages/Games/Level1/Ejercicio3";
-import Ejercicio4 from "./pages/Games/Level1/Ejercicio4";
-import Ejercicio5 from "./pages/Games/Level1/Ejercicio5";
-import EjercicioP1 from "./pages/Games/Nivel2/EjercicioP1";
-import EjercicioP2 from "./pages/Games/Nivel2/EjercicioP2";
-import EjercicioP3 from "./pages/Games/Nivel2/EjercicioP3";
-import EjercicioP4 from "./pages/Games/Nivel2/EjercicioP4";
-import EjercicioP5 from "./pages/Games/Nivel2/EjercicioP5";
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { TokenProvider } from './Context/TokenProvider';
+import Login from './pages/users/Login';
+import SignUp from './pages/users/SignUp';
+import Dashboard from './pages/Games/Presentation/Dashboard';
+import Ejercicio1 from './pages/Games/Level1/Ejercicio1';
+import Ejercicio2 from './pages/Games/Level1/Ejercicio2';
+import Ejercicio3 from './pages/Games/Level1/Ejercicio3';
+import Ejercicio4 from './pages/Games/Level1/Ejercicio4';
+import Ejercicio5 from './pages/Games/Level1/Ejercicio5';
+import EjercicioP1 from './pages/Games/Nivel2/EjercicioP1';
+import EjercicioP2 from './pages/Games/Nivel2/EjercicioP2';
+import EjercicioP3 from './pages/Games/Nivel2/EjercicioP3';
+import EjercicioP4 from './pages/Games/Nivel2/EjercicioP4';
+import EjercicioP5 from './pages/Games/Nivel2/EjercicioP5';
+import EjercicioP6 from './pages/Games/Nivel2/EjercicioP6';
 
 function App() {
     return (
@@ -47,6 +48,10 @@ function App() {
                         <Route
                             path="/ejercicio5-pseudocodigo"
                             element={<EjercicioP5 />}
+                        />
+                        <Route
+                            path="/ejercicio6-pseudocodigo"
+                            element={<EjercicioP6 />}
                         />
                     </Routes>
                 </BrowserRouter>

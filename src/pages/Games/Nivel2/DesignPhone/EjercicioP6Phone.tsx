@@ -3,7 +3,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { verificarResultadoPseudocodigo5 } from '../VerificarResultadoPseudo';
+import { verificarResultadoPseudocodigo6 } from '../VerificarResultadoPseudo';
 
 interface CodeLine {
     id: string;
@@ -11,29 +11,30 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: '1', content: 'Proceso SumarHastaNegativo' },
+    { id: '1', content: 'Proceso ContarParesImpares' },
+    { id: '4', content: '  pares <- 0' },
     {
-        id: '4',
-        content:
-            '  Escribir "Ingrese un numero positivo (un negativo para terminar):"',
+        id: '2',
+        content: '  Definir numero, contador, pares, impares Como Entero',
     },
-    { id: '2', content: '  Definir numero, suma Como Entero' },
-    { id: '6', content: '  Mientras numero >= 0 Hacer' },
-    { id: '7', content: '    suma <- suma + numero' },
-    { id: '3', content: '  suma <- 0' },
-    { id: '5', content: '  Leer numero' },
-    {
-        id: '8',
-        content:
-            '    Escribir "Ingrese un numero positivo (un negativo para terminar):"',
-    },
-    { id: '9', content: '    Leer numero' },
-    { id: '10', content: '  FinMientras' },
-    { id: '11', content: '  Escribir "La suma total es: ", suma' },
-    { id: '12', content: 'FinProceso' },
+    { id: '6', content: '  Mientras contador < 5 Hacer' },
+    { id: '7', content: '    Escribir "Ingrese un numero:"' },
+    { id: '3', content: '  contador <- 0' },
+    { id: '5', content: '  impares <- 0' },
+    { id: '8', content: '    Leer numero' },
+    { id: '9', content: '    Si numero % 2 = 0 Entonces' },
+    { id: '10', content: '      pares <- pares + 1' },
+    { id: '11', content: '    SiNo' },
+    { id: '12', content: '      impares <- impares + 1' },
+    { id: '13', content: '    FinSi' },
+    { id: '14', content: '    contador <- contador + 1' },
+    { id: '15', content: '  FinMientras' },
+    { id: '16', content: '  Escribir "Cantidad de pares: ", pares' },
+    { id: '17', content: '  Escribir "Cantidad de impares: ", impares' },
+    { id: '18', content: 'FinProceso' },
 ];
 
-const EjercicioP5Laptop: React.FC = () => {
+const EjercicioP6Phone: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
@@ -69,34 +70,43 @@ const EjercicioP5Laptop: React.FC = () => {
     // Mostrar resultado del ejercicio
     const verificarRespuestaPseudo = async (resultados: boolean[]) => {
         const pasos = selected.map((line, index) => ({
-            id: line.id,
             texto: line.content,
             estado: resultados[index] ?? false,
         }));
 
         const htmlContenido = `
-        <div style="display:flex; flex-direction:column; gap:6px; text-align:left; margin-top:10px;">
-            ${pasos
-                .map((p) => {
-                    const borderColor = p.estado ? '#16a34a' : '#dc2626';
+    <div style="
+        display:flex;
+        flex-direction:column;
+        gap:6px;
+        margin-top:8px;
+        text-align:left;
+    ">
+        ${pasos
+            .map((p) => {
+                const borderColor = p.estado ? '#16a34a' : '#dc2626';
+                return `<div style="
+                    border:2px solid ${borderColor};
+                    border-radius:6px;
+                    padding:6px 8px;
+                    width:100%;
+                    box-sizing:border-box;
 
-                    return `
-                    <div style="
-                        border:2px solid ${borderColor};
-                        border-radius:6px;
-                        padding:4px 6px;
-                        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace;
-                        white-space: pre;
-                        font-size:13px;
-                        color:#000000;
-                        background:#ffffff;
-                    ">
-                        ${p.texto}
-                    </div>
-                    `;
-                })
-                .join('')}
-        </div>`;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+                    white-space: pre;
+                    text-align:left;
+
+                    overflow-x:auto;
+                    overflow-y:hidden;
+                    -webkit-overflow-scrolling: touch;
+
+                    font-size:12px;
+                    color:#000;
+                    background:#fff;
+                ">${p.texto}</div>`;
+            })
+            .join('')}
+    </div>`;
 
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
@@ -105,7 +115,9 @@ const EjercicioP5Laptop: React.FC = () => {
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
-                width: '55%',
+                width: '95%',
+                padding: '12px',
+                heightAuto: false,
                 confirmButtonText: 'Simular ciclo',
                 showCancelButton: true,
                 cancelButtonText: 'Cerrar',
@@ -114,58 +126,56 @@ const EjercicioP5Laptop: React.FC = () => {
                     cancelButton: 'btn-cierre',
                 },
                 html: `
-                <div style="padding:8px;">
+            <div style="padding:4px;">
+                <div style="max-height:40vh; overflow-y:auto;">
                     ${htmlContenido}
-
-                    <div style="
-                        margin-top:14px;
-                        padding-top:12px;
-                        border-top:1px solid #e5e7eb;
-                        text-align:left;
-                        color:#000;
-                        font-size:14px;
-                        line-height:1.5;
-                    ">
-                        Se pedirán números enteros uno por uno.<br/>
-                        El ciclo continuará mientras el número ingresado sea <b>mayor o igual a 0</b>.<br/>
-                        Cuando ingreses un número negativo, el ciclo terminará y se mostrará la suma total.
-                    </div>
                 </div>
-                `,
+
+                <div style="
+                    margin-top:10px;
+                    padding-top:10px;
+                    border-top:1px solid #e5e7eb;
+                    text-align:left;
+                    color:#000;
+                    font-size:13px;
+                    line-height:1.4;
+                ">
+                    Se pedirán exactamente 5 números enteros.<br/>
+                    El sistema contará cuántos son pares y cuántos impares.<br/>
+                    Al final se mostrarán ambos resultados.
+                </div>
+            </div>
+            `,
             });
 
             if (!primerSwal.isConfirmed) return;
 
-            let suma = 0;
-            const numerosValidos: number[] = [];
-            // let numeroActual: number | null = null;
-            let numeroActual = 0;
-            let iteracion = 1;
+            let pares = 0;
+            let impares = 0;
 
-            while (true) {
+            for (let i = 1; i <= 5; i++) {
                 const { value } = await Swal.fire({
-                    title: `Iteración ${iteracion}`,
+                    title: `Iteración ${i}`,
                     html: `
-                    <div style="color:#000; text-align:left; font-size:14px;">
-                        <div style="margin-bottom:10px;">
-                            Ingresa un número entero
-                        </div>
-                        <div style="margin-bottom:8px; color:#374151;">
-                            El ciclo termina cuando ingreses un número <b>negativo</b>.
-                        </div>
-                        <div style="font-size:13px; color:#374151;">
-                            Suma actual: <b>${suma}</b>
-                        </div>
+                <div style="color:#000; text-align:left; font-size:14px;">
+                    <div style="margin-bottom:10px;">
+                        Ingresa un número entero
                     </div>
-                    `,
+                    <div style="font-size:12px; color:#374151;">
+                        Pares: <b>${pares}</b> | Impares: <b>${impares}</b>
+                    </div>
+                </div>
+                `,
                     input: 'number',
                     inputAttributes: {
                         step: '1',
                         inputmode: 'numeric',
                         pattern: '[0-9-]*',
                     },
-                    inputPlaceholder: 'Ej: 8 o -1 para terminar',
-                    width: '40%',
+                    inputPlaceholder: 'Ej: 8',
+                    width: '92%',
+                    padding: '12px',
+                    heightAuto: false,
                     confirmButtonText: 'Continuar',
                     allowOutsideClick: false,
                     allowEscapeKey: false,
@@ -200,86 +210,53 @@ const EjercicioP5Laptop: React.FC = () => {
 
                 if (value === undefined) return;
 
-                numeroActual = value;
-
-                if (numeroActual < 0) {
-                    break;
+                if (value % 2 === 0) {
+                    pares++;
+                } else {
+                    impares++;
                 }
-
-                numerosValidos.push(numeroActual);
-                suma += numeroActual;
-                iteracion++;
             }
 
-            await mostrarResultadoSumaHastaNegativo(
-                numerosValidos,
-                suma,
-                numeroActual
-            );
+            await Swal.fire({
+                title: 'Resultado Final',
+                icon: 'success',
+                width: '92%',
+                padding: '12px',
+                confirmButtonText: 'Cerrar',
+                customClass: {
+                    confirmButton: 'btn-semitransparente',
+                },
+                html: `
+            <div style="color:#000; text-align:left; font-size:14px;">
+                <div style="margin-bottom:12px;">
+                    <b>Cantidad de números pares:</b> ${pares}
+                </div>
+                <div>
+                    <b>Cantidad de números impares:</b> ${impares}
+                </div>
+            </div>
+            `,
+            });
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',
-                html: `<div style="padding:8px;">${htmlContenido}</div>`,
                 icon: 'error',
                 iconColor: 'red',
+                width: '95%',
+                padding: '12px',
+                html: `<div style="max-height:55vh; overflow-y:auto;">${htmlContenido}</div>`,
                 confirmButtonText: 'Cerrar',
                 customClass: {
                     confirmButton: 'btn-cierre',
                 },
-                width: '50%',
             });
         }
-    };
-
-    // Mostrar resultado final del ciclo
-    const mostrarResultadoSumaHastaNegativo = async (
-        numerosValidos: number[],
-        suma: number,
-        numeroFinal: number | null
-    ) => {
-        await Swal.fire({
-            title: 'Resultado Final',
-            icon: 'success',
-            width: '45%',
-            confirmButtonText: 'Cerrar',
-            customClass: {
-                confirmButton: 'btn-semitransparente',
-            },
-            html: `
-            <div style="color:#000; text-align:left; font-size:14px;">
-                <div style="margin-bottom:10px;">
-                    <b>Números sumados:</b>
-                </div>
-
-                <div style="
-                    background:#f8fafc;
-                    border:1px solid #e5e7eb;
-                    border-radius:8px;
-                    padding:10px;
-                    margin-bottom:12px;
-                    font-size:13px;
-                    line-height:1.6;
-                    word-break:break-word;
-                ">
-                    ${numerosValidos.length > 0 ? numerosValidos.join(', ') : 'No se ingresaron números no negativos'}
-                </div>
-
-                <div style="margin-bottom:10px;">
-                    <b>Número que terminó el ciclo:</b> ${numeroFinal}
-                </div>
-
-                <div style="font-size:16px;">
-                    <b>La suma total es:</b> ${suma}
-                </div>
-            </div>
-            `,
-        });
     };
 
     // Ejecutar verificación
     const printOrder = () => {
         const ids = selected.map((line) => line.id);
-        const resultados: boolean[] = verificarResultadoPseudocodigo5(ids);
+        const resultados: boolean[] = verificarResultadoPseudocodigo6(ids);
 
         console.log('IDs en orden:', ids);
         console.log('Resultados:', resultados);
@@ -288,7 +265,7 @@ const EjercicioP5Laptop: React.FC = () => {
     };
 
     const cardStyle: React.CSSProperties = {
-        padding: '10px 10px',
+        padding: '10px',
         borderRadius: '10px',
         fontSize: '13px',
         fontWeight: 500,
@@ -302,7 +279,7 @@ const EjercicioP5Laptop: React.FC = () => {
     const codeTextStyle: React.CSSProperties = {
         whiteSpace: 'pre',
         fontFamily:
-            "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+            "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace",
     };
 
     return (
@@ -334,38 +311,25 @@ const EjercicioP5Laptop: React.FC = () => {
                 <h1>Pseudocodigo</h1>
             </div>
             <br />
-
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                 <h1>
-                    Diseñar el pseudocódigo que permita calcular la suma
-                    acumulada de una serie de números positivos ingresados por
-                    el usuario, finalizando el proceso al introducir un valor
-                    negativo. Este algoritmo utiliza una estructura de control
-                    repetitiva que condiciona la permanencia en el ciclo a que
-                    el número ingresado sea mayor o igual a cero, permitiendo
-                    que el usuario sume una cantidad indeterminada de valores
-                    que se acumulan progresivamente en una variable, deteniendo
-                    la ejecución y mostrando el resultado total obtenido justo
-                    en el momento en que se detecta una entrada negativa como
-                    señal de cierre.
+                    Diseñar un algoritmo que lea 5 números y determine cuántos
+                    son pares y cuántos impares.
                 </h1>
             </div>
+
             {/* ================= BANCO ================= */}
             <div>
                 <br />
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <h3 style={{ color: 'white', margin: 0 }}>
-                        Banco de líneas
-                    </h3>
+                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                    <h3 style={{ color: 'white' }}>Banco de líneas</h3>
                 </div>
-                <br />
+
                 <div
                     style={{
                         display: 'flex',
                         flexWrap: 'wrap',
-                        gap: '12px',
-                        minHeight: '90px',
-                        alignContent: 'flex-start',
+                        gap: '10px',
                         justifyContent: 'center',
                     }}
                 >
@@ -373,20 +337,15 @@ const EjercicioP5Laptop: React.FC = () => {
                         <div
                             key={line.id}
                             onClick={() => addLine(line)}
-                            style={{
-                                ...cardStyle,
-                                backgroundColor: '#f8fafc',
-                                height: '35px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                overflow: 'hidden',
-                            }}
-                            title="Click para enviar a Construcción"
+                            style={cardStyle}
                         >
                             <span style={codeTextStyle}>{line.content}</span>
                         </div>
                     ))}
                 </div>
+
+                <br />
+                <br />
             </div>
 
             <br />
@@ -413,15 +372,14 @@ const EjercicioP5Laptop: React.FC = () => {
                             ref={drop.innerRef}
                             {...drop.droppableProps}
                             style={{
-                                width: '50vw',
-                                height: '70vh',
+                                width: '95vw',
+                                height: '65vh',
                                 margin: '0 auto',
-                                padding: '20px',
+                                padding: '15px',
                                 borderRadius: '16px',
                                 background: '#ffffff',
                                 border: '2px dashed #cbd5e1',
                                 overflowY: 'auto',
-                                boxSizing: 'border-box',
                             }}
                         >
                             {selected.map((line, index) => (
@@ -436,15 +394,10 @@ const EjercicioP5Laptop: React.FC = () => {
                                             {...drag.draggableProps}
                                             {...drag.dragHandleProps}
                                             onClick={() => returnToBank(line)}
-                                            title="Click para devolver al Banco"
                                             style={{
                                                 ...cardStyle,
-                                                marginBottom: '10px',
+                                                marginBottom: '8px',
                                                 border: '1px solid #3b82f6',
-                                                height: '40px',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                overflow: 'hidden',
                                                 ...drag.draggableProps.style,
                                             }}
                                         >
@@ -460,8 +413,9 @@ const EjercicioP5Laptop: React.FC = () => {
                     )}
                 </Droppable>
             </DragDropContext>
+            <br />
         </div>
     );
 };
 
-export default EjercicioP5Laptop;
+export default EjercicioP6Phone;
