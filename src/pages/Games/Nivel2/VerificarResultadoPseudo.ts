@@ -385,3 +385,90 @@ export const verificarResultadoPseudocodigo8 = (ids: string[]): boolean[] => {
         b16,
     ];
 };
+
+export const verificarResultadoPseudocodigo9 = (ids: string[]): boolean[] => {
+    let b1 = false,
+        b2 = false,
+        b3 = false,
+        b4 = false,
+        b5 = false;
+    let b6 = false,
+        b7 = false,
+        b8 = false,
+        b9 = false,
+        b10 = false;
+    let b11 = false,
+        b12 = false,
+        b13 = false;
+
+    if (ids[0] === '1') b1 = true; // Proceso ArregloBasico
+    if (ids[1] === '2') b2 = true; // Definir numeros Como Entero
+    if (ids[2] === '3') b3 = true; // Dimension numeros[5]
+    if (ids[3] === '4') b4 = true; // Definir i Como Entero
+    if (ids[4] === '5') b5 = true; // Para i <- 1 Hasta 5 Hacer (llenar)
+    if (ids[5] === '6') b6 = true; // Escribir "Ingrese un numero...
+    if (ids[6] === '7') b7 = true; // Leer numeros[i]
+    if (ids[7] === '8') b8 = true; // FinPara (del llenado)
+    if (ids[8] === '9') b9 = true; // Escribir "Los numeros ingresados son:"
+    if (ids[9] === '10') b10 = true; // Para i <- 1 Hasta 5 Hacer (mostrar)
+    if (ids[10] === '11') b11 = true; // Escribir numeros[i]
+    if (ids[11] === '12') b12 = true; // FinPara (del mostrar)
+    if (ids[12] === '13') b13 = true; // FinProceso
+
+    return [b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13];
+};
+
+export const verificarResultadoPseudocodigo10 = (ids: string[]): boolean[] => {
+    let b1 = false,
+        b2 = false,
+        b3 = false,
+        b4 = false,
+        b5 = false;
+    let b6 = false,
+        b7 = false,
+        b8 = false,
+        b9 = false,
+        b10 = false;
+    let b11 = false,
+        b12 = false,
+        b13 = false,
+        b14 = false;
+    let b15 = false;
+    let b16 = false;
+
+    if (ids[0] === '1') b1 = true; // Proceso NumeroMayor
+    if (ids[1] === '2') b2 = true; // Definir numeros Como Entero
+    if (ids[2] === '3') b3 = true; // Dimension numeros[5]
+    if (ids[3] === '4') b4 = true; // Definir i, mayor Como Entero
+    if (ids[4] === '5') b5 = true; // Para i <- 1 Hasta 5 Hacer (llenar)
+    if (ids[5] === '6') b6 = true; // Escribir "Ingrese un numero ", i, ":"
+    if (ids[6] === '7') b7 = true; // Leer numeros[i]
+    if (ids[7] === '8') b8 = true; // FinPara (llenado)
+    if (ids[8] === '9') b9 = true; // mayor <- numeros[1]
+    if (ids[9] === '10') b10 = true; // Para i <- 2 Hasta 5 Hacer (buscar mayor)
+    if (ids[10] === '11') b11 = true; // Si numeros[i] > mayor Entonces
+    if (ids[11] === '12') b12 = true; // mayor <- numeros[i]
+    if (ids[12] === '13') b13 = true; // FinSi
+    if (ids[13] === '14') b14 = true; // FinProceso (incluye el último FinPara y Escribir)
+    if (ids[14] === '15') b15 = true; // FinProceso (incluye el último FinPara y Escribir)
+    if (ids[15] === '16') b16 = true; // FinProceso (incluye el último FinPara y Escribir)
+
+    return [
+        b1,
+        b2,
+        b3,
+        b4,
+        b5,
+        b6,
+        b7,
+        b8,
+        b9,
+        b10,
+        b11,
+        b12,
+        b13,
+        b14,
+        b15,
+        b16,
+    ];
+};
