@@ -341,7 +341,7 @@ const EjercicioP5Phone: React.FC = () => {
             <div className="contenedor-diagramaflujo-ejercicio1">
                 <h1>Pseudocodigo</h1>
             </div>
-
+            <br />
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                 <h1>
                     Diseñar el pseudocódigo que permita calcular la suma

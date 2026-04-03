@@ -194,7 +194,7 @@ const Ejercicio1Laptop: React.FC = () => {
             <div className="contenedor-diagramaflujo-ejercicio1">
                 <h1>Diagramas de Flujo</h1>
             </div>
-
+            <br />
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                 <h1>
                     Diseñar el diagrama de flujo que recibe 2 numeros e imprime
