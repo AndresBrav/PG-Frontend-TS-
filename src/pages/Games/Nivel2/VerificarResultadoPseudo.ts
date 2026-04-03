@@ -330,3 +330,58 @@ export const verificarResultadoPseudocodigo7 = (ids: string[]): boolean[] => {
 
     return [b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14];
 };
+
+export const verificarResultadoPseudocodigo8 = (ids: string[]): boolean[] => {
+    let b1 = false,
+        b2 = false,
+        b3 = false,
+        b4 = false,
+        b5 = false;
+    let b6 = false,
+        b7 = false,
+        b8 = false,
+        b9 = false,
+        b10 = false;
+    let b11 = false,
+        b12 = false;
+    let b13 = false;
+    let b14 = false;
+    let b15 = false;
+    let b16 = false;
+
+    if (ids[0] === '1') b1 = true; // Proceso SumaParesImpares
+    if (ids[1] === '2') b2 = true; // Definir i, N, sumaPares, sumaImpares Como Entero
+    if (ids[2] === '3') b3 = true; // sumaPares <- 0
+    if (ids[3] === '4') b4 = true; // sumaImpares <- 0
+    if (ids[4] === '5') b5 = true; // Escribir "Ingrese un numero:"
+    if (ids[5] === '6') b6 = true; // Leer N
+    if (ids[6] === '7') b7 = true; // Para i <- 1 Hasta N Hacer
+    if (ids[7] === '8') b8 = true; // Si i MOD 2 = 0 Entonces
+    if (ids[8] === '9') b9 = true; // sumaPares <- sumaPares + i
+    if (ids[9] === '10') b10 = true; // SiNo
+    if (ids[10] === '11') b11 = true; // sumaImpares <- sumaImpares + i
+    if (ids[11] === '12') b12 = true; // FinSi (y FinPara + salidas)
+    if (ids[12] === '13') b13 = true; // Escribir "Suma de pares: ", sumaPares
+    if (ids[13] === '14') b14 = true; // Escribir "Suma de impares: ", sumaImpares
+    if (ids[14] === '15') b15 = true; //
+    if (ids[15] === '16') b16 = true; // FinProceso
+
+    return [
+        b1,
+        b2,
+        b3,
+        b4,
+        b5,
+        b6,
+        b7,
+        b8,
+        b9,
+        b10,
+        b11,
+        b12,
+        b13,
+        b14,
+        b15,
+        b16,
+    ];
+};

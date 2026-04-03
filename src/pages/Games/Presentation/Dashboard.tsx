@@ -15,7 +15,7 @@ import ModalInf2 from './ModalInf2';
 
 const Dashboard = () => {
     // useAuthRedirect(); //redirecciona si no hay token
-    const redirectToHome = useAuthRedirect();
+    // const redirectToHome = useAuthRedirect();
 
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
@@ -32,7 +32,7 @@ const Dashboard = () => {
 
         if (!claveAcceso) {
             console.log('no tienes una clave valida');
-            redirectToHome();
+            // redirectToHome();
         } else {
             const obtenerDatosUsuario = async () => {
                 console.log('la clave de acceso es ' + claveAcceso);
@@ -107,6 +107,10 @@ const Dashboard = () => {
 
     const irEjercicio7Pseudocodigo = () => {
         navigate('/ejercicio7-pseudocodigo');
+    };
+
+    const irEjercicio8Pseudocodigo = () => {
+        navigate('/ejercicio8-pseudocodigo');
     };
 
     return (
@@ -598,6 +602,15 @@ const Dashboard = () => {
                     onClick={irEjercicio7Pseudocodigo}
                 >
                     <div className="circle-inner">7</div>
+                </div>
+            </div>
+
+            <div className="contenedo-diagrama-flujo-primer-ejercicio">
+                <div
+                    className="circle-outer-2"
+                    onClick={irEjercicio8Pseudocodigo}
+                >
+                    <div className="circle-inner">8</div>
                 </div>
             </div>
             <br />
