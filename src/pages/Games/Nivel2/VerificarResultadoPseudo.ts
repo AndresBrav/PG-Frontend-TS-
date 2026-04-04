@@ -6,6 +6,8 @@ export const verificarResultadoPseudocodigo1 = (ids: string[]): boolean[] => {
     let boolean5: boolean = false;
     let boolean6: boolean = false;
     let boolean7: boolean = false;
+    let boolean8: boolean = false;
+    let boolean9: boolean = false;
 
     if (ids[0] === '1') boolean1 = true;
     if (ids[1] === '2') boolean2 = true;
@@ -14,6 +16,8 @@ export const verificarResultadoPseudocodigo1 = (ids: string[]): boolean[] => {
     if (ids[4] === '5') boolean5 = true;
     if (ids[5] === '6') boolean6 = true;
     if (ids[6] === '7') boolean7 = true;
+    if (ids[7] === '8') boolean8 = true;
+    if (ids[8] === '9') boolean9 = true;
 
     return [
         boolean1,
@@ -23,6 +27,8 @@ export const verificarResultadoPseudocodigo1 = (ids: string[]): boolean[] => {
         boolean5,
         boolean6,
         boolean7,
+        boolean8,
+        boolean9,
     ];
 };
 

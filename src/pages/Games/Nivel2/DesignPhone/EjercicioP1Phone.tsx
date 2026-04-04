@@ -12,12 +12,14 @@ interface CodeLine {
 
 const initialCode: CodeLine[] = [
     { id: '1', content: 'Proceso SumarDosNumeros' },
-    { id: '4', content: '  Leer num2' },
     { id: '2', content: '  Definir num1, num2, resultado Como Entero' },
-    { id: '6', content: '  Escribir resultado' },
-    { id: '7', content: 'FinProceso' },
-    { id: '3', content: '  Leer num1' },
-    { id: '5', content: '  resultado <- num1 + num2' },
+    { id: '3', content: '  Escribir "Ingrese el primer número"' },
+    { id: '4', content: '  Leer num1' },
+    { id: '5', content: '  Escribir "Ingrese el segundo número"' },
+    { id: '6', content: '  Leer num2' },
+    { id: '7', content: '  resultado <- num1 + num2' },
+    { id: '8', content: '  Escribir resultado' },
+    { id: '9', content: 'FinProceso' },
 ];
 
 const EjercicioP1Phone: React.FC = () => {
