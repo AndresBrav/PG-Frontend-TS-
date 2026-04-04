@@ -33,6 +33,7 @@ export const verificarResultadoPseudocodigo1 = (ids: string[]): boolean[] => {
 };
 
 export const verificarResultadoPseudocodigo2 = (ids: string[]): boolean[] => {
+    // Inicializamos todas las banderas en false
     let boolean1: boolean = false;
     let boolean2: boolean = false;
     let boolean3: boolean = false;
@@ -50,22 +51,60 @@ export const verificarResultadoPseudocodigo2 = (ids: string[]): boolean[] => {
     let boolean15: boolean = false;
     let boolean16: boolean = false;
 
-    if (ids[0] === '1') boolean1 = true;
-    if (ids[1] === '2') boolean2 = true;
-    if (ids[2] === '3') boolean3 = true;
-    if (ids[3] === '4') boolean4 = true;
-    if (ids[4] === '5') boolean5 = true;
-    if (ids[5] === '6') boolean6 = true;
-    if (ids[6] === '7') boolean7 = true;
-    if (ids[7] === '8') boolean8 = true;
-    if (ids[8] === '9') boolean9 = true;
-    if (ids[9] === '10') boolean10 = true;
-    if (ids[10] === '11') boolean11 = true;
-    if (ids[11] === '12') boolean12 = true;
-    if (ids[12] === '13') boolean13 = true;
-    if (ids[13] === '14') boolean14 = true;
-    if (ids[14] === '15') boolean15 = true;
-    if (ids[15] === '16') boolean16 = true;
+    // Validación del orden
+
+    if (ids[0] === '1') boolean1 = true; // Proceso MayorDeDosNumeros
+    if (ids[1] === '2') boolean2 = true; // Definir num1, num2 Como Entero
+
+    // === PARTE CRÍTICA: Lectura de números ===
+    // Solo aceptamos dos combinaciones coherentes:
+
+    if (ids[2] === '3') {
+        //Escribir num1
+        boolean3 = true;
+
+        if (ids[3] === '4') {
+            //Leer num1
+            boolean4 = true;
+
+            if (ids[4] === '5') {
+                //Escribir num2
+                boolean5 = true;
+
+                if (ids[5] === '6') {
+                    //Leer num2
+                    boolean6 = true;
+                }
+            }
+        }
+    } else if (ids[2] === '5') {
+        //Escribir num2
+        boolean3 = true;
+        if (ids[3] === '6') {
+            //Leer num2
+            boolean4 = true;
+            if (ids[4] === '3') {
+                //Escribir num1
+                boolean5 = true;
+                if (ids[5] === '4') {
+                    //Leer num1
+                    boolean6 = true;
+                }
+            }
+        }
+    }
+
+    // Estructura condicional (se mantiene fija)
+    if (ids[6] === '7') boolean7 = true; // Si num1 > 0 Y num2 > 0 Entonces
+    if (ids[7] === '8') boolean8 = true; //     Si num1 > num2 Entonces
+    if (ids[8] === '9') boolean9 = true; //         Escribir num1, " Es mayor"
+    if (ids[9] === '10') boolean10 = true; //     SiNo
+    if (ids[10] === '11') boolean11 = true; //         Escribir num2, " Es mayor"
+    if (ids[11] === '12') boolean12 = true; //     Fin Si
+    if (ids[12] === '13') boolean13 = true; // SiNo
+    if (ids[13] === '14') boolean14 = true; //     Escribir "Ingresa numeros positivos"
+    if (ids[14] === '15') boolean15 = true; //   Fin Si
+    if (ids[15] === '16') boolean16 = true; // FinProceso
 
     return [
         boolean1,
