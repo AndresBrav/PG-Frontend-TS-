@@ -12,16 +12,16 @@ interface CodeLine {
 
 const initialCode: CodeLine[] = [
     { id: '1', content: 'Proceso SumarHastaNegativo' },
+    { id: '2', content: '  Definir numero, suma Como Entero' },
+    { id: '3', content: '  suma <- 0' },
     {
         id: '4',
         content:
             '  Escribir "Ingrese un numero positivo (un negativo para terminar):"',
     },
-    { id: '2', content: '  Definir numero, suma Como Entero' },
+    { id: '5', content: '  Leer numero' },
     { id: '6', content: '  Mientras numero >= 0 Hacer' },
     { id: '7', content: '    suma <- suma + numero' },
-    { id: '3', content: '  suma <- 0' },
-    { id: '5', content: '  Leer numero' },
     {
         id: '8',
         content:
