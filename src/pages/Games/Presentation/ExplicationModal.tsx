@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface ModalPropsInf {
     isOpenSecondModal: boolean;
@@ -20,23 +20,23 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
     return (
         <div
             style={{
-                position: "fixed",
-                top: "10vh",
-                left: "10vw",
-                right: "10vw",
-                bottom: "10vh",
-                background: "rgba(24, 24, 24, 1)",
+                position: 'fixed',
+                top: '10vh',
+                left: '10vw',
+                right: '10vw',
+                bottom: '10vh',
+                background: 'rgba(24, 24, 24, 1)',
                 borderRadius: 15,
-                border: "2px solid white",
+                border: '2px solid white',
                 zIndex: 10000,
             }}
         >
             <div
                 style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    padding: "10px 15px",
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    padding: '10px 15px',
                 }}
             >
                 <svg
@@ -47,7 +47,7 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
                     style={{
-                        cursor: "pointer",
+                        cursor: 'pointer',
                     }}
                 >
                     <title>cancel</title>
@@ -55,18 +55,20 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
                 </svg>
             </div>
             <br />
-            <div style={{ display: "flex", justifyContent: "center" }}>
-                <h1 style={{ fontSize:"24px",color: "white"}}>{title}</h1>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <h1 style={{ fontSize: '24px', color: 'white' }}>{title}</h1>
             </div>
-            <div style={{ display: "flex", justifyContent: "center" }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <img
-                    style={{ height: "150px", width: "150px" }}
+                    style={{ height: '150px', width: '150px' }}
                     src={images}
                     alt="Símbolo de inicio/fin del diagrama de flujo"
                 />
             </div>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-                <h1 style={{fontSize:"20px",color:"white"}}>{descripcion} </h1> 
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <h1 style={{ fontSize: '20px', color: 'white' }}>
+                    {descripcion}{' '}
+                </h1>
             </div>
         </div>
     );
