@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { verificarResultadoPseudocodigo1 } from '../VerificarResultadoPseudo';
+import { TokenContext } from '../../../../Context/TokenContext';
+import { ejerciciosId } from '../../../../data/ejercicios';
+import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 
 interface CodeLine {
     id: string;
@@ -26,6 +29,8 @@ const EjercicioP1Phone: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
+    const [counterRate, setcounterRate] = useState<number>(1);
+    const { claveAcceso } = useContext(TokenContext);
 
     const returnDashboard = () => navigate('/dashboard');
 
@@ -49,7 +54,7 @@ const EjercicioP1Phone: React.FC = () => {
         });
     };
 
-    const verificarRespuestaPseudo = (resultados: boolean[]) => {
+    const verificarRespuestaPseudo = async (resultados: boolean[]) => {
         const pasos = selected.map((line, index) => ({
             texto: line.content,
             estado: resultados[index] ?? false,
@@ -97,12 +102,12 @@ const EjercicioP1Phone: React.FC = () => {
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
-                width: '95%',
+                width: '80%',
                 padding: '12px',
                 heightAuto: false,
                 confirmButtonText: 'Calcular',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -177,6 +182,17 @@ const EjercicioP1Phone: React.FC = () => {
                     return { num1, num2, suma: num1 + num2 };
                 },
             }).then(async (r) => {
+                // 👉 SOLO cuando hace click en "Siguiente"
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    console.log('Click en Siguiente');
+                    ejecutarOtroMetodo();
+                    return;
+                }
+
+                // 👉 Ignorar clicks fuera o ESC
+                if (r.isDismissed) return;
+
+                // 👉 Si presiona "Calcular"
                 if (!r.isConfirmed || !r.value) return;
 
                 await Swal.fire({
@@ -195,6 +211,11 @@ const EjercicioP1Phone: React.FC = () => {
                     `,
                 });
             });
+            if (counterRate == 1) {
+                console.log('el contador es ', counterRate);
+                await incrementarPuntuacionApi(claveAcceso, ejerciciosId[5]);
+            }
+            setcounterRate(counterRate + 1);
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -229,6 +250,12 @@ const EjercicioP1Phone: React.FC = () => {
         whiteSpace: 'pre',
         fontFamily:
             "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace",
+    };
+
+    const ejecutarOtroMetodo = async () => {
+        // navigate("/ejercicio3");
+        navigate('/ejercicio2-pseudocodigo');
+        // alert('iremos a la siguiente seccion cuando se implemente');
     };
 
     return (

@@ -57,7 +57,7 @@ const Ejercicio5Phone: React.FC = () => {
         verificarRespuesta(resultado);
     };
 
-    const verificarRespuesta = (resultado: boolean[]) => {
+    const verificarRespuesta = async (resultado: boolean[]) => {
         const pasos = [
             { imagen: 'https://i.imgur.com/zweLKEX.png', estado: resultado[0] }, //inicio
             { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[1] }, //flecha abajo 1
@@ -206,6 +206,8 @@ const Ejercicio5Phone: React.FC = () => {
                     ejecutarOtroMetodo();
                 }
             });
+            console.log('la clave de acceso va ser ', claveAcceso);
+            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]);
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -225,8 +227,7 @@ const Ejercicio5Phone: React.FC = () => {
 
     const ejecutarOtroMetodo = async () => {
         // navigate("/ejercicio3");
-        console.log('la clave de acceso va ser ', claveAcceso);
-        await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]);
+        navigate('/dashboard');
         alert('iremos a la siguiente seccion cuando se implemente');
     };
 

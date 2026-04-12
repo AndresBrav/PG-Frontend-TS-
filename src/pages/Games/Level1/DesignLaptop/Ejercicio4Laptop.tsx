@@ -57,7 +57,7 @@ const Ejercicio4Laptop: React.FC = () => {
         verificarRespuesta(resultado);
     };
 
-    const verificarRespuesta = (resultado: boolean[]) => {
+    const verificarRespuesta = async (resultado: boolean[]) => {
         const pasos = [
             { imagen: 'https://i.imgur.com/8Oalgpj.png', estado: resultado[0] }, //inicio
             { imagen: 'https://i.imgur.com/G9A6r4u.png', estado: resultado[3] }, //flecha 2
@@ -123,6 +123,8 @@ const Ejercicio4Laptop: React.FC = () => {
                     ejecutarOtroMetodo();
                 }
             });
+            console.log('la clave de acceso va ser ', claveAcceso);
+            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[3]);
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -139,8 +141,6 @@ const Ejercicio4Laptop: React.FC = () => {
     };
 
     const ejecutarOtroMetodo = async () => {
-        console.log('la clave de acceso va ser ', claveAcceso);
-        await incrementarPuntuacionApi(claveAcceso, ejerciciosId[3]);
         navigate('/ejercicio5');
     };
 

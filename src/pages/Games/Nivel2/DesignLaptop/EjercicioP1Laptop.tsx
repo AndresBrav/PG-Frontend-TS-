@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { verificarResultadoPseudocodigo1 } from '../VerificarResultadoPseudo';
+import { TokenContext } from '../../../../Context/TokenContext';
+import { ejerciciosId } from '../../../../data/ejercicios';
+import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 
 interface CodeLine {
     id: string;
@@ -25,7 +28,9 @@ const initialCode: CodeLine[] = [
 const EjercicioP1Laptop: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
+    const [counterRate, setcounterRate] = useState<number>(1);
     const navigate = useNavigate();
+    const { claveAcceso } = useContext(TokenContext);
 
     const returnDashboard = () => {
         navigate('/dashboard');
@@ -55,8 +60,8 @@ const EjercicioP1Laptop: React.FC = () => {
         });
     };
 
-    // ✅ Similar a tu verificarRespuesta: muestra Swal con tarjetas verde/rojo
-    const verificarRespuestaPseudo = (resultados: boolean[]) => {
+    // ✅ Similar a tu verificarRespueasync sta: muestra Swal con tarjetas verde/rojo
+    const verificarRespuestaPseudo = async (resultados: boolean[]) => {
         const pasos = selected.map((line, index) => ({
             id: line.id,
             texto: line.content,
@@ -104,7 +109,7 @@ const EjercicioP1Laptop: React.FC = () => {
                 width: '55%',
                 confirmButtonText: 'Calcular',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -193,6 +198,18 @@ const EjercicioP1Laptop: React.FC = () => {
                     };
                 },
             }).then(async (r) => {
+                // 👉 SOLO cuando hace click en "Siguiente"
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    console.log('Click en Siguiente');
+                    ejecutarOtroMetodo();
+                    return;
+                }
+
+                // 👉 Ignorar clicks fuera o ESC
+                if (r.isDismissed) return;
+
+                // 👉 Si presiona "Calcular"
+
                 if (!r.isConfirmed || !r.value) return;
 
                 // ✅ SEGUNDO SWAL → mostrar resultado
@@ -222,6 +239,11 @@ const EjercicioP1Laptop: React.FC = () => {
                 // 🔹 Si quieres navegar después:
                 // navigate("/ejercicio2");
             });
+            if (counterRate == 1) {
+                console.log('el contador es ', counterRate);
+                await incrementarPuntuacionApi(claveAcceso, ejerciciosId[5]);
+            }
+            setcounterRate(counterRate + 1);
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -269,6 +291,12 @@ const EjercicioP1Laptop: React.FC = () => {
         whiteSpace: 'pre',
         fontFamily:
             "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+    };
+
+    const ejecutarOtroMetodo = async () => {
+        // navigate("/ejercicio3");
+        navigate('/ejercicio2-pseudocodigo');
+        // alert('iremos a la siguiente seccion cuando se implemente');
     };
 
     return (
