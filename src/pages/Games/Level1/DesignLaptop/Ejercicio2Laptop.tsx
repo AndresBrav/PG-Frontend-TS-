@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { initialWidgetsEjercicio2 } from '../widgetsDataLevel1';
 import { verificarResultadoEjercicio2 } from '../VerificarResultado';
 import Swal from 'sweetalert2';
-
+import { ejerciciosId } from '../../../../data/ejercicios';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 
@@ -190,7 +190,7 @@ const Ejercicio2Laptop: React.FC = () => {
 
     const ejecutarOtroMetodo = async () => {
         console.log('la clave de acceso va ser ', claveAcceso);
-        await incrementarPuntuacionApi(claveAcceso, '2');
+        await incrementarPuntuacionApi(claveAcceso, ejerciciosId[1]);
         navigate('/ejercicio3');
     };
 

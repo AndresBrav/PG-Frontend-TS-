@@ -14,7 +14,7 @@ import avatars from '../../users/avatars';
 import ModalInf2 from './ModalInf2';
 
 const Dashboard = () => {
-    // useAuthRedirect(); //redirecciona si no hay token
+    useAuthRedirect(); //redirecciona si no hay token
     // const redirectToHome = useAuthRedirect();
 
     const a = useCerrarSesion(); // Hook para cerrar sesión

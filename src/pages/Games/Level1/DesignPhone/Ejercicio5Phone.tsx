@@ -9,6 +9,7 @@ import { verificarResultadoEjercicio5 } from '../VerificarResultado';
 import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
+import { ejerciciosId } from '../../../../data/ejercicios';
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
@@ -225,7 +226,7 @@ const Ejercicio5Phone: React.FC = () => {
     const ejecutarOtroMetodo = async () => {
         // navigate("/ejercicio3");
         console.log('la clave de acceso va ser ', claveAcceso);
-        await incrementarPuntuacionApi(claveAcceso, '5');
+        await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]);
         alert('iremos a la siguiente seccion cuando se implemente');
     };
 

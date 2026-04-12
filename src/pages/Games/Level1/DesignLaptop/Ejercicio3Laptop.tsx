@@ -9,7 +9,7 @@ import { verificarResultadoEjercicio3 } from '../VerificarResultado';
 import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
-
+import { ejerciciosId } from '../../../../data/ejercicios';
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
 const CELL_WIDTH = 150; // ancho de cada celda
@@ -200,7 +200,7 @@ const Ejercicio3Laptop: React.FC = () => {
 
     const ejecutarOtroMetodo = async () => {
         console.log('la clave de acceso va ser ', claveAcceso);
-        await incrementarPuntuacionApi(claveAcceso, '3');
+        await incrementarPuntuacionApi(claveAcceso, ejerciciosId[2]);
         navigate('/ejercicio4');
     };
 
