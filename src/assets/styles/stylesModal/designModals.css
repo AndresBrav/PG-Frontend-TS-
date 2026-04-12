@@ -43,6 +43,10 @@
 }
 
 @media (max-width: 480px) {
+    .contenedor-diagramaflujo-ejercicio1 {
+        margin-right: 40vw;
+    }
+
     .contenedor-diagramaflujo-ejercicio1 > h1 {
         font-size: 16px; /* 1 rem 16 px */
     }

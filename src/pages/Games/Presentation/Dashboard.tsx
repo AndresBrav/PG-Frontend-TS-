@@ -337,25 +337,6 @@ const Dashboard = () => {
                                         Cancelar
                                     </button>
 
-                                    {/* <button
-                                        className="aceptar-seccion"
-                                        disabled={!selectedAvatar}
-                                        onClick={() => {
-                                            const avatarElegido = avatars.find(
-                                                (a) => a.id === selectedAvatar
-                                            );
-
-                                            if (avatarElegido) {
-                                                // Actualiza la imagen principal
-                                                // setIdAvatar(avatarElegido.url);
-                                            }
-
-                                            setOpenAvatarModal(false);
-                                            setSelectedAvatar(null);
-                                        }}
-                                    >
-                                        Guardar imagen
-                                    </button> */}
                                     <button
                                         className="aceptar-seccion-avatar"
                                         onClick={async () => {
