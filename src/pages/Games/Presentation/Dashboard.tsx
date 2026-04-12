@@ -460,7 +460,7 @@ const Dashboard = () => {
             </div>
 
             {/* Modal fijo */}
-            {/* <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} /> */}
+            <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div className="circle-outer-1" onClick={irEjercicio1}>
