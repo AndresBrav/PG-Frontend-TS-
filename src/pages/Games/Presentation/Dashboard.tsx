@@ -15,7 +15,7 @@ import ModalInf2 from './ModalInf2';
 
 const Dashboard = () => {
     useAuthRedirect(); //redirecciona si no hay token
-    // const redirectToHome = useAuthRedirect();
+    const redirectToHome = useAuthRedirect();
 
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
@@ -32,7 +32,7 @@ const Dashboard = () => {
 
         if (!claveAcceso) {
             console.log('no tienes una clave valida');
-            // redirectToHome();
+            redirectToHome();
         } else {
             const obtenerDatosUsuario = async () => {
                 console.log('la clave de acceso es ' + claveAcceso);
