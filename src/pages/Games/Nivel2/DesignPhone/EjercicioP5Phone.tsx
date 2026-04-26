@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { verificarResultadoPseudocodigo5 } from '../VerificarResultadoPseudo';
+import { TokenContext } from '../../../../Context/TokenContext';
+import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
+import { ejerciciosId } from '../../../../data/ejercicios';
 
 interface CodeLine {
     id: string;
@@ -29,6 +32,8 @@ const EjercicioP5Phone: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
+    const [counterRate, setcounterRate] = useState<number>(1);
+    const { claveAcceso } = useContext(TokenContext);
 
     const returnDashboard = () => {
         navigate('/dashboard');
@@ -138,7 +143,7 @@ const EjercicioP5Phone: React.FC = () => {
             </div>
             `,
             });
-
+            await IncrementarPuntuacionEjercicio();
             if (!primerSwal.isConfirmed) return;
 
             let suma = 0;
@@ -237,6 +242,14 @@ const EjercicioP5Phone: React.FC = () => {
                 },
             });
         }
+    };
+
+    const IncrementarPuntuacionEjercicio = async () => {
+        if (counterRate == 1) {
+            console.log('el contador es ', counterRate);
+            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[9]);
+        }
+        setcounterRate(counterRate + 1);
     };
 
     const mostrarResultadoSumaHastaNegativo = async (

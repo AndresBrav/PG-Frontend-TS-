@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { verificarResultadoPseudocodigo2 } from '../VerificarResultadoPseudo';
+import { ejerciciosId } from '../../../../data/ejercicios';
+import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
+import { TokenContext } from '../../../../Context/TokenContext';
 
 interface CodeLine {
     id: string;
@@ -33,6 +36,8 @@ const EjercicioP2Phone: React.FC = () => {
     const [available, setAvailable] = useState<CodeLine[]>(initialCode);
     const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
+    const [counterRate, setcounterRate] = useState<number>(1);
+    const { claveAcceso } = useContext(TokenContext);
 
     const returnDashboard = () => {
         navigate('/dashboard');
@@ -63,7 +68,7 @@ const EjercicioP2Phone: React.FC = () => {
     };
 
     // Mostrar resultado del ejercicio
-    const verificarRespuestaPseudo = (resultados: boolean[]) => {
+    const verificarRespuestaPseudo = async (resultados: boolean[]) => {
         const pasos = selected.map((line, index) => ({
             texto: line.content,
             estado: resultados[index] ?? false,
@@ -208,6 +213,7 @@ const EjercicioP2Phone: React.FC = () => {
                     `,
                 });
             });
+            await IncrementarPuntuacionEjercicio();
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -218,6 +224,14 @@ const EjercicioP2Phone: React.FC = () => {
                 html: `<div style="max-height:55vh;overflow-y:auto;">${htmlContenido}</div>`,
             });
         }
+    };
+
+    const IncrementarPuntuacionEjercicio = async () => {
+        if (counterRate == 1) {
+            console.log('el contador es ', counterRate);
+            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[6]);
+        }
+        setcounterRate(counterRate + 1);
     };
 
     // Ejecutar verificación

@@ -211,11 +211,7 @@ const EjercicioP1Phone: React.FC = () => {
                     `,
                 });
             });
-            if (counterRate == 1) {
-                console.log('el contador es ', counterRate);
-                await incrementarPuntuacionApi(claveAcceso, ejerciciosId[5]);
-            }
-            setcounterRate(counterRate + 1);
+            await IncrementarPuntuacionEjercicio();
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -226,6 +222,14 @@ const EjercicioP1Phone: React.FC = () => {
                 html: `<div style="max-height:55vh;overflow-y:auto;">${htmlContenido}</div>`,
             });
         }
+    };
+
+    const IncrementarPuntuacionEjercicio = async () => {
+        if (counterRate == 1) {
+            console.log('el contador es ', counterRate);
+            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[5]);
+        }
+        setcounterRate(counterRate + 1);
     };
 
     const printOrder = () => {
