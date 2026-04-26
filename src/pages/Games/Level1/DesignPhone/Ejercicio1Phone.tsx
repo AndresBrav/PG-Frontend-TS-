@@ -20,6 +20,7 @@ const WIDGET_SCALE = 1; // escala de imagen
 const Ejercicio1Phone: React.FC = () => {
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
+    const [counterRate, setcounterRate] = useState<number>(1);
 
     const [layout, setLayout] = useState<Layout[]>(
         initialWidgets.map((w, idx) => ({
@@ -148,8 +149,7 @@ const Ejercicio1Phone: React.FC = () => {
                     ejecutarOtroMetodo();
                 }
             });
-            console.log('la clave de acceso va ser ', claveAcceso);
-            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[0]);
+            await IncrementarPuntuacionEjercicio();
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -167,6 +167,15 @@ const Ejercicio1Phone: React.FC = () => {
         }
 
         //console.log("el resultado es: ", resultado);
+    };
+
+    const IncrementarPuntuacionEjercicio = async () => {
+        if (counterRate == 1) {
+            console.log('el contador es ', counterRate);
+
+            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[0]);
+        }
+        setcounterRate(counterRate + 1);
     };
 
     const ejecutarOtroMetodo = async () => {

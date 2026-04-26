@@ -21,7 +21,7 @@ const WIDGET_SCALE = 1; // escala de imagen
 const Ejercicio5Laptop: React.FC = () => {
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
-
+    const [counterRate, setcounterRate] = useState<number>(1);
     const [layout, setLayout] = useState<Layout[]>(
         initialWidgetsEjercicio5.map((w, idx) => ({
             i: w.id.toString(),
@@ -204,7 +204,7 @@ const Ejercicio5Laptop: React.FC = () => {
                     ejecutarOtroMetodo();
                 }
             });
-            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]); // Incrementa la puntuación antes de mostrar el Swal
+            await IncrementarPuntuacionEjercicio();
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
@@ -218,6 +218,14 @@ const Ejercicio5Laptop: React.FC = () => {
                 },
             });
         }
+    };
+
+    const IncrementarPuntuacionEjercicio = async () => {
+        if (counterRate == 1) {
+            console.log('la clave de acceso va ser ', claveAcceso);
+            await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]);
+        }
+        setcounterRate(counterRate + 1);
     };
 
     const ejecutarOtroMetodo = async () => {
