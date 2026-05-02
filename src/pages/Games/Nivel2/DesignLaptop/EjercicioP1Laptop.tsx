@@ -257,11 +257,12 @@ const EjercicioP1Laptop: React.FC = () => {
     };
 
     const IncrementarPuntuacionEjercicio = async () => {
+        console.log('el contador aqui es ............', counterRate);
         if (counterRate == 1) {
             console.log('el contador es ', counterRate);
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[5]);
         }
-        setcounterRate(counterRate + 1);
+        setcounterRate((prev) => prev + 1);
     };
 
     // Ejecutar verificación

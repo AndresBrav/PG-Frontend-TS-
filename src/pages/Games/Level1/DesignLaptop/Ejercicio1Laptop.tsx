@@ -162,6 +162,7 @@ const Ejercicio1Laptop: React.FC = () => {
     };
 
     const IncrementarPuntuacionEjercicio = async () => {
+        console.log('el contador aqui es ............', counterRate);
         if (counterRate == 1) {
             console.log('el contador es ', counterRate);
 
