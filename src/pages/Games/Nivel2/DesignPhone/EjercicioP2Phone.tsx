@@ -231,7 +231,7 @@ const EjercicioP2Phone: React.FC = () => {
             console.log('el contador es ', counterRate);
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[6]);
         }
-        setcounterRate(counterRate + 1);
+        setcounterRate((prev) => prev + 1);
     };
 
     // Ejecutar verificación

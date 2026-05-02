@@ -190,7 +190,7 @@ const EjercicioP2Laptop: React.FC = () => {
             console.log('el contador es ', counterRate);
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[6]);
         }
-        setcounterRate(counterRate + 1);
+        setcounterRate((prev) => prev + 1);
     };
 
     // Mostrar el resultado del número mayor

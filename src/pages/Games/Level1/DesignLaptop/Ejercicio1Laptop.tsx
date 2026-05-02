@@ -168,7 +168,7 @@ const Ejercicio1Laptop: React.FC = () => {
 
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[0]);
         }
-        setcounterRate(counterRate + 1);
+        setcounterRate((prev) => prev + 1);
     };
 
     const ejecutarOtroMetodo = async () => {

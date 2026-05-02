@@ -263,7 +263,7 @@ const EjercicioP6Phone: React.FC = () => {
             console.log('el contador es ', counterRate);
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[10]);
         }
-        setcounterRate(counterRate + 1);
+        setcounterRate((prev) => prev + 1);
     };
 
     // Ejecutar verificación

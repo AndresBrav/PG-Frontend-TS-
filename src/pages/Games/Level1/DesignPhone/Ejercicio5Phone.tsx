@@ -231,7 +231,7 @@ const Ejercicio5Phone: React.FC = () => {
             console.log('la clave de acceso va ser ', claveAcceso);
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]);
         }
-        setcounterRate(counterRate + 1);
+        setcounterRate((prev) => prev + 1);
     };
 
     const ejecutarOtroMetodo = async () => {

@@ -235,7 +235,7 @@ const EjercicioP8Laptop: React.FC = () => {
             console.log('el contador es ', counterRate);
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[12]);
         }
-        setcounterRate(counterRate + 1);
+        setcounterRate((prev) => prev + 1);
     };
 
     // Ejecutar verificación
