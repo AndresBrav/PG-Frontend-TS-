@@ -27,6 +27,8 @@ const Dashboard = () => {
     const [openAvatarModal, setOpenAvatarModal] = useState(false);
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
 
+    const [openNotifications, setOpenNotifications] = useState(false);
+
     useEffect(() => {
         // console.log("la calve de accesssooooo es " + claveAcceso);
 
@@ -123,10 +125,11 @@ const Dashboard = () => {
 
     return (
         <>
-            <div className="header-dashboard-container">
-                <div className="item-header-dashboard">
+            {/* <div className="header-dashboard-container"> */}
+            <div className="flex justify-end items-center flex-row flex-nowrap">
+                <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
                     <svg
-                        className="dashboard-icon-fire"
+                        className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px]"
                         viewBox="415 411 26 32"
                         fill="#FF7C02"
                         xmlns="http://www.w3.org/2000/svg"
@@ -137,245 +140,275 @@ const Dashboard = () => {
                         />
                     </svg>
                 </div>
-                <div className="item-header-dashboard">{puntuacion} pts</div>
-                <div className="item-header-dashboard-profile">
-                    {/* <img src={profileIcon} alt="Profile Icon" /> */}
-                    <div className="item-header-dashboard-profile">
-                        <img
-                            src={idAvatar ? idAvatar : profileIcon}
-                            alt="Profile Icon"
-                            onClick={() => setOpen(true)}
-                            style={{
-                                cursor: 'pointer',
-                                width: '70px', // tamaño que tú quieras
-                                height: '70px', // mismo que width para que sea círculo
-                                borderRadius: '10%',
-                            }}
-                        />
-                    </div>
+                <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
+                    {puntuacion} pts
+                </div>
 
-                    {open && (
-                        <div className="modal">
-                            <div className="modal-box">
-                                <svg
-                                    className="modal-close"
-                                    fill="#E11919"
-                                    onClick={() => {
-                                        setOpen(false);
-                                    }}
-                                    width="35px"
-                                    height="35px"
-                                    viewBox="0 0 32 32"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <title>cancel</title>
-                                    <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
-                                </svg>
+                <div className="relative mt-[10px] mr-[20px]">
+                    <svg
+                        onClick={() => setOpenNotifications(!openNotifications)}
+                        className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px] cursor-pointer"
+                        fill="#ffffff"
+                        viewBox="0 0 512 512"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path d="M256,48C141.31,48,48,141.31,48,256s93.31,208,208,208,208-93.31,208-208S370.69,48,256,48Zm0,336c-20.9,0-37.52-8.86-39.75-27.58a4,4,0,0,1,4-4.42h71.45a4,4,0,0,1,4,4.48C293.15,374.85,276.68,384,256,384Zm98-48H158c-11.84,0-18-15-11.19-23,16.33-19.34,27.87-27.47,27.87-80.8,0-48.87,25.74-66.21,47-74.67a11.35,11.35,0,0,0,6.33-6.68C231.7,138.6,242.14,128,256,128s24.28,10.6,28,22.86a11.39,11.39,0,0,0,6.34,6.68c21.21,8.44,47,25.81,47,74.67,0,53.33,11.53,61.46,27.86,80.8C371.94,321,365.77,336,354,336Z" />
+                    </svg>
 
-                                <br />
-                                <br />
-                                <br />
-                                <br />
+                    {openNotifications && (
+                        <div className="absolute right-0 mt-2 w-[250px] bg-white text-black rounded-lg shadow-lg p-3 z-50">
+                            <p className="font-bold mb-2">Notificaciones</p>
 
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        position: 'relative', // Importante para posicionar el botón encima
-                                        margin: '20px 0',
-                                    }}
-                                    onMouseEnter={(e) =>
-                                        (e.currentTarget.style.cursor =
-                                            'pointer')
-                                    } // opcional: cursor pointer
-                                >
-                                    {/* Contenedor de la imagen con overlay */}
-                                    <div
-                                        style={{
-                                            position: 'relative',
-                                            display: 'inline-block',
-                                        }}
-                                    >
-                                        <img
-                                            style={{
-                                                height: '150px',
-                                                width: '150px',
-                                                borderRadius: '50%', // círculo perfecto
-                                                objectFit: 'cover',
-                                                border: '4px solid #fff',
-                                                boxShadow:
-                                                    '0 4px 10px rgba(0,0,0,0.2)',
-                                            }}
-                                            src={idAvatar || profileIcon}
-                                            alt="Foto de perfil"
-                                        />
-
-                                        {/* Overlay oscuro + botón que aparece al hover */}
-                                        <div
-                                            style={{
-                                                position: 'absolute',
-                                                top: 0,
-                                                left: 0,
-                                                width: '100%',
-                                                height: '100%',
-                                                borderRadius: '50%',
-                                                backgroundColor:
-                                                    'rgba(0, 0, 0, 0.5)', // fondo oscuro semi-transparente
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                opacity: 0, // oculto por defecto
-                                                transition: 'opacity 0.3s ease', // animación suave
-                                            }}
-                                            className="overlay-boton-avatar"
-                                            onMouseEnter={(e) =>
-                                                (e.currentTarget.style.opacity =
-                                                    '1')
-                                            }
-                                            onMouseLeave={(e) =>
-                                                (e.currentTarget.style.opacity =
-                                                    '0')
-                                            }
-                                            onClick={() => {
-                                                // Aquí pones la lógica para cambiar la foto (abrir input file, etc.)
-                                                console.log(
-                                                    'Abrir selector de foto'
-                                                );
-                                                setOpenAvatarModal(true);
-                                                // Ejemplo: document.getElementById('input-foto')?.click();
-                                            }}
-                                        >
-                                            <span
-                                                style={{
-                                                    color: 'white',
-                                                    fontWeight: 'bold',
-                                                    fontSize: '14px',
-                                                    textAlign: 'center',
-                                                    padding: '10px',
-                                                }}
-                                            >
-                                                Cambiar foto de perfil
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <p>
-                                    <strong>Nombre:</strong> {nombre}
-                                </p>
-
-                                <p>
-                                    <strong>Edad:</strong> {edad}
-                                </p>
-                                <br />
-                                <button
-                                    className="cerrar-sesion-usuario"
-                                    onClick={a}
-                                >
-                                    Cerrar Sesion
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {openAvatarModal && (
-                        <div className="modal">
-                            <div className="modal-box">
-                                <h2 style={{ textAlign: 'center' }}>
-                                    Selecciona un avatar
-                                </h2>
-
-                                <div
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(3, 1fr)',
-                                        gap: '15px',
-                                        marginTop: '20px',
-                                    }}
-                                >
-                                    {avatars.map((avatar) => (
-                                        <img
-                                            key={avatar.id}
-                                            src={avatar.url}
-                                            alt={`avatar-${avatar.id}`}
-                                            onClick={() =>
-                                                setSelectedAvatar(avatar.id)
-                                            }
-                                            style={{
-                                                width: '80px',
-                                                height: '80px',
-                                                borderRadius: '50%',
-                                                cursor: 'pointer',
-                                                border:
-                                                    selectedAvatar === avatar.id
-                                                        ? '4px solid #FF7C02'
-                                                        : '2px solid transparent',
-                                                boxShadow:
-                                                    selectedAvatar === avatar.id
-                                                        ? '0 0 10px rgba(255,124,2,0.8)'
-                                                        : 'none',
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        marginTop: '30px',
-                                    }}
-                                >
-                                    <button
-                                        className="cerrar-sesion-usuario"
-                                        onClick={() => {
-                                            setOpenAvatarModal(false);
-                                            setSelectedAvatar(null);
-                                        }}
-                                    >
-                                        Cancelar
-                                    </button>
-
-                                    <button
-                                        className="aceptar-seccion-avatar"
-                                        onClick={async () => {
-                                            if (!selectedAvatar) return;
-
-                                            const avatarElegido = avatars.find(
-                                                (a) => a.id === selectedAvatar
-                                            );
-
-                                            if (!avatarElegido || !claveAcceso)
-                                                return;
-
-                                            try {
-                                                // esperar a que se guarde en backend
-                                                await actualizarFotoPerfil(
-                                                    claveAcceso,
-                                                    String(avatarElegido.id)
-                                                );
-
-                                                // actualizar UI SOLO si backend respondió bien
-                                                setIdAvatar(avatarElegido.url);
-
-                                                setOpenAvatarModal(false);
-                                                setSelectedAvatar(null);
-                                            } catch (error) {
-                                                console.error(
-                                                    'Error al actualizar avatar',
-                                                    error
-                                                );
-                                            }
-                                        }}
-                                    >
-                                        Guardar imagen
-                                    </button>
-                                </div>
-                            </div>
+                            <ul className="flex flex-col gap-y-2">
+                                <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                    🔔 Nueva recompensa disponible
+                                </li>
+                                <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                    🎯 Has subido de nivel
+                                </li>
+                                <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                    💬 Tienes un mensaje nuevo
+                                </li>
+                            </ul>
                         </div>
                     )}
                 </div>
+
+                {/* <img src={profileIcon} alt="Profile Icon" /> */}
+                <div className="item-header-dashboard-profile">
+                    <img
+                        src={idAvatar ? idAvatar : profileIcon}
+                        alt="Profile Icon"
+                        onClick={() => setOpen(true)}
+                        style={{
+                            cursor: 'pointer',
+                            width: '70px', // tamaño que tú quieras
+                            height: '70px', // mismo que width para que sea círculo
+                            borderRadius: '10%',
+                        }}
+                    />
+                </div>
+
+                {open && (
+                    <div className="modal">
+                        <div className="modal-box">
+                            <svg
+                                className="modal-close"
+                                fill="#E11919"
+                                onClick={() => {
+                                    setOpen(false);
+                                }}
+                                width="35px"
+                                height="35px"
+                                viewBox="0 0 32 32"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <title>cancel</title>
+                                <path d="M10.771 8.518c-1.144 0.215-2.83 2.171-2.086 2.915l4.573 4.571-4.573 4.571c-0.915 0.915 1.829 3.656 2.744 2.742l4.573-4.571 4.573 4.571c0.915 0.915 3.658-1.829 2.744-2.742l-4.573-4.571 4.573-4.571c0.915-0.915-1.829-3.656-2.744-2.742l-4.573 4.571-4.573-4.571c-0.173-0.171-0.394-0.223-0.657-0.173v0zM16 1c-8.285 0-15 6.716-15 15s6.715 15 15 15 15-6.716 15-15-6.715-15-15-15zM16 4.75c6.213 0 11.25 5.037 11.25 11.25s-5.037 11.25-11.25 11.25-11.25-5.037-11.25-11.25c0.001-6.213 5.037-11.25 11.25-11.25z"></path>
+                            </svg>
+
+                            <br />
+                            <br />
+                            <br />
+                            <br />
+
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    position: 'relative', // Importante para posicionar el botón encima
+                                    margin: '20px 0',
+                                }}
+                                onMouseEnter={(e) =>
+                                    (e.currentTarget.style.cursor = 'pointer')
+                                } // opcional: cursor pointer
+                            >
+                                {/* Contenedor de la imagen con overlay */}
+                                <div
+                                    style={{
+                                        position: 'relative',
+                                        display: 'inline-block',
+                                    }}
+                                >
+                                    <img
+                                        style={{
+                                            height: '150px',
+                                            width: '150px',
+                                            borderRadius: '50%', // círculo perfecto
+                                            objectFit: 'cover',
+                                            border: '4px solid #fff',
+                                            boxShadow:
+                                                '0 4px 10px rgba(0,0,0,0.2)',
+                                        }}
+                                        src={idAvatar || profileIcon}
+                                        alt="Foto de perfil"
+                                    />
+
+                                    {/* Overlay oscuro + botón que aparece al hover */}
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            borderRadius: '50%',
+                                            backgroundColor:
+                                                'rgba(0, 0, 0, 0.5)', // fondo oscuro semi-transparente
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            opacity: 0, // oculto por defecto
+                                            transition: 'opacity 0.3s ease', // animación suave
+                                        }}
+                                        className="overlay-boton-avatar"
+                                        onMouseEnter={(e) =>
+                                            (e.currentTarget.style.opacity =
+                                                '1')
+                                        }
+                                        onMouseLeave={(e) =>
+                                            (e.currentTarget.style.opacity =
+                                                '0')
+                                        }
+                                        onClick={() => {
+                                            // Aquí pones la lógica para cambiar la foto (abrir input file, etc.)
+                                            console.log(
+                                                'Abrir selector de foto'
+                                            );
+                                            setOpenAvatarModal(true);
+                                            // Ejemplo: document.getElementById('input-foto')?.click();
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                                fontSize: '14px',
+                                                textAlign: 'center',
+                                                padding: '10px',
+                                            }}
+                                        >
+                                            Cambiar foto de perfil
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p>
+                                <strong>Nombre:</strong> {nombre}
+                            </p>
+
+                            <p>
+                                <strong>Edad:</strong> {edad}
+                            </p>
+                            <br />
+                            <button
+                                className="cerrar-sesion-usuario"
+                                onClick={a}
+                            >
+                                Cerrar Sesion
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {openAvatarModal && (
+                    <div className="modal">
+                        <div className="modal-box">
+                            <h2 style={{ textAlign: 'center' }}>
+                                Selecciona un avatar
+                            </h2>
+
+                            <div
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(3, 1fr)',
+                                    gap: '15px',
+                                    marginTop: '20px',
+                                }}
+                            >
+                                {avatars.map((avatar) => (
+                                    <img
+                                        key={avatar.id}
+                                        src={avatar.url}
+                                        alt={`avatar-${avatar.id}`}
+                                        onClick={() =>
+                                            setSelectedAvatar(avatar.id)
+                                        }
+                                        style={{
+                                            width: '80px',
+                                            height: '80px',
+                                            borderRadius: '50%',
+                                            cursor: 'pointer',
+                                            border:
+                                                selectedAvatar === avatar.id
+                                                    ? '4px solid #FF7C02'
+                                                    : '2px solid transparent',
+                                            boxShadow:
+                                                selectedAvatar === avatar.id
+                                                    ? '0 0 10px rgba(255,124,2,0.8)'
+                                                    : 'none',
+                                        }}
+                                    />
+                                ))}
+                            </div>
+
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    marginTop: '30px',
+                                }}
+                            >
+                                <button
+                                    className="cerrar-sesion-usuario"
+                                    onClick={() => {
+                                        setOpenAvatarModal(false);
+                                        setSelectedAvatar(null);
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+
+                                <button
+                                    className="aceptar-seccion-avatar"
+                                    onClick={async () => {
+                                        if (!selectedAvatar) return;
+
+                                        const avatarElegido = avatars.find(
+                                            (a) => a.id === selectedAvatar
+                                        );
+
+                                        if (!avatarElegido || !claveAcceso)
+                                            return;
+
+                                        try {
+                                            // esperar a que se guarde en backend
+                                            await actualizarFotoPerfil(
+                                                claveAcceso,
+                                                String(avatarElegido.id)
+                                            );
+
+                                            // actualizar UI SOLO si backend respondió bien
+                                            setIdAvatar(avatarElegido.url);
+
+                                            setOpenAvatarModal(false);
+                                            setSelectedAvatar(null);
+                                        } catch (error) {
+                                            console.error(
+                                                'Error al actualizar avatar',
+                                                error
+                                            );
+                                        }
+                                    }}
+                                >
+                                    Guardar imagen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="information-design-level-style-container-grid">
