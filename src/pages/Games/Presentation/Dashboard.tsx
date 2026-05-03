@@ -156,20 +156,28 @@ const Dashboard = () => {
                     </svg>
 
                     {openNotifications && (
-                        <div className="absolute right-0 mt-2 w-[250px] bg-white text-black rounded-lg shadow-lg p-3 z-50">
-                            <p className="font-bold mb-2">Notificaciones</p>
+                        <div className="fixed top-[70px] left-0 w-full px-4 sm:absolute sm:right-0 sm:left-auto sm:w-[350px] z-50">
+                            <div className="bg-white text-black rounded-lg shadow-lg p-3 max-h-[300px] overflow-y-auto">
+                                <p className="font-bold mb-2">Notificaciones</p>
 
-                            <ul className="flex flex-col gap-y-2">
-                                <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                    🔔 Nueva recompensa disponible
-                                </li>
-                                <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                    🎯 Has subido de nivel
-                                </li>
-                                <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                    💬 Tienes un mensaje nuevo
-                                </li>
-                            </ul>
+                                <ul className="flex flex-col gap-y-2">
+                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                        ⏰ No olvides completar tu actividad
+                                        diaria
+                                    </li>
+                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                        🎯 Felicidades haz completado el nivel 1
+                                        Ganaste +50 puntos
+                                    </li>
+                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                        🎯 Felicidades haz completado el nivel 2
+                                        Ganaste +100 puntos
+                                    </li>
+                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
+                                        🚀 Vas mejorando, sigue así
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     )}
                 </div>
