@@ -1,0 +1,38 @@
+import axios from 'axios';
+const API = import.meta.env.VITE_API_URL;
+
+interface Notificacion {
+    id: number;
+    descripcion: string;
+}
+
+interface RespuestaNotificaciones {
+    msg: string;
+    arreglonoti: Notificacion[];
+}
+
+export const traerNotificaciones = async (
+    clave: string
+): Promise<RespuestaNotificaciones | null> => {
+    try {
+        // Axios devuelve un objeto AxiosResponse, y el dato útil está en .data
+        const response = await axios.get<RespuestaNotificaciones>(
+            `${API}/notificaciones/consultar`,
+            {
+                headers: {
+                    Authorization: clave,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            }
+        );
+
+        // response.data ya es de tipo RespuestaNotificaciones
+        if (!response.data) return null;
+        console.log('el arreglo que se trae es ', response.data.arreglonoti);
+        const { msg, arreglonoti } = response.data;
+        return { msg, arreglonoti };
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return null;
+    }
+};

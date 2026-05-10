@@ -12,6 +12,12 @@ import {
 } from '../../../api/usuarioApi';
 import avatars from '../../users/avatars';
 import ModalInf2 from './ModalInf2';
+import { traerNotificaciones } from '../../../api/notificacionApi';
+
+interface Notificacion {
+    id: number;
+    descripcion: string;
+}
 
 const Dashboard = () => {
     useAuthRedirect(); //redirecciona si no hay token
@@ -23,6 +29,7 @@ const Dashboard = () => {
     const [edad, setEdad] = useState<number>(0);
     const [idAvatar, setIdAvatar] = useState<string>('');
     const [puntuacion, setPuntuacion] = useState<number>(0);
+    const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
 
     const [openAvatarModal, setOpenAvatarModal] = useState(false);
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
@@ -36,6 +43,7 @@ const Dashboard = () => {
             console.log('no tienes una clave valida');
             redirectToHome();
         } else {
+            //traer datos del usuario
             const obtenerDatosUsuario = async () => {
                 console.log('la clave de acceso es ' + claveAcceso);
                 const data = await traerUsuarios(claveAcceso);
@@ -43,14 +51,23 @@ const Dashboard = () => {
                 setEdad(data?.edad ?? 0);
                 setIdAvatar(data?.idAvatar ?? '');
             };
-
+            // traer puntuacion del usuario
             const traerPuntosUsuario = async () => {
                 const data = await traerPuntuacion(claveAcceso);
                 setPuntuacion(data?.puntuacionTotal ?? 0);
             };
 
+            const cargarNotificaciones = async () => {
+                const data = await traerNotificaciones(claveAcceso);
+                console.log(data?.arreglonoti);
+                if (data) {
+                    setNotificaciones(data?.arreglonoti);
+                }
+            };
+
             obtenerDatosUsuario();
             traerPuntosUsuario();
+            cargarNotificaciones();
         }
     }, [claveAcceso]);
 
@@ -161,6 +178,17 @@ const Dashboard = () => {
                                 <p className="font-bold mb-2">Notificaciones</p>
 
                                 <ul className="flex flex-col gap-y-2">
+                                    {notificaciones.map((noti) => (
+                                        <li
+                                            key={noti.id}
+                                            className="p-2 hover:bg-gray-100 rounded cursor-pointer"
+                                        >
+                                            {noti.descripcion}
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                {/* <ul className="flex flex-col gap-y-2">
                                     <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
                                         ⏰ No olvides completar tu actividad
                                         diaria
@@ -176,7 +204,7 @@ const Dashboard = () => {
                                     <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
                                         🚀 Vas mejorando, sigue así
                                     </li>
-                                </ul>
+                                </ul> */}
                             </div>
                         </div>
                     )}
