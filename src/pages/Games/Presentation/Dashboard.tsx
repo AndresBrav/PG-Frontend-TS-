@@ -12,7 +12,10 @@ import {
 } from '../../../api/usuarioApi';
 import avatars from '../../users/avatars';
 import ModalInf2 from './ModalInf2';
-import { traerNotificaciones } from '../../../api/notificacionApi';
+import {
+    enviarIdNotificacion,
+    traerNotificaciones,
+} from '../../../api/notificacionApi';
 
 interface Notificacion {
     id: number;
@@ -181,30 +184,30 @@ const Dashboard = () => {
                                     {notificaciones.map((noti) => (
                                         <li
                                             key={noti.id}
+                                            onClick={() =>
+                                                // enviarIdNotificacion(noti.id,claveAcceso)
+                                                {
+                                                    if (!claveAcceso) return;
+
+                                                    enviarIdNotificacion(
+                                                        noti.id,
+                                                        claveAcceso
+                                                    );
+
+                                                    setNotificaciones((prev) =>
+                                                        prev.filter(
+                                                            (n) =>
+                                                                n.id !== noti.id
+                                                        )
+                                                    );
+                                                }
+                                            }
                                             className="p-2 hover:bg-gray-100 rounded cursor-pointer"
                                         >
                                             {noti.descripcion}
                                         </li>
                                     ))}
                                 </ul>
-
-                                {/* <ul className="flex flex-col gap-y-2">
-                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                        ⏰ No olvides completar tu actividad
-                                        diaria
-                                    </li>
-                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                        🎯 Felicidades haz completado el nivel 1
-                                        Ganaste +50 puntos
-                                    </li>
-                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                        🎯 Felicidades haz completado el nivel 2
-                                        Ganaste +100 puntos
-                                    </li>
-                                    <li className="p-2 hover:bg-gray-100 rounded cursor-pointer">
-                                        🚀 Vas mejorando, sigue así
-                                    </li>
-                                </ul> */}
                             </div>
                         </div>
                     )}

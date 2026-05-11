@@ -36,3 +36,27 @@ export const traerNotificaciones = async (
         return null;
     }
 };
+
+export const enviarIdNotificacion = async (id: number, claveAcceso: string) => {
+    console.log('la clave de acceso es ', claveAcceso);
+    try {
+        const response = await axios.put(
+            `${API}/notificaciones/actualizar/${id}`, // ruta correcta
+            {}, // body vacío
+            {
+                headers: {
+                    Authorization: claveAcceso, // 🔑 agrega Bearer si tu backend lo espera
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            }
+        );
+
+        console.log('la respuesta del servidor es ', response.data);
+    } catch (error: any) {
+        console.error(
+            'error fetching data:',
+            error.response?.status,
+            error.response?.data
+        );
+    }
+};
