@@ -20,6 +20,7 @@ import {
 interface Notificacion {
     id: number;
     descripcion: string;
+    fecha: string;
 }
 
 const Dashboard = () => {
@@ -180,7 +181,7 @@ const Dashboard = () => {
                             <div className="bg-white text-black rounded-lg shadow-lg p-3 max-h-[300px] overflow-y-auto">
                                 <p className="font-bold mb-2">Notificaciones</p>
 
-                                <ul className="flex flex-col gap-y-2">
+                                {/* <ul className="flex flex-col gap-y-2">
                                     {notificaciones.map((noti) => (
                                         <li
                                             key={noti.id}
@@ -204,7 +205,47 @@ const Dashboard = () => {
                                             }
                                             className="p-2 hover:bg-gray-100 rounded cursor-pointer"
                                         >
-                                            {noti.descripcion}
+                                            {noti.descripcion} {noti.fecha}
+                                        </li>
+                                    ))}
+                                </ul> */}
+
+                                <ul className="flex flex-col gap-y-3">
+                                    {notificaciones.map((noti) => (
+                                        <li
+                                            key={noti.id}
+                                            onClick={() => {
+                                                if (!claveAcceso) return;
+
+                                                enviarIdNotificacion(
+                                                    noti.id,
+                                                    claveAcceso
+                                                );
+
+                                                setNotificaciones((prev) =>
+                                                    prev.filter(
+                                                        (n) => n.id !== noti.id
+                                                    )
+                                                );
+                                            }}
+                                            className="bg-gray-50 hover:bg-orange-50 border border-gray-200 hover:border-orange-300 rounded-xl p-3 cursor-pointer transition-all duration-200 shadow-sm"
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="text-[15px] text-gray-800 font-medium">
+                                                    {noti.descripcion}
+                                                </span>
+
+                                                <span className="text-[12px] text-gray-500 mt-1">
+                                                    {new Date(
+                                                        noti.fecha
+                                                    ).toLocaleString('es-ES', {
+                                                        day: '2-digit',
+                                                        month: 'short',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </span>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
