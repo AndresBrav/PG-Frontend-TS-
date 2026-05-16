@@ -43,6 +43,10 @@ const EjercicioP10Laptop: React.FC = () => {
         navigate('/dashboard');
     };
 
+    const ejecutarOtroMetodo = async () => {
+        navigate('/dashboard');
+    };
+
     // Click en banco -> pasa a construcción
     const addLine = (line: CodeLine) => {
         setAvailable((prev) => prev.filter((x) => x.id !== line.id));

@@ -71,6 +71,10 @@ const EjercicioP5Laptop: React.FC = () => {
         });
     };
 
+    const ejecutarOtroMetodo = async () => {
+        navigate('/ejercicio6-pseudocodigo');
+    };
+
     // Mostrar resultado del ejercicio
     const verificarRespuestaPseudo = async (resultados: boolean[]) => {
         const pasos = selected.map((line, index) => ({
@@ -106,14 +110,14 @@ const EjercicioP5Laptop: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const primerSwal = await Swal.fire({
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
                 width: '55%',
                 confirmButtonText: 'Simular ciclo',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -137,90 +141,98 @@ const EjercicioP5Laptop: React.FC = () => {
                     </div>
                 </div>
                 `,
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed) {
+                    let suma = 0;
+                    const numerosValidos: number[] = [];
+                    // let numeroActual: number | null = null;
+                    let numeroActual = 0;
+                    let iteracion = 1;
+
+                    while (true) {
+                        const { value } = await Swal.fire({
+                            title: `Iteración ${iteracion}`,
+                            html: `
+                            <div style="color:#000; text-align:left; font-size:14px;">
+                                <div style="margin-bottom:10px;">
+                                    Ingresa un número entero
+                                </div>
+                                <div style="margin-bottom:8px; color:#374151;">
+                                    El ciclo termina cuando ingreses un número <b>negativo</b>.
+                                </div>
+                                <div style="font-size:13px; color:#374151;">
+                                    Suma actual: <b>${suma}</b>
+                                </div>
+                            </div>
+                            `,
+                            input: 'number',
+                            inputAttributes: {
+                                step: '1',
+                                inputmode: 'numeric',
+                                pattern: '[0-9-]*',
+                            },
+                            inputPlaceholder: 'Ej: 8 o -1 para terminar',
+                            width: '40%',
+                            confirmButtonText: 'Continuar',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            customClass: {
+                                confirmButton: 'btn-semitransparente',
+                            },
+                            preConfirm: (val) => {
+                                if (val === '' || val === null) {
+                                    Swal.showValidationMessage(
+                                        'Debes ingresar un número.'
+                                    );
+                                    return;
+                                }
+
+                                const n = Number(val);
+
+                                if (Number.isNaN(n)) {
+                                    Swal.showValidationMessage(
+                                        'Número inválido.'
+                                    );
+                                    return;
+                                }
+
+                                if (!Number.isInteger(n)) {
+                                    Swal.showValidationMessage(
+                                        'Solo se permiten enteros.'
+                                    );
+                                    return;
+                                }
+
+                                return n;
+                            },
+                        });
+
+                        if (value === undefined) return;
+
+                        numeroActual = value;
+
+                        if (numeroActual < 0) {
+                            break;
+                        }
+
+                        numerosValidos.push(numeroActual);
+                        suma += numeroActual;
+                        iteracion++;
+                    }
+
+                    await mostrarResultadoSumaHastaNegativo(
+                        numerosValidos,
+                        suma,
+                        numeroActual
+                    );
+                }
             });
             await IncrementarPuntuacionEjercicio(); //incrementar puntuacion
-            if (!primerSwal.isConfirmed) return;
-
-            let suma = 0;
-            const numerosValidos: number[] = [];
-            // let numeroActual: number | null = null;
-            let numeroActual = 0;
-            let iteracion = 1;
-
-            while (true) {
-                const { value } = await Swal.fire({
-                    title: `Iteración ${iteracion}`,
-                    html: `
-                    <div style="color:#000; text-align:left; font-size:14px;">
-                        <div style="margin-bottom:10px;">
-                            Ingresa un número entero
-                        </div>
-                        <div style="margin-bottom:8px; color:#374151;">
-                            El ciclo termina cuando ingreses un número <b>negativo</b>.
-                        </div>
-                        <div style="font-size:13px; color:#374151;">
-                            Suma actual: <b>${suma}</b>
-                        </div>
-                    </div>
-                    `,
-                    input: 'number',
-                    inputAttributes: {
-                        step: '1',
-                        inputmode: 'numeric',
-                        pattern: '[0-9-]*',
-                    },
-                    inputPlaceholder: 'Ej: 8 o -1 para terminar',
-                    width: '40%',
-                    confirmButtonText: 'Continuar',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    customClass: {
-                        confirmButton: 'btn-semitransparente',
-                    },
-                    preConfirm: (val) => {
-                        if (val === '' || val === null) {
-                            Swal.showValidationMessage(
-                                'Debes ingresar un número.'
-                            );
-                            return;
-                        }
-
-                        const n = Number(val);
-
-                        if (Number.isNaN(n)) {
-                            Swal.showValidationMessage('Número inválido.');
-                            return;
-                        }
-
-                        if (!Number.isInteger(n)) {
-                            Swal.showValidationMessage(
-                                'Solo se permiten enteros.'
-                            );
-                            return;
-                        }
-
-                        return n;
-                    },
-                });
-
-                if (value === undefined) return;
-
-                numeroActual = value;
-
-                if (numeroActual < 0) {
-                    break;
-                }
-
-                numerosValidos.push(numeroActual);
-                suma += numeroActual;
-                iteracion++;
-            }
-
-            await mostrarResultadoSumaHastaNegativo(
-                numerosValidos,
-                suma,
-                numeroActual
-            );
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',

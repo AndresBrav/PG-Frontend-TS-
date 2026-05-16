@@ -44,6 +44,10 @@ const EjercicioP3Laptop: React.FC = () => {
         navigate('/dashboard');
     };
 
+    const ejecutarOtroMetodo = async () => {
+        navigate('/ejercicio4-pseudocodigo');
+    };
+
     // Click en banco -> pasa a construcción
     const addLine = (line: CodeLine) => {
         setAvailable((prev) => prev.filter((x) => x.id !== line.id));
@@ -96,14 +100,14 @@ const EjercicioP3Laptop: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const result = await Swal.fire({
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
                 width: '55%',
                 confirmButtonText: 'Evaluar',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -165,14 +169,19 @@ const EjercicioP3Laptop: React.FC = () => {
 
                     return { nota };
                 },
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed && r.value) {
+                    const { nota } = r.value;
+                    await mostrarResultadoCalificacion(nota);
+                }
             });
 
             await IncrementarPuntuacionEjercicio();
-
-            if (result.isConfirmed && result.value) {
-                const { nota } = result.value;
-                await mostrarResultadoCalificacion(nota);
-            }
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',
