@@ -41,6 +41,10 @@ const EjercicioP4Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
+    const ejecutarOtroMetodo = () => {
+        navigate('/ejercicio5-pseudocodigo');
+    };
+
     const returnDashboard = () => {
         navigate('/dashboard');
     };
@@ -113,7 +117,8 @@ const EjercicioP4Phone: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const primerSwal = await Swal.fire({
+            await IncrementarPuntuacionEjercicio();
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
@@ -122,7 +127,7 @@ const EjercicioP4Phone: React.FC = () => {
                 heightAuto: false,
                 confirmButtonText: 'Simular ciclo',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -147,77 +152,84 @@ const EjercicioP4Phone: React.FC = () => {
                     </div>
                 </div>
                 `,
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed) {
+                    let suma = 0;
+                    const numeros: number[] = [];
+
+                    // 🔁 Simulación del ciclo (10 iteraciones)
+                    for (let i = 1; i <= 10; i++) {
+                        const { value } = await Swal.fire({
+                            title: `Iteración ${i} de 10`,
+                            html: `
+                            <div style="color:#000; text-align:left; font-size:14px;">
+                                <div style="margin-bottom:10px;">
+                                    Ingresa el número <b>${i}</b>
+                                </div>
+                                <div style="font-size:12px; color:#374151;">
+                                    Valor actual de suma: <b>${suma}</b>
+                                </div>
+                            </div>
+                            `,
+                            input: 'number',
+                            inputAttributes: {
+                                step: '1',
+                                inputmode: 'numeric',
+                                pattern: '[0-9-]*',
+                            },
+                            inputPlaceholder: `Ej: ${i}`,
+                            width: '92%',
+                            padding: '12px',
+                            heightAuto: false,
+                            confirmButtonText:
+                                i === 10 ? 'Finalizar' : 'Siguiente',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            customClass: {
+                                confirmButton: 'btn-semitransparente',
+                            },
+                            preConfirm: (val) => {
+                                if (val === '' || val === null) {
+                                    Swal.showValidationMessage(
+                                        'Debes ingresar un número.'
+                                    );
+                                    return;
+                                }
+
+                                const n = Number(val);
+
+                                if (Number.isNaN(n)) {
+                                    Swal.showValidationMessage(
+                                        'Número inválido.'
+                                    );
+                                    return;
+                                }
+
+                                if (!Number.isInteger(n)) {
+                                    Swal.showValidationMessage(
+                                        'Solo se permiten enteros.'
+                                    );
+                                    return;
+                                }
+
+                                return n;
+                            },
+                        });
+
+                        if (value === undefined) return;
+
+                        numeros.push(value);
+                        suma += value;
+                    }
+
+                    await mostrarResultadoSuma(numeros, suma);
+                }
             });
-
-            await IncrementarPuntuacionEjercicio(); //incrementar puntuacion
-            if (!primerSwal.isConfirmed) return;
-
-            let suma = 0;
-            const numeros: number[] = [];
-
-            // 🔁 Simulación del ciclo (10 iteraciones)
-            for (let i = 1; i <= 10; i++) {
-                const { value } = await Swal.fire({
-                    title: `Iteración ${i} de 10`,
-                    html: `
-                    <div style="color:#000; text-align:left; font-size:14px;">
-                        <div style="margin-bottom:10px;">
-                            Ingresa el número <b>${i}</b>
-                        </div>
-                        <div style="font-size:12px; color:#374151;">
-                            Valor actual de suma: <b>${suma}</b>
-                        </div>
-                    </div>
-                    `,
-                    input: 'number',
-                    inputAttributes: {
-                        step: '1',
-                        inputmode: 'numeric',
-                        pattern: '[0-9-]*',
-                    },
-                    inputPlaceholder: `Ej: ${i}`,
-                    width: '92%',
-                    padding: '12px',
-                    heightAuto: false,
-                    confirmButtonText: i === 10 ? 'Finalizar' : 'Siguiente',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    customClass: {
-                        confirmButton: 'btn-semitransparente',
-                    },
-                    preConfirm: (val) => {
-                        if (val === '' || val === null) {
-                            Swal.showValidationMessage(
-                                'Debes ingresar un número.'
-                            );
-                            return;
-                        }
-
-                        const n = Number(val);
-
-                        if (Number.isNaN(n)) {
-                            Swal.showValidationMessage('Número inválido.');
-                            return;
-                        }
-
-                        if (!Number.isInteger(n)) {
-                            Swal.showValidationMessage(
-                                'Solo se permiten enteros.'
-                            );
-                            return;
-                        }
-
-                        return n;
-                    },
-                });
-
-                if (value === undefined) return;
-
-                numeros.push(value);
-                suma += value;
-            }
-
-            await mostrarResultadoSuma(numeros, suma);
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',

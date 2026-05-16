@@ -39,6 +39,10 @@ const EjercicioP10Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
+    const ejecutarOtroMetodo = () => {
+        navigate('/dashboard');
+    };
+
     const returnDashboard = () => {
         navigate('/dashboard');
     };
@@ -111,7 +115,7 @@ const EjercicioP10Phone: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const primerSwal = await Swal.fire({
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
@@ -120,7 +124,7 @@ const EjercicioP10Phone: React.FC = () => {
                 heightAuto: false,
                 confirmButtonText: 'Simular arreglo',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -145,88 +149,94 @@ const EjercicioP10Phone: React.FC = () => {
                 </div>
             </div>
             `,
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed) {
+                    const numeros: number[] = [];
+
+                    // Llenar el arreglo
+                    for (let i = 1; i <= 5; i++) {
+                        const { value } = await Swal.fire({
+                            title: `Posición ${i}`,
+                            html: `
+                            <div style="color:#000; text-align:left; font-size:14px;">
+                                Ingrese un número entero para la posición <b>${i}</b>
+                            </div>
+                            `,
+                            input: 'number',
+                            inputAttributes: {
+                                step: '1',
+                                inputmode: 'numeric',
+                            },
+                            inputPlaceholder: 'Ej: 42',
+                            width: '92%',
+                            padding: '12px',
+                            heightAuto: false,
+                            confirmButtonText: 'Guardar',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            customClass: {
+                                confirmButton: 'btn-semitransparente',
+                            },
+                            preConfirm: (val) => {
+                                if (val === '' || val === null) {
+                                    Swal.showValidationMessage(
+                                        'Debes ingresar un número.'
+                                    );
+                                    return;
+                                }
+                                const n = Number(val);
+                                if (Number.isNaN(n) || !Number.isInteger(n)) {
+                                    Swal.showValidationMessage(
+                                        'Solo se permiten números enteros.'
+                                    );
+                                    return;
+                                }
+                                return n;
+                            },
+                        });
+
+                        if (value === undefined) return;
+                        numeros.push(value);
+                    }
+
+                    // Encontrar el número mayor
+                    let mayor = numeros[0];
+                    for (let i = 1; i < numeros.length; i++) {
+                        if (numeros[i] > mayor) {
+                            mayor = numeros[i];
+                        }
+                    }
+
+                    await Swal.fire({
+                        title: 'Resultado Final',
+                        icon: 'success',
+                        width: '92%',
+                        padding: '12px',
+                        confirmButtonText: 'Cerrar',
+                        customClass: {
+                            confirmButton: 'btn-semitransparente',
+                        },
+                        html: `
+                    <div style="color:#000; text-align:left; font-size:14px;">
+                        <div><b>Números ingresados:</b></div>
+                        <div style="margin:10px 0; background:#f8fafc; padding:10px; border-radius:8px;">
+                            ${numeros.join(', ')}
+                        </div>
+                        <div style="font-size:18px;">
+                            <b>El número mayor es: ${mayor}</b>
+                        </div>
+                    </div>
+                    `,
+                    });
+                }
             });
 
             await IncrementarPuntuacionEjercicio();
-            if (!primerSwal.isConfirmed) return;
-
-            const numeros: number[] = [];
-
-            // Llenar el arreglo
-            for (let i = 1; i <= 5; i++) {
-                const { value } = await Swal.fire({
-                    title: `Posición ${i}`,
-                    html: `
-                    <div style="color:#000; text-align:left; font-size:14px;">
-                        Ingrese un número entero para la posición <b>${i}</b>
-                    </div>
-                    `,
-                    input: 'number',
-                    inputAttributes: {
-                        step: '1',
-                        inputmode: 'numeric',
-                    },
-                    inputPlaceholder: 'Ej: 42',
-                    width: '92%',
-                    padding: '12px',
-                    heightAuto: false,
-                    confirmButtonText: 'Guardar',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    customClass: {
-                        confirmButton: 'btn-semitransparente',
-                    },
-                    preConfirm: (val) => {
-                        if (val === '' || val === null) {
-                            Swal.showValidationMessage(
-                                'Debes ingresar un número.'
-                            );
-                            return;
-                        }
-                        const n = Number(val);
-                        if (Number.isNaN(n) || !Number.isInteger(n)) {
-                            Swal.showValidationMessage(
-                                'Solo se permiten números enteros.'
-                            );
-                            return;
-                        }
-                        return n;
-                    },
-                });
-
-                if (value === undefined) return;
-                numeros.push(value);
-            }
-
-            // Encontrar el número mayor
-            let mayor = numeros[0];
-            for (let i = 1; i < numeros.length; i++) {
-                if (numeros[i] > mayor) {
-                    mayor = numeros[i];
-                }
-            }
-
-            await Swal.fire({
-                title: 'Resultado Final',
-                icon: 'success',
-                width: '92%',
-                padding: '12px',
-                confirmButtonText: 'Cerrar',
-                customClass: {
-                    confirmButton: 'btn-semitransparente',
-                },
-                html: `
-            <div style="color:#000; text-align:left; font-size:14px;">
-                <div><b>Números ingresados:</b></div>
-                <div style="margin:10px 0; background:#f8fafc; padding:10px; border-radius:8px;">
-                    ${numeros.join(', ')}
-                </div>
-                <div style="font-size:18px;">
-                    <b>El número mayor es: ${mayor}</b>
-                </div>
-            </div>
-            `,
-            });
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',

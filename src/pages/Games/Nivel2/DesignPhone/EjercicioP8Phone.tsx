@@ -42,6 +42,10 @@ const EjercicioP8Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
+    const ejecutarOtroMetodo = () => {
+        navigate('/ejercicio9-pseudocodigo');
+    };
+
     const returnDashboard = () => {
         navigate('/dashboard');
     };
@@ -114,7 +118,7 @@ const EjercicioP8Phone: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const primerSwal = await Swal.fire({
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
@@ -123,7 +127,7 @@ const EjercicioP8Phone: React.FC = () => {
                 heightAuto: false,
                 confirmButtonText: 'Simular ejercicio',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -149,89 +153,101 @@ const EjercicioP8Phone: React.FC = () => {
                 </div>
             </div>
             `,
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed) {
+                    let N = 0;
+
+                    const { value } = await Swal.fire({
+                        title: 'Ingrese un número',
+                        html: `
+                        <div style="color:#000; text-align:left; font-size:14px;">
+                            Ingresa un número entero positivo (N)
+                        </div>
+                        `,
+                        input: 'number',
+                        inputAttributes: {
+                            step: '1',
+                            inputmode: 'numeric',
+                            min: '1',
+                        },
+                        inputPlaceholder: 'Ej: 10',
+                        width: '92%',
+                        padding: '12px',
+                        heightAuto: false,
+                        confirmButtonText: 'Calcular',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        customClass: {
+                            confirmButton: 'btn-semitransparente',
+                        },
+                        preConfirm: (val) => {
+                            if (val === '' || val === null) {
+                                Swal.showValidationMessage(
+                                    'Debes ingresar un número.'
+                                );
+                                return;
+                            }
+                            const n = Number(val);
+                            if (
+                                Number.isNaN(n) ||
+                                !Number.isInteger(n) ||
+                                n < 1
+                            ) {
+                                Swal.showValidationMessage(
+                                    'Ingrese un número entero mayor o igual a 1.'
+                                );
+                                return;
+                            }
+                            return n;
+                        },
+                    });
+
+                    if (value === undefined) return;
+                    N = value;
+
+                    let sumaPares = 0;
+                    let sumaImpares = 0;
+
+                    for (let i = 1; i <= N; i++) {
+                        if (i % 2 === 0) {
+                            sumaPares += i;
+                        } else {
+                            sumaImpares += i;
+                        }
+                    }
+
+                    await Swal.fire({
+                        title: 'Resultado Final',
+                        icon: 'success',
+                        width: '92%',
+                        padding: '12px',
+                        confirmButtonText: 'Cerrar',
+                        customClass: {
+                            confirmButton: 'btn-semitransparente',
+                        },
+                        html: `
+                    <div style="color:#000; text-align:left; font-size:14px;">
+                        <div><b>N = </b>${N}</div>
+                        <div style="margin:12px 0;">
+                            <b>Suma de números pares:</b> ${sumaPares}
+                        </div>
+                        <div>
+                            <b>Suma de números impares:</b> ${sumaImpares}
+                        </div>
+                        <div style="margin-top:15px; font-size:16px;">
+                            <b>Total:</b> ${sumaPares + sumaImpares}
+                        </div>
+                    </div>
+                    `,
+                    });
+                }
             });
             await IncrementarPuntuacionEjercicio();
-            if (!primerSwal.isConfirmed) return;
-
-            let N = 0;
-
-            const { value } = await Swal.fire({
-                title: 'Ingrese un número',
-                html: `
-                <div style="color:#000; text-align:left; font-size:14px;">
-                    Ingresa un número entero positivo (N)
-                </div>
-                `,
-                input: 'number',
-                inputAttributes: {
-                    step: '1',
-                    inputmode: 'numeric',
-                    min: '1',
-                },
-                inputPlaceholder: 'Ej: 10',
-                width: '92%',
-                padding: '12px',
-                heightAuto: false,
-                confirmButtonText: 'Calcular',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                customClass: {
-                    confirmButton: 'btn-semitransparente',
-                },
-                preConfirm: (val) => {
-                    if (val === '' || val === null) {
-                        Swal.showValidationMessage('Debes ingresar un número.');
-                        return;
-                    }
-                    const n = Number(val);
-                    if (Number.isNaN(n) || !Number.isInteger(n) || n < 1) {
-                        Swal.showValidationMessage(
-                            'Ingrese un número entero mayor o igual a 1.'
-                        );
-                        return;
-                    }
-                    return n;
-                },
-            });
-
-            if (value === undefined) return;
-            N = value;
-
-            let sumaPares = 0;
-            let sumaImpares = 0;
-
-            for (let i = 1; i <= N; i++) {
-                if (i % 2 === 0) {
-                    sumaPares += i;
-                } else {
-                    sumaImpares += i;
-                }
-            }
-
-            await Swal.fire({
-                title: 'Resultado Final',
-                icon: 'success',
-                width: '92%',
-                padding: '12px',
-                confirmButtonText: 'Cerrar',
-                customClass: {
-                    confirmButton: 'btn-semitransparente',
-                },
-                html: `
-            <div style="color:#000; text-align:left; font-size:14px;">
-                <div><b>N = </b>${N}</div>
-                <div style="margin:12px 0;">
-                    <b>Suma de números pares:</b> ${sumaPares}
-                </div>
-                <div>
-                    <b>Suma de números impares:</b> ${sumaImpares}
-                </div>
-                <div style="margin-top:15px; font-size:16px;">
-                    <b>Total:</b> ${sumaPares + sumaImpares}
-                </div>
-            </div>
-            `,
-            });
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',

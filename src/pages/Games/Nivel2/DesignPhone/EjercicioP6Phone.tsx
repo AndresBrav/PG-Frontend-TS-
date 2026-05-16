@@ -44,6 +44,10 @@ const EjercicioP6Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
+    const ejecutarOtroMetodo = () => {
+        navigate('/ejercicio7-pseudocodigo');
+    };
+
     const returnDashboard = () => {
         navigate('/dashboard');
     };
@@ -116,7 +120,8 @@ const EjercicioP6Phone: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const primerSwal = await Swal.fire({
+            await IncrementarPuntuacionEjercicio();
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
@@ -125,7 +130,7 @@ const EjercicioP6Phone: React.FC = () => {
                 heightAuto: false,
                 confirmButtonText: 'Simular ciclo',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -151,96 +156,103 @@ const EjercicioP6Phone: React.FC = () => {
                 </div>
             </div>
             `,
-            });
-            await IncrementarPuntuacionEjercicio();
-            if (!primerSwal.isConfirmed) return;
-
-            let pares = 0;
-            let impares = 0;
-
-            for (let i = 1; i <= 5; i++) {
-                const { value } = await Swal.fire({
-                    title: `Iteración ${i}`,
-                    html: `
-                <div style="color:#000; text-align:left; font-size:14px;">
-                    <div style="margin-bottom:10px;">
-                        Ingresa un número entero
-                    </div>
-                    <div style="font-size:12px; color:#374151;">
-                        Pares: <b>${pares}</b> | Impares: <b>${impares}</b>
-                    </div>
-                </div>
-                `,
-                    input: 'number',
-                    inputAttributes: {
-                        step: '1',
-                        inputmode: 'numeric',
-                        pattern: '[0-9-]*',
-                    },
-                    inputPlaceholder: 'Ej: 8',
-                    width: '92%',
-                    padding: '12px',
-                    heightAuto: false,
-                    confirmButtonText: 'Continuar',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    customClass: {
-                        confirmButton: 'btn-semitransparente',
-                    },
-                    preConfirm: (val) => {
-                        if (val === '' || val === null) {
-                            Swal.showValidationMessage(
-                                'Debes ingresar un número.'
-                            );
-                            return;
-                        }
-
-                        const n = Number(val);
-
-                        if (Number.isNaN(n)) {
-                            Swal.showValidationMessage('Número inválido.');
-                            return;
-                        }
-
-                        if (!Number.isInteger(n)) {
-                            Swal.showValidationMessage(
-                                'Solo se permiten enteros.'
-                            );
-                            return;
-                        }
-
-                        return n;
-                    },
-                });
-
-                if (value === undefined) return;
-
-                if (value % 2 === 0) {
-                    pares++;
-                } else {
-                    impares++;
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
                 }
-            }
+                if (r.isDismissed) return;
+                if (r.isConfirmed) {
+                    let pares = 0;
+                    let impares = 0;
 
-            await Swal.fire({
-                title: 'Resultado Final',
-                icon: 'success',
-                width: '92%',
-                padding: '12px',
-                confirmButtonText: 'Cerrar',
-                customClass: {
-                    confirmButton: 'btn-semitransparente',
-                },
-                html: `
-            <div style="color:#000; text-align:left; font-size:14px;">
-                <div style="margin-bottom:12px;">
-                    <b>Cantidad de números pares:</b> ${pares}
-                </div>
-                <div>
-                    <b>Cantidad de números impares:</b> ${impares}
-                </div>
-            </div>
-            `,
+                    for (let i = 1; i <= 5; i++) {
+                        const { value } = await Swal.fire({
+                            title: `Iteración ${i}`,
+                            html: `
+                        <div style="color:#000; text-align:left; font-size:14px;">
+                            <div style="margin-bottom:10px;">
+                                Ingresa un número entero
+                            </div>
+                            <div style="font-size:12px; color:#374151;">
+                                Pares: <b>${pares}</b> | Impares: <b>${impares}</b>
+                            </div>
+                        </div>
+                        `,
+                            input: 'number',
+                            inputAttributes: {
+                                step: '1',
+                                inputmode: 'numeric',
+                                pattern: '[0-9-]*',
+                            },
+                            inputPlaceholder: 'Ej: 8',
+                            width: '92%',
+                            padding: '12px',
+                            heightAuto: false,
+                            confirmButtonText: 'Continuar',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            customClass: {
+                                confirmButton: 'btn-semitransparente',
+                            },
+                            preConfirm: (val) => {
+                                if (val === '' || val === null) {
+                                    Swal.showValidationMessage(
+                                        'Debes ingresar un número.'
+                                    );
+                                    return;
+                                }
+
+                                const n = Number(val);
+
+                                if (Number.isNaN(n)) {
+                                    Swal.showValidationMessage(
+                                        'Número inválido.'
+                                    );
+                                    return;
+                                }
+
+                                if (!Number.isInteger(n)) {
+                                    Swal.showValidationMessage(
+                                        'Solo se permiten enteros.'
+                                    );
+                                    return;
+                                }
+
+                                return n;
+                            },
+                        });
+
+                        if (value === undefined) return;
+
+                        if (value % 2 === 0) {
+                            pares++;
+                        } else {
+                            impares++;
+                        }
+                    }
+
+                    await Swal.fire({
+                        title: 'Resultado Final',
+                        icon: 'success',
+                        width: '92%',
+                        padding: '12px',
+                        confirmButtonText: 'Cerrar',
+                        customClass: {
+                            confirmButton: 'btn-semitransparente',
+                        },
+                        html: `
+                    <div style="color:#000; text-align:left; font-size:14px;">
+                        <div style="margin-bottom:12px;">
+                            <b>Cantidad de números pares:</b> ${pares}
+                        </div>
+                        <div>
+                            <b>Cantidad de números impares:</b> ${impares}
+                        </div>
+                    </div>
+                    `,
+                    });
+                }
             });
         } else {
             await Swal.fire({

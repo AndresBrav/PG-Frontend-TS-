@@ -39,6 +39,10 @@ const EjercicioP2Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
+    const ejecutarOtroMetodo = () => {
+        navigate('/ejercicio3-pseudocodigo');
+    };
+
     const returnDashboard = () => {
         navigate('/dashboard');
     };
@@ -111,6 +115,7 @@ const EjercicioP2Phone: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
+            await IncrementarPuntuacionEjercicio();
             Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
@@ -120,7 +125,7 @@ const EjercicioP2Phone: React.FC = () => {
                 heightAuto: false,
                 confirmButtonText: 'Calcular',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -195,25 +200,29 @@ const EjercicioP2Phone: React.FC = () => {
                     return { num1, num2, suma: num1 + num2 };
                 },
             }).then(async (r) => {
-                if (!r.isConfirmed || !r.value) return;
-
-                await Swal.fire({
-                    title: 'Resultado',
-                    icon: 'success',
-                    width: '92%',
-                    padding: '12px',
-                    html: `
-                        <div style="color:#000;text-align:left;font-size:14px;">
-                            <div><b>num1:</b> ${r.value.num1}</div>
-                            <div><b>num2:</b> ${r.value.num2}</div>
-                            <div style="margin-top:10px;font-size:16px;">
-                                <b>resultado:</b> ${r.value.suma}
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed && r.value) {
+                    await Swal.fire({
+                        title: 'Resultado',
+                        icon: 'success',
+                        width: '92%',
+                        padding: '12px',
+                        html: `
+                            <div style="color:#000;text-align:left;font-size:14px;">
+                                <div><b>num1:</b> ${r.value.num1}</div>
+                                <div><b>num2:</b> ${r.value.num2}</div>
+                                <div style="margin-top:10px;font-size:16px;">
+                                    <b>resultado:</b> ${r.value.suma}
+                                </div>
                             </div>
-                        </div>
-                    `,
-                });
+                        `,
+                    });
+                }
             });
-            await IncrementarPuntuacionEjercicio();
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',

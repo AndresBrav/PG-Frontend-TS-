@@ -43,6 +43,10 @@ const EjercicioP3Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
+    const ejecutarOtroMetodo = () => {
+        navigate('/ejercicio4-pseudocodigo');
+    };
+
     const returnDashboard = () => {
         navigate('/dashboard');
     };
@@ -115,7 +119,8 @@ const EjercicioP3Phone: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const result = await Swal.fire({
+            await IncrementarPuntuacionEjercicio();
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
@@ -124,7 +129,7 @@ const EjercicioP3Phone: React.FC = () => {
                 heightAuto: false,
                 confirmButtonText: 'Evaluar',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -196,13 +201,16 @@ const EjercicioP3Phone: React.FC = () => {
 
                     return { nota };
                 },
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed && r.value) {
+                    await mostrarResultadoCalificacion(r.value.nota);
+                }
             });
-
-            await IncrementarPuntuacionEjercicio();
-
-            if (!result.isConfirmed || !result.value) return;
-
-            await mostrarResultadoCalificacion(result.value.nota);
         } else {
             await Swal.fire({
                 title: 'Ejercicio incompleto',

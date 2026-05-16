@@ -48,6 +48,10 @@ const EjercicioP7Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
+    const ejecutarOtroMetodo = () => {
+        navigate('/ejercicio8-pseudocodigo');
+    };
+
     const returnDashboard = () => {
         navigate('/dashboard');
     };
@@ -120,7 +124,8 @@ const EjercicioP7Phone: React.FC = () => {
         const todoCorrecto = resultados.length > 0 && resultados.every(Boolean);
 
         if (todoCorrecto) {
-            const primerSwal = await Swal.fire({
+            await IncrementarPuntuacionEjercicio();
+            Swal.fire({
                 title: 'Ejercicio completado',
                 icon: 'success',
                 iconColor: 'green',
@@ -129,7 +134,7 @@ const EjercicioP7Phone: React.FC = () => {
                 heightAuto: false,
                 confirmButtonText: 'Simular tabla',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -155,92 +160,99 @@ const EjercicioP7Phone: React.FC = () => {
                 </div>
             </div>
             `,
-            });
-            await IncrementarPuntuacionEjercicio();
-            if (!primerSwal.isConfirmed) return;
+            }).then(async (r) => {
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+                if (r.isDismissed) return;
+                if (r.isConfirmed) {
+                    let numero = 0;
 
-            let numero = 0;
+                    // Pedir número con validación
+                    while (true) {
+                        const { value } = await Swal.fire({
+                            title: 'Ingrese un número',
+                            html: `
+                            <div style="color:#000; text-align:left; font-size:14px;">
+                                Ingresa un número entre <b>1 y 10</b>
+                            </div>
+                            `,
+                            input: 'number',
+                            inputAttributes: {
+                                step: '1',
+                                inputmode: 'numeric',
+                            },
+                            inputPlaceholder: 'Ej: 7',
+                            width: '92%',
+                            padding: '12px',
+                            heightAuto: false,
+                            confirmButtonText: 'Continuar',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            customClass: {
+                                confirmButton: 'btn-semitransparente',
+                            },
+                            preConfirm: (val) => {
+                                if (val === '' || val === null) {
+                                    Swal.showValidationMessage(
+                                        'Debes ingresar un número.'
+                                    );
+                                    return;
+                                }
 
-            // Pedir número con validación
-            while (true) {
-                const { value } = await Swal.fire({
-                    title: 'Ingrese un número',
-                    html: `
-                    <div style="color:#000; text-align:left; font-size:14px;">
-                        Ingresa un número entre <b>1 y 10</b>
-                    </div>
-                    `,
-                    input: 'number',
-                    inputAttributes: {
-                        step: '1',
-                        inputmode: 'numeric',
-                    },
-                    inputPlaceholder: 'Ej: 7',
-                    width: '92%',
-                    padding: '12px',
-                    heightAuto: false,
-                    confirmButtonText: 'Continuar',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    customClass: {
-                        confirmButton: 'btn-semitransparente',
-                    },
-                    preConfirm: (val) => {
-                        if (val === '' || val === null) {
-                            Swal.showValidationMessage(
-                                'Debes ingresar un número.'
-                            );
-                            return;
-                        }
+                                const n = Number(val);
 
-                        const n = Number(val);
+                                if (Number.isNaN(n)) {
+                                    Swal.showValidationMessage(
+                                        'Número inválido.'
+                                    );
+                                    return;
+                                }
 
-                        if (Number.isNaN(n)) {
-                            Swal.showValidationMessage('Número inválido.');
-                            return;
-                        }
+                                if (!Number.isInteger(n)) {
+                                    Swal.showValidationMessage(
+                                        'Solo se permiten enteros.'
+                                    );
+                                    return;
+                                }
 
-                        if (!Number.isInteger(n)) {
-                            Swal.showValidationMessage(
-                                'Solo se permiten enteros.'
-                            );
-                            return;
-                        }
+                                if (n < 1 || n > 10) {
+                                    Swal.showValidationMessage(
+                                        'El número debe estar entre 1 y 10.'
+                                    );
+                                    return;
+                                }
 
-                        if (n < 1 || n > 10) {
-                            Swal.showValidationMessage(
-                                'El número debe estar entre 1 y 10.'
-                            );
-                            return;
-                        }
+                                return n;
+                            },
+                        });
 
-                        return n;
-                    },
-                });
+                        if (value === undefined) return;
+                        numero = value;
+                        break;
+                    }
 
-                if (value === undefined) return;
-                numero = value;
-                break;
-            }
+                    // Mostrar tabla
+                    let tablaHtml = `<div style="text-align:left; font-size:14px; margin-top:10px;">`;
+                    tablaHtml += `<b>Tabla del ${numero}:</b><br><br>`;
+                    for (let i = 1; i <= 10; i++) {
+                        tablaHtml += `${numero} x ${i} = ${numero * i}<br>`;
+                    }
+                    tablaHtml += `</div>`;
 
-            // Mostrar tabla
-            let tablaHtml = `<div style="text-align:left; font-size:14px; margin-top:10px;">`;
-            tablaHtml += `<b>Tabla del ${numero}:</b><br><br>`;
-            for (let i = 1; i <= 10; i++) {
-                tablaHtml += `${numero} x ${i} = ${numero * i}<br>`;
-            }
-            tablaHtml += `</div>`;
-
-            await Swal.fire({
-                title: 'Tabla de Multiplicar',
-                icon: 'success',
-                width: '92%',
-                padding: '12px',
-                confirmButtonText: 'Cerrar',
-                customClass: {
-                    confirmButton: 'btn-semitransparente',
-                },
-                html: tablaHtml,
+                    await Swal.fire({
+                        title: 'Tabla de Multiplicar',
+                        icon: 'success',
+                        width: '92%',
+                        padding: '12px',
+                        confirmButtonText: 'Cerrar',
+                        customClass: {
+                            confirmButton: 'btn-semitransparente',
+                        },
+                        html: tablaHtml,
+                    });
+                }
             });
         } else {
             await Swal.fire({
