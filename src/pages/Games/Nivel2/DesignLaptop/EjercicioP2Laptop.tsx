@@ -43,6 +43,10 @@ const EjercicioP2Laptop: React.FC = () => {
         navigate('/dashboard');
     };
 
+    const ejecutarOtroMetodo = async () => {
+        navigate('/ejercicio3-pseudocodigo');
+    };
+
     // Click en banco -> pasa a construcción
     const addLine = (line: CodeLine) => {
         setAvailable((prev) => prev.filter((x) => x.id !== line.id));
@@ -101,7 +105,7 @@ const EjercicioP2Laptop: React.FC = () => {
                 width: '55%',
                 confirmButtonText: 'Calcular',
                 showCancelButton: true,
-                cancelButtonText: 'Cerrar',
+                cancelButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
                     cancelButton: 'btn-cierre',
@@ -160,14 +164,25 @@ const EjercicioP2Laptop: React.FC = () => {
                         return;
                     }
 
-                    // Mostrar el número mayor
-                    mostrarMayorNumero(num1, num2);
-
                     return {
                         num1,
                         num2,
                     };
                 },
+            }).then(async (r) => {
+                // 👉 Detectar clic en "Siguiente"
+                if (r.dismiss === Swal.DismissReason.cancel) {
+                    ejecutarOtroMetodo();
+                    return;
+                }
+
+                if (r.isDismissed) return;
+
+                // 👉 Si presiona "Calcular"
+                if (r.isConfirmed && r.value) {
+                    const { num1, num2 } = r.value;
+                    await mostrarMayorNumero(num1, num2);
+                }
             });
             await IncrementarPuntuacionEjercicio();
         } else {
