@@ -242,11 +242,43 @@
 .node-wrapper {
     padding: 0;
     transition: box-shadow 0.15s;
+    position: relative;
 }
 
 .node-wrapper.selected {
     box-shadow: 0 0 0 2px var(--accent);
     border-radius: 4px;
+}
+
+.node-delete-btn {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--node-bg);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.2s;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.node-delete-btn:hover {
+    background: #ff4444;
+    border-color: #ff4444;
+    color: white;
+    transform: scale(1.1);
+}
+
+.node-delete-btn:active {
+    transform: scale(0.95);
 }
 
 .node-shape {
@@ -449,6 +481,18 @@
     .no-label {
         left: -24px;
     }
+
+    .node-delete-btn {
+        width: 36px;
+        height: 36px;
+        top: -16px;
+        right: -16px;
+    }
+
+    .node-delete-btn svg {
+        width: 18px;
+        height: 18px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -516,5 +560,17 @@
 
     .no-label {
         left: -22px;
+    }
+
+    .node-delete-btn {
+        width: 40px;
+        height: 40px;
+        top: -18px;
+        right: -18px;
+    }
+
+    .node-delete-btn svg {
+        width: 20px;
+        height: 20px;
     }
 }
