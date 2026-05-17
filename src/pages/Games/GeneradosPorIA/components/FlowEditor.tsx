@@ -14,6 +14,10 @@ import {
   type Edge,
   type OnNodesDelete,
   type OnEdgesDelete,
+  BaseEdge,
+  EdgeLabelRenderer,
+  getSmoothStepPath,
+  type EdgeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { StartEndNode, ProcessNode, DataNode, DecisionNode } from './nodes';
@@ -36,8 +40,69 @@ const defaultLabels: Record<NodeType, string> = {
 let id = 0;
 const getId = () => `node_${id++}`;
 
+function CustomEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, label, selected, style = {}, markerEnd, data: edgeData }: EdgeProps) {
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  const isSelected = selected || (edgeData as any)?.selected;
+
+  return (
+    <>
+      <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
+      {label && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              pointerEvents: 'all',
+            }}
+            className="edge-label"
+          >
+            {label}
+          </div>
+        </EdgeLabelRenderer>
+      )}
+      {isSelected && (
+        <EdgeLabelRenderer>
+          <button
+            className="edge-delete-btn"
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${(sourceX + targetX) / 2}px,${(sourceY + targetY) / 2}px)`,
+              pointerEvents: 'all',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              (edgeData as any)?.onDeleteEdge?.(id);
+            }}
+            aria-label="Eliminar flecha"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </EdgeLabelRenderer>
+      )}
+    </>
+  );
+}
+
+const edgeTypes = {
+  custom: CustomEdge,
+};
+
 const edgeOptions = {
-  type: 'smoothstep',
+  type: 'custom',
   markerEnd: {
     type: MarkerType.ArrowClosed,
     width: 20,
@@ -66,6 +131,14 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const { screenToFlowPosition } = useReactFlow();
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+    const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+
+    const deleteEdgeById = useCallback((edgeId: string) => {
+      const remainingEdges = internalEdges.filter((e) => e.id !== edgeId);
+      setInternalEdges(remainingEdges);
+      onEdgesChange(remainingEdges);
+      setSelectedEdgeId(null);
+    }, [internalEdges, setInternalEdges, onEdgesChange]);
 
     const syncNodes = useCallback((newNodes: Node[]) => {
       setInternalNodes(newNodes);
@@ -73,9 +146,13 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
     }, [setInternalNodes, onNodesChange]);
 
     const syncEdges = useCallback((newEdges: Edge[]) => {
-      setInternalEdges(newEdges);
-      onEdgesChange(newEdges);
-    }, [setInternalEdges, onEdgesChange]);
+      const edgesWithDelete = newEdges.map((edge) => ({
+        ...edge,
+        data: { ...edge.data, onDeleteEdge: deleteEdgeById },
+      }));
+      setInternalEdges(edgesWithDelete);
+      onEdgesChange(edgesWithDelete);
+    }, [setInternalEdges, onEdgesChange, deleteEdgeById]);
 
     const onConnect: OnConnect = useCallback(
       (params) => {
@@ -91,12 +168,13 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
           ...params,
           ...edgeOptions,
           label,
+          data: { onDeleteEdge: deleteEdgeById },
         };
 
         const newEdges = addEdge(newEdge, internalEdges);
         syncEdges(newEdges);
       },
-      [internalEdges, internalNodes, syncEdges]
+      [internalEdges, internalNodes, syncEdges, deleteEdgeById]
     );
 
     const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
@@ -114,6 +192,12 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
     }, []);
 
     const onPaneClick = useCallback(() => {
+      setSelectedNodeId(null);
+      setSelectedEdgeId(null);
+    }, []);
+
+    const onEdgeClick = useCallback((_event: React.MouseEvent, edge: Edge) => {
+      setSelectedEdgeId(edge.id);
       setSelectedNodeId(null);
     }, []);
 
@@ -145,8 +229,11 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
         const deletedIds = deleted.map((e) => e.id);
         const remainingEdges = internalEdges.filter((e) => !deletedIds.includes(e.id));
         syncEdges(remainingEdges);
+        if (selectedEdgeId && deletedIds.includes(selectedEdgeId)) {
+          setSelectedEdgeId(null);
+        }
       },
-      [internalEdges, syncEdges]
+      [internalEdges, syncEdges, selectedEdgeId]
     );
 
     const onDragOver = useCallback((event: React.DragEvent) => {
@@ -226,12 +313,14 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
           onConnect={onConnect}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
+          onEdgeClick={onEdgeClick}
           onPaneClick={onPaneClick}
           onNodesDelete={onNodesDelete}
           onEdgesDelete={onEdgesDelete}
           onDragOver={onDragOver}
           onDrop={onDrop}
           nodeTypes={nodeTypesWithProps}
+          edgeTypes={edgeTypes}
           defaultEdgeOptions={edgeOptions}
           fitView
           deleteKeyCode={["Delete", "Backspace"]}
