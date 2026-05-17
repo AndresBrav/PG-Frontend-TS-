@@ -1,12 +1,9 @@
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { useNodeDelete } from '../FlowEditor';
 
-interface CustomNodeProps {
-  selectedNodeId: string | null;
-  onDeleteNode: (id: string) => void;
-}
-
-function ProcessNode({ data, selected, id, selectedNodeId, onDeleteNode }: NodeProps & CustomNodeProps) {
+function ProcessNode({ data, selected, id }: NodeProps) {
+  const { selectedNodeId, deleteNodeById } = useNodeDelete();
   const isSelected = selected || selectedNodeId === id;
 
   return (
@@ -17,9 +14,10 @@ function ProcessNode({ data, selected, id, selectedNodeId, onDeleteNode }: NodeP
       {isSelected && (
         <button
           className="node-delete-btn"
+          style={{ touchAction: 'none' }}
           onClick={(e) => {
             e.stopPropagation();
-            onDeleteNode(id);
+            deleteNodeById(id);
           }}
           aria-label="Eliminar nodo"
         >

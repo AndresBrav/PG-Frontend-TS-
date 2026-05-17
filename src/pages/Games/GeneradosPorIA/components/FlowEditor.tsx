@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo, useImperativeHandle, forwardRef, useState } from 'react';
+import { createContext, useContext, useCallback, useRef, useMemo, useImperativeHandle, forwardRef, useState } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -22,6 +22,22 @@ import {
 import '@xyflow/react/dist/style.css';
 import { StartEndNode, ProcessNode, DataNode, DecisionNode } from './nodes';
 import type { NodeType } from '../types/flow';
+
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+interface NodeDeleteContextType {
+  selectedNodeId: string | null;
+  setSelectedNodeId: (id: string | null) => void;
+  deleteNodeById: (id: string) => void;
+}
+
+const NodeDeleteContext = createContext<NodeDeleteContextType>({
+  selectedNodeId: null,
+  setSelectedNodeId: () => {},
+  deleteNodeById: () => {},
+});
+
+export const useNodeDelete = () => useContext(NodeDeleteContext);
 
 const nodeTypes = {
   startEnd: StartEndNode,
@@ -77,6 +93,7 @@ function CustomEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, ta
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${(sourceX + targetX) / 2}px,${(sourceY + targetY) / 2}px)`,
               pointerEvents: 'all',
+              touchAction: 'none',
             }}
             onClick={(e) => {
               e.stopPropagation();
@@ -154,6 +171,16 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
       onEdgesChange(edgesWithDelete);
     }, [setInternalEdges, onEdgesChange, deleteEdgeById]);
 
+    const deleteNodeById = useCallback((nodeId: string) => {
+      const remainingNodes = internalNodes.filter((n) => n.id !== nodeId);
+      const remainingEdges = internalEdges.filter(
+        (e) => e.source !== nodeId && e.target !== nodeId
+      );
+      syncNodes(remainingNodes);
+      syncEdges(remainingEdges);
+      setSelectedNodeId(null);
+    }, [internalNodes, internalEdges, syncNodes, syncEdges]);
+
     const onConnect: OnConnect = useCallback(
       (params) => {
         const sourceNode = internalNodes.find((n) => n.id === params.source);
@@ -200,16 +227,6 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
       setSelectedEdgeId(edge.id);
       setSelectedNodeId(null);
     }, []);
-
-    const deleteNodeById = useCallback((nodeId: string) => {
-      const remainingNodes = internalNodes.filter((n) => n.id !== nodeId);
-      const remainingEdges = internalEdges.filter(
-        (e) => e.source !== nodeId && e.target !== nodeId
-      );
-      syncNodes(remainingNodes);
-      syncEdges(remainingEdges);
-      setSelectedNodeId(null);
-    }, [internalNodes, internalEdges, syncNodes, syncEdges]);
 
     const onNodesDelete: OnNodesDelete = useCallback(
       (deleted) => {
@@ -296,42 +313,43 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
 
     const proOptions = useMemo(() => ({ hideAttribution: true }), []);
 
-    const nodeTypesWithProps = useMemo(() => ({
-      startEnd: (props: any) => <StartEndNode {...props} selectedNodeId={selectedNodeId} onDeleteNode={deleteNodeById} />,
-      process: (props: any) => <ProcessNode {...props} selectedNodeId={selectedNodeId} onDeleteNode={deleteNodeById} />,
-      data: (props: any) => <DataNode {...props} selectedNodeId={selectedNodeId} onDeleteNode={deleteNodeById} />,
-      decision: (props: any) => <DecisionNode {...props} selectedNodeId={selectedNodeId} onDeleteNode={deleteNodeById} />,
+    const contextValue = useMemo(() => ({
+      selectedNodeId,
+      setSelectedNodeId,
+      deleteNodeById,
     }), [selectedNodeId, deleteNodeById]);
 
     return (
-      <div ref={reactFlowWrapper} className="flow-editor">
-        <ReactFlow
-          nodes={internalNodes}
-          edges={internalEdges}
-          onNodesChange={onNodesChangeInternal}
-          onEdgesChange={onEdgesChangeInternal}
-          onConnect={onConnect}
-          onNodeClick={onNodeClick}
-          onNodeDoubleClick={onNodeDoubleClick}
-          onEdgeClick={onEdgeClick}
-          onPaneClick={onPaneClick}
-          onNodesDelete={onNodesDelete}
-          onEdgesDelete={onEdgesDelete}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
-          nodeTypes={nodeTypesWithProps}
-          edgeTypes={edgeTypes}
-          defaultEdgeOptions={edgeOptions}
-          fitView
-          deleteKeyCode={["Delete", "Backspace"]}
-          snapToGrid
-          snapGrid={[15, 15]}
-          proOptions={proOptions}
-        >
-          <Controls />
-          <Background variant={BackgroundVariant.Dots} gap={15} size={1} />
-        </ReactFlow>
-      </div>
+      <NodeDeleteContext.Provider value={contextValue}>
+        <div ref={reactFlowWrapper} className="flow-editor">
+          <ReactFlow
+            nodes={internalNodes}
+            edges={internalEdges}
+            onNodesChange={onNodesChangeInternal}
+            onEdgesChange={onEdgesChangeInternal}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            onNodeDoubleClick={onNodeDoubleClick}
+            onEdgeClick={onEdgeClick}
+            onPaneClick={onPaneClick}
+            onNodesDelete={onNodesDelete}
+            onEdgesDelete={onEdgesDelete}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            defaultEdgeOptions={edgeOptions}
+            fitView
+            deleteKeyCode={["Delete", "Backspace"]}
+            snapToGrid={!isTouchDevice}
+            snapGrid={[15, 15]}
+            proOptions={proOptions}
+          >
+            <Controls />
+            <Background variant={BackgroundVariant.Dots} gap={15} size={1} />
+          </ReactFlow>
+        </div>
+      </NodeDeleteContext.Provider>
     );
   }
 );
