@@ -1,0 +1,520 @@
+.app {
+    --text: #6b6375;
+    --text-h: #08060d;
+    --bg: #fff;
+    --border: #e5e4e7;
+    --code-bg: #f4f3ec;
+    --accent: #aa3bff;
+    --accent-hover: #9333ea;
+    --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+    --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+    --mono: ui-monospace, Consolas, monospace;
+
+    --toolbar-bg: #ffffff;
+    --sidebar-bg: #f9f8fc;
+    --sidebar-item-bg: #ffffff;
+    --sidebar-item-hover: #f4f3ec;
+    --canvas-bg: #ffffff;
+    --node-bg: #ffffff;
+    --node-startend: #e8f5e9;
+    --node-startend-border: #4caf50;
+    --node-process: #e3f2fd;
+    --node-process-border: #2196f3;
+    --node-data: #fff3e0;
+    --node-data-border: #ff9800;
+    --node-decision: #fce4ec;
+    --node-decision-border: #e91e63;
+    --yes-color: #2e7d32;
+    --yes-bg: #e8f5e9;
+    --no-color: #c62828;
+    --no-bg: #ffebee;
+    --handle-bg: #ffffff;
+    --handle-border: #6b6375;
+    --edge-color: #6b6375;
+    --controls-bg: #ffffff;
+    --controls-hover: #f4f3ec;
+    --btn-clear-bg: #f4f3ec;
+    --btn-clear-hover: #e5e4e7;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    font: 16px/145% var(--sans);
+    letter-spacing: 0.18px;
+    color-scheme: light dark;
+    color: var(--text);
+    background: var(--bg);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border: none;
+    min-height: 100svh;
+
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+    .app {
+        --text: #9ca3af;
+        --text-h: #f3f4f6;
+        --bg: #16171d;
+        --border: #2e303a;
+        --code-bg: #1f2028;
+        --accent: #c084fc;
+        --accent-hover: #a855f7;
+        --toolbar-bg: #1a1b23;
+        --sidebar-bg: #1e1f28;
+        --sidebar-item-bg: #252630;
+        --sidebar-item-hover: #2e303a;
+        --canvas-bg: #ffffff;
+        --node-bg: #252630;
+        --node-startend: #1a3a1a;
+        --node-startend-border: #4caf50;
+        --node-process: #1a2a3a;
+        --node-process-border: #2196f3;
+        --node-data: #3a2a1a;
+        --node-data-border: #ff9800;
+        --node-decision: #3a1a2a;
+        --node-decision-border: #e91e63;
+        --yes-color: #66bb6a;
+        --yes-bg: #1a3a1a;
+        --no-color: #ef5350;
+        --no-bg: #3a1a1a;
+        --handle-bg: #2e303a;
+        --handle-border: #9ca3af;
+        --edge-color: #9ca3af;
+        --controls-bg: #252630;
+        --controls-hover: #2e303a;
+        --btn-clear-bg: #2e303a;
+        --btn-clear-hover: #3a3b45;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+}
+
+.app h1,
+.app h2,
+.app h3 {
+    font-family: var(--heading);
+    font-weight: 500;
+    color: var(--text-h);
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: var(--toolbar-bg);
+    border-bottom: 1px solid var(--border);
+    z-index: 10;
+}
+
+.toolbar h2 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--text-h);
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-export {
+    background: var(--accent);
+    color: white;
+}
+
+.btn-export:hover {
+    background: var(--accent-hover);
+}
+
+.btn-clear {
+    background: var(--btn-clear-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn-clear:hover {
+    background: var(--btn-clear-hover);
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 100%;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.sidebar h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--text-h);
+    text-align: center;
+}
+
+.sidebar-items {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    justify-content: center;
+}
+
+.sidebar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: grab;
+    background: var(--sidebar-item-bg);
+    transition: all 0.2s;
+    min-width: 100px;
+}
+
+.sidebar-item:hover {
+    border-color: var(--accent);
+    background: var(--sidebar-item-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.sidebar-item:active {
+    cursor: grabbing;
+}
+
+.sidebar-item.mobile-item:active {
+    transform: scale(0.95);
+    background: var(--accent-bg);
+    border-color: var(--accent);
+}
+
+.symbol-preview {
+    width: 80px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.symbol-preview svg {
+    width: 100%;
+    height: 100%;
+}
+
+.symbol-name {
+    font-size: 12px;
+    color: var(--text);
+    text-align: center;
+}
+
+.flow-editor {
+    flex: 1;
+    height: 100%;
+}
+
+.node-wrapper {
+    padding: 0;
+    transition: box-shadow 0.15s;
+}
+
+.node-wrapper.selected {
+    box-shadow: 0 0 0 2px var(--accent);
+    border-radius: 4px;
+}
+
+.node-shape {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 12px 20px;
+    min-width: 120px;
+    font-size: 14px;
+    color: var(--text-h);
+    background: var(--node-bg);
+    border: 2px solid var(--border);
+    word-break: break-word;
+    max-width: 200px;
+    pointer-events: none;
+    user-select: none;
+}
+
+.node-label {
+    pointer-events: none;
+    user-select: none;
+}
+
+.node-shape.start-end {
+    border-radius: 50px;
+    background: var(--node-startend);
+    border-color: var(--node-startend-border);
+}
+
+.node-shape.process {
+    border-radius: 6px;
+    background: var(--node-process);
+    border-color: var(--node-process-border);
+}
+
+.node-shape.data {
+    clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
+    background: var(--node-data);
+    border: none;
+    padding: 12px 30px;
+}
+
+.node-shape.decision {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    background: var(--node-decision);
+    border: none;
+    padding: 25px 20px;
+    min-width: 140px;
+    min-height: 90px;
+}
+
+.decision-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.decision-label {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 5;
+    pointer-events: none;
+    user-select: none;
+}
+
+.yes-label {
+    right: -28px;
+    color: var(--yes-color);
+    background: var(--yes-bg);
+}
+
+.no-label {
+    left: -28px;
+    color: var(--no-color);
+    background: var(--no-bg);
+}
+
+.react-flow__handle {
+    width: 12px;
+    height: 12px;
+    background: var(--handle-bg);
+    border: 2px solid var(--handle-border);
+}
+
+.react-flow__handle:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.react-flow__edge-path {
+    stroke: var(--edge-color);
+    stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+
+.react-flow__edge-text {
+    fill: #000000;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.react-flow__controls {
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.react-flow__controls button {
+    background: var(--controls-bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.react-flow__controls button:hover {
+    background: var(--controls-hover);
+}
+
+.react-flow__background {
+    background: var(--canvas-bg);
+}
+
+@media (max-width: 768px) {
+    .toolbar {
+        padding: 8px 12px;
+    }
+
+    .toolbar h2 {
+        font-size: 16px;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .sidebar {
+        padding: 8px 10px;
+    }
+
+    .sidebar h3 {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .sidebar-items {
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    .sidebar-item {
+        min-width: 85px;
+        padding: 8px 10px;
+    }
+
+    .symbol-preview {
+        width: 60px;
+        height: 30px;
+    }
+
+    .symbol-name {
+        font-size: 10px;
+    }
+
+    .react-flow__controls {
+        transform: scale(0.85);
+        transform-origin: bottom left;
+    }
+
+    .node-shape {
+        font-size: 12px;
+        padding: 10px 16px;
+        min-width: 100px;
+    }
+
+    .node-shape.decision {
+        padding: 20px 16px;
+        min-width: 120px;
+        min-height: 75px;
+    }
+
+    .decision-label {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+
+    .yes-label {
+        right: -24px;
+    }
+
+    .no-label {
+        left: -24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .toolbar {
+        flex-direction: column;
+        gap: 8px;
+        padding: 6px 10px;
+    }
+
+    .toolbar h2 {
+        font-size: 14px;
+    }
+
+    .toolbar-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sidebar {
+        padding: 6px 8px;
+    }
+
+    .sidebar h3 {
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .sidebar-items {
+        gap: 6px;
+    }
+
+    .sidebar-item {
+        min-width: 75px;
+        padding: 6px 8px;
+    }
+
+    .symbol-preview {
+        width: 50px;
+        height: 25px;
+    }
+
+    .symbol-name {
+        font-size: 9px;
+    }
+
+    .node-shape {
+        font-size: 11px;
+        padding: 8px 12px;
+        min-width: 90px;
+    }
+
+    .node-shape.decision {
+        padding: 18px 12px;
+        min-width: 110px;
+        min-height: 70px;
+    }
+
+    .decision-label {
+        font-size: 9px;
+    }
+
+    .yes-label {
+        right: -22px;
+    }
+
+    .no-label {
+        left: -22px;
+    }
+}
