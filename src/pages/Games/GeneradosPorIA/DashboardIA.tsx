@@ -5,6 +5,7 @@ import ModalInf1 from '../Presentation/ModalInf1'; // 👈 Importamos el modal f
 import { useNavigate } from 'react-router-dom';
 import useCerrarSesion from '../../../hooks/useCerrarSesion';
 import { TokenContext } from '../../../Context/TokenContext';
+import Swal from 'sweetalert2';
 import {
     actualizarFotoPerfil,
     traerPuntuacion,
@@ -15,6 +16,7 @@ import {
     enviarIdNotificacion,
     traerNotificaciones,
 } from '../../../api/notificacionApi';
+import { main as consultarEjercicio } from '../../../api/ejerciciosIA/consultaEjercicio';
 
 interface Notificacion {
     id: number;
@@ -24,7 +26,6 @@ interface Notificacion {
 
 const DashboardIA = () => {
     useAuthRedirect(); //redirecciona si no hay token
-    const redirectToHome = useAuthRedirect();
 
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
@@ -102,6 +103,83 @@ const DashboardIA = () => {
 
     const irEjercicio5 = () => {
         navigate('/ejercicio5');
+    };
+
+    // Función para generar ejercicio con modal
+    const handleGenerarEjercicio = async () => {
+        // Mostrar loading
+        Swal.fire({
+            title: 'Generando ejercicio...',
+            html: 'Por favor espera mientras se genera tu ejercicio con IA',
+            icon: 'info',
+            iconColor: '#FF7C02',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        try {
+            // Consultar el ejercicio a la IA
+            const ejercicioGenerado = await consultarEjercicio();
+
+            // Mostrar el ejercicio generado
+            const result = await Swal.fire({
+                title: 'Ejercicio Generado por IA',
+                html: `
+                    <div style="text-align: left; padding: 20px; background: rgba(217, 217, 217, 0.3); border-radius: 10px; margin: 15px 0;">
+                        <h2 style="color: #333; margin-bottom: 15px; font-size: 18px;">Problema:</h2>
+                        <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
+                            ${ejercicioGenerado}
+                        </p>
+                    </div>
+                `,
+                icon: 'info',
+                iconColor: '#FF7C02',
+                confirmButtonText: 'Guardar',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    title: 'titulo-celular',
+                    confirmButton: 'btn-semitransparente',
+                    cancelButton: 'btn-cancelar',
+                    icon: 'icono-celular',
+                },
+                width: '80%',
+            });
+
+            if (result.isConfirmed) {
+                // Mostrar mensaje de confirmación
+                await Swal.fire({
+                    title: 'Ejercicio Guardado',
+                    text: '¡Ejercicio guardado exitosamente!',
+                    icon: 'success',
+                    iconColor: 'green',
+                    confirmButtonText: 'Continuar',
+                    customClass: {
+                        title: 'titulo-celular',
+                        confirmButton: 'btn-semitransparente',
+                        icon: 'icono-celular',
+                    },
+                    width: '80%',
+                });
+            }
+        } catch (error) {
+            console.error('Error al generar ejercicio:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'No se pudo generar el ejercicio. Intenta de nuevo.',
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+                customClass: {
+                    title: 'titulo-celular',
+                    confirmButton: 'btn-semitransparente',
+                    icon: 'icono-celular',
+                },
+                width: '80%',
+            });
+        }
     };
 
     return (
@@ -484,7 +562,41 @@ const DashboardIA = () => {
                 </div>
             </div>
 
-            <div>hola como estas</div>
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '20px',
+                    margin: '20px 0',
+                }}
+            >
+                <button
+                    onClick={handleGenerarEjercicio}
+                    style={{
+                        backgroundColor: '#22C55E',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 30px',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#16A34A';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#22C55E';
+                        e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                >
+                    Generar Ejercicio
+                </button>
+            </div>
 
             {/* Modal fijo */}
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
