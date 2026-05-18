@@ -19,6 +19,7 @@ import EjercicioP8 from './pages/Games/Nivel2/EjercicioP8';
 import EjercicioP9 from './pages/Games/Nivel2/EjercicioP9';
 import EjercicioP10 from './pages/Games/Nivel2/EjercicioP10';
 import DesignBoard from './pages/Games/GeneradosPorIA/DesignBoard';
+import DashboardIA from './pages/Games/GeneradosPorIA/DashboardIA';
 
 function App() {
     return (
@@ -74,6 +75,7 @@ function App() {
                             path="/ejercicio10-pseudocodigo"
                             element={<EjercicioP10 />}
                         />
+                        <Route path="/dashboardIA" element={<DashboardIA />} />
                         <Route path="/designboard" element={<DesignBoard />} />
                     </Routes>
                 </BrowserRouter>
