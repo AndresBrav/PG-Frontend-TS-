@@ -17,11 +17,23 @@ import {
     traerNotificaciones,
 } from '../../../api/notificacionApi';
 import { main as consultarEjercicio } from '../../../api/ejerciciosIA/consultaEjercicio';
+import { traerNotificaciones as traerJuegosIA } from '../../../api/ejerciciosIA/ejercicioIAapi';
 
 interface Notificacion {
     id: number;
     descripcion: string;
     fecha: string;
+}
+
+interface JuegoIA {
+    id: number;
+    descripcion: string;
+    tipo_juego: string;
+    usuario_id: number;
+    completado: number;
+    puntos: number;
+    createdAt: string;
+    updatedAt: string;
 }
 
 const DashboardIA = () => {
@@ -34,6 +46,7 @@ const DashboardIA = () => {
     const [idAvatar, setIdAvatar] = useState<string>('');
     const [puntuacion, setPuntuacion] = useState<number>(0);
     const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
+    const [juegosIA, setJuegosIA] = useState<JuegoIA[]>([]);
 
     const [openAvatarModal, setOpenAvatarModal] = useState(false);
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
@@ -69,9 +82,18 @@ const DashboardIA = () => {
                 }
             };
 
+            const cargarJuegosIA = async () => {
+                const data = await traerJuegosIA(claveAcceso);
+                console.log('Juegos IA cargados:', data?.juegosIA);
+                if (data && data.juegosIA) {
+                    setJuegosIA(data.juegosIA);
+                }
+            };
+
             obtenerDatosUsuario();
             traerPuntosUsuario();
             cargarNotificaciones();
+            cargarJuegosIA();
         }
     }, [claveAcceso]);
 
@@ -84,26 +106,6 @@ const DashboardIA = () => {
     // const alternarModal2 = () => setModalAbierto2(!modalAbierto2);
 
     const navigate = useNavigate(); // Hook que te da la función navigate
-
-    const irEjercicio1 = () => {
-        navigate('/ejercicio1');
-    };
-
-    const irEjercicio2 = () => {
-        navigate('/ejercicio2');
-    };
-
-    const irEjercicio3 = () => {
-        navigate('/ejercicio3');
-    };
-
-    const irEjercicio4 = () => {
-        navigate('/ejercicio4');
-    };
-
-    const irEjercicio5 = () => {
-        navigate('/ejercicio5');
-    };
 
     // Función para generar ejercicio con modal
     const handleGenerarEjercicio = async () => {
@@ -601,31 +603,24 @@ const DashboardIA = () => {
             {/* Modal fijo */}
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
 
-            <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio1}>
-                    <div className="circle-inner">1</div>
+            {/* Mostrar juegos IA dinámicamente */}
+            {juegosIA.map((juego, index) => (
+                <div
+                    key={juego.id}
+                    className="contenedo-diagrama-flujo-primer-ejercicio"
+                >
+                    <div
+                        className={
+                            index % 2 === 0
+                                ? 'circle-outer-1'
+                                : 'circle-outer-2'
+                        }
+                        onClick={() => navigate(`/ejercicio${juego.id}`)}
+                    >
+                        <div className="circle-inner">{index + 1}</div>
+                    </div>
                 </div>
-            </div>
-            <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2" onClick={irEjercicio2}>
-                    <div className="circle-inner">2</div>
-                </div>
-            </div>
-            <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio3}>
-                    <div className="circle-inner">3</div>
-                </div>
-            </div>
-            <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2" onClick={irEjercicio4}>
-                    <div className="circle-inner">4</div>
-                </div>
-            </div>
-            <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio5}>
-                    <div className="circle-inner">5</div>
-                </div>
-            </div>
+            ))}
             <br />
         </>
     );
