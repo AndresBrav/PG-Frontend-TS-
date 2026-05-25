@@ -21,3 +21,35 @@ export const traerNotificaciones = async (clave: string): Promise<any> => {
         return null;
     }
 };
+
+interface DatosJuegoIA {
+    descripcion: string;
+    tipo_juego: string;
+    completado: boolean;
+    puntos: number;
+}
+
+export const guardarJuegoIA = async (
+    clave: string,
+    datos: DatosJuegoIA
+): Promise<any> => {
+    try {
+        const response = await axios.post(
+            `${API}/juegosIA/guardarjuegoIA`,
+            datos,
+            {
+                headers: {
+                    Authorization: clave,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            }
+        );
+
+        if (!response.data) return null;
+        console.log('Juego guardado exitosamente:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error guardando juego:', error);
+        return null;
+    }
+};

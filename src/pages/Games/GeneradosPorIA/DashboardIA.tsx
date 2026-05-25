@@ -17,7 +17,10 @@ import {
     traerNotificaciones,
 } from '../../../api/notificacionApi';
 import { main as consultarEjercicio } from '../../../api/ejerciciosIA/consultaEjercicio';
-import { traerNotificaciones as traerJuegosIA } from '../../../api/ejerciciosIA/ejercicioIAapi';
+import {
+    traerNotificaciones as traerJuegosIA,
+    guardarJuegoIA,
+} from '../../../api/ejerciciosIA/ejercicioIAapi';
 
 interface Notificacion {
     id: number;
@@ -152,20 +155,53 @@ const DashboardIA = () => {
             });
 
             if (result.isConfirmed) {
-                // Mostrar mensaje de confirmación
-                await Swal.fire({
-                    title: 'Ejercicio Guardado',
-                    text: '¡Ejercicio guardado exitosamente!',
-                    icon: 'success',
-                    iconColor: 'green',
-                    confirmButtonText: 'Continuar',
-                    customClass: {
-                        title: 'titulo-celular',
-                        confirmButton: 'btn-semitransparente',
-                        icon: 'icono-celular',
-                    },
-                    width: '80%',
-                });
+                try {
+                    // Guardar el juego en la base de datos
+                    if (claveAcceso) {
+                        const datosJuego = {
+                            descripcion: ejercicioGenerado,
+                            tipo_juego: 'ia',
+                            completado: false,
+                            puntos: 0,
+                        };
+                        await guardarJuegoIA(claveAcceso, datosJuego);
+
+                        // Recargar los juegos IA después de guardar
+                        const dataJuegos = await traerJuegosIA(claveAcceso);
+                        if (dataJuegos && dataJuegos.juegosIA) {
+                            setJuegosIA(dataJuegos.juegosIA);
+                        }
+                    }
+
+                    // Mostrar mensaje de confirmación
+                    await Swal.fire({
+                        title: 'Ejercicio Guardado',
+                        text: '¡Ejercicio guardado exitosamente!',
+                        icon: 'success',
+                        iconColor: 'green',
+                        confirmButtonText: 'Continuar',
+                        customClass: {
+                            title: 'titulo-celular',
+                            confirmButton: 'btn-semitransparente',
+                            icon: 'icono-celular',
+                        },
+                        width: '80%',
+                    });
+                } catch (error) {
+                    console.error('Error al guardar el juego:', error);
+                    await Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo guardar el ejercicio',
+                        icon: 'error',
+                        confirmButtonText: 'Cerrar',
+                        customClass: {
+                            title: 'titulo-celular',
+                            confirmButton: 'btn-semitransparente',
+                            icon: 'icono-celular',
+                        },
+                        width: '80%',
+                    });
+                }
             }
         } catch (error) {
             console.error('Error al generar ejercicio:', error);
@@ -615,7 +651,14 @@ const DashboardIA = () => {
                                 ? 'circle-outer-1'
                                 : 'circle-outer-2'
                         }
-                        onClick={() => navigate(`/ejercicio${juego.id}`)}
+                        onClick={() =>
+                            navigate('/designboard', {
+                                state: {
+                                    juegoId: juego.id,
+                                    juegoDescripcion: juego.descripcion,
+                                },
+                            })
+                        }
                     >
                         <div className="circle-inner">{index + 1}</div>
                     </div>
