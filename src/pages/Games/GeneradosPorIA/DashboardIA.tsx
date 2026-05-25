@@ -16,7 +16,7 @@ import {
     enviarIdNotificacion,
     traerNotificaciones,
 } from '../../../api/notificacionApi';
-import { main as consultarEjercicio } from '../../../api/ejerciciosIA/consultaEjercicio';
+import { consultarEjercicio } from '../../../api/ejerciciosIA/consultaEjercicio';
 import {
     traerNotificaciones as traerJuegosIA,
     guardarJuegoIA,

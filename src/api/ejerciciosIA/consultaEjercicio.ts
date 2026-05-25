@@ -1,4 +1,4 @@
-export async function main() {
+export async function consultarEjercicio() {
     const temas = [
         'videojuegos',
         'supermercado',
