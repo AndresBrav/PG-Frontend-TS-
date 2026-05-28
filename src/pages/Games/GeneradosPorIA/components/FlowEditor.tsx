@@ -20,7 +20,7 @@ import {
   type EdgeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { StartEndNode, ProcessNode, DataNode, DecisionNode, CycleNode } from './nodes';
+import { StartEndNode, ProcessNode, DataNode, DecisionNode } from './nodes';
 import type { NodeType } from '../types/flow';
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
@@ -44,7 +44,6 @@ const nodeTypes = {
   process: ProcessNode,
   data: DataNode,
   decision: DecisionNode,
-  cycle: CycleNode,
 };
 
 const defaultLabels: Record<NodeType, string> = {
@@ -52,7 +51,6 @@ const defaultLabels: Record<NodeType, string> = {
   process: 'Proceso',
   data: 'Datos',
   decision: 'Condicion?',
-  cycle: 'Bucle',
 };
 
 let id = 0;
