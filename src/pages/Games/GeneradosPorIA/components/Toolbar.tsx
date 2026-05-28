@@ -116,7 +116,22 @@ function Toolbar({
         <div className="toolbar">
             <h2>Flowchart Editor</h2>
             <div className="toolbar-actions">
-                <button className="btn btn-export" onClick={handleExport}>
+                <button
+                    className="btn btn-export"
+                    onClick={handleExport}
+                    style={{
+                        backgroundColor: '#20FB1080',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 30px',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    }}
+                >
                     Ejecutar
                 </button>
                 {/* <button className="btn btn-clear" onClick={onClear}>
