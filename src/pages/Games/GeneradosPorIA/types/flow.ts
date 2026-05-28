@@ -1,4 +1,4 @@
-export type NodeType = 'startEnd' | 'process' | 'data' | 'decision';
+export type NodeType = 'startEnd' | 'process' | 'data' | 'decision' | 'cycle';
 
 export interface FlowNodeData {
   label: string;

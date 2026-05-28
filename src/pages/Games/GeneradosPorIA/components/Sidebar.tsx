@@ -9,7 +9,8 @@ const symbols: Array<{ type: NodeType; label: string; shape: string }> = [
     { type: 'startEnd', label: 'Inicio / Final', shape: 'oval' },
     { type: 'process', label: 'Proceso', shape: 'rect' },
     { type: 'data', label: 'Entrada / Salida', shape: 'parallelogram' },
-    { type: 'decision', label: 'Decisi\u00f3n', shape: 'diamond' },
+    { type: 'decision', label: 'Decisión', shape: 'diamond' },
+    { type: 'cycle', label: 'Bucle', shape: 'cycle' },
 ];
 
 function Sidebar({ onDragStart, onAddNode }: SidebarProps) {
@@ -114,6 +115,45 @@ function Sidebar({ onDragStart, onAddNode }: SidebarProps) {
                                         fill="var(--text)"
                                     >
                                         ?
+                                    </text>
+                                    <text
+                                        x="110"
+                                        y="44"
+                                        textAnchor="middle"
+                                        fontSize="8"
+                                        fill="var(--yes-color)"
+                                        fontWeight="bold"
+                                    >
+                                        SI
+                                    </text>
+                                    <text
+                                        x="10"
+                                        y="44"
+                                        textAnchor="middle"
+                                        fontSize="8"
+                                        fill="var(--no-color)"
+                                        fontWeight="bold"
+                                    >
+                                        NO
+                                    </text>
+                                </svg>
+                            )}
+                            {symbol.shape === 'cycle' && (
+                                <svg viewBox="0 0 120 80">
+                                    <polygon
+                                        points="60,5 115,40 60,75 5,40"
+                                        fill="var(--node-cycle)"
+                                        stroke="var(--node-cycle-border)"
+                                        strokeWidth="2"
+                                    />
+                                    <text
+                                        x="60"
+                                        y="44"
+                                        textAnchor="middle"
+                                        fontSize="11"
+                                        fill="var(--text)"
+                                    >
+                                        ↺
                                     </text>
                                     <text
                                         x="110"

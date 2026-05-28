@@ -24,6 +24,8 @@
     --node-data-border: #ff9800;
     --node-decision: #fce4ec;
     --node-decision-border: #e91e63;
+    --node-cycle: #e3f2fd;
+    --node-cycle-border: #1976d2;
     --yes-color: #2e7d32;
     --yes-bg: #e8f5e9;
     --no-color: #c62828;
@@ -82,6 +84,8 @@
         --node-data-border: #ff9800;
         --node-decision: #3a1a2a;
         --node-decision-border: #e91e63;
+        --node-cycle: #1a2a3a;
+        --node-cycle-border: #1976d2;
         --yes-color: #66bb6a;
         --yes-bg: #1a3a1a;
         --no-color: #ef5350;
@@ -332,6 +336,15 @@
     min-height: 90px;
 }
 
+.node-shape.cycle {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    background: var(--node-cycle);
+    border: none;
+    padding: 25px 20px;
+    min-width: 140px;
+    min-height: 90px;
+}
+
 .decision-wrapper {
     position: relative;
     display: inline-flex;
@@ -511,6 +524,12 @@
         min-height: 75px;
     }
 
+    .node-shape.cycle {
+        padding: 20px 16px;
+        min-width: 120px;
+        min-height: 75px;
+    }
+
     .decision-label {
         font-size: 10px;
         padding: 1px 4px;
@@ -597,6 +616,12 @@
     }
 
     .node-shape.decision {
+        padding: 18px 12px;
+        min-width: 110px;
+        min-height: 70px;
+    }
+
+    .node-shape.cycle {
         padding: 18px 12px;
         min-width: 110px;
         min-height: 70px;
