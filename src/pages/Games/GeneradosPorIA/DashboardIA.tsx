@@ -2,7 +2,7 @@ import useAuthRedirect from '../../../hooks/useAuthRedirect';
 import profileIcon from '../../../assets/filesSvg/filesdashboardSvg/profile.svg';
 import { useContext, useEffect, useState } from 'react';
 import ModalInf1 from '../Presentation/ModalInf1'; // 👈 Importamos el modal fijo
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import useCerrarSesion from '../../../hooks/useCerrarSesion';
 import { TokenContext } from '../../../Context/TokenContext';
 import Swal from 'sweetalert2';
@@ -109,6 +109,7 @@ const DashboardIA = () => {
     // const alternarModal2 = () => setModalAbierto2(!modalAbierto2);
 
     const navigate = useNavigate(); // Hook que te da la función navigate
+    const location = useLocation();
 
     // Función para generar ejercicio con modal
     const handleGenerarEjercicio = async () => {
@@ -223,8 +224,17 @@ const DashboardIA = () => {
     return (
         <>
             {/* <div className="header-dashboard-container"> */}
-            <div className="flex justify-end items-center flex-row flex-nowrap">
-                <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:items-center">
+                <select
+                    value={location.pathname}
+                    onChange={(e) => navigate(e.target.value)}
+                    className="w-auto mx-auto sm:mr-5 mt-5 sm:mt-0 bg-white/10 text-white border border-white/30 rounded-md px-3 py-1.5 sm:px-4 sm:py-2 text-sm cursor-pointer outline-none focus:ring-2 focus:ring-[#FF7C02] focus:border-transparent hover:bg-white/20 transition-all duration-200"
+                >
+                    <option value="/dashboard" className="text-black">Ejercicios Normal</option>
+                    <option value="/dashboardIA" className="text-black">Ejercicios Computadora</option>
+                </select>
+                <div className="flex justify-center sm:justify-end items-center flex-row flex-nowrap mt-2 sm:mt-0">
+                    <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
                     <svg
                         className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px]"
                         viewBox="415 411 26 32"
@@ -314,6 +324,7 @@ const DashboardIA = () => {
                             borderRadius: '10%',
                         }}
                     />
+                </div>
                 </div>
 
                 {open && (
