@@ -15,6 +15,8 @@ import avatars from '../../users/avatars';
 import {
     enviarIdNotificacion,
     traerNotificaciones,
+    traerTableroPuntuacion,
+    type PuntuacionUsuario,
 } from '../../../api/notificacionApi';
 import { consultarEjercicio } from '../../../api/ejerciciosIA/consultaEjercicio';
 import {
@@ -55,6 +57,20 @@ const DashboardIA = () => {
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
 
     const [openNotifications, setOpenNotifications] = useState(false);
+
+    const [openScoreboard, setOpenScoreboard] = useState(false);
+    const [scoreboard, setScoreboard] = useState<PuntuacionUsuario[]>([]);
+    const [cargandoScoreboard, setCargandoScoreboard] = useState(false);
+
+    const cargarTablero = async () => {
+        if (!claveAcceso) return;
+        setCargandoScoreboard(true);
+        const data = await traerTableroPuntuacion(claveAcceso);
+        if (data) {
+            setScoreboard(data);
+        }
+        setCargandoScoreboard(false);
+    };
 
     useEffect(() => {
         // console.log("la calve de accesssooooo es " + claveAcceso);
@@ -234,6 +250,97 @@ const DashboardIA = () => {
                     <option value="/dashboardIA" className="text-black">Ejercicios Computadora</option>
                 </select>
                 <div className="flex justify-center sm:justify-end items-center flex-row flex-nowrap mt-2 sm:mt-0">
+                    <div className="relative mt-[10px] mr-[20px]">
+                        {/* Trophy Icon Button */}
+                        <div
+                            onClick={() => {
+                                setOpenScoreboard(!openScoreboard);
+                                if (!openScoreboard) {
+                                    cargarTablero();
+                                }
+                            }}
+                            className="cursor-pointer hover:scale-110 transition-transform duration-200"
+                            title="Ver Tablero de Puntuaciones"
+                        >
+                            <svg
+                                className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px]"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    d="M19 5H18V3C18 2.45 17.55 2 17 2H7C6.45 2 6 2.45 6 3V5H5C3.9 5 3 5.9 3 7V9C3 11.24 4.61 13.12 6.78 13.82C7.57 15.34 9.04 16.43 10.8 16.78V19H9C8.45 19 8 19.45 8 20V21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21V20C16 19.45 15.55 19 15 19H13.2V16.78C14.96 16.43 16.43 15.34 17.22 13.82C19.39 13.12 21 11.24 21 9V7C21 5.9 20.1 5 19 5ZM5 9V7H6V11C4.9 10.6 4.1 9.9 5 9ZM19 9C19.9 9.9 19.1 10.6 18 11V7H19V9Z"
+                                    fill="#FF7C02"
+                                />
+                            </svg>
+                        </div>
+
+                        {openScoreboard && (
+                            <div className="fixed top-[70px] left-0 w-full px-4 sm:absolute sm:right-0 sm:left-auto sm:w-[350px] z-50">
+                                <div className="bg-slate-900 text-white border border-slate-800 rounded-xl shadow-2xl p-4 max-h-[350px] flex flex-col backdrop-blur-md bg-opacity-95">
+                                    <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                                        <span className="font-bold text-sm text-[#FF7C02] tracking-wider uppercase flex items-center gap-1.5">
+                                            🏆 Tablero de Puntuaciones
+                                        </span>
+                                        <button
+                                            onClick={() => setOpenScoreboard(false)}
+                                            className="text-slate-400 hover:text-white transition-colors cursor-pointer text-xs font-semibold px-2 py-1 rounded bg-slate-800 hover:bg-slate-700"
+                                        >
+                                            Cerrar
+                                        </button>
+                                    </div>
+
+                                    {/* Scrollable List container */}
+                                    <div className="overflow-y-auto flex-1 pr-1 flex flex-col gap-y-2 select-none" style={{ scrollbarWidth: 'thin' }}>
+                                        {cargandoScoreboard ? (
+                                            <div className="flex flex-col items-center justify-center py-6 text-slate-400">
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#FF7C02] mb-2"></div>
+                                                <span className="text-xs">Cargando tablero...</span>
+                                            </div>
+                                        ) : scoreboard.length === 0 ? (
+                                            <div className="text-center py-6 text-slate-400 text-xs">
+                                                Sin puntuaciones registradas
+                                            </div>
+                                        ) : (
+                                            scoreboard.map((user, idx) => {
+                                                let rankBg = 'bg-slate-800/40 border-slate-800';
+                                                let badgeBg = 'bg-slate-700 text-slate-300';
+                                                if (idx === 0) {
+                                                    rankBg = 'bg-amber-500/10 border-amber-500/20';
+                                                    badgeBg = 'bg-amber-500 text-slate-950 font-bold';
+                                                } else if (idx === 1) {
+                                                    rankBg = 'bg-slate-300/10 border-slate-300/20';
+                                                    badgeBg = 'bg-slate-300 text-slate-950 font-bold';
+                                                } else if (idx === 2) {
+                                                    rankBg = 'bg-amber-700/15 border-amber-700/20';
+                                                    badgeBg = 'bg-amber-700 text-amber-100 font-bold';
+                                                }
+                                                return (
+                                                    <div
+                                                        key={idx}
+                                                        className={`flex items-center justify-between p-2.5 rounded-lg border ${rankBg} transition-all duration-150`}
+                                                    >
+                                                        <div className="flex items-center gap-x-2">
+                                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${badgeBg}`}>
+                                                                {idx + 1}
+                                                            </div>
+                                                            <span className="text-xs font-semibold text-slate-200 truncate max-w-[150px]">
+                                                                {user.username}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-x-1 font-bold text-xs text-[#FF7C02]">
+                                                            <span>{user.puntuacionTotal}</span>
+                                                            <span className="text-[10px] font-normal text-slate-400">pts</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
                     <svg
                         className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px]"

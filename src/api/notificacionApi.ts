@@ -61,3 +61,29 @@ export const enviarIdNotificacion = async (id: number, claveAcceso: string) => {
         );
     }
 };
+
+export interface PuntuacionUsuario {
+    username: string;
+    puntuacionTotal: number;
+}
+
+export const traerTableroPuntuacion = async (
+    clave: string
+): Promise<PuntuacionUsuario[] | null> => {
+    try {
+        const response = await axios.get<PuntuacionUsuario[]>(
+            `${API}/notificaciones/puntuacion`,
+            {
+                headers: {
+                    Authorization: clave,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching score board:', error);
+        return null;
+    }
+};
+
