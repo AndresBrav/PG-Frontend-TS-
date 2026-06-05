@@ -48,7 +48,13 @@ function DesignBoard() {
     return (
         <ReactFlowProvider>
             <div className="app">
-                <Toolbar nodes={nodes} edges={edges} onClear={handleClear} juegoId={juegoId} juegoDescripcion={juegoDescripcion} />
+                <Toolbar
+                    nodes={nodes}
+                    edges={edges}
+                    onClear={handleClear}
+                    juegoId={juegoId}
+                    juegoDescripcion={juegoDescripcion}
+                />
                 <div
                     style={{
                         padding: '0px',
@@ -58,9 +64,6 @@ function DesignBoard() {
                         borderLeft: '4px solid #FF7C02',
                     }}
                 >
-                    {/* <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
-                        Ejercicio ID: {juegoId || 'No especificado'}
-                    </h3> */}
                     <p
                         style={{
                             margin: '0',
