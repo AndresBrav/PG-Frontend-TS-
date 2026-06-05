@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import type { FlowExport } from '../types/flow';
 import Swal from 'sweetalert2';
@@ -22,6 +22,7 @@ function Toolbar({
     juegoDescripcion,
 }: ToolbarProps) {
     const { claveAcceso } = useContext(TokenContext);
+    const [counterRate, setCounterRate] = useState<number>(1);
 
     const handleExport = async () => {
         const exportData: FlowExport = {
@@ -105,11 +106,21 @@ function Toolbar({
             if (esValido && swalResult.isConfirmed) {
                 if (juegoId) {
                     try {
-                        await completarJuego(claveAcceso, juegoId);
-                        console.log('Puntos incrementados para juego', juegoId);
+                        if (counterRate === 1) {
+                            await completarJuego(claveAcceso, juegoId);
+                            console.log(
+                                'Puntos incrementados para juego',
+                                juegoId
+                            );
+                        } else {
+                            console.log(
+                                'Puntos ya incrementados anteriormente para este juego'
+                            );
+                        }
                     } catch (err) {
                         console.error('Error incrementando puntos:', err);
                     }
+                    setCounterRate((prev) => prev + 1);
                 } else {
                     console.warn(
                         'No se proporcionó juegoId para completarJuego'
