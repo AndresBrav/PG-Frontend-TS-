@@ -1,7 +1,10 @@
+import { useContext } from 'react';
 import type { Node, Edge } from '@xyflow/react';
 import type { FlowExport } from '../types/flow';
 import Swal from 'sweetalert2';
 import { verificarDiagrama } from '../../../../api/ejerciciosIA/verificarDiagrama';
+import { TokenContext } from '../../../../Context/TokenContext';
+import { completarJuego } from '../../../../api/ejerciciosIA/ejercicios';
 
 interface ToolbarProps {
     nodes: Node[];
@@ -18,6 +21,8 @@ function Toolbar({
     juegoId,
     juegoDescripcion,
 }: ToolbarProps) {
+    const { claveAcceso } = useContext(TokenContext);
+
     const handleExport = async () => {
         const exportData: FlowExport = {
             nodes: nodes.map((node) => ({
@@ -80,7 +85,7 @@ function Toolbar({
                 !resultado.toLowerCase().includes('error') &&
                 resultado.toLowerCase().includes('correcto');
 
-            Swal.fire({
+            const swalResult = await Swal.fire({
                 title: esValido
                     ? '✓ Diagrama Correcto'
                     : '✗ Diagrama Incorrecto',
@@ -95,6 +100,22 @@ function Toolbar({
                 },
                 width: '80%',
             });
+
+            // Si el usuario confirma y el diagrama es válido, llamar al endpoint para completar juego
+            if (esValido && swalResult.isConfirmed) {
+                if (juegoId) {
+                    try {
+                        await completarJuego(claveAcceso, juegoId);
+                        console.log('Puntos incrementados para juego', juegoId);
+                    } catch (err) {
+                        console.error('Error incrementando puntos:', err);
+                    }
+                } else {
+                    console.warn(
+                        'No se proporcionó juegoId para completarJuego'
+                    );
+                }
+            }
         } catch (error) {
             console.error('Error al verificar diagrama:', error);
             Swal.fire({
@@ -134,9 +155,9 @@ function Toolbar({
                 >
                     Ejecutar
                 </button>
-                {/* <button className="btn btn-clear" onClick={onClear}>
-          Limpiar
-        </button> */}
+                <button className="btn btn-clear" onClick={onClear}>
+                    Limpiar
+                </button>
             </div>
         </div>
     );
