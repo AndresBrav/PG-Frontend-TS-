@@ -211,7 +211,9 @@ const Dashboard = () => {
                                             🏆 Tablero de Puntuaciones
                                         </span>
                                         <button
-                                            onClick={() => setOpenScoreboard(false)}
+                                            onClick={() =>
+                                                setOpenScoreboard(false)
+                                            }
                                             className="text-slate-400 hover:text-white transition-colors cursor-pointer text-xs font-semibold px-2 py-1 rounded bg-slate-800 hover:bg-slate-700"
                                         >
                                             Cerrar
@@ -219,11 +221,16 @@ const Dashboard = () => {
                                     </div>
 
                                     {/* Scrollable List container */}
-                                    <div className="overflow-y-auto flex-1 pr-1 flex flex-col gap-y-2 select-none" style={{ scrollbarWidth: 'thin' }}>
+                                    <div
+                                        className="overflow-y-auto flex-1 pr-1 flex flex-col gap-y-2 select-none"
+                                        style={{ scrollbarWidth: 'thin' }}
+                                    >
                                         {cargandoScoreboard ? (
                                             <div className="flex flex-col items-center justify-center py-6 text-slate-400">
                                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#FF7C02] mb-2"></div>
-                                                <span className="text-xs">Cargando tablero...</span>
+                                                <span className="text-xs">
+                                                    Cargando tablero...
+                                                </span>
                                             </div>
                                         ) : scoreboard.length === 0 ? (
                                             <div className="text-center py-6 text-slate-400 text-xs">
@@ -231,17 +238,25 @@ const Dashboard = () => {
                                             </div>
                                         ) : (
                                             scoreboard.map((user, idx) => {
-                                                let rankBg = 'bg-slate-800/40 border-slate-800';
-                                                let badgeBg = 'bg-slate-700 text-slate-300';
+                                                let rankBg =
+                                                    'bg-slate-800/40 border-slate-800';
+                                                let badgeBg =
+                                                    'bg-slate-700 text-slate-300';
                                                 if (idx === 0) {
-                                                    rankBg = 'bg-amber-500/10 border-amber-500/20';
-                                                    badgeBg = 'bg-amber-500 text-slate-950 font-bold';
+                                                    rankBg =
+                                                        'bg-amber-500/10 border-amber-500/20';
+                                                    badgeBg =
+                                                        'bg-amber-500 text-slate-950 font-bold';
                                                 } else if (idx === 1) {
-                                                    rankBg = 'bg-slate-300/10 border-slate-300/20';
-                                                    badgeBg = 'bg-slate-300 text-slate-950 font-bold';
+                                                    rankBg =
+                                                        'bg-slate-300/10 border-slate-300/20';
+                                                    badgeBg =
+                                                        'bg-slate-300 text-slate-950 font-bold';
                                                 } else if (idx === 2) {
-                                                    rankBg = 'bg-amber-700/15 border-amber-700/20';
-                                                    badgeBg = 'bg-amber-700 text-amber-100 font-bold';
+                                                    rankBg =
+                                                        'bg-amber-700/15 border-amber-700/20';
+                                                    badgeBg =
+                                                        'bg-amber-700 text-amber-100 font-bold';
                                                 }
                                                 return (
                                                     <div
@@ -249,7 +264,9 @@ const Dashboard = () => {
                                                         className={`flex items-center justify-between p-2.5 rounded-lg border ${rankBg} transition-all duration-150`}
                                                     >
                                                         <div className="flex items-center gap-x-2">
-                                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${badgeBg}`}>
+                                                            <div
+                                                                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${badgeBg}`}
+                                                            >
                                                                 {idx + 1}
                                                             </div>
                                                             <span className="text-xs font-semibold text-slate-200 truncate max-w-[150px]">
@@ -257,8 +274,14 @@ const Dashboard = () => {
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-x-1 font-bold text-xs text-[#FF7C02]">
-                                                            <span>{user.puntuacionTotal}</span>
-                                                            <span className="text-[10px] font-normal text-slate-400">pts</span>
+                                                            <span>
+                                                                {
+                                                                    user.puntuacionTotal
+                                                                }
+                                                            </span>
+                                                            <span className="text-[10px] font-normal text-slate-400">
+                                                                pts
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 );

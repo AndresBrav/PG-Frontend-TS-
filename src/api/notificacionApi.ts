@@ -86,4 +86,3 @@ export const traerTableroPuntuacion = async (
         return null;
     }
 };
-

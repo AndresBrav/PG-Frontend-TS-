@@ -1,7 +1,7 @@
 import axios from 'axios';
 const API = import.meta.env.VITE_API_URL;
 
-export const traerNotificaciones = async (clave: string): Promise<any> => {
+export const traerJuegosIA = async (clave: string): Promise<any> => {
     try {
         // Axios devuelve un objeto AxiosResponse, y el dato útil está en .data
         const response = await axios.get(`${API}/juegosIA/traerJuegosConIA`, {
