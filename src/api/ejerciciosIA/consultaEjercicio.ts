@@ -1,8 +1,8 @@
 import { GoogleGenAI } from '@google/genai';
+const apikeyGemini = import.meta.env.VITE_GEMINI_API_KEY;
 
 const ai = new GoogleGenAI({
-    // apiKey: 'AIzaSyBSl3pY7bBhyIEZVKd1TVW7SYaSSBhkBZY',
-    apiKey: 'AQ.Ab8RN6JRT04inM979tMNxcapcVgLIxC1bORDW0ZUTppNg2JchA',
+    apiKey: apikeyGemini,
 });
 
 export async function consultarEjercicio() {
