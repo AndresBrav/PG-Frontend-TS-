@@ -22,6 +22,7 @@ import { consultarEjercicio } from '../../../api/ejerciciosIA/consultaEjercicio'
 import {
     traerJuegosIA,
     guardarJuegoIA,
+    traerJuegosIAPseudo,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
 
 interface Notificacion {
@@ -52,6 +53,7 @@ const DashboardIA = () => {
     const [puntuacion, setPuntuacion] = useState<number>(0);
     const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
     const [juegosIA, setJuegosIA] = useState<JuegoIA[]>([]);
+    const [juegosIAPseudo, setJuegosIAPseudo] = useState<JuegoIA[]>([]);
 
     const [openAvatarModal, setOpenAvatarModal] = useState(false);
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
@@ -112,10 +114,19 @@ const DashboardIA = () => {
                 }
             };
 
+            const cargarJuegosIAPseudo = async () => {
+                const data = await traerJuegosIAPseudo(claveAcceso);
+                console.log('Juegos IA Pseudo cargados:', data?.juegosIA);
+                if (data && data.juegosIA) {
+                    setJuegosIAPseudo(data.juegosIA);
+                }
+            };
+
             obtenerDatosUsuario();
             traerPuntosUsuario();
             cargarNotificaciones();
             cargarJuegosIA();
+            cargarJuegosIAPseudo();
         }
     }, [claveAcceso]);
 
@@ -886,6 +897,36 @@ const DashboardIA = () => {
                     </svg>
                 </div>
             </div>
+
+            {/* Mostrar juegos IA dinámicamente para Pseudocódigo */}
+            {juegosIAPseudo.map((juego, index) => (
+                <div
+                    key={`pseudo-${juego.id}`}
+                    className="contenedo-diagrama-flujo-primer-ejercicio"
+                >
+                    <div
+                        className={`${
+                            index % 2 === 0
+                                ? 'circle-outer-1'
+                                : 'circle-outer-2'
+                        } ${juego.completado === 1 ? 'circle-completed' : ''}`}
+                        onClick={() =>
+                            navigate('/editingboard', {
+                                state: {
+                                    juegoId: juego.id,
+                                    juegoDescripcion: juego.descripcion,
+                                },
+                            })
+                        }
+                    >
+                        <div
+                            className={`circle-inner ${juego.completado === 1 ? 'circle-completed' : ''}`}
+                        >
+                            {index + 1}
+                        </div>
+                    </div>
+                </div>
+            ))}
 
             {/* <ModalInf2 isOpen={modalAbierto2} onClose={alternarModal2} /> */}
         </>

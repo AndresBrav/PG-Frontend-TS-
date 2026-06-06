@@ -20,6 +20,7 @@ import EjercicioP9 from './pages/Games/Nivel2/EjercicioP9';
 import EjercicioP10 from './pages/Games/Nivel2/EjercicioP10';
 import DesignBoard from './pages/Games/GeneradosPorIA/DesignBoard';
 import DashboardIA from './pages/Games/GeneradosPorIA/DashboardIA';
+import EditingBoard from './pages/Games/GeneradosPorIA/EditingBoard/EditingBoard';
 
 function App() {
     return (
@@ -77,6 +78,7 @@ function App() {
                         />
                         <Route path="/dashboardIA" element={<DashboardIA />} />
                         <Route path="/designboard" element={<DesignBoard />} />
+                        <Route path="/editingboard" element={<EditingBoard />} />
                     </Routes>
                 </BrowserRouter>
             </TokenProvider>
