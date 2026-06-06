@@ -140,6 +140,10 @@
     font-weight: bold;
 }
 
+.circle-completed {
+    background: #22C55E !important;
+}
+
 .cerrar-sesion-usuario {
     background-color: red;
     color: white;

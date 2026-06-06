@@ -13,7 +13,10 @@ export const traerNotificaciones = async (clave: string): Promise<any> => {
 
         //
         if (!response.data) return null;
-        console.log('el arreglo que se trae es ', response.data.juegosIA);
+        console.log(
+            'el arreglo que se trae es .................. ',
+            response.data.juegosIA
+        );
         const { juegosIA, msg } = response.data;
         return { juegosIA, msg };
     } catch (error) {

@@ -246,8 +246,12 @@ const DashboardIA = () => {
                     onChange={(e) => navigate(e.target.value)}
                     className="w-auto mx-auto sm:mr-5 mt-5 sm:mt-0 bg-white/10 text-white border border-white/30 rounded-md px-3 py-1.5 sm:px-4 sm:py-2 text-sm cursor-pointer outline-none focus:ring-2 focus:ring-[#FF7C02] focus:border-transparent hover:bg-white/20 transition-all duration-200"
                 >
-                    <option value="/dashboard" className="text-black">Ejercicios Normal</option>
-                    <option value="/dashboardIA" className="text-black">Ejercicios Computadora</option>
+                    <option value="/dashboard" className="text-black">
+                        Ejercicios Normal
+                    </option>
+                    <option value="/dashboardIA" className="text-black">
+                        Ejercicios Computadora
+                    </option>
                 </select>
                 <div className="flex justify-center sm:justify-end items-center flex-row flex-nowrap mt-2 sm:mt-0">
                     <div className="relative mt-[10px] mr-[20px]">
@@ -283,7 +287,9 @@ const DashboardIA = () => {
                                             🏆 Tablero de Puntuaciones
                                         </span>
                                         <button
-                                            onClick={() => setOpenScoreboard(false)}
+                                            onClick={() =>
+                                                setOpenScoreboard(false)
+                                            }
                                             className="text-slate-400 hover:text-white transition-colors cursor-pointer text-xs font-semibold px-2 py-1 rounded bg-slate-800 hover:bg-slate-700"
                                         >
                                             Cerrar
@@ -291,11 +297,16 @@ const DashboardIA = () => {
                                     </div>
 
                                     {/* Scrollable List container */}
-                                    <div className="overflow-y-auto flex-1 pr-1 flex flex-col gap-y-2 select-none" style={{ scrollbarWidth: 'thin' }}>
+                                    <div
+                                        className="overflow-y-auto flex-1 pr-1 flex flex-col gap-y-2 select-none"
+                                        style={{ scrollbarWidth: 'thin' }}
+                                    >
                                         {cargandoScoreboard ? (
                                             <div className="flex flex-col items-center justify-center py-6 text-slate-400">
                                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#FF7C02] mb-2"></div>
-                                                <span className="text-xs">Cargando tablero...</span>
+                                                <span className="text-xs">
+                                                    Cargando tablero...
+                                                </span>
                                             </div>
                                         ) : scoreboard.length === 0 ? (
                                             <div className="text-center py-6 text-slate-400 text-xs">
@@ -303,17 +314,25 @@ const DashboardIA = () => {
                                             </div>
                                         ) : (
                                             scoreboard.map((user, idx) => {
-                                                let rankBg = 'bg-slate-800/40 border-slate-800';
-                                                let badgeBg = 'bg-slate-700 text-slate-300';
+                                                let rankBg =
+                                                    'bg-slate-800/40 border-slate-800';
+                                                let badgeBg =
+                                                    'bg-slate-700 text-slate-300';
                                                 if (idx === 0) {
-                                                    rankBg = 'bg-amber-500/10 border-amber-500/20';
-                                                    badgeBg = 'bg-amber-500 text-slate-950 font-bold';
+                                                    rankBg =
+                                                        'bg-amber-500/10 border-amber-500/20';
+                                                    badgeBg =
+                                                        'bg-amber-500 text-slate-950 font-bold';
                                                 } else if (idx === 1) {
-                                                    rankBg = 'bg-slate-300/10 border-slate-300/20';
-                                                    badgeBg = 'bg-slate-300 text-slate-950 font-bold';
+                                                    rankBg =
+                                                        'bg-slate-300/10 border-slate-300/20';
+                                                    badgeBg =
+                                                        'bg-slate-300 text-slate-950 font-bold';
                                                 } else if (idx === 2) {
-                                                    rankBg = 'bg-amber-700/15 border-amber-700/20';
-                                                    badgeBg = 'bg-amber-700 text-amber-100 font-bold';
+                                                    rankBg =
+                                                        'bg-amber-700/15 border-amber-700/20';
+                                                    badgeBg =
+                                                        'bg-amber-700 text-amber-100 font-bold';
                                                 }
                                                 return (
                                                     <div
@@ -321,7 +340,9 @@ const DashboardIA = () => {
                                                         className={`flex items-center justify-between p-2.5 rounded-lg border ${rankBg} transition-all duration-150`}
                                                     >
                                                         <div className="flex items-center gap-x-2">
-                                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${badgeBg}`}>
+                                                            <div
+                                                                className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${badgeBg}`}
+                                                            >
                                                                 {idx + 1}
                                                             </div>
                                                             <span className="text-xs font-semibold text-slate-200 truncate max-w-[150px]">
@@ -329,8 +350,14 @@ const DashboardIA = () => {
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-x-1 font-bold text-xs text-[#FF7C02]">
-                                                            <span>{user.puntuacionTotal}</span>
-                                                            <span className="text-[10px] font-normal text-slate-400">pts</span>
+                                                            <span>
+                                                                {
+                                                                    user.puntuacionTotal
+                                                                }
+                                                            </span>
+                                                            <span className="text-[10px] font-normal text-slate-400">
+                                                                pts
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 );
@@ -342,96 +369,104 @@ const DashboardIA = () => {
                         )}
                     </div>
                     <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
-                    <svg
-                        className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px]"
-                        viewBox="415 411 26 32"
-                        fill="#FF7C02"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path
-                            d="M428.5,441 C422.148,441 417,435.641 417,429.625 C417,428.228 417.031,427.094 418,426 C417.895,426.634 419.397,432.055 424.305,431.771 C424.092,427.652 422.978,417.561 428.152,414.073 C427.695,419.557 429.038,426.924 435.029,428 C434.686,425.801 434.727,422.143 436.267,421.467 C436.433,424.836 438.924,426.914 438.924,430.152 C438.924,436.016 433.251,441 428.5,441 L428.5,441 Z M437.905,417.953 C433.52,419.203 432.717,422.748 433,425 C429.872,421.322 430,417.093 430,411 C419.968,414.783 422.301,425.688 422,429 C419.477,426.935 419,422 419,422 C416.336,423.371 415,427.031 415,430 C415,437.18 420.82,443 428,443 C435.18,443 441,437.18 441,430 C441,425.733 437.867,423.765 437.905,417.953 L437.905,417.953 Z"
+                        <svg
+                            className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px]"
+                            viewBox="415 411 26 32"
                             fill="#FF7C02"
-                        />
-                    </svg>
-                </div>
-                <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
-                    {puntuacion} pts
-                </div>
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M428.5,441 C422.148,441 417,435.641 417,429.625 C417,428.228 417.031,427.094 418,426 C417.895,426.634 419.397,432.055 424.305,431.771 C424.092,427.652 422.978,417.561 428.152,414.073 C427.695,419.557 429.038,426.924 435.029,428 C434.686,425.801 434.727,422.143 436.267,421.467 C436.433,424.836 438.924,426.914 438.924,430.152 C438.924,436.016 433.251,441 428.5,441 L428.5,441 Z M437.905,417.953 C433.52,419.203 432.717,422.748 433,425 C429.872,421.322 430,417.093 430,411 C419.968,414.783 422.301,425.688 422,429 C419.477,426.935 419,422 419,422 C416.336,423.371 415,427.031 415,430 C415,437.18 420.82,443 428,443 C435.18,443 441,437.18 441,430 C441,425.733 437.867,423.765 437.905,417.953 L437.905,417.953 Z"
+                                fill="#FF7C02"
+                            />
+                        </svg>
+                    </div>
+                    <div className="mt-[10px] text-white mr-[20px] rounded-[5px] ml-0 text-[20px]">
+                        {puntuacion} pts
+                    </div>
 
-                <div className="relative mt-[10px] mr-[20px]">
-                    <svg
-                        onClick={() => setOpenNotifications(!openNotifications)}
-                        className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px] cursor-pointer"
-                        fill="#ffffff"
-                        viewBox="0 0 512 512"
-                        xmlns="http://www.w3.org/2000/svg"
-                    >
-                        <path d="M256,48C141.31,48,48,141.31,48,256s93.31,208,208,208,208-93.31,208-208S370.69,48,256,48Zm0,336c-20.9,0-37.52-8.86-39.75-27.58a4,4,0,0,1,4-4.42h71.45a4,4,0,0,1,4,4.48C293.15,374.85,276.68,384,256,384Zm98-48H158c-11.84,0-18-15-11.19-23,16.33-19.34,27.87-27.47,27.87-80.8,0-48.87,25.74-66.21,47-74.67a11.35,11.35,0,0,0,6.33-6.68C231.7,138.6,242.14,128,256,128s24.28,10.6,28,22.86a11.39,11.39,0,0,0,6.34,6.68c21.21,8.44,47,25.81,47,74.67,0,53.33,11.53,61.46,27.86,80.8C371.94,321,365.77,336,354,336Z" />
-                    </svg>
+                    <div className="relative mt-[10px] mr-[20px]">
+                        <svg
+                            onClick={() =>
+                                setOpenNotifications(!openNotifications)
+                            }
+                            className="w-[30px] h-[30px] sm:w-[50px] sm:h-[50px] cursor-pointer"
+                            fill="#ffffff"
+                            viewBox="0 0 512 512"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path d="M256,48C141.31,48,48,141.31,48,256s93.31,208,208,208,208-93.31,208-208S370.69,48,256,48Zm0,336c-20.9,0-37.52-8.86-39.75-27.58a4,4,0,0,1,4-4.42h71.45a4,4,0,0,1,4,4.48C293.15,374.85,276.68,384,256,384Zm98-48H158c-11.84,0-18-15-11.19-23,16.33-19.34,27.87-27.47,27.87-80.8,0-48.87,25.74-66.21,47-74.67a11.35,11.35,0,0,0,6.33-6.68C231.7,138.6,242.14,128,256,128s24.28,10.6,28,22.86a11.39,11.39,0,0,0,6.34,6.68c21.21,8.44,47,25.81,47,74.67,0,53.33,11.53,61.46,27.86,80.8C371.94,321,365.77,336,354,336Z" />
+                        </svg>
 
-                    {openNotifications && (
-                        <div className="fixed top-[70px] left-0 w-full px-4 sm:absolute sm:right-0 sm:left-auto sm:w-[350px] z-50">
-                            <div className="bg-white text-black rounded-lg shadow-lg p-3 max-h-[300px] overflow-y-auto">
-                                <p className="font-bold mb-2">Notificaciones</p>
+                        {openNotifications && (
+                            <div className="fixed top-[70px] left-0 w-full px-4 sm:absolute sm:right-0 sm:left-auto sm:w-[350px] z-50">
+                                <div className="bg-white text-black rounded-lg shadow-lg p-3 max-h-[300px] overflow-y-auto">
+                                    <p className="font-bold mb-2">
+                                        Notificaciones
+                                    </p>
 
-                                <ul className="flex flex-col gap-y-3">
-                                    {notificaciones.map((noti) => (
-                                        <li
-                                            key={noti.id}
-                                            onClick={() => {
-                                                if (!claveAcceso) return;
+                                    <ul className="flex flex-col gap-y-3">
+                                        {notificaciones.map((noti) => (
+                                            <li
+                                                key={noti.id}
+                                                onClick={() => {
+                                                    if (!claveAcceso) return;
 
-                                                enviarIdNotificacion(
-                                                    noti.id,
-                                                    claveAcceso
-                                                );
+                                                    enviarIdNotificacion(
+                                                        noti.id,
+                                                        claveAcceso
+                                                    );
 
-                                                setNotificaciones((prev) =>
-                                                    prev.filter(
-                                                        (n) => n.id !== noti.id
-                                                    )
-                                                );
-                                            }}
-                                            className="bg-gray-50 hover:bg-orange-50 border border-gray-200 hover:border-orange-300 rounded-xl p-3 cursor-pointer transition-all duration-200 shadow-sm"
-                                        >
-                                            <div className="flex flex-col">
-                                                <span className="text-[15px] text-gray-800 font-medium">
-                                                    {noti.descripcion}
-                                                </span>
+                                                    setNotificaciones((prev) =>
+                                                        prev.filter(
+                                                            (n) =>
+                                                                n.id !== noti.id
+                                                        )
+                                                    );
+                                                }}
+                                                className="bg-gray-50 hover:bg-orange-50 border border-gray-200 hover:border-orange-300 rounded-xl p-3 cursor-pointer transition-all duration-200 shadow-sm"
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className="text-[15px] text-gray-800 font-medium">
+                                                        {noti.descripcion}
+                                                    </span>
 
-                                                <span className="text-[12px] text-gray-500 mt-1">
-                                                    {new Date(
-                                                        noti.fecha
-                                                    ).toLocaleString('es-ES', {
-                                                        day: '2-digit',
-                                                        month: 'short',
-                                                        hour: '2-digit',
-                                                        minute: '2-digit',
-                                                    })}
-                                                </span>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
+                                                    <span className="text-[12px] text-gray-500 mt-1">
+                                                        {new Date(
+                                                            noti.fecha
+                                                        ).toLocaleString(
+                                                            'es-ES',
+                                                            {
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                            }
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
 
-                {/* <img src={profileIcon} alt="Profile Icon" /> */}
-                <div className="item-header-dashboard-profile">
-                    <img
-                        src={idAvatar ? idAvatar : profileIcon}
-                        alt="Profile Icon"
-                        onClick={() => setOpen(true)}
-                        style={{
-                            cursor: 'pointer',
-                            width: '70px', // tamaño que tú quieras
-                            height: '70px', // mismo que width para que sea círculo
-                            borderRadius: '10%',
-                        }}
-                    />
-                </div>
+                    {/* <img src={profileIcon} alt="Profile Icon" /> */}
+                    <div className="item-header-dashboard-profile">
+                        <img
+                            src={idAvatar ? idAvatar : profileIcon}
+                            alt="Profile Icon"
+                            onClick={() => setOpen(true)}
+                            style={{
+                                cursor: 'pointer',
+                                width: '70px', // tamaño que tú quieras
+                                height: '70px', // mismo que width para que sea círculo
+                                borderRadius: '10%',
+                            }}
+                        />
+                    </div>
                 </div>
 
                 {open && (
@@ -764,11 +799,11 @@ const DashboardIA = () => {
                     className="contenedo-diagrama-flujo-primer-ejercicio"
                 >
                     <div
-                        className={
+                        className={`${
                             index % 2 === 0
                                 ? 'circle-outer-1'
                                 : 'circle-outer-2'
-                        }
+                        } ${juego.completado === 1 ? 'circle-completed' : ''}`}
                         onClick={() =>
                             navigate('/designboard', {
                                 state: {
@@ -778,7 +813,11 @@ const DashboardIA = () => {
                             })
                         }
                     >
-                        <div className="circle-inner">{index + 1}</div>
+                        <div
+                            className={`circle-inner ${juego.completado === 1 ? 'circle-completed' : ''}`}
+                        >
+                            {index + 1}
+                        </div>
                     </div>
                 </div>
             ))}
