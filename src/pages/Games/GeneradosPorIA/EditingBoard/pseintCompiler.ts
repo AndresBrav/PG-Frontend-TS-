@@ -898,15 +898,39 @@ class Compilador {
     private compilarFuncion(): void {
         const linea = this.lineas[this.i];
         const k = this.clave();
+        const arrowIdx = linea.toks.findIndex(
+            (t) => t.tipo === 'punt' && t.val === '<-'
+        );
         let nombre = '';
-        for (let j = 1; j < linea.toks.length; j++) {
-            if (linea.toks[j].tipo === 'word') {
-                nombre = normVar(linea.toks[j].val);
-                break;
+        let retorno = '';
+        if (arrowIdx !== -1) {
+            for (let j = arrowIdx - 1; j >= 1; j--) {
+                if (linea.toks[j].tipo === 'word') {
+                    retorno = normVar(linea.toks[j].val);
+                    break;
+                }
+            }
+            for (let j = arrowIdx + 1; j < linea.toks.length; j++) {
+                if (linea.toks[j].tipo === 'word') {
+                    nombre = normVar(linea.toks[j].val);
+                    break;
+                }
+            }
+        } else {
+            for (let j = 1; j < linea.toks.length; j++) {
+                if (linea.toks[j].tipo === 'word') {
+                    nombre = normVar(linea.toks[j].val);
+                    break;
+                }
             }
         }
         if (!nombre) {
             this.erro(linea);
+        }
+        if (NOMBRES_INCORPORADOS.has(nombre)) {
+            throw new Error(
+                `No se puede definir la función "${nombre}": ya existe una función incorporada con ese nombre.`
+            );
         }
         const paren = linea.toks.findIndex(
             (t) => t.tipo === 'punt' && t.val === '('
@@ -923,9 +947,17 @@ class Compilador {
                 }
             }
         }
-        this.out.push(`async function ${nombre}(${params.join(', ')}) {`);
+        const tiposAnteriores = this.tipos;
+        const declaradasAnteriores = this.declaradas;
+        this.tipos = new Map();
+        this.declaradas = new Set();
         for (const p of params) {
             this.declaradas.add(p);
+        }
+        this.out.push(`async function ${nombre}(${params.join(', ')}) {`);
+        if (retorno) {
+            this.out.push(`${retorno} = undefined;`);
+            this.declaradas.add(retorno);
         }
         this.i++;
         const finNombre = k === 'funcion' ? 'finfuncion' : 'finsubproceso';
@@ -933,7 +965,12 @@ class Compilador {
         if (this.clave() === finNombre) {
             this.i++;
         }
+        if (retorno) {
+            this.out.push(`return ${retorno};`);
+        }
         this.out.push('}');
+        this.tipos = tiposAnteriores;
+        this.declaradas = declaradasAnteriores;
     }
 
     private compilarRetornar(): void {
@@ -1039,6 +1076,33 @@ export function ejecutarPseudo(codigo: string): string {
     const c = new Compilador(lineas);
     return c.compilar();
 }
+
+const NOMBRES_INCORPORADOS = new Set([
+    'longitud',
+    'mayusculas',
+    'minusculas',
+    'concatenar',
+    'subcadena',
+    'convertiranumero',
+    'convertiratexto',
+    'recortar',
+    'remplazar',
+    'reemplazar',
+    'buscar',
+    'azar',
+    'redondear',
+    'truncar',
+    'raiz',
+    'abs',
+    'potencia',
+    'sen',
+    'cos',
+    'tan',
+    'log',
+    'exp',
+    'esnumero',
+    'limpiarpantalla',
+]);
 
 const FUNCIONES_INCORPORADAS = `
     const longitud = (s) => String(s).length;
