@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { completarJuego } from '../../../../api/ejerciciosIA/ejercicios';
 import { verificarPseudocodigo } from '../../../../api/ejerciciosIA/verificarPseudocodigo';
+import { ejecutarPseudocodigo } from './pseintCompiler';
 import '../app.css';
 
 interface LocationState {
@@ -49,6 +50,7 @@ FinAlgoritmo`;
 
     const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
     const [isVerifying, setIsVerifying] = useState<boolean>(false);
+    const [isRunning, setIsRunning] = useState<boolean>(false);
     const [counterRate, setCounterRate] = useState<number>(1);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -108,39 +110,84 @@ FinAlgoritmo`;
         }
     };
 
-    // Ejecutar localmente (imprime en console.log y en la consola simulada)
-    const handleEjecutar = () => {
-        const lineas = code.split('\n');
+    // Ejecutar el pseudocódigo localmente (transpilado a JavaScript)
+    const handleEjecutar = async () => {
+        if (!code.trim()) {
+            Swal.fire({
+                title: 'Código vacío',
+                text: 'Por favor, escribe tu pseudocódigo antes de ejecutar.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#FF7C02',
+            });
+            return;
+        }
 
-        console.log('--- EJECUTANDO PSEUDOCODIGO ---');
-        lineas.forEach((linea, i) => {
-            console.log(`Línea ${i + 1}: ${linea}`);
-        });
-        console.log('--------------------------------');
+        setIsRunning(true);
+        setConsoleOutput(['[Sistema] Iniciando ejecución del pseudocódigo...']);
 
-        const logs = [
-            `[Sistema] Iniciando simulación de pseudocódigo...`,
-            ...lineas.map(
-                (linea, i) => `[L-${String(i + 1).padStart(2, '0')}] ${linea}`
-            ),
-            `[Sistema] Ejecución finalizada. ${lineas.length} líneas procesadas. Verificado en console.log.`,
-        ];
+        try {
+            const result = await ejecutarPseudocodigo(code, {
+                imprimir: (texto) => {
+                    setConsoleOutput((prev) => [...prev, texto]);
+                },
+                pedirEntrada: async (nombre) => {
+                    const { value, isConfirmed } = await Swal.fire({
+                        title: 'Entrada requerida (Leer)',
+                        html: `<div style="text-align:left;color:#333;line-height:1.5;">El algoritmo necesita el valor de <strong>${nombre}</strong>.</div>`,
+                        input: 'text',
+                        inputPlaceholder: `Escribe un valor para ${nombre}...`,
+                        showCancelButton: true,
+                        confirmButtonText: 'Enviar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#FF7C02',
+                        customClass: {
+                            title: 'titulo-celular',
+                            confirmButton: 'btn-semitransparente',
+                            icon: 'icono-celular',
+                        },
+                        width: '80%',
+                    });
 
-        setConsoleOutput(logs);
+                    const valor = isConfirmed ? (value ?? '') : '';
+                    setConsoleOutput((prev) => [...prev, `> ${nombre} = ${valor}`]);
+                    return String(valor);
+                },
+            });
 
-        Swal.fire({
-            title: 'Ejecutado correctamente',
-            text: 'Se han impreso todas las líneas del código en la consola del navegador.',
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#FF7C02',
-            customClass: {
-                title: 'titulo-celular',
-                confirmButton: 'btn-semitransparente',
-                icon: 'icono-celular',
-            },
-            width: '80%',
-        });
+            setIsRunning(false);
+            setConsoleOutput((prev) => [
+                ...prev,
+                '[Sistema] Ejecución finalizada.',
+            ]);
+
+            if (result.error) {
+                setConsoleOutput((prev) => [...prev, `[Error] ${result.error}`]);
+                Swal.fire({
+                    title: 'Error en la ejecución',
+                    text: result.error,
+                    icon: 'error',
+                    confirmButtonText: 'Cerrar',
+                    confirmButtonColor: '#FF7C02',
+                });
+                return;
+            }
+        } catch (err) {
+            setIsRunning(false);
+            setConsoleOutput((prev) => [
+                ...prev,
+                `[Error] ${
+                    err instanceof Error ? err.message : String(err)
+                }`,
+            ]);
+            Swal.fire({
+                title: 'Error inesperado',
+                text: err instanceof Error ? err.message : String(err),
+                icon: 'error',
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#FF7C02',
+            });
+        }
     };
 
     // Validar con Inteligencia Artificial (Mistral)
@@ -276,6 +323,7 @@ FinAlgoritmo`;
                     <button
                         className="btn"
                         onClick={handleEjecutar}
+                        disabled={isRunning}
                         style={{
                             backgroundColor: '#ff9800',
                             color: 'white',
@@ -284,16 +332,18 @@ FinAlgoritmo`;
                             borderRadius: '8px',
                             fontWeight: 'bold',
                             cursor: 'pointer',
+                            opacity: isRunning ? 0.7 : 1,
                             transition: 'transform 0.2s',
                         }}
                         onMouseEnter={(e) =>
+                            !isRunning &&
                             (e.currentTarget.style.transform = 'scale(1.03)')
                         }
                         onMouseLeave={(e) =>
                             (e.currentTarget.style.transform = 'scale(1)')
                         }
                     >
-                        ▶ Ejecutar
+                        {isRunning ? '⏳ Ejecutando...' : '▶ Ejecutar'}
                     </button>
                     <button
                         className="btn"
