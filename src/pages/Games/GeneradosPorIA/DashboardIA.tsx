@@ -898,6 +898,42 @@ const DashboardIA = () => {
                 </div>
             </div>
 
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: '20px',
+                    margin: '20px 0',
+                }}
+            >
+                <button
+                    // onClick={handleGenerarEjercicio}
+                    style={{
+                        backgroundColor: '#22C55E',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 30px',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#16A34A';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#22C55E';
+                        e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                >
+                    Generar Ejercicio
+                </button>
+            </div>
+
             {/* Mostrar juegos IA dinámicamente para Pseudocódigo */}
             {juegosIAPseudo.map((juego, index) => (
                 <div

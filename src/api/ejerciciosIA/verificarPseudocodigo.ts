@@ -1,4 +1,7 @@
-export async function verificarPseudocodigo(pseudocodigo: string, ejercicio: string) {
+export async function verificarPseudocodigo(
+    pseudocodigo: string,
+    ejercicio: string
+) {
     const prompt = `
 Eres un profesor experto en algoritmos y pseudocódigo.
 
@@ -50,7 +53,9 @@ ${pseudocodigo}
         });
 
         if (!response.ok) {
-            throw new Error(`Error Mistral: ${response.status} ${response.statusText}`);
+            throw new Error(
+                `Error Mistral: ${response.status} ${response.statusText}`
+            );
         }
 
         const data = await response.json();
