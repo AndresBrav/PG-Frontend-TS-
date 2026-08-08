@@ -325,6 +325,9 @@ class Expresion {
                 }
                 return `await ${palabra}(${args.join(', ')})`;
             }
+            if (this.actual()?.val === '[') {
+                return this.indizado(palabra);
+            }
             return palabra;
         }
         return '';
@@ -332,6 +335,24 @@ class Expresion {
 
     private actual(): Token | undefined {
         return this.toks[this.pos];
+    }
+
+    private indizado(palabra: string): string {
+        this.pos++;
+        const indices: string[] = [];
+        while (this.actual() && this.actual()?.val !== ']') {
+            const idx = this.parse();
+            indices.push(idx);
+            if (this.actual()?.val === ',') {
+                this.pos++;
+            }
+        }
+        if (this.actual()?.val === ']') {
+            this.pos++;
+        }
+        return indices
+            .map((i) => `[(${i}) - 1]`)
+            .reduce((acc, seg) => acc + seg, palabra);
     }
 }
 
@@ -368,6 +389,9 @@ class Compilador {
         switch (k) {
             case 'definir':
                 this.compilarDefinir();
+                break;
+            case 'dimension':
+                this.compilarDimension();
                 break;
             case 'leer':
                 this.compilarLeer();
@@ -473,20 +497,115 @@ class Compilador {
         this.i++;
     }
 
+    private compilarDimension(): void {
+        const linea = this.lineas[this.i];
+        const resto = linea.toks.slice(1);
+        let p = 0;
+        while (p < resto.length) {
+            if (resto[p].tipo !== 'word') {
+                p++;
+                continue;
+            }
+            const nombre = normVar(resto[p].val);
+            p++;
+            if (resto[p]?.val === '[') {
+                p++;
+                const dims: string[] = [];
+                const partes: Token[][] = [];
+                let actual: Token[] = [];
+                while (p < resto.length && resto[p].val !== ']') {
+                    if (resto[p].tipo === 'punt' && resto[p].val === ',') {
+                        partes.push(actual);
+                        actual = [];
+                    } else {
+                        actual.push(resto[p]);
+                    }
+                    p++;
+                }
+                if (actual.length > 0) {
+                    partes.push(actual);
+                }
+                if (resto[p]?.val === ']') {
+                    p++;
+                }
+                for (const parte of partes) {
+                    dims.push(new Expresion(parte).parse());
+                }
+                this.declararArreglo(nombre, dims);
+                continue;
+            }
+            this.declararVariable(nombre);
+        }
+        this.i++;
+    }
+
+    private declararArreglo(nombre: string, dims: string[]): void {
+        const generador = (asignacion: boolean): string => {
+            const declarador = asignacion ? nombre : `let ${nombre}`;
+            if (dims.length === 0) {
+                return `${declarador} = [];`;
+            }
+            if (dims.length === 1) {
+                return `${declarador} = new Array(${dims[0]}).fill(0);`;
+            }
+            return `${declarador} = Array.from({ length: ${dims[0]} }, () => new Array(${dims[1]}).fill(0));`;
+        };
+        if (this.declaradas.has(nombre)) {
+            this.out.push(generador(true));
+            return;
+        }
+        this.out.push(generador(false));
+        this.declaradas.add(nombre);
+    }
+
     private compilarLeer(): void {
         const linea = this.lineas[this.i];
-        const vars: string[] = [];
-        for (let j = 1; j < linea.toks.length; j++) {
-            if (linea.toks[j].tipo === 'word') {
-                vars.push(normVar(linea.toks[j].val));
+        const resto = linea.toks.slice(1);
+        const segmentos: Token[][] = [];
+        let actual: Token[] = [];
+        let nivel = 0;
+        for (const t of resto) {
+            if (t.tipo === 'punt' && (t.val === '[' || t.val === '(')) {
+                nivel++;
+            }
+            if (t.tipo === 'punt' && (t.val === ']' || t.val === ')')) {
+                nivel--;
+            }
+            if (t.tipo === 'punt' && t.val === ',' && nivel === 0) {
+                segmentos.push(actual);
+                actual = [];
+            } else {
+                actual.push(t);
             }
         }
-        for (const v of vars) {
-            this.declararVariable(v);
-            const tipo = this.tipos.get(v) ?? '';
-            this.out.push(
-                `${v} = await __leer(${JSON.stringify(v)}, ${JSON.stringify(tipo)});`
+        if (actual.length > 0) {
+            segmentos.push(actual);
+        }
+        for (const seg of segmentos) {
+            if (seg.length === 0) {
+                continue;
+            }
+            const tieneIndice = seg.some(
+                (t) => t.tipo === 'punt' && t.val === '['
             );
+            const nombre = normVar(
+                seg.find((t) => t.tipo === 'word')?.val ?? ''
+            );
+            if (!nombre) {
+                continue;
+            }
+            const tipo = this.tipos.get(nombre) ?? '';
+            if (tieneIndice) {
+                const destino = new Expresion(seg).parse();
+                this.out.push(
+                    `${destino} = await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipo)});`
+                );
+            } else {
+                this.declararVariable(nombre);
+                this.out.push(
+                    `${nombre} = await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipo)});`
+                );
+            }
         }
         this.i++;
     }
@@ -672,17 +791,35 @@ class Compilador {
                     (t) => t.tipo === 'punt' && t.val === ':'
                 );
                 const labelsToks =
-                    idxPuntos === -1
-                        ? linea.toks.slice(1)
-                        : linea.toks.slice(1, idxPuntos);
+                    idxPuntos <= 0
+                        ? linea.toks
+                              .filter(
+                                  (t) =>
+                                      !(
+                                          t.tipo === 'punt' &&
+                                          (t.val === ':' || t.val === '-')
+                                      )
+                              )
+                        : linea.toks.slice(0, idxPuntos);
                 const labels = new Expresion(labelsToks).argumentos();
                 for (const lbl of labels) {
                     this.out.push(`case ${lbl}:`);
                 }
+                const restoLinea =
+                    idxPuntos !== -1 ? linea.toks.slice(idxPuntos + 1) : [];
                 this.i++;
+                if (restoLinea.length > 0) {
+                    this.out.push(
+                        ...this.compilarToksInLinea(restoLinea)
+                    );
+                }
                 while (this.i < this.lineas.length) {
                     const k2 = this.clave();
-                    if (k2 === 'caso' || k2 === 'finsegun') {
+                    if (
+                        k2 === 'caso' ||
+                        k2 === 'finsegun' ||
+                        this.esLineaCaso(this.lineas[this.i])
+                    ) {
                         break;
                     }
                     if (
@@ -727,7 +864,35 @@ class Compilador {
         ) {
             return true;
         }
-        return false;
+        return linea.toks.some(
+            (t) => t.tipo === 'punt' && t.val === ':'
+        );
+    }
+
+    private compilarToksInLinea(toks: Token[]): string[] {
+        const salida: string[] = [];
+        const k = normVar(toks[0]?.val ?? '');
+        if (k === 'escribir') {
+            const exp = new Expresion(toks.slice(1));
+            const args = exp.argumentos();
+            if (args.length === 0) {
+                salida.push('__escribir();');
+            } else {
+                salida.push(`__escribir(${args.join(', ')});`);
+            }
+        } else if (k === 'leer') {
+            const aux = new Compilador(
+                [],
+                { cadenas: [], lineas: [{ toks }] } as unknown as Algoritmo
+            );
+            aux.lineas = [{ toks }];
+            aux.compilarLeer();
+            salida.push(...aux.out);
+        } else {
+            const exp = new Expresion(toks);
+            salida.push(`${exp.parse()};`);
+        }
+        return salida;
     }
 
     private compilarFuncion(): void {
@@ -814,9 +979,33 @@ class Compilador {
         }
         const exprToks = linea.toks.slice(opIdx + 1);
         const expr = new Expresion(exprToks).parse();
-        this.declararVariable(nombre);
-        this.out.push(`${nombre} = ${expr};`);
+        const { esArreglo, destino } = this.analizarDestino(
+            linea.toks.slice(0, opIdx)
+        );
+        if (!esArreglo) {
+            this.declararVariable(nombre);
+        }
+        this.out.push(`${destino} = ${expr};`);
         this.i++;
+    }
+
+    private analizarDestino(toks: Token[]): {
+        esArreglo: boolean;
+        destino: string;
+    } {
+        const tieneCorchete = toks.some(
+            (t, idx) => idx > 0 && t.tipo === 'punt' && t.val === '['
+        );
+        if (tieneCorchete) {
+            return {
+                esArreglo: true,
+                destino: new Expresion(toks).parse(),
+            };
+        }
+        if (toks.length > 0 && toks[0].tipo === 'word') {
+            return { esArreglo: false, destino: normVar(toks[0].val) };
+        }
+        return { esArreglo: false, destino: '' };
     }
 
     private recorrerHasta(finales: string[]): void {
@@ -850,6 +1039,50 @@ export function ejecutarPseudo(codigo: string): string {
     const c = new Compilador(lineas);
     return c.compilar();
 }
+
+const FUNCIONES_INCORPORADAS = `
+    const longitud = (s) => String(s).length;
+    const mayusculas = (s) => String(s).toUpperCase();
+    const minusculas = (s) => String(s).toLowerCase();
+    const concatenar = (...args) => args.map(String).join('');
+    const subcadena = (s, ini, fin) => {
+        const cad = String(s);
+        const i = Number(ini) - 1;
+        const f = fin === undefined ? cad.length : Number(fin);
+        if (i < 0 || i >= cad.length) return '';
+        return cad.slice(i, f);
+    };
+    const convertiranumero = (s) => {
+        const n = parseFloat(String(s).trim().replace(',', '.'));
+        return Number.isNaN(n) ? 0 : n;
+    };
+    const convertiratexto = (n) => String(n);
+    const recortar = (s) => String(s).trim();
+    const remplazar = (s, patron, reemplazo) =>
+        String(s).split(String(patron)).join(String(reemplazo));
+    const buscar = (s, buscado) => {
+        const p = String(s).indexOf(String(buscado));
+        return p === -1 ? 0 : p + 1;
+    };
+    const azar = (n) => Math.floor(Math.random() * Number(n));
+    const redondear = (n) => Math.round(Number(n));
+    const truncar = (n) => Math.trunc(Number(n));
+    const raiz = (n) => Math.sqrt(Number(n));
+    const abs = (n) => Math.abs(Number(n));
+    const potencia = (b, e) => Math.pow(Number(b), Number(e));
+    const sen = (n) => Math.sin(Number(n));
+    const cos = (n) => Math.cos(Number(n));
+    const tan = (n) => Math.tan(Number(n));
+    const log = (n) => Math.log(Number(n));
+    const exp = (n) => Math.exp(Number(n));
+    const esnumero = (s) => {
+        const n = parseFloat(String(s).trim().replace(',', '.'));
+        return !Number.isNaN(n);
+    };
+    const limpiarpantalla = () => {
+        callbacks.imprimir('[Pantalla limpiada]');
+    };
+`;
 
 export async function ejecutarPseudocodigo(
     codigo: string,
@@ -885,7 +1118,7 @@ export async function ejecutarPseudocodigo(
         callbacks.imprimir(texto);
         salida.push(texto);
     };
-
+${FUNCIONES_INCORPORADAS}
 ${fuente}
 `;
 
@@ -930,7 +1163,11 @@ function convertir(valor: unknown, tipo: string): unknown {
     if (tipo === 'logico' || tipo === 'bool' || tipo === 'boolean') {
         return /^(s|si|verdadero|true|v|1)$/i.test(v.trim());
     }
-    return v;
+    if (tipo === 'cadena' || tipo === 'texto' || tipo === 'caracter') {
+        return v;
+    }
+    const flexible = parseFloat(v.replace(',', '.'));
+    return Number.isNaN(flexible) ? v : flexible;
 }
 
 export default ejecutarPseudocodigo;
