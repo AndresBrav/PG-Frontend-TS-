@@ -23,6 +23,7 @@ import {
     traerJuegosIAPseudo,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
 import { generarEjercicioHandler } from './generarEjercicioHandler';
+import { generarEjercicioHandlerPseudo } from './generarEjercicioHandlerPseudo';
 
 interface Notificacion {
     id: number;
@@ -143,6 +144,10 @@ const DashboardIA = () => {
     // Función para generar ejercicio con modal (delegada al handler)
     const handleGenerarEjercicio = async () => {
         await generarEjercicioHandler(claveAcceso, setJuegosIA);
+    };
+
+    const handleGenerarEjercicioPseudo = async () => {
+        await generarEjercicioHandlerPseudo(claveAcceso, setJuegosIAPseudo);
     };
 
     return (
@@ -802,7 +807,7 @@ const DashboardIA = () => {
                 }}
             >
                 <button
-                    // onClick={handleGenerarEjercicio}
+                    onClick={handleGenerarEjercicioPseudo}
                     style={{
                         backgroundColor: '#22C55E',
                         color: 'white',
@@ -824,7 +829,7 @@ const DashboardIA = () => {
                         e.currentTarget.style.transform = 'scale(1)';
                     }}
                 >
-                    Generar Ejercicio
+                    Generar Ejercicio Pseudocodigo
                 </button>
             </div>
 

@@ -5,7 +5,7 @@ const ai = new GoogleGenAI({
     apiKey: apikeyGemini,
 });
 
-export async function consultarEjercicio() {
+export async function consultarEjercicioPseudo() {
     const temas = [
         'videojuegos',
         'supermercado',
