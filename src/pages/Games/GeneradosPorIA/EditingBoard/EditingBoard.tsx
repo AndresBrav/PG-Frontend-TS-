@@ -131,10 +131,13 @@ FinAlgoritmo`;
                 imprimir: (texto) => {
                     setConsoleOutput((prev) => [...prev, texto]);
                 },
-                pedirEntrada: async (nombre) => {
+                pedirEntrada: async (nombre, _tipo, mensajePrevio) => {
+                    const aviso = mensajePrevio
+                        ? `<div style="text-align:left;color:#555;line-height:1.5;font-weight:bold;margin-bottom:8px;">${mensajePrevio}</div>`
+                        : '';
                     const { value, isConfirmed } = await Swal.fire({
                         title: 'Entrada requerida (Leer)',
-                        html: `<div style="text-align:left;color:#333;line-height:1.5;">El algoritmo necesita el valor de <strong>${nombre}</strong>.</div>`,
+                        html: `${aviso}<div style="text-align:left;color:#333;line-height:1.5;">El algoritmo necesita el valor de <strong>${nombre}</strong>.</div>`,
                         input: 'text',
                         inputPlaceholder: `Escribe un valor para ${nombre}...`,
                         showCancelButton: true,

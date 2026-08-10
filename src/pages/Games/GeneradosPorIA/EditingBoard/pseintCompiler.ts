@@ -1,6 +1,10 @@
 export interface CallbacksEjecucion {
     imprimir: (texto: string) => void;
-    pedirEntrada: (nombre: string) => Promise<string>;
+    pedirEntrada: (
+        nombre: string,
+        tipo: string,
+        mensajePrevio?: string
+    ) => Promise<string>;
 }
 
 export interface ResultadoEjecucion {
@@ -1171,14 +1175,20 @@ export async function ejecutarPseudocodigo(
             throw new Error('Se superó el límite de ${MAX_PASOS} pasos. ¿Tienes un bucle infinito?');
         }
     };
+    const __ultimoMensaje = { valor: '' };
     const __leer = async (nombre, tipo) => {
-        const valor = await callbacks.pedirEntrada(nombre);
+        const valor = await callbacks.pedirEntrada(
+            nombre,
+            tipo,
+            __ultimoMensaje.valor
+        );
         return convertir(valor, tipo);
     };
     const __escribir = (...args) => {
         const texto = args
             .map(a => typeof a === 'boolean' ? (a ? 'VERDADERO' : 'FALSO') : String(a))
             .join(' ');
+        __ultimoMensaje.valor = texto;
         callbacks.imprimir(texto);
         salida.push(texto);
     };
