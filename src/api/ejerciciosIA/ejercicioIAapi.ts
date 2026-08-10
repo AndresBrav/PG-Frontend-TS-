@@ -65,7 +65,7 @@ export const guardarJuegoIA = async (
 ): Promise<any> => {
     try {
         const response = await axios.post(
-            `${API}/juegosIA/guardarjuegoIA`,
+            `${API}/juegos/guardarjuegoIA`,
             datos,
             {
                 headers: {

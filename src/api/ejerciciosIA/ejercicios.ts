@@ -8,7 +8,7 @@ export const completarJuego = async (
 ) => {
     try {
         const response = await axios.put(
-            `${API}/juegosIA/completar/${juego_id}`,
+            `${API}/juegos/completar/${juego_id}`,
             {},
             {
                 headers: {
