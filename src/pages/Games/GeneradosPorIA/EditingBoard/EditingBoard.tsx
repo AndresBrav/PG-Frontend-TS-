@@ -153,7 +153,10 @@ FinAlgoritmo`;
                     });
 
                     const valor = isConfirmed ? (value ?? '') : '';
-                    setConsoleOutput((prev) => [...prev, `> ${nombre} = ${valor}`]);
+                    setConsoleOutput((prev) => [
+                        ...prev,
+                        `> ${nombre} = ${valor}`,
+                    ]);
                     return String(valor);
                 },
             });
@@ -165,7 +168,10 @@ FinAlgoritmo`;
             ]);
 
             if (result.error) {
-                setConsoleOutput((prev) => [...prev, `[Error] ${result.error}`]);
+                setConsoleOutput((prev) => [
+                    ...prev,
+                    `[Error] ${result.error}`,
+                ]);
                 Swal.fire({
                     title: 'Error en la ejecución',
                     text: result.error,
@@ -179,9 +185,7 @@ FinAlgoritmo`;
             setIsRunning(false);
             setConsoleOutput((prev) => [
                 ...prev,
-                `[Error] ${
-                    err instanceof Error ? err.message : String(err)
-                }`,
+                `[Error] ${err instanceof Error ? err.message : String(err)}`,
             ]);
             Swal.fire({
                 title: 'Error inesperado',
