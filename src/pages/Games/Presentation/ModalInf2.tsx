@@ -2,37 +2,47 @@ import React, { useState } from 'react';
 import '../../../assets/styles/stylesModal/designModals.css';
 import ExplicationModal from './ExplicationModal';
 
+import Escribir from '/images/pseint/Escribir.png';
+import Leer from '/images/pseint/Leer.png';
+import asignar from '/images/pseint/asignar.png';
+import Si from '/images/pseint/Si.png';
+
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
 const Titulos = {
-    a: 'Símbolo de Inicio / Final',
-    b: 'Símbolo de Proceso / Acción',
-    c: 'Símbolo de Documento',
-    d: 'Símbolo de Decisión',
-    e: 'Símbolo de Entrada / Salida',
-    f: 'Símbolo de Conector',
+    a: 'Escribir',
+    b: 'Leer',
+    c: 'Asignar',
+    d: 'Si',
+    e: '',
+    f: '',
+    g: '',
+    h: '',
 } as const;
 
 const Descripciones = {
-    a: 'El símbolo de terminación marca el punto inicial o final del sistema. Por lo general, contiene la palabra Inicio o Fin.',
-    b: 'Un rectangulo solo puede representar un solo paso dentro de un processo (agregar dos tazas de harina), o un subproceso completo (hacer pan) dentro de un proceso más grande.',
-    c: 'Un documento o informe impreso',
-    d: 'Un punto de decisión o ramificación. Las líneas que representan diferentes decisiones surgen de diferentes puntos del diamante.',
-    e: 'Representa el material o la información que entra o sale del sistema, como una orden del cliente (entrada) o un producto (salida).',
-    f: 'Indica que el flujo continúa donde se ha colocado un símbolo identico (que contiene la misma letra).',
+    a: 'Nos permite mostrar en pantalla algún tipo de dato, o varios separados por una coma (,) y esos datos deben estar entre comillas ("")',
+    b: 'Nos permite recibir valores por teclado y guardarlos en variables.',
+    c: 'nos permite guardar un valor en una variable',
+    d: 'Nos permite evaluar la propiedad de una variable, y en función de esta, realizar una acción determinada',
+    e: '',
+    f: '',
+    g: '',
+    h: '',
 };
 
 const Enlaces = {
-    a: 'https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png',
-    b: 'https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png',
-    c: 'https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png',
-    d: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
-    e: 'https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png',
-    f: 'https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png',
-    g: 'https://www.smartdraw.com/flowchart/img/predefined-process-flowchart-symbol.png',
+    a: Escribir,
+    b: Leer,
+    c: asignar,
+    d: Si,
+    e: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
+    f: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
+    g: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
+    h: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
 } as const;
 
 const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
@@ -77,6 +87,18 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         setTitulo(Titulos.f);
         setimages(Enlaces.f);
         setDescripcion(Descripciones.f);
+        setIsModalOpen(true); /* abrimos el segundo modal */
+    };
+    const manejarClick7 = () => {
+        setTitulo(Titulos.g);
+        setimages(Enlaces.g);
+        setDescripcion(Descripciones.g);
+        setIsModalOpen(true); /* abrimos el segundo modal */
+    };
+    const manejarClick8 = () => {
+        setTitulo(Titulos.h);
+        setimages(Enlaces.h);
+        setDescripcion(Descripciones.h);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
 
@@ -137,8 +159,9 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
                     <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
                         <h1>
-                            Un diagrama de flujo es un diagrama que describe un
-                            proceso, sistema o algoritmo informático.
+                            El pseudocódigo describe un algoritmo usando un
+                            lenguaje estructurado y parecido al español, sin
+                            depender de un lenguaje de programación concreto.
                         </h1>
                     </div>
 
@@ -148,31 +171,50 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             src={Enlaces.a}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick1}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.b}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick2}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.c}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick3}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.d}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick4}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
+                        <img />
                         <img
                             src={Enlaces.e}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick5}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.f}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick6}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
+                        />
+                        <img
+                            src={Enlaces.g}
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick7}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
+                        />
+                        <img
+                            src={Enlaces.h}
+                            alt="Símbolo de inicio/fin del diagrama de flujo"
+                            onClick={manejarClick8}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                     </div>
                     <br />

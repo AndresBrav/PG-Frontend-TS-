@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import "../../../assets/styles/stylesModal/designModals.css";
-import ExplicationModal from "./ExplicationModal";
+import React, { useState } from 'react';
+import '../../../assets/styles/stylesModal/designModals.css';
+import ExplicationModal from './ExplicationModal';
 
 interface ModalProps {
     isOpen: boolean;
@@ -8,38 +8,38 @@ interface ModalProps {
 }
 
 const Titulos = {
-    a: "Símbolo de Inicio / Final",
-    b: "Símbolo de Proceso / Acción",
-    c: "Símbolo de Documento",
-    d: "Símbolo de Decisión",
-    e: "Símbolo de Entrada / Salida",
-    f: "Símbolo de Conector",
+    a: 'Símbolo de Inicio / Final',
+    b: 'Símbolo de Proceso / Acción',
+    c: 'Símbolo de Documento',
+    d: 'Símbolo de Decisión',
+    e: 'Símbolo de Entrada / Salida',
+    f: 'Símbolo de Conector',
 } as const;
 
 const Descripciones = {
-    a: "El símbolo de terminación marca el punto inicial o final del sistema. Por lo general, contiene la palabra Inicio o Fin.",
-    b: "Un rectangulo solo puede representar un solo paso dentro de un processo (agregar dos tazas de harina), o un subproceso completo (hacer pan) dentro de un proceso más grande.",
-    c: "Un documento o informe impreso",
-    d: "Un punto de decisión o ramificación. Las líneas que representan diferentes decisiones surgen de diferentes puntos del diamante.",
-    e: "Representa el material o la información que entra o sale del sistema, como una orden del cliente (entrada) o un producto (salida).",
-    f: "Indica que el flujo continúa donde se ha colocado un símbolo identico (que contiene la misma letra).",
+    a: 'El símbolo de terminación marca el punto inicial o final del sistema. Por lo general, contiene la palabra Inicio o Fin.',
+    b: 'Un rectangulo solo puede representar un solo paso dentro de un processo (agregar dos tazas de harina), o un subproceso completo (hacer pan) dentro de un proceso más grande.',
+    c: 'Un documento o informe impreso',
+    d: 'Un punto de decisión o ramificación. Las líneas que representan diferentes decisiones surgen de diferentes puntos del diamante.',
+    e: 'Representa el material o la información que entra o sale del sistema, como una orden del cliente (entrada) o un producto (salida).',
+    f: 'Indica que el flujo continúa donde se ha colocado un símbolo identico (que contiene la misma letra).',
 };
 
 const Enlaces = {
-    a: "https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png",
-    b: "https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png",
-    c: "https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png",
-    d: "https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png",
-    e: "https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png",
-    f: "https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png",
-    g: "https://www.smartdraw.com/flowchart/img/predefined-process-flowchart-symbol.png",
+    a: 'https://www.smartdraw.com/flowchart/img/start-end-flowchart-symbol.png',
+    b: 'https://www.smartdraw.com/flowchart/img/action-process-flowchart-symbol.png',
+    c: 'https://www.smartdraw.com/flowchart/img/document-flowchart-symbol.png',
+    d: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
+    e: 'https://www.smartdraw.com/flowchart/img/imput-output-flowchart-symbol.png',
+    f: 'https://www.smartdraw.com/flowchart/img/connector-flowchart-symbol.png',
+    g: 'https://www.smartdraw.com/flowchart/img/predefined-process-flowchart-symbol.png',
 } as const;
 
 const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [titulo, setTitulo] = useState<string>("");
-    const [images, setimages] = useState<string>("");
-    const [descripcion, setDescripcion] = useState<string>("");
+    const [titulo, setTitulo] = useState<string>('');
+    const [images, setimages] = useState<string>('');
+    const [descripcion, setDescripcion] = useState<string>('');
 
     if (!isOpen) return null;
 
@@ -84,33 +84,33 @@ const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         <>
             <div
                 style={{
-                    position: "fixed",
+                    position: 'fixed',
                     inset: 0,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                     zIndex: 9999,
                 }}
             >
                 <div
                     style={{
-                        background: "rgba(24, 24, 24, 1)",
+                        background: 'rgba(24, 24, 24, 1)',
                         borderRadius: 15,
-                        width: "80vw",
-                        height: "80vh",
-                        overflowY: "auto",
-                        border: "2px solid white",
-                        display: "flex",
-                        flexDirection: "column",
+                        width: '80vw',
+                        height: '80vh',
+                        overflowY: 'auto',
+                        border: '2px solid white',
+                        display: 'flex',
+                        flexDirection: 'column',
                     }}
                 >
                     {/* 🔹 Encabezado con flex */}
                     <div
                         style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "center",
-                            padding: "10px 15px",
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                            padding: '10px 15px',
                         }}
                     >
                         <svg
@@ -121,7 +121,7 @@ const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             viewBox="0 0 32 32"
                             xmlns="http://www.w3.org/2000/svg"
                             style={{
-                                cursor: "pointer",
+                                cursor: 'pointer',
                             }}
                         >
                             <title>cancel</title>
@@ -148,31 +148,37 @@ const ModalInf1: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             src={Enlaces.a}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick1}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.b}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick2}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.c}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick3}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.d}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick4}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.e}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick5}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                         <img
                             src={Enlaces.f}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick6}
+                            className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
                     </div>
                     <br />

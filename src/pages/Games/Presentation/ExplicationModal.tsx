@@ -60,7 +60,7 @@ const ExplicationModal: React.FC<ModalPropsInf> = ({
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <img
-                    style={{ height: '150px', width: '150px' }}
+                    className="w-[200px] h-[170px] md:w-[300px] md:h-[250px] object-contain"
                     src={images}
                     alt="Símbolo de inicio/fin del diagrama de flujo"
                 />
