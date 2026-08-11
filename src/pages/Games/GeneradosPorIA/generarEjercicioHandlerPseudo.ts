@@ -13,7 +13,7 @@ export async function generarEjercicioHandlerPseudo(
     // Mostrar loading
     Swal.fire({
         title: 'Generando ejercicio...',
-        html: 'Por favor espera mientras se genera tu ejercicio con IA',
+        html: 'Por favor espera mientras se genera tu ejercicio',
         icon: 'info',
         iconColor: '#FF7C02',
         allowOutsideClick: false,
@@ -29,7 +29,7 @@ export async function generarEjercicioHandlerPseudo(
 
         // Mostrar el ejercicio generado
         const result = await Swal.fire({
-            title: 'Ejercicio Generado por IA',
+            title: 'Ejercicio Generado',
             html: `
                     <div style="text-align: left; padding: 20px; background: rgba(217, 217, 217, 0.3); border-radius: 10px; margin: 15px 0;">
                         <h2 style="color: #333; margin-bottom: 15px; font-size: 18px;">Problema:</h2>

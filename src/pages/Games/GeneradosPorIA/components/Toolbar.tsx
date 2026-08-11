@@ -62,7 +62,7 @@ function Toolbar({
         // Mostrar loading
         Swal.fire({
             title: 'Verificando diagrama...',
-            html: 'Por favor espera mientras se verifica tu diagrama con IA',
+            html: 'Por favor espera mientras se verifica tu diagrama',
             icon: 'info',
             iconColor: '#FF7C02',
             allowOutsideClick: false,
