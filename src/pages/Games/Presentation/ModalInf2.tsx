@@ -6,6 +6,8 @@ import Escribir from '/images/pseint/Escribir.png';
 import Leer from '/images/pseint/Leer.png';
 import asignar from '/images/pseint/asignar.png';
 import Si from '/images/pseint/Si.png';
+import Mientras from '/images/pseint/Mientras.png';
+import Para from '/images/pseint/Para.png';
 
 interface ModalProps {
     isOpen: boolean;
@@ -17,10 +19,8 @@ const Titulos = {
     b: 'Leer',
     c: 'Asignar',
     d: 'Si',
-    e: '',
-    f: '',
-    g: '',
-    h: '',
+    e: 'Mientras',
+    f: 'Para',
 } as const;
 
 const Descripciones = {
@@ -28,10 +28,8 @@ const Descripciones = {
     b: 'Nos permite recibir valores por teclado y guardarlos en variables.',
     c: 'nos permite guardar un valor en una variable',
     d: 'Nos permite evaluar la propiedad de una variable, y en función de esta, realizar una acción determinada',
-    e: '',
-    f: '',
-    g: '',
-    h: '',
+    e: 'Permite realizar cierta acción determinada por la condición del Mientras',
+    f: 'Presenta un cierto rango de valores, y para ellos realiza una determinada acción',
 };
 
 const Enlaces = {
@@ -39,10 +37,8 @@ const Enlaces = {
     b: Leer,
     c: asignar,
     d: Si,
-    e: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
-    f: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
-    g: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
-    h: 'https://www.smartdraw.com/flowchart/img/decision-flowchart-symbol.png',
+    e: Mientras,
+    f: Para,
 } as const;
 
 const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
@@ -89,18 +85,18 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         setDescripcion(Descripciones.f);
         setIsModalOpen(true); /* abrimos el segundo modal */
     };
-    const manejarClick7 = () => {
-        setTitulo(Titulos.g);
-        setimages(Enlaces.g);
-        setDescripcion(Descripciones.g);
-        setIsModalOpen(true); /* abrimos el segundo modal */
-    };
-    const manejarClick8 = () => {
-        setTitulo(Titulos.h);
-        setimages(Enlaces.h);
-        setDescripcion(Descripciones.h);
-        setIsModalOpen(true); /* abrimos el segundo modal */
-    };
+    // const manejarClick7 = () => {
+    //     setTitulo(Titulos.g);
+    //     setimages(Enlaces.g);
+    //     setDescripcion(Descripciones.g);
+    //     setIsModalOpen(true); /* abrimos el segundo modal */
+    // };
+    // const manejarClick8 = () => {
+    //     setTitulo(Titulos.h);
+    //     setimages(Enlaces.h);
+    //     setDescripcion(Descripciones.h);
+    //     setIsModalOpen(true); /* abrimos el segundo modal */
+    // };
 
     return (
         <>
@@ -204,7 +200,7 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             onClick={manejarClick6}
                             className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
                         />
-                        <img
+                        {/* <img
                             src={Enlaces.g}
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick7}
@@ -215,7 +211,7 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             alt="Símbolo de inicio/fin del diagrama de flujo"
                             onClick={manejarClick8}
                             className="w-[90px] h-[90px] md:w-[300px] md:h-[250px] object-fill"
-                        />
+                        /> */}
                     </div>
                     <br />
                 </div>
