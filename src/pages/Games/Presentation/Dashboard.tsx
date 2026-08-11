@@ -9,6 +9,7 @@ import {
     actualizarFotoPerfil,
     traerPuntuacion,
     traerUsuarios,
+    traerJuegosCompletados,
 } from '../../../api/usuarioApi';
 import avatars from '../../users/avatars';
 import ModalInf2 from './ModalInf2';
@@ -36,6 +37,7 @@ const Dashboard = () => {
     const [idAvatar, setIdAvatar] = useState<string>('');
     const [puntuacion, setPuntuacion] = useState<number>(0);
     const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
+    const [juegosCompletados, setJuegosCompletados] = useState<number[]>([]);
 
     const [openAvatarModal, setOpenAvatarModal] = useState(false);
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
@@ -85,9 +87,17 @@ const Dashboard = () => {
                 }
             };
 
+            const cargarJuegosCompletados = async () => {
+                const data = await traerJuegosCompletados(claveAcceso);
+                if (data) {
+                    setJuegosCompletados(data);
+                }
+            };
+
             obtenerDatosUsuario();
             traerPuntosUsuario();
             cargarNotificaciones();
+            cargarJuegosCompletados();
         }
     }, [claveAcceso]);
 
@@ -710,28 +720,63 @@ const Dashboard = () => {
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio1}>
-                    <div className="circle-inner">1</div>
+                <div
+                    className={`circle-outer-1 ${juegosCompletados.includes(1) ? 'circle-completed' : ''}`}
+                    onClick={irEjercicio1}
+                >
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(1) ? 'circle-completed' : ''}`}
+                    >
+                        1
+                    </div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2" onClick={irEjercicio2}>
-                    <div className="circle-inner">2</div>
+                <div
+                    className={`circle-outer-2 ${juegosCompletados.includes(2) ? 'circle-completed' : ''}`}
+                    onClick={irEjercicio2}
+                >
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(2) ? 'circle-completed' : ''}`}
+                    >
+                        2
+                    </div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio3}>
-                    <div className="circle-inner">3</div>
+                <div
+                    className={`circle-outer-1 ${juegosCompletados.includes(3) ? 'circle-completed' : ''}`}
+                    onClick={irEjercicio3}
+                >
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(3) ? 'circle-completed' : ''}`}
+                    >
+                        3
+                    </div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-2" onClick={irEjercicio4}>
-                    <div className="circle-inner">4</div>
+                <div
+                    className={`circle-outer-2 ${juegosCompletados.includes(4) ? 'circle-completed' : ''}`}
+                    onClick={irEjercicio4}
+                >
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(4) ? 'circle-completed' : ''}`}
+                    >
+                        4
+                    </div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
-                <div className="circle-outer-1" onClick={irEjercicio5}>
-                    <div className="circle-inner">5</div>
+                <div
+                    className={`circle-outer-1 ${juegosCompletados.includes(5) ? 'circle-completed' : ''}`}
+                    onClick={irEjercicio5}
+                >
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(5) ? 'circle-completed' : ''}`}
+                    >
+                        5
+                    </div>
                 </div>
             </div>
             <br />
@@ -801,89 +846,129 @@ const Dashboard = () => {
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-1"
+                    className={`circle-outer-1 ${juegosCompletados.includes(6) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio1Pseudocodigo}
                 >
-                    <div className="circle-inner">1</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(6) ? 'circle-completed' : ''}`}
+                    >
+                        1
+                    </div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-2"
+                    className={`circle-outer-2 ${juegosCompletados.includes(7) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio2Pseudocodigo}
                 >
-                    <div className="circle-inner">2</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(7) ? 'circle-completed' : ''}`}
+                    >
+                        2
+                    </div>
                 </div>
             </div>
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-1"
+                    className={`circle-outer-1 ${juegosCompletados.includes(8) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio3Pseudocodigo}
                 >
-                    <div className="circle-inner">3</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(8) ? 'circle-completed' : ''}`}
+                    >
+                        3
+                    </div>
                 </div>
             </div>
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-2"
+                    className={`circle-outer-2 ${juegosCompletados.includes(9) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio4Pseudocodigo}
                 >
-                    <div className="circle-inner">4</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(9) ? 'circle-completed' : ''}`}
+                    >
+                        4
+                    </div>
                 </div>
             </div>
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-1"
+                    className={`circle-outer-1 ${juegosCompletados.includes(10) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio5Pseudocodigo}
                 >
-                    <div className="circle-inner">5</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(10) ? 'circle-completed' : ''}`}
+                    >
+                        5
+                    </div>
                 </div>
             </div>
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-2"
+                    className={`circle-outer-2 ${juegosCompletados.includes(11) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio6Pseudocodigo}
                 >
-                    <div className="circle-inner">6</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(11) ? 'circle-completed' : ''}`}
+                    >
+                        6
+                    </div>
                 </div>
             </div>
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-1"
+                    className={`circle-outer-1 ${juegosCompletados.includes(12) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio7Pseudocodigo}
                 >
-                    <div className="circle-inner">7</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(12) ? 'circle-completed' : ''}`}
+                    >
+                        7
+                    </div>
                 </div>
             </div>
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-2"
+                    className={`circle-outer-2 ${juegosCompletados.includes(13) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio8Pseudocodigo}
                 >
-                    <div className="circle-inner">8</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(13) ? 'circle-completed' : ''}`}
+                    >
+                        8
+                    </div>
                 </div>
             </div>
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-1"
+                    className={`circle-outer-1 ${juegosCompletados.includes(14) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio9Pseudocodigo}
                 >
-                    <div className="circle-inner">9</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(14) ? 'circle-completed' : ''}`}
+                    >
+                        9
+                    </div>
                 </div>
             </div>
 
             <div className="contenedo-diagrama-flujo-primer-ejercicio">
                 <div
-                    className="circle-outer-2"
+                    className={`circle-outer-2 ${juegosCompletados.includes(15) ? 'circle-completed' : ''}`}
                     onClick={irEjercicio10Pseudocodigo}
                 >
-                    <div className="circle-inner">10</div>
+                    <div
+                        className={`circle-inner ${juegosCompletados.includes(15) ? 'circle-completed' : ''}`}
+                    >
+                        10
+                    </div>
                 </div>
             </div>
             <br />

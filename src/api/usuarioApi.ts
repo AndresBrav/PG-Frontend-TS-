@@ -57,6 +57,29 @@ export const traerPuntuacion = async (
     }
 };
 
+export const traerJuegosCompletados = async (
+    clave: string
+): Promise<number[] | null> => {
+    try {
+        const response = await axios.get<{ juegosCompletados: number[] }>(
+            `${API}/usuarios/traerJuegosCompletados`,
+            {
+                headers: {
+                    Authorization: clave,
+                    "ngrok-skip-browser-warning": "true",
+                },
+            }
+        );
+
+        if (!response.data) return null;
+
+        return response.data.juegosCompletados;
+    } catch (error) {
+        console.error("Error fetching completed games:", error);
+        return null;
+    }
+};
+
 export const actualizarFotoPerfil = async (clave: string, idAvatar: string) => {
     console.log("la clave de acceso es ", clave);
     try {
