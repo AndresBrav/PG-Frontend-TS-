@@ -24,6 +24,7 @@ import {
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
 import { generarEjercicioHandler } from './generarEjercicioHandler';
 import { generarEjercicioHandlerPseudo } from './generarEjercicioHandlerPseudo';
+import ModalInf2 from '../Presentation/ModalInf2';
 
 interface Notificacion {
     id: number;
@@ -833,6 +834,8 @@ const DashboardIA = () => {
                 </button>
             </div>
 
+            <ModalInf2 isOpen={modalAbierto2} onClose={alternarModal2} />
+
             {/* Mostrar juegos IA dinámicamente para Pseudocódigo */}
             {juegosIAPseudo.map((juego, index) => (
                 <div
@@ -862,8 +865,6 @@ const DashboardIA = () => {
                     </div>
                 </div>
             ))}
-
-            {/* <ModalInf2 isOpen={modalAbierto2} onClose={alternarModal2} /> */}
         </>
     );
 };
