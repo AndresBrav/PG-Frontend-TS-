@@ -528,11 +528,11 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            <p>
+                            <p className="text-white">
                                 <strong>Nombre:</strong> {nombre}
                             </p>
 
-                            <p>
+                            <p className="text-white">
                                 <strong>Edad:</strong> {edad}
                             </p>
                             <br />
