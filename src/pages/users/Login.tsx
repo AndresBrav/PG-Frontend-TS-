@@ -1,11 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
-import { TokenContext } from "../../Context/TokenContext";
-import { loginuser } from "../../Services/authService";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useEffect, useState } from 'react';
+import { TokenContext } from '../../Context/TokenContext';
+import { loginuser } from '../../Services/authService';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-    const [username, setUsername] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
+    const [username, setUsername] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const navigate = useNavigate();
     // const [message, setMessage] = useState<string>("");
@@ -34,13 +34,14 @@ const Login = () => {
     };
 
     useEffect(() => {
-        if (claveAcceso) {    /* Esta línea verifica si claveAcceso tiene un valor "truthy". En JavaScript, un valor es considerado "truthy" si no es false, 0, "", null, undefined, o NaN. */
-            navigate("/dashboard");
+        if (claveAcceso) {
+            /* Esta línea verifica si claveAcceso tiene un valor "truthy". En JavaScript, un valor es considerado "truthy" si no es false, 0, "", null, undefined, o NaN. */
+            navigate('/dashboard');
         }
     }, [claveAcceso, navigate]);
 
     const handleSignup = () => {
-        navigate("/registro"); // Navigate to the SignUp page
+        navigate('/registro'); // Navigate to the SignUp page
     };
 
     return (
@@ -48,39 +49,39 @@ const Login = () => {
             <input
                 className="flex-input-login"
                 type="text"
-                placeholder="Username"
+                placeholder="Usuario"
                 value={username}
                 onChange={handleUsernameChange}
-                style={{ marginRight: "0.5rem" }}
+                style={{ marginRight: '0.5rem' }}
             />
             <div
                 style={{
-                    position: "relative",
-                    width: "60%",
-                    marginRight: "0.5rem",
+                    position: 'relative',
+                    width: '60%',
+                    marginRight: '0.5rem',
                 }}
             >
                 <input
                     className="flex-input-login"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Contraseña"
                     value={password}
                     onChange={handlePasswordChange}
-                    style={{ width: "100%", marginRight: 0 }}
+                    style={{ width: '100%', marginRight: 0 }}
                 />
                 <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     style={{
-                        position: "absolute",
-                        right: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
+                        position: 'absolute',
+                        right: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
                         padding: 0,
                     }}
                 >
