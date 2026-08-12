@@ -44,7 +44,7 @@ interface JuegoIA {
 }
 
 const DashboardIA = () => {
-    useAuthRedirect(); //redirecciona si no hay token
+    const redirectToHome = useAuthRedirect(); //redirecciona si no hay token
 
     const a = useCerrarSesion(); // Hook para cerrar sesión
     const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
@@ -83,7 +83,7 @@ const DashboardIA = () => {
 
         if (!claveAcceso) {
             console.log('no tienes una clave valida');
-            // redirectToHome();
+            redirectToHome();
         } else {
             //traer datos del usuario
             const obtenerDatosUsuario = async () => {
