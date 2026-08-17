@@ -14,15 +14,15 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: '1', content: 'Proceso SumarDosNumeros' },
     { id: '2', content: '  Definir num1, num2, resultado Como Entero' },
     { id: '3', content: '  Escribir "Ingrese el primer número"' },
-    { id: '4', content: '  Leer num1' },
-    { id: '5', content: '  Escribir "Ingrese el segundo número"' },
     { id: '6', content: '  Leer num2' },
+    { id: '1', content: 'Proceso SumarDosNumeros' },
+    { id: '5', content: '  Escribir "Ingrese el segundo número"' },
+    { id: '9', content: 'FinProceso' },
     { id: '7', content: '  resultado <- num1 + num2' },
     { id: '8', content: '  Escribir resultado' },
-    { id: '9', content: 'FinProceso' },
+    { id: '4', content: '  Leer num1' },
 ];
 
 const EjercicioP1Laptop: React.FC = () => {

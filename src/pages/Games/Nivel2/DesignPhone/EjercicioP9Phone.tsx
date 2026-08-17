@@ -14,22 +14,22 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: '1', content: 'Proceso ArregloBasico' },
-    { id: '2', content: '    Definir numeros Como Entero' },
     { id: '3', content: '    Dimension numeros[5]' },
+    { id: '1', content: 'Proceso ArregloBasico' },
     { id: '4', content: '    Definir i Como Entero' },
+    { id: '2', content: '    Definir numeros Como Entero' },
     { id: '5', content: '    Para i <- 1 Hasta 5 Hacer' },
     {
         id: '6',
         content: '        Escribir "Ingrese un numero en la posicion ", i, ":"',
     },
     { id: '7', content: '        Leer numeros[i]' },
-    { id: '8', content: '    FinPara' },
-    { id: '9', content: '    Escribir "Los numeros ingresados son:"' },
     { id: '10', content: '    Para i <- 1 Hasta 5 Hacer' },
+    { id: '8', content: '    FinPara' },
+    { id: '13', content: 'FinProceso' },
+    { id: '9', content: '    Escribir "Los numeros ingresados son:"' },
     { id: '11', content: '        Escribir numeros[i]' },
     { id: '12', content: '    FinPara' },
-    { id: '13', content: 'FinProceso' },
 ];
 
 const EjercicioP9Phone: React.FC = () => {

@@ -14,24 +14,18 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: '1', content: 'Proceso SumarDiezNumeros' },
-    { id: '4', content: '  contador <- 1' },
     { id: '2', content: '  Definir numero, suma, contador Como Entero ' },
-    { id: '6', content: '    Escribir "Ingrese un numero:"' },
+    { id: '3', content: '  suma <- 0' },
     { id: '7', content: '    Leer numero' },
-    {
-        id: '3',
-        content: '  suma <- 0',
-    },
+    { id: '4', content: '  contador <- 1' },
     { id: '5', content: '  Mientras contador <= 10 Hacer ' },
-    { id: '8', content: '    suma <- suma + numero' },
-    {
-        id: '9',
-        content: '    contador <- contador + 1 ',
-    },
     { id: '10', content: '  FinMientras' },
-    { id: '11', content: '  Escribir "La suma total es: ", suma' },
+    { id: '1', content: 'Proceso SumarDiezNumeros' },
+    { id: '8', content: '    suma <- suma + numero' },
     { id: '12', content: 'FinProceso' },
+    { id: '6', content: '    Escribir "Ingrese un numero:"' },
+    { id: '9', content: '    contador <- contador + 1 ' },
+    { id: '11', content: '  Escribir "La suma total es: ", suma' },
 ];
 
 const EjercicioP4Phone: React.FC = () => {

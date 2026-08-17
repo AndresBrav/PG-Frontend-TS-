@@ -15,17 +15,25 @@ interface CodeLine {
 
 const initialCode: CodeLine[] = [
     { id: '1', content: 'Proceso SumarHastaNegativo' },
-    { id: '4', content: '  Escribir "Ingrese un numero"' },
-    { id: '2', content: '  Definir numero, suma Como Entero' },
-    { id: '6', content: '  Mientras numero >= 0 Hacer' },
-    { id: '7', content: '    suma <- suma + numero' },
     { id: '3', content: '  suma <- 0' },
+    { id: '2', content: '  Definir numero, suma Como Entero' },
+    {
+        id: '4',
+        content:
+            '  Escribir "Ingrese un numero positivo (un negativo para terminar):"',
+    },
     { id: '5', content: '  Leer numero' },
-    { id: '8', content: '    Escribir "Ingrese un numero"' },
-    { id: '9', content: '    Leer numero' },
+    { id: '7', content: '    suma <- suma + numero' },
+    { id: '6', content: '  Mientras numero >= 0 Hacer' },
+    {
+        id: '8',
+        content:
+            '    Escribir "Ingrese un numero positivo (un negativo para terminar):"',
+    },
     { id: '10', content: '  FinMientras' },
-    { id: '11', content: '  Escribir "La suma total es: ", suma' },
     { id: '12', content: 'FinProceso' },
+    { id: '9', content: '    Leer numero' },
+    { id: '11', content: '  Escribir "La suma total es: ", suma' },
 ];
 
 const EjercicioP5Phone: React.FC = () => {

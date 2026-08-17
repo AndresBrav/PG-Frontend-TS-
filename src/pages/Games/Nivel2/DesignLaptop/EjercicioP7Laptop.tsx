@@ -14,25 +14,25 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: '1', content: 'Proceso TablaDeMultiplicar' },
     { id: '2', content: '    Definir numero, i Como Entero' },
+    { id: '1', content: 'Proceso TablaDeMultiplicar' },
     {
         id: '3',
         content:
             '    Escribir "Ingrese un número entre 1 y 10 para ver su tabla de multiplicar:"',
     },
-    { id: '4', content: '    Leer numero' },
     { id: '5', content: '    Mientras numero < 1 O numero > 10 Hacer' },
+    { id: '4', content: '    Leer numero' },
     {
         id: '6',
         content:
             '        Escribir "Error: El número debe estar entre 1 y 10. Intente nuevamente."',
     },
     { id: '7', content: '        Leer numero' },
-    { id: '8', content: '    FinMientras' },
     { id: '9', content: '    Escribir ""' },
-    { id: '10', content: '    Escribir "Tabla del ", numero, ":"' },
+    { id: '8', content: '    FinMientras' },
     { id: '11', content: '    Para i <- 1 Hasta 10 Hacer' },
+    { id: '10', content: '    Escribir "Tabla del ", numero, ":"' },
     {
         id: '12',
         content: '        Escribir numero, " x ", i, " = ", numero * i',

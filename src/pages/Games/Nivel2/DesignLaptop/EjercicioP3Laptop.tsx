@@ -14,6 +14,8 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
+    { id: '6', content: '    Escribir "El estudiante APROBO la materia"' },
+    { id: '7', content: '  Sino' },
     { id: '1', content: 'Proceso EvaluarCalificacion' },
     { id: '2', content: '  Definir nota Como Entero' },
     {
@@ -21,15 +23,16 @@ const initialCode: CodeLine[] = [
         content: '  Escribir "Ingrese la nota del estudiante (0 - 100):"',
     },
     { id: '4', content: '  Leer nota' },
-    { id: '5', content: '  Si nota >= 51 Entonces' },
-    { id: '6', content: '    Escribir "El estudiante APROBO la materia"' },
-    { id: '7', content: '  Sino' },
     { id: '8', content: '    Si nota >= 40 Entonces' },
-    { id: '9', content: '      Escribir "El estudiante esta en RECUPERACION"' },
+    { id: '12', content: '    FinSi' },
+    {
+        id: '9',
+        content: '      Escribir "El estudiante esta en RECUPERACION"',
+    },
+    { id: '13', content: '  FinSi' },
+    { id: '5', content: '  Si nota >= 51 Entonces' },
     { id: '10', content: '    Sino' },
     { id: '11', content: '      Escribir "El estudiante REPROBO la materia"' },
-    { id: '12', content: '    FinSi' },
-    { id: '13', content: '  FinSi' },
     { id: '14', content: 'FinProceso' },
 ];
 

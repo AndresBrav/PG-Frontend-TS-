@@ -14,22 +14,22 @@ interface CodeLine {
 }
 
 const initialCode: CodeLine[] = [
-    { id: '1', content: 'Proceso MayorDeDosNumeros' },
-    { id: '4', content: '  Leer num1' },
-    { id: '2', content: '  Definir num1, num2 Como Entero' },
-    { id: '6', content: '  Leer num2' },
-    { id: '7', content: '  Si num1 > 0 Y num2 > 0 Entonces' },
     { id: '3', content: '  Escribir "Ingresa el primer número:"' },
     { id: '5', content: '  Escribir "Ingresa el segundo número:"' },
+    { id: '7', content: '  Si num1 > 0 Y num2 > 0 Entonces' },
+    { id: '1', content: 'Proceso MayorDeDosNumeros' },
     { id: '8', content: '    Si num1 > num2 Entonces' },
+    { id: '2', content: '  Definir num1, num2 Como Entero' },
+    { id: '4', content: '  Leer num1' },
+    { id: '16', content: 'Fin Proceso' },
+    { id: '6', content: '  Leer num2' },
     { id: '9', content: '      Escribir  num1,  "Es mayor"' },
-    { id: '10', content: '    SiNo' },
     { id: '11', content: '      Escribir num2,  "Es mayor"' },
-    { id: '12', content: '    Fin Si' },
     { id: '13', content: '  SiNo' },
     { id: '14', content: '    Escribir  "Ingresa numeros positivos"' },
+    { id: '12', content: '    Fin Si' },
+    { id: '10', content: '    SiNo' },
     { id: '15', content: '  Fin Si' },
-    { id: '16', content: 'Fin Proceso' },
 ];
 
 const EjercicioP2Phone: React.FC = () => {

@@ -15,21 +15,21 @@ interface CodeLine {
 
 const initialCode: CodeLine[] = [
     { id: '1', content: 'Proceso NumeroMayor' },
-    { id: '2', content: '    Definir numeros Como Entero' },
-    { id: '3', content: '    Dimension numeros[5]' },
     { id: '4', content: '    Definir i, mayor Como Entero' },
     { id: '5', content: '    Para i <- 1 Hasta 5 Hacer' },
+    { id: '2', content: '    Definir numeros Como Entero' },
+    { id: '3', content: '    Dimension numeros[5]' },
     { id: '6', content: '        Escribir "Ingrese un numero ", i, ":"' },
-    { id: '7', content: '        Leer numeros[i]' },
-    { id: '8', content: '    FinPara' },
     { id: '9', content: '    mayor <- numeros[1]' },
+    { id: '13', content: '        FinSi' },
+    { id: '7', content: '        Leer numeros[i]' },
     { id: '10', content: '    Para i <- 2 Hasta 5 Hacer' },
     { id: '11', content: '        Si numeros[i] > mayor Entonces' },
+    { id: '8', content: '    FinPara' },
+    { id: '16', content: 'FinProceso' },
     { id: '12', content: '            mayor <- numeros[i]' },
-    { id: '13', content: '        FinSi' },
     { id: '14', content: '    FinPara' },
     { id: '15', content: '    Escribir "El numero mayor es: ", mayor' },
-    { id: '16', content: 'FinProceso' },
 ];
 
 const EjercicioP10Phone: React.FC = () => {
