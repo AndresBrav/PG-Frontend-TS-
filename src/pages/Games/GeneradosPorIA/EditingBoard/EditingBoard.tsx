@@ -388,24 +388,26 @@ FinAlgoritmo`;
                     flex: 1,
                     flexDirection: 'column',
                     overflow: 'hidden',
+                    minHeight: 0,
                 }}
             >
                 {/* Enunciado del Ejercicio */}
                 <div
                     style={{
-                        padding: '15px 20px',
-                        margin: '15px',
+                        padding: '12px 20px',
+                        margin: '12px 15px 5px 15px',
                         backgroundColor: 'rgba(217, 217, 217, 0.1)',
                         borderRadius: '10px',
                         borderLeft: '4px solid #FF7C02',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        flexShrink: 0,
                     }}
                 >
                     <h3
                         style={{
-                            margin: '0 0 5px 0',
+                            margin: '0 0 4px 0',
                             color: '#FF7C02',
-                            fontSize: '15px',
+                            fontSize: '14px',
                             fontWeight: 'bold',
                         }}
                     >
@@ -415,8 +417,8 @@ FinAlgoritmo`;
                         style={{
                             margin: '0',
                             color: 'var(--text-h)',
-                            lineHeight: '1.5',
-                            fontSize: '15px',
+                            lineHeight: '1.4',
+                            fontSize: '14px',
                         }}
                     >
                         {enunciado}
@@ -430,13 +432,13 @@ FinAlgoritmo`;
                         flex: 1,
                         flexDirection: 'row',
                         gap: '15px',
-                        padding: '0 15px 15px 15px',
+                        padding: '10px 15px 15px 15px',
                         minHeight: 0,
-                        flexWrap: 'wrap',
+                        overflow: 'hidden',
                     }}
                     className="main-layout-panels"
                 >
-                    {/* Panel Izquierdo: Editor */}
+                    {/* Panel Izquierdo: Editor con Sidebar de Números Integrado */}
                     <div
                         style={{
                             flex: 2,
@@ -446,7 +448,8 @@ FinAlgoritmo`;
                             border: '1px solid var(--border)',
                             borderRadius: '10px',
                             overflow: 'hidden',
-                            minWidth: '320px',
+                            minWidth: 0,
+                            minHeight: 0,
                             boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
                         }}
                     >
@@ -458,6 +461,8 @@ FinAlgoritmo`;
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
+                                backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                                flexShrink: 0,
                             }}
                         >
                             <span
@@ -476,38 +481,50 @@ FinAlgoritmo`;
                             </span>
                         </div>
 
-                        {/* Editor Body */}
+                        {/* Editor Body: Sidebar de números + Textarea contenidos */}
                         <div
                             style={{
                                 display: 'flex',
                                 flex: 1,
                                 position: 'relative',
                                 overflow: 'hidden',
+                                minHeight: 0,
                             }}
                         >
-                            {/* Números de línea */}
+                            {/* Panel/Sidebar de Números de línea */}
                             <div
                                 ref={lineNumbersRef}
                                 style={{
-                                    width: '45px',
-                                    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                                    width: '55px',
+                                    minWidth: '55px',
+                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
                                     color: '#888',
                                     padding: '12px 0',
-                                    textAlign: 'center',
+                                    textAlign: 'right',
+                                    paddingRight: '10px',
                                     fontFamily: 'var(--mono)',
-                                    fontSize: '14px',
+                                    fontSize: '13px',
                                     lineHeight: '24px',
                                     borderRight: '1px solid var(--border)',
                                     overflow: 'hidden',
                                     userSelect: 'none',
+                                    boxSizing: 'border-box',
                                 }}
                             >
                                 {lines.map((_, i) => (
-                                    <div key={i}>{i + 1}</div>
+                                    <div
+                                        key={i}
+                                        style={{
+                                            height: '24px',
+                                            lineHeight: '24px',
+                                        }}
+                                    >
+                                        {i + 1}
+                                    </div>
                                 ))}
                             </div>
 
-                            {/* Campo de Texto */}
+                            {/* Campo de Texto del Código */}
                             <textarea
                                 ref={textareaRef}
                                 value={code}
@@ -523,25 +540,28 @@ FinAlgoritmo`;
                                     outline: 'none',
                                     padding: '12px',
                                     fontFamily: 'var(--mono)',
-                                    fontSize: '14px',
+                                    fontSize: '13px',
                                     lineHeight: '24px',
                                     resize: 'none',
                                     whiteSpace: 'pre',
                                     overflow: 'auto',
+                                    boxSizing: 'border-box',
                                 }}
                                 placeholder="// Escribe tu pseudocódigo aquí..."
                             />
                         </div>
                     </div>
 
-                    {/* Panel Derecho: Consola y Guía */}
+                    {/* Panel Derecho: Consola y Guía Rápida */}
                     <div
                         style={{
                             flex: 1,
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '15px',
-                            minWidth: '280px',
+                            minWidth: 0,
+                            minHeight: 0,
+                            overflow: 'hidden',
                         }}
                     >
                         {/* Simulación de Consola */}
@@ -555,6 +575,7 @@ FinAlgoritmo`;
                                 flexDirection: 'column',
                                 overflow: 'hidden',
                                 boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                                minHeight: 0,
                             }}
                         >
                             <div
@@ -565,7 +586,9 @@ FinAlgoritmo`;
                                     fontSize: '13px',
                                     display: 'flex',
                                     justifyContent: 'space-between',
+                                    alignItems: 'center',
                                     borderBottom: '1px solid #444',
+                                    flexShrink: 0,
                                 }}
                             >
                                 <span>📟 Consola de Salida</span>
@@ -621,6 +644,9 @@ FinAlgoritmo`;
                                 fontSize: '13px',
                                 color: 'var(--text)',
                                 lineHeight: '1.5',
+                                flexShrink: 0,
+                                overflowY: 'auto',
+                                maxHeight: '45%',
                             }}
                         >
                             <h4
@@ -633,33 +659,30 @@ FinAlgoritmo`;
                                 💡 Guía Rápida de Pseudocódigo (PseInt)
                             </h4>
                             <ul style={{ paddingLeft: '18px', margin: 0 }}>
-                                <li>
+                                <li style={{ marginBottom: '4px' }}>
                                     <strong>Estructura:</strong> Comienza con{' '}
                                     <code>Algoritmo Nombre</code> y termina con{' '}
                                     <code>FinAlgoritmo</code>.
                                 </li>
-                                <li>
+                                <li style={{ marginBottom: '4px' }}>
                                     <strong>Variables:</strong>{' '}
                                     <code>
-                                        Definir variable Como
-                                        Real/Entero/Caracter
+                                        Definir variable Como Real
                                     </code>
                                     .
                                 </li>
-                                <li>
-                                    <strong>Asignación:</strong> Usa la flecha{' '}
+                                <li style={{ marginBottom: '4px' }}>
+                                    <strong>Asignación:</strong> Usa{' '}
                                     <code>&lt;-</code> (Ej:{' '}
-                                    <code>resultado &lt;- a + b</code>).
+                                    <code>a &lt;- b + c</code>).
                                 </li>
-                                <li>
+                                <li style={{ marginBottom: '4px' }}>
                                     <strong>Entrada:</strong> Usa{' '}
-                                    <code>Leer variable</code> para ingresar un
-                                    valor.
+                                    <code>Leer variable</code>.
                                 </li>
                                 <li>
                                     <strong>Salida:</strong> Usa{' '}
-                                    <code>Escribir "Mensaje"</code> para
-                                    imprimir.
+                                    <code>Escribir "Mensaje"</code>.
                                 </li>
                             </ul>
                         </div>
