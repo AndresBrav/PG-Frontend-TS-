@@ -20,6 +20,7 @@ import {
   type EdgeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import Swal from 'sweetalert2';
 import { StartEndNode, ProcessNode, DataNode, DecisionNode } from './nodes';
 import type { NodeType } from '../types/flow';
 
@@ -204,15 +205,37 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
       [internalEdges, internalNodes, syncEdges, deleteEdgeById]
     );
 
-    const onNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
-      const newLabel = prompt('Editar texto del nodo:', node.data.label as string);
-      if (newLabel !== null && newLabel.trim() !== '') {
-        const updatedNodes = internalNodes.map((n) =>
-          n.id === node.id ? { ...n, data: { ...n.data, label: newLabel.trim() } } : n
-        );
-        syncNodes(updatedNodes);
-      }
-    }, [internalNodes, syncNodes]);
+    const onNodeDoubleClick = useCallback(
+      async (_event: React.MouseEvent, node: Node) => {
+        const { value: newLabel, isConfirmed } = await Swal.fire({
+          title: 'Editar Texto del Símbolo',
+          input: 'text',
+          inputValue: (node.data.label as string) || '',
+          inputPlaceholder: 'Escribe el texto o instrucción...',
+          showCancelButton: true,
+          confirmButtonText: 'Guardar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#FF7C02',
+          cancelButtonColor: '#6B7280',
+          customClass: {
+            title: 'titulo-celular',
+            confirmButton: 'btn-semitransparente',
+          },
+          width: '90%',
+          maxWidth: '440px',
+        });
+
+        if (isConfirmed && newLabel !== undefined && newLabel.trim() !== '') {
+          const updatedNodes = internalNodes.map((n) =>
+            n.id === node.id
+              ? { ...n, data: { ...n.data, label: newLabel.trim() } }
+              : n
+          );
+          syncNodes(updatedNodes);
+        }
+      },
+      [internalNodes, syncNodes]
+    );
 
     const onNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
       setSelectedNodeId(node.id);
