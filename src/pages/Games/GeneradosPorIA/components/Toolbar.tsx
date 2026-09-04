@@ -166,9 +166,9 @@ function Toolbar({
                 >
                     Ejecutar
                 </button>
-                <button className="btn btn-clear" onClick={onClear}>
+                {/* <button className="btn btn-clear" onClick={onClear}>
                     Limpiar
-                </button>
+                </button> */}
             </div>
         </div>
     );
