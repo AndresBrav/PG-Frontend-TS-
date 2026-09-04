@@ -636,3 +636,26 @@
         height: 20px;
     }
 }
+
+/* Reglas Responsivas para Móviles en el Editor de Pseudocódigo */
+@media (max-width: 768px) {
+    .main-layout-panels {
+        flex-direction: column !important;
+        overflow-y: auto !important;
+        gap: 15px !important;
+    }
+
+    .main-layout-panels > div {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        flex: none !important;
+    }
+
+    /* Editor ocupa 100% del ancho con altura cómoda para móviles */
+    .main-layout-panels > div:first-child {
+        height: 420px !important;
+        min-height: 350px !important;
+    }
+}
+
