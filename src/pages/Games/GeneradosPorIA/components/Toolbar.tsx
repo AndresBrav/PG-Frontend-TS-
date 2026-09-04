@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Node, Edge } from '@xyflow/react';
 import type { FlowExport } from '../types/flow';
 import Swal from 'sweetalert2';
@@ -21,6 +22,7 @@ function Toolbar({
     juegoId,
     juegoDescripcion,
 }: ToolbarProps) {
+    const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
     const [counterRate, setCounterRate] = useState<number>(1);
 
@@ -146,7 +148,40 @@ function Toolbar({
 
     return (
         <div className="toolbar">
-            <h2>Flowchart Editor</h2>
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                }}
+            >
+                <button
+                    onClick={() => navigate('/dashboardIA')}
+                    style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-h)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        padding: '5px',
+                    }}
+                    title="Volver al Dashboard"
+                >
+                    ←
+                </button>
+                <h2
+                    style={{
+                        margin: 0,
+                        fontSize: '20px',
+                        color: 'var(--text-h)',
+                    }}
+                >
+                    Editor de Diagramas de Flujo
+                </h2>
+            </div>
             <div className="toolbar-actions">
                 <button
                     className="btn btn-export"
