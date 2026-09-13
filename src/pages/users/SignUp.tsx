@@ -1,12 +1,12 @@
-import { useContext, useEffect, useState } from "react";
-import { TokenContext } from "../../Context/TokenContext";
-import { registerUser } from "../../Services/authService";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from 'react';
+import { TokenContext } from '../../Context/TokenContext';
+import { registerUser } from '../../Services/authService';
+import { useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
-    const [username, setUsername] = useState<string>("");
-    const [edad, setEdad] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
+    const [username, setUsername] = useState<string>('');
+    const [edad, setEdad] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const navigate = useNavigate();
     const { claveAcceso, setClaveAcceso } = useContext(TokenContext);
@@ -34,7 +34,7 @@ const SignUp = () => {
     useEffect(() => {
         if (claveAcceso) {
             // Navigate to the dashboard or any other page after successful registration
-            navigate("/dashboard"); // You can also use useNavigate from react-router-dom
+            navigate('/dashboard'); // You can also use useNavigate from react-router-dom
         }
     }, [claveAcceso, navigate]);
 
@@ -46,7 +46,7 @@ const SignUp = () => {
                 placeholder="Ingresar Usuario"
                 value={username}
                 onChange={handleUsernameChange}
-                style={{ marginRight: "0.5rem" }}
+                style={{ marginRight: '0.5rem' }}
             />
 
             <select
@@ -62,37 +62,49 @@ const SignUp = () => {
                 <option value="21">21 años</option>
                 <option value="22">22 años</option>
                 <option value="23">23 años</option>
+                <option value="23">24 años</option>
+                <option value="23">25 años</option>
+                <option value="23">26 años</option>
+                <option value="23">27 años</option>
+                <option value="23">28 años</option>
+                <option value="23">29 años</option>
+                <option value="23">30 años</option>
+                <option value="23">31 años</option>
+                <option value="23">32 años</option>
+                <option value="23">33 años</option>
+                <option value="23">34 años</option>
+                <option value="23">35 años</option>
                 {/* Puedes agregar más opciones aquí */}
             </select>
 
             <div
                 style={{
-                    position: "relative",
-                    width: "60%",
-                    marginRight: "0.5rem",
+                    position: 'relative',
+                    width: '60%',
+                    marginRight: '0.5rem',
                 }}
             >
                 <input
                     className="flex-input-login"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Ingresar Contraseña"
                     value={password}
                     onChange={handlePasswordChange}
-                    style={{ width: "100%", marginRight: 0 }}
+                    style={{ width: '100%', marginRight: 0 }}
                 />
                 <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     style={{
-                        position: "absolute",
-                        right: "10px",
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "transparent",
-                        border: "none",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
+                        position: 'absolute',
+                        right: '10px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
                         padding: 0,
                     }}
                 >
