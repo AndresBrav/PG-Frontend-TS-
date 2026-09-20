@@ -121,14 +121,14 @@
 // }
 
 import { GoogleGenAI } from '@google/genai';
+import { getGeminiApiKey } from './getGeminiApiKey';
 
-const apikeyGemini = import.meta.env.VITE_GEMINI_API_KEY;
+export async function verificarDiagrama(jsonDiagrama: any, ejercicio: string, claveAcceso?: string) {
+    const apikeyGemini = await getGeminiApiKey(claveAcceso);
+    const ai = new GoogleGenAI({
+        apiKey: apikeyGemini,
+    });
 
-const ai = new GoogleGenAI({
-    apiKey: apikeyGemini,
-});
-
-export async function verificarDiagrama(jsonDiagrama: any, ejercicio: string) {
     const diagramaReducido = {
         nodes: jsonDiagrama.nodes.map((n: any) => ({
             id: n.id,

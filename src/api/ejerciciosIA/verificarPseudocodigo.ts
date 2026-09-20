@@ -69,17 +69,17 @@
 // }
 
 import { GoogleGenAI } from '@google/genai';
-
-const apikeyGemini = import.meta.env.VITE_GEMINI_API_KEY;
-
-const ai = new GoogleGenAI({
-    apiKey: apikeyGemini,
-});
+import { getGeminiApiKey } from './getGeminiApiKey';
 
 export async function verificarPseudocodigo(
     pseudocodigo: string,
-    ejercicio: string
+    ejercicio: string,
+    claveAcceso?: string
 ) {
+    const apikeyGemini = await getGeminiApiKey(claveAcceso);
+    const ai = new GoogleGenAI({
+        apiKey: apikeyGemini,
+    });
     const prompt = `
 Eres un profesor experto en algoritmos y pseudocódigo.
 

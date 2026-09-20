@@ -1,11 +1,12 @@
 import { GoogleGenAI } from '@google/genai';
-const apikeyGemini = import.meta.env.VITE_GEMINI_API_KEY;
+import { getGeminiApiKey } from './getGeminiApiKey';
 
-const ai = new GoogleGenAI({
-    apiKey: apikeyGemini,
-});
+export async function consultarEjercicio(claveAcceso?: string) {
+    const apikeyGemini = await getGeminiApiKey(claveAcceso);
+    const ai = new GoogleGenAI({
+        apiKey: apikeyGemini,
+    });
 
-export async function consultarEjercicio() {
     const temas = [
         'videojuegos',
         'supermercado',
