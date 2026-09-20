@@ -6,7 +6,7 @@ import type { NodeType } from './types/flow';
 import Sidebar from './components/Sidebar';
 import FlowEditor, { type FlowEditorRef } from './components/FlowEditor';
 import Toolbar from './components/Toolbar';
-import './App.css';
+import './app.css';
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
