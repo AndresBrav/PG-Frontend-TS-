@@ -332,6 +332,15 @@ const Dashboard = () => {
                             <path d="M256,48C141.31,48,48,141.31,48,256s93.31,208,208,208,208-93.31,208-208S370.69,48,256,48Zm0,336c-20.9,0-37.52-8.86-39.75-27.58a4,4,0,0,1,4-4.42h71.45a4,4,0,0,1,4,4.48C293.15,374.85,276.68,384,256,384Zm98-48H158c-11.84,0-18-15-11.19-23,16.33-19.34,27.87-27.47,27.87-80.8,0-48.87,25.74-66.21,47-74.67a11.35,11.35,0,0,0,6.33-6.68C231.7,138.6,242.14,128,256,128s24.28,10.6,28,22.86a11.39,11.39,0,0,0,6.34,6.68c21.21,8.44,47,25.81,47,74.67,0,53.33,11.53,61.46,27.86,80.8C371.94,321,365.77,336,354,336Z" />
                         </svg>
 
+                        {/* Badge contador de notificaciones responsivo */}
+                        {notificaciones.length > 0 && (
+                            <span className="absolute -top-1 -right-1 sm:-top-1.5 sm:-right-1.5 bg-red-600 text-white text-[10px] sm:text-xs font-bold rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center border-2 border-slate-900 shadow-md pointer-events-none">
+                                {notificaciones.length > 99
+                                    ? '99+'
+                                    : notificaciones.length}
+                            </span>
+                        )}
+
                         {openNotifications && (
                             <div className="fixed top-[70px] left-0 w-full px-4 sm:absolute sm:right-0 sm:left-auto sm:w-[350px] z-50">
                                 <div className="bg-white text-black rounded-lg shadow-lg p-3 max-h-[300px] overflow-y-auto">
