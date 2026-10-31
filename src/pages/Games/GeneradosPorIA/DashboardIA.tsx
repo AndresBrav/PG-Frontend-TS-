@@ -161,10 +161,13 @@ const DashboardIA = () => {
                     className="w-auto mx-auto sm:mr-5 mt-5 sm:mt-0 bg-white/10 text-white border border-white/30 rounded-md px-3 py-1.5 sm:px-4 sm:py-2 text-sm cursor-pointer outline-none focus:ring-2 focus:ring-[#FF7C02] focus:border-transparent hover:bg-white/20 transition-all duration-200"
                 >
                     <option value="/dashboard" className="text-black">
-                        Ejercicios Normal
+                        Inicio
                     </option>
-                    <option value="/dashboardIA" className="text-black">
-                        Ejercicios Computadora
+                    <option value="/ejercicios" className="text-black">
+                        Ejercicios fijos
+                    </option>
+                    <option value="/ejercicios-ia" className="text-black">
+                        Ejercicios con IA
                     </option>
                 </select>
                 <div className="flex justify-center sm:justify-end items-center flex-row flex-nowrap mt-2 sm:mt-0">

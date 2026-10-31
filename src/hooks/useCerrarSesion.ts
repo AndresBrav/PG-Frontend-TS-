@@ -1,17 +1,13 @@
-import { useContext } from "react"; 
+import { useCallback, useContext } from "react";
 import { TokenContext } from "../Context/TokenContext";
-
 
 const useCerrarSesion = () => {
     const { setClaveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
-    
 
-    const cerrarSesion = () => {
+    return useCallback(() => {
         localStorage.removeItem("token");
         setClaveAcceso(""); // Limpiar el token en el contexto
-    };
-
-    return cerrarSesion;
+    }, [setClaveAcceso]);
 };
 
 export default useCerrarSesion;

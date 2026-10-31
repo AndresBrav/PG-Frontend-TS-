@@ -32,7 +32,7 @@ const EjercicioP1Phone: React.FC = () => {
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
 
-    const returnDashboard = () => navigate('/dashboard');
+    const returnDashboard = () => navigate('/ejercicios');
 
     const addLine = (line: CodeLine) => {
         setAvailable((prev) => prev.filter((x) => x.id !== line.id));

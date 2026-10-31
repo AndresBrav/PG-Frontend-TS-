@@ -48,7 +48,7 @@ const EjercicioP3Phone: React.FC = () => {
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     // Click en banco -> pasa a construcción

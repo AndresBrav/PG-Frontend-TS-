@@ -154,7 +154,7 @@ const Ejercicio4Laptop: React.FC = () => {
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     return (

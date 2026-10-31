@@ -1,7 +1,20 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import {
+    BrowserRouter,
+    Navigate,
+    Route,
+    Routes,
+} from 'react-router-dom';
 import { TokenProvider } from './Context/TokenProvider';
+import { UsuarioProvider } from './Context/UsuarioProvider';
+import RutaProtegida from './components/rutas/RutaProtegida';
+import RutaPorRol from './components/rutas/RutaPorRol';
+import RutaPublica from './components/rutas/RutaPublica';
 import Login from './pages/users/Login';
 import SignUp from './pages/users/SignUp';
+import DashboardInicio from './pages/Home/DashboardInicio';
+import DetalleGrupo from './pages/Profesor/DetalleGrupo';
+import DetalleEstudiante from './pages/Profesor/DetalleEstudiante';
+import PanelAdmin from './pages/Admin/PanelAdmin';
 import Dashboard from './pages/Games/Presentation/Dashboard';
 import Ejercicio1 from './pages/Games/Level1/Ejercicio1';
 import Ejercicio2 from './pages/Games/Level1/Ejercicio2';
@@ -26,61 +39,148 @@ function App() {
     return (
         <>
             <TokenProvider>
-                <BrowserRouter>
-                    <Routes>
-                        <Route path="/" element={<Login />} />
-                        <Route path="/registro" element={<SignUp />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/ejercicio1" element={<Ejercicio1 />} />
-                        <Route path="/ejercicio2" element={<Ejercicio2 />} />
-                        <Route path="/ejercicio3" element={<Ejercicio3 />} />
-                        <Route path="/ejercicio4" element={<Ejercicio4 />} />
-                        <Route path="/ejercicio5" element={<Ejercicio5 />} />
-                        <Route
-                            path="/ejercicio1-pseudocodigo"
-                            element={<EjercicioP1 />}
-                        />
-                        <Route
-                            path="/ejercicio2-pseudocodigo"
-                            element={<EjercicioP2 />}
-                        />
-                        <Route
-                            path="/ejercicio3-pseudocodigo"
-                            element={<EjercicioP3 />}
-                        />
-                        <Route
-                            path="/ejercicio4-pseudocodigo"
-                            element={<EjercicioP4 />}
-                        />
-                        <Route
-                            path="/ejercicio5-pseudocodigo"
-                            element={<EjercicioP5 />}
-                        />
-                        <Route
-                            path="/ejercicio6-pseudocodigo"
-                            element={<EjercicioP6 />}
-                        />
-                        <Route
-                            path="/ejercicio7-pseudocodigo"
-                            element={<EjercicioP7 />}
-                        />
-                        <Route
-                            path="/ejercicio8-pseudocodigo"
-                            element={<EjercicioP8 />}
-                        />
-                        <Route
-                            path="/ejercicio9-pseudocodigo"
-                            element={<EjercicioP9 />}
-                        />
-                        <Route
-                            path="/ejercicio10-pseudocodigo"
-                            element={<EjercicioP10 />}
-                        />
-                        <Route path="/dashboardIA" element={<DashboardIA />} />
-                        <Route path="/designboard" element={<DesignBoard />} />
-                        <Route path="/editingboard" element={<EditingBoard />} />
-                    </Routes>
-                </BrowserRouter>
+                <UsuarioProvider>
+                    <BrowserRouter>
+                        <Routes>
+                            <Route
+                                path="/"
+                                element={
+                                    <RutaPublica>
+                                        <Login />
+                                    </RutaPublica>
+                                }
+                            />
+                            <Route
+                                path="/registro"
+                                element={
+                                    <RutaPublica>
+                                        <SignUp />
+                                    </RutaPublica>
+                                }
+                            />
+
+                            <Route element={<RutaProtegida />}>
+                                <Route
+                                    path="/dashboard"
+                                    element={<DashboardInicio />}
+                                />
+                                <Route
+                                    path="/ejercicios"
+                                    element={<Dashboard />}
+                                />
+                                <Route
+                                    path="/ejercicios-ia"
+                                    element={<DashboardIA />}
+                                />
+                                <Route
+                                    path="/dashboardIA"
+                                    element={
+                                        <Navigate
+                                            to="/ejercicios-ia"
+                                            replace
+                                        />
+                                    }
+                                />
+                                <Route
+                                    path="/ejercicio1"
+                                    element={<Ejercicio1 />}
+                                />
+                                <Route
+                                    path="/ejercicio2"
+                                    element={<Ejercicio2 />}
+                                />
+                                <Route
+                                    path="/ejercicio3"
+                                    element={<Ejercicio3 />}
+                                />
+                                <Route
+                                    path="/ejercicio4"
+                                    element={<Ejercicio4 />}
+                                />
+                                <Route
+                                    path="/ejercicio5"
+                                    element={<Ejercicio5 />}
+                                />
+                                <Route
+                                    path="/ejercicio1-pseudocodigo"
+                                    element={<EjercicioP1 />}
+                                />
+                                <Route
+                                    path="/ejercicio2-pseudocodigo"
+                                    element={<EjercicioP2 />}
+                                />
+                                <Route
+                                    path="/ejercicio3-pseudocodigo"
+                                    element={<EjercicioP3 />}
+                                />
+                                <Route
+                                    path="/ejercicio4-pseudocodigo"
+                                    element={<EjercicioP4 />}
+                                />
+                                <Route
+                                    path="/ejercicio5-pseudocodigo"
+                                    element={<EjercicioP5 />}
+                                />
+                                <Route
+                                    path="/ejercicio6-pseudocodigo"
+                                    element={<EjercicioP6 />}
+                                />
+                                <Route
+                                    path="/ejercicio7-pseudocodigo"
+                                    element={<EjercicioP7 />}
+                                />
+                                <Route
+                                    path="/ejercicio8-pseudocodigo"
+                                    element={<EjercicioP8 />}
+                                />
+                                <Route
+                                    path="/ejercicio9-pseudocodigo"
+                                    element={<EjercicioP9 />}
+                                />
+                                <Route
+                                    path="/ejercicio10-pseudocodigo"
+                                    element={<EjercicioP10 />}
+                                />
+                                <Route
+                                    path="/designboard"
+                                    element={<DesignBoard />}
+                                />
+                                <Route
+                                    path="/editingboard"
+                                    element={<EditingBoard />}
+                                />
+
+                                <Route
+                                    element={
+                                        <RutaPorRol
+                                            roles={['profesor', 'admin']}
+                                        />
+                                    }
+                                >
+                                    <Route
+                                        path="/grupos/:id"
+                                        element={<DetalleGrupo />}
+                                    />
+                                    <Route
+                                        path="/estudiantes/:id"
+                                        element={<DetalleEstudiante />}
+                                    />
+                                </Route>
+
+                                <Route
+                                    element={
+                                        <RutaPorRol roles={['admin']} />
+                                    }
+                                >
+                                    <Route
+                                        path="/admin"
+                                        element={<PanelAdmin />}
+                                    />
+                                </Route>
+                            </Route>
+                        </Routes>
+                    </BrowserRouter>
+                </UsuarioProvider>
             </TokenProvider>
         </>
     );

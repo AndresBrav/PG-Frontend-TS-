@@ -233,7 +233,7 @@ const Ejercicio3Phone: React.FC = () => {
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     return (

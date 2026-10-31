@@ -297,7 +297,7 @@ FinAlgoritmo`;
                     }}
                 >
                     <button
-                        onClick={() => navigate('/dashboardIA')}
+                        onClick={() => navigate('/ejercicios-ia')}
                         style={{
                             background: 'transparent',
                             border: 'none',
@@ -309,7 +309,7 @@ FinAlgoritmo`;
                             fontWeight: 'bold',
                             padding: '5px',
                         }}
-                        title="Volver al Dashboard"
+                        title="Volver a Ejercicios IA"
                     >
                         ←
                     </button>

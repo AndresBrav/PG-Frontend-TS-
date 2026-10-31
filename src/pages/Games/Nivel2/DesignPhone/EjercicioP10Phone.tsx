@@ -40,11 +40,11 @@ const EjercicioP10Phone: React.FC = () => {
     const { claveAcceso } = useContext(TokenContext);
 
     const ejecutarOtroMetodo = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     // Click en banco -> pasa a construcción

@@ -236,12 +236,12 @@ const Ejercicio5Phone: React.FC = () => {
 
     const ejecutarOtroMetodo = async () => {
         // navigate("/ejercicio3");
-        navigate('/dashboard');
+        navigate('/ejercicios');
         alert('iremos a la siguiente seccion cuando se implemente');
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     return (

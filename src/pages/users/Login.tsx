@@ -1,142 +1,119 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
+import type { FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { TokenContext } from '../../Context/TokenContext';
 import { loginuser } from '../../Services/authService';
-import { useNavigate } from 'react-router-dom';
+import BotonMostrarPassword from '../../components/auth/BotonMostrarPassword';
 
 const Login = () => {
-    const [username, setUsername] = useState<string>('');
+    const [identificador, setIdentificador] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const navigate = useNavigate();
-    // const [message, setMessage] = useState<string>("");
+    const [mostrarPassword, setMostrarPassword] = useState<boolean>(false);
+    const [cargando, setCargando] = useState<boolean>(false);
+    const [mensajeError, setMensajeError] = useState<string | null>(null);
+    const { setClaveAcceso } = useContext(TokenContext);
 
-    const { claveAcceso, setClaveAcceso } = useContext(TokenContext);
+    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUsername(e.target.value);
-    };
+        if (!identificador.trim() || !password) {
+            setMensajeError('Ingresa tu usuario o código y tu contraseña.');
+            return;
+        }
 
-    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPassword(e.target.value);
-    };
+        setCargando(true);
+        setMensajeError(null);
 
-    const handleLogin = async () => {
         try {
-            const data = await loginuser(
-                username,
-                password
-            ); /* make a request to the backend */
-            setClaveAcceso(data.token); //we store the token in the context
-            // setMessage("Token almacenado correctamente");
+            const data = await loginuser(identificador, password);
+            setClaveAcceso(data.token);
         } catch (error) {
-            // setMessage("Error en el login");
+            setMensajeError(
+                error instanceof Error
+                    ? error.message
+                    : 'No se pudo iniciar sesión'
+            );
+        } finally {
+            setCargando(false);
         }
-    };
-
-    useEffect(() => {
-        if (claveAcceso) {
-            /* Esta línea verifica si claveAcceso tiene un valor "truthy". En JavaScript, un valor es considerado "truthy" si no es false, 0, "", null, undefined, o NaN. */
-            navigate('/dashboard');
-        }
-    }, [claveAcceso, navigate]);
-
-    const handleSignup = () => {
-        navigate('/registro'); // Navigate to the SignUp page
     };
 
     return (
-        <div className="flex-container-login">
-            <input
-                className="flex-input-login"
-                type="text"
-                placeholder="Usuario"
-                value={username}
-                onChange={handleUsernameChange}
-                style={{ marginRight: '0.5rem' }}
-            />
-            <div
-                style={{
-                    position: 'relative',
-                    width: '60%',
-                    marginRight: '0.5rem',
-                }}
+        <div className="auth-page">
+            <form
+                className="flex-container-login"
+                onSubmit={handleLogin}
+                noValidate
             >
-                <input
-                    className="flex-input-login"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Contraseña"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    style={{ width: '100%', marginRight: 0 }}
-                />
-                <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                        position: 'absolute',
-                        right: '10px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: 0,
-                    }}
-                >
-                    {showPassword ? (
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.53 13.53 0 0 0 2 12s3 8 10 8a9.74 9.74 0 0 0 5.39-1.61M2 2l20 20"
-                                stroke="#0d6efd"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                    ) : (
-                        <svg
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                                stroke="#0d6efd"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="3"
-                                stroke="#0d6efd"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            />
-                        </svg>
-                    )}
-                </button>
-            </div>
+                <div className="auth-header">
+                    <h1 className="auth-title">Iniciar sesión</h1>
+                    <br />
+                    <p className="auth-subtitle">
+                        Ingresa con tu usuario o código institucional
+                    </p>
+                </div>
 
-            <button className="flex-button-login" onClick={handleLogin}>
-                <p>Iniciar Sesion</p>
-            </button>
-            <button className="flex-button-login" onClick={handleSignup}>
-                <p>Registrarse</p>
-            </button>
-            {/* {message && <p>{message}</p>} */}
+                {mensajeError && (
+                    <p className="auth-error" role="alert" aria-live="polite">
+                        {mensajeError}
+                    </p>
+                )}
+
+                <div className="auth-field">
+                    <label className="auth-label" htmlFor="login-identificador">
+                        Usuario o código
+                    </label>
+                    <input
+                        id="login-identificador"
+                        className="flex-input-login"
+                        type="text"
+                        placeholder="Usuario o código institucional"
+                        value={identificador}
+                        onChange={(e) => setIdentificador(e.target.value)}
+                        autoComplete="username"
+                        required
+                    />
+                </div>
+
+                <div className="auth-field">
+                    <label className="auth-label" htmlFor="login-password">
+                        Contraseña
+                    </label>
+                    <div className="auth-password">
+                        <input
+                            id="login-password"
+                            className="flex-input-login"
+                            type={mostrarPassword ? 'text' : 'password'}
+                            placeholder="Ingresa tu contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            autoComplete="current-password"
+                            required
+                        />
+                        <BotonMostrarPassword
+                            visible={mostrarPassword}
+                            onToggle={() =>
+                                setMostrarPassword(!mostrarPassword)
+                            }
+                        />
+                    </div>
+                </div>
+
+                <button
+                    className="flex-button-login"
+                    type="submit"
+                    disabled={cargando}
+                >
+                    {cargando ? 'Ingresando...' : 'Iniciar sesión'}
+                </button>
+
+                <p className="auth-switch">
+                    ¿No tienes cuenta?{' '}
+                    <Link className="auth-link" to="/registro">
+                        Regístrate
+                    </Link>
+                </p>
+            </form>
         </div>
     );
 };

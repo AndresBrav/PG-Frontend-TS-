@@ -6,20 +6,16 @@ interface TokenProviderProps {
 }
 
 export function TokenProvider({ children }: TokenProviderProps) {
-    const [claveAcceso, setClaveAcceso] = useState<string>("");
+    const [claveAcceso, setClaveAcceso] = useState<string>(
+        () => localStorage.getItem("token") ?? "",
+    );
 
-    // Cargar el token desde localStorage al iniciar
-    useEffect(() => {
-        const savedToken = localStorage.getItem("token");
-        if (savedToken) {
-            setClaveAcceso(savedToken);
-        }
-    }, []);
-
-    // Guardar en localStorage cada vez que cambie
+    // Guardar o limpiar el token cada vez que cambie
     useEffect(() => {
         if (claveAcceso) {
             localStorage.setItem("token", claveAcceso);
+        } else {
+            localStorage.removeItem("token");
         }
     }, [claveAcceso]);
 

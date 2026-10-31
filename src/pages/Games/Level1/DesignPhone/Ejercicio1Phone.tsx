@@ -183,7 +183,7 @@ const Ejercicio1Phone: React.FC = () => {
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     return (

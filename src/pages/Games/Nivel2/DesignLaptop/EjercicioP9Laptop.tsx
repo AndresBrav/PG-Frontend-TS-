@@ -40,7 +40,7 @@ const EjercicioP9Laptop: React.FC = () => {
     const { claveAcceso } = useContext(TokenContext);
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     const ejecutarOtroMetodo = async () => {

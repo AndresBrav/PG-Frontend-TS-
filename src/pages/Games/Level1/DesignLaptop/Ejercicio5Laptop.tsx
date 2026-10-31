@@ -232,12 +232,12 @@ const Ejercicio5Laptop: React.FC = () => {
         // navigate("/ejercicio3");
         console.log('la clave de acceso va ser ', claveAcceso);
         // await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]);
-        navigate('/dashboard');
+        navigate('/ejercicios');
         // alert('iremos a la siguiente seccion cuando se implemente');
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     return (

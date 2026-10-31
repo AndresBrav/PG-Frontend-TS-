@@ -48,7 +48,7 @@ const EjercicioP5Phone: React.FC = () => {
     };
 
     const returnDashboard = () => {
-        navigate('/dashboard');
+        navigate('/ejercicios');
     };
 
     // Click en banco -> pasa a construcción
