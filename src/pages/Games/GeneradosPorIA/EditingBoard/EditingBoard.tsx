@@ -1,10 +1,14 @@
-import React, { useState, useRef, useContext } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useContext, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { completarJuego } from '../../../../api/ejerciciosIA/ejercicios';
 import { verificarPseudocodigo } from '../../../../api/ejerciciosIA/verificarPseudocodigo';
 import { ejecutarPseudocodigo } from './pseintCompiler';
+import {
+    obtenerJuegoIAPorId,
+    guardarEstadoTablero,
+} from '../../../../api/ejerciciosIA/ejercicioIAapi';
 import '../app.css';
 
 interface LocationState {
@@ -20,20 +24,28 @@ FinAlgoritmo`;
 
 const EditingBoard: React.FC = () => {
     const location = useLocation();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
 
-    const { juegoId, juegoDescripcion } =
-        (location.state as LocationState) || {};
+    const locationState = location.state as LocationState | null;
+    const queryId = searchParams.get('id');
+    const juegoId =
+        locationState?.juegoId ?? (queryId ? Number(queryId) : undefined);
 
-    const enunciado = juegoDescripcion || DEFAULT_INSTRUCCIONES;
+    const [enunciado, setEnunciado] = useState<string>(
+        locationState?.juegoDescripcion || DEFAULT_INSTRUCCIONES
+    );
 
     // Código inicial: si el enunciado es el de suma, cargamos el por defecto para demostración,
     // si no, cargamos una plantilla vacía.
     const [code, setCode] = useState<string>(() => {
+        const initialEnunciado =
+            locationState?.juegoDescripcion || DEFAULT_INSTRUCCIONES;
         if (
-            enunciado === DEFAULT_INSTRUCCIONES ||
-            (enunciado.includes('dos números') && enunciado.includes('sume'))
+            initialEnunciado === DEFAULT_INSTRUCCIONES ||
+            (initialEnunciado.includes('dos números') &&
+                initialEnunciado.includes('sume'))
         ) {
             return DEFAULT_CODE;
         }
@@ -47,6 +59,119 @@ const EditingBoard: React.FC = () => {
     // 4. Mostrar resultado (Ej: Escribir y)
 FinAlgoritmo`;
     });
+
+    const [estadoGuardado, setEstadoGuardado] = useState<
+        'guardado' | 'guardando' | 'sin_guardar'
+    >('guardado');
+    const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Cargar progreso previo guardado al montar el componente
+    useEffect(() => {
+        if (!juegoId || !claveAcceso) return;
+
+        let activo = true;
+
+        const cargarProgreso = async () => {
+            const juego = await obtenerJuegoIAPorId(claveAcceso, juegoId);
+            if (!activo || !juego) return;
+
+            if (juego.descripcion) {
+                setEnunciado(juego.descripcion);
+            }
+
+            if (juego.estado_tablero) {
+                try {
+                    const parsed = JSON.parse(juego.estado_tablero);
+                    if (parsed && typeof parsed.code === 'string') {
+                        setCode(parsed.code);
+                        setEstadoGuardado('guardado');
+                        return;
+                    }
+                } catch {
+                    // ignorar si no era JSON
+                }
+
+                if (
+                    typeof juego.estado_tablero === 'string' &&
+                    juego.estado_tablero.trim()
+                ) {
+                    setCode(juego.estado_tablero);
+                    setEstadoGuardado('guardado');
+                }
+            }
+        };
+
+        void cargarProgreso();
+
+        return () => {
+            activo = false;
+        };
+    }, [juegoId, claveAcceso]);
+
+    // Función de guardado en la base de datos
+    const guardarProgresoEnBD = useCallback(
+        async (codigoAGuardar: string, mostrarToast = false) => {
+            if (!juegoId || !claveAcceso) return;
+
+            setEstadoGuardado('guardando');
+
+            try {
+                await guardarEstadoTablero(claveAcceso, juegoId, {
+                    code: codigoAGuardar,
+                });
+                setEstadoGuardado('guardado');
+
+                try {
+                    localStorage.setItem(
+                        `editing_draft_${juegoId}`,
+                        codigoAGuardar
+                    );
+                } catch {
+                    // ignorar límites de storage
+                }
+
+                if (mostrarToast) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Progreso guardado',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true,
+                    });
+                }
+            } catch (error) {
+                console.error(
+                    'Error guardando progreso de pseudocódigo:',
+                    error
+                );
+                setEstadoGuardado('sin_guardar');
+            }
+        },
+        [juegoId, claveAcceso]
+    );
+
+    const handleCodeChange = (nuevoCodigo: string) => {
+        setCode(nuevoCodigo);
+        setEstadoGuardado('sin_guardar');
+
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        debounceTimerRef.current = setTimeout(() => {
+            void guardarProgresoEnBD(nuevoCodigo, false);
+        }, 1500);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, []);
 
     const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
     const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -76,7 +201,7 @@ FinAlgoritmo`;
                 value.substring(0, selectionStart) +
                 tabSpaces +
                 value.substring(selectionEnd);
-            setCode(newValue);
+            handleCodeChange(newValue);
 
             setTimeout(() => {
                 textarea.selectionStart = textarea.selectionEnd =
@@ -101,7 +226,7 @@ FinAlgoritmo`;
                 '\n' +
                 leadingWhitespace +
                 value.substring(selectionEnd);
-            setCode(newValue);
+            handleCodeChange(newValue);
 
             setTimeout(() => {
                 textarea.selectionStart = textarea.selectionEnd =
@@ -248,10 +373,11 @@ FinAlgoritmo`;
                 width: '80%',
             });
 
-            // Si es válido y hay juegoId, marcar como completado
+            // Si es válido y hay juegoId, marcar como completado y guardar estado
             if (esValido && swalResult.isConfirmed) {
                 if (juegoId && claveAcceso) {
                     try {
+                        void guardarProgresoEnBD(code, false);
                         if (counterRate === 1) {
                             await completarJuego(claveAcceso, juegoId);
                             console.log(
@@ -325,8 +451,88 @@ FinAlgoritmo`;
                 </div>
                 <div
                     className="toolbar-actions"
-                    style={{ display: 'flex', gap: '10px' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
+                    {juegoId && (
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                color:
+                                    estadoGuardado === 'guardando'
+                                        ? '#FBBF24'
+                                        : estadoGuardado === 'guardado'
+                                        ? '#34D399'
+                                        : '#9CA3AF',
+                                marginRight: '6px',
+                            }}
+                        >
+                            <span
+                                style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor:
+                                        estadoGuardado === 'guardando'
+                                            ? '#FBBF24'
+                                            : estadoGuardado === 'guardado'
+                                            ? '#34D399'
+                                            : '#9CA3AF',
+                                }}
+                            />
+                            <span>
+                                {estadoGuardado === 'guardando'
+                                    ? 'Guardando...'
+                                    : estadoGuardado === 'guardado'
+                                    ? 'Guardado'
+                                    : 'Sin guardar'}
+                            </span>
+                        </div>
+                    )}
+                    {juegoId && (
+                        <button
+                            type="button"
+                            onClick={() => void guardarProgresoEnBD(code, true)}
+                            disabled={estadoGuardado === 'guardando'}
+                            style={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                                color: 'white',
+                                border: '1px solid rgba(255, 255, 255, 0.25)',
+                                padding: '10px 18px',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                cursor:
+                                    estadoGuardado === 'guardando'
+                                        ? 'not-allowed'
+                                        : 'pointer',
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                            }}
+                            title="Guardar progreso ahora"
+                        >
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Guardar
+                        </button>
+                    )}
                     <button
                         className="btn"
                         onClick={handleEjecutar}
@@ -528,7 +734,7 @@ FinAlgoritmo`;
                             <textarea
                                 ref={textareaRef}
                                 value={code}
-                                onChange={(e) => setCode(e.target.value)}
+                                onChange={(e) => handleCodeChange(e.target.value)}
                                 onKeyDown={handleKeyDown}
                                 onScroll={handleScroll}
                                 wrap="off"

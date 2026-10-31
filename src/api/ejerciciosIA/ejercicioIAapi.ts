@@ -83,3 +83,49 @@ export const guardarJuegoIA = async (
         return null;
     }
 };
+
+export const obtenerJuegoIAPorId = async (
+    clave: string,
+    juegoId: number
+): Promise<any> => {
+    try {
+        const response = await axios.get(`${API}/juegos/ia/${juegoId}`, {
+            headers: {
+                Authorization: clave,
+                'ngrok-skip-browser-warning': 'true',
+            },
+        });
+        return response.data?.juego ?? null;
+    } catch (error) {
+        console.error('Error obteniendo juego IA:', error);
+        return null;
+    }
+};
+
+export const guardarEstadoTablero = async (
+    clave: string,
+    juegoId: number,
+    estadoTablero: object | string
+): Promise<any> => {
+    try {
+        const payload =
+            typeof estadoTablero === 'object'
+                ? JSON.stringify(estadoTablero)
+                : estadoTablero;
+
+        const response = await axios.put(
+            `${API}/juegos/guardarTablero/${juegoId}`,
+            { estado_tablero: payload },
+            {
+                headers: {
+                    Authorization: clave,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error guardando estado del tablero:', error);
+        return null;
+    }
+};

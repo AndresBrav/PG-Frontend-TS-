@@ -187,7 +187,7 @@ const DashboardIA = () => {
                                 : 'circle-outer-2'
                         } ${juego.completado === 1 ? 'circle-completed' : ''}`}
                         onClick={() =>
-                            navigate('/designboard', {
+                            navigate(`/designboard?id=${juego.id}`, {
                                 state: {
                                     juegoId: juego.id,
                                     juegoDescripcion: juego.descripcion,
@@ -317,7 +317,7 @@ const DashboardIA = () => {
                                 : 'circle-outer-2'
                         } ${juego.completado === 1 ? 'circle-completed' : ''}`}
                         onClick={() =>
-                            navigate('/editingboard', {
+                            navigate(`/editingboard?id=${juego.id}`, {
                                 state: {
                                     juegoId: juego.id,
                                     juegoDescripcion: juego.descripcion,

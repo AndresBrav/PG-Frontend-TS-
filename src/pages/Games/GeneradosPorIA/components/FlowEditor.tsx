@@ -164,6 +164,8 @@ const edgeOptions = {
 
 export interface FlowEditorRef {
     addNodeAtCenter: (type: NodeType) => void;
+    getFlowState: () => { nodes: Node[]; edges: Edge[]; viewport?: { x: number; y: number; zoom: number } };
+    loadFlowState: (state: { nodes?: Node[]; edges?: Edge[]; viewport?: { x: number; y: number; zoom: number } }) => void;
 }
 
 interface FlowEditorProps {
@@ -171,16 +173,17 @@ interface FlowEditorProps {
     edges: Edge[];
     onNodesChange: (nodes: Node[]) => void;
     onEdgesChange: (edges: Edge[]) => void;
+    onFlowChange?: () => void;
 }
 
 const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
-    ({ nodes, edges, onNodesChange, onEdgesChange }, ref) => {
+    ({ nodes, edges, onNodesChange, onEdgesChange, onFlowChange }, ref) => {
         const [internalNodes, setInternalNodes, onNodesChangeInternal] =
             useNodesState(nodes);
         const [internalEdges, setInternalEdges, onEdgesChangeInternal] =
             useEdgesState(edges);
         const reactFlowWrapper = useRef<HTMLDivElement>(null);
-        const { screenToFlowPosition } = useReactFlow();
+        const { screenToFlowPosition, toObject, setViewport } = useReactFlow();
         const [selectedNodeId, setSelectedNodeId] = useState<string | null>(
             null
         );
@@ -196,16 +199,18 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 setInternalEdges(remainingEdges);
                 onEdgesChange(remainingEdges);
                 setSelectedEdgeId(null);
+                onFlowChange?.();
             },
-            [internalEdges, setInternalEdges, onEdgesChange]
+            [internalEdges, setInternalEdges, onEdgesChange, onFlowChange]
         );
 
         const syncNodes = useCallback(
             (newNodes: Node[]) => {
                 setInternalNodes(newNodes);
                 onNodesChange(newNodes);
+                onFlowChange?.();
             },
-            [setInternalNodes, onNodesChange]
+            [setInternalNodes, onNodesChange, onFlowChange]
         );
 
         const syncEdges = useCallback(
@@ -216,8 +221,9 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 }));
                 setInternalEdges(edgesWithDelete);
                 onEdgesChange(edgesWithDelete);
+                onFlowChange?.();
             },
-            [setInternalEdges, onEdgesChange, deleteEdgeById]
+            [setInternalEdges, onEdgesChange, deleteEdgeById, onFlowChange]
         );
 
         const deleteNodeById = useCallback(
@@ -234,6 +240,42 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
             },
             [internalNodes, internalEdges, syncNodes, syncEdges]
         );
+
+        const loadFlowState = useCallback(
+            (state: {
+                nodes?: Node[];
+                edges?: Edge[];
+                viewport?: { x: number; y: number; zoom: number };
+            }) => {
+                if (state.nodes && Array.isArray(state.nodes)) {
+                    setInternalNodes(state.nodes);
+                    onNodesChange(state.nodes);
+                }
+                if (state.edges && Array.isArray(state.edges)) {
+                    const edgesWithDelete = state.edges.map((edge) => ({
+                        ...edge,
+                        data: { ...edge.data, onDeleteEdge: deleteEdgeById },
+                    }));
+                    setInternalEdges(edgesWithDelete);
+                    onEdgesChange(edgesWithDelete);
+                }
+                if (state.viewport) {
+                    void setViewport(state.viewport);
+                }
+            },
+            [
+                setInternalNodes,
+                onNodesChange,
+                setInternalEdges,
+                onEdgesChange,
+                deleteEdgeById,
+                setViewport,
+            ]
+        );
+
+        const getFlowState = useCallback(() => {
+            return toObject();
+        }, [toObject]);
 
         const onConnect: OnConnect = useCallback(
             (params) => {
@@ -412,7 +454,15 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
 
         useImperativeHandle(ref, () => ({
             addNodeAtCenter,
+            getFlowState,
+            loadFlowState,
         }));
+
+        const onNodeDragStop = useCallback(() => {
+            const currentNodes = toObject().nodes;
+            onNodesChange(currentNodes);
+            onFlowChange?.();
+        }, [toObject, onNodesChange, onFlowChange]);
 
         const proOptions = useMemo(() => ({ hideAttribution: true }), []);
 
@@ -433,6 +483,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                         edges={internalEdges}
                         onNodesChange={onNodesChangeInternal}
                         onEdgesChange={onEdgesChangeInternal}
+                        onNodeDragStop={onNodeDragStop}
                         onConnect={onConnect}
                         onNodeClick={onNodeClick}
                         onNodeDoubleClick={onNodeDoubleClick}

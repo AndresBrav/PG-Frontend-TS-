@@ -13,6 +13,8 @@ interface ToolbarProps {
     onClear: () => void;
     juegoId?: number;
     juegoDescripcion?: string;
+    estadoGuardado?: 'guardado' | 'guardando' | 'sin_guardar';
+    onGuardarManual?: () => void;
 }
 
 function Toolbar({
@@ -21,6 +23,8 @@ function Toolbar({
     onClear,
     juegoId,
     juegoDescripcion,
+    estadoGuardado = 'guardado',
+    onGuardarManual,
 }: ToolbarProps) {
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
@@ -182,7 +186,93 @@ function Toolbar({
                     Editor de Diagramas de Flujo
                 </h2>
             </div>
-            <div className="toolbar-actions">
+            <div
+                className="toolbar-actions"
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                }}
+            >
+                {juegoId && (
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            fontSize: '13px',
+                            fontWeight: '500',
+                            color:
+                                estadoGuardado === 'guardando'
+                                    ? '#FBBF24'
+                                    : estadoGuardado === 'guardado'
+                                    ? '#34D399'
+                                    : '#9CA3AF',
+                        }}
+                    >
+                        <span
+                            style={{
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                backgroundColor:
+                                    estadoGuardado === 'guardando'
+                                        ? '#FBBF24'
+                                        : estadoGuardado === 'guardado'
+                                        ? '#34D399'
+                                        : '#9CA3AF',
+                            }}
+                        />
+                        <span>
+                            {estadoGuardado === 'guardando'
+                                ? 'Guardando...'
+                                : estadoGuardado === 'guardado'
+                                ? 'Guardado'
+                                : 'Sin guardar'}
+                        </span>
+                    </div>
+                )}
+                {juegoId && onGuardarManual && (
+                    <button
+                        type="button"
+                        onClick={onGuardarManual}
+                        disabled={estadoGuardado === 'guardando'}
+                        style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                            color: 'white',
+                            border: '1px solid rgba(255, 255, 255, 0.25)',
+                            padding: '10px 18px',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor:
+                                estadoGuardado === 'guardando'
+                                    ? 'not-allowed'
+                                    : 'pointer',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                        title="Guardar progreso ahora"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Guardar
+                    </button>
+                )}
                 <button
                     className="btn btn-export"
                     onClick={handleExport}
