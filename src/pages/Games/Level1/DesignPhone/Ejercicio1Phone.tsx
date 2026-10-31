@@ -10,27 +10,36 @@ import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 import { ejerciciosId } from '../../../../data/ejercicios';
+import { useTableroFijo } from '../../../../hooks/useTableroFijo';
+import { BarraControlesEjercicio } from '../BarraControlesEjercicio';
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
 const CELL_WIDTH = 100; // ancho de cada celda
 const CELL_HEIGHT = 50; // alto de cada celda
-const WIDGET_SCALE = 1; // escala de imagen
+
+const defaultLayout: Layout[] = initialWidgets.map((w, idx) => ({
+    i: w.id.toString(),
+    x: Math.floor(idx / GRID_ROWS),
+    y: idx % GRID_ROWS,
+    w: 1,
+    h: 1,
+}));
 
 const Ejercicio1Phone: React.FC = () => {
     const navigate = useNavigate();
-    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
+    const { claveAcceso } = useContext(TokenContext);
     const [counterRate, setcounterRate] = useState<number>(1);
 
-    const [layout, setLayout] = useState<Layout[]>(
-        initialWidgets.map((w, idx) => ({
-            i: w.id.toString(),
-            x: Math.floor(idx / GRID_ROWS),
-            y: idx % GRID_ROWS,
-            w: 1,
-            h: 1,
-        }))
-    );
+    const {
+        layout,
+        setLayout,
+        cargando,
+        guardando,
+        guardado,
+        guardarManual,
+        reiniciarTablero,
+    } = useTableroFijo(ejerciciosId[0], defaultLayout, claveAcceso);
 
     const imprimirPosiciones = () => {
         console.log('📋 Posiciones de widgets:');
@@ -49,7 +58,6 @@ const Ejercicio1Phone: React.FC = () => {
             columnaWidget,
             filaWidget
         );
-        //console.log("el resultado es: ", resultado);
 
         verificarRespuesta(resultado);
     };
@@ -95,10 +103,10 @@ const Ejercicio1Phone: React.FC = () => {
         const htmlContenido = `
   <div style="
       display: grid; 
-      grid-template-columns: 150px; 
-      grid-template-rows:auto;
-      gap: 20px; 
+      grid-template-columns: repeat(3, 100px); 
+      gap: 15px; 
       margin: 10px 0;
+      justify-content: center;
   ">
     ${pasos
         .map((paso, index) => {
@@ -106,7 +114,7 @@ const Ejercicio1Phone: React.FC = () => {
             return `
               <img src="${paso.imagen}" 
                    alt="Paso ${index + 1}" 
-                   style="width:100px; height:50px; border:4px solid ${borderColor}; border-radius:8px;" />
+                   style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:6px;" />
             `;
         })
         .join('')}
@@ -137,18 +145,16 @@ const Ejercicio1Phone: React.FC = () => {
                 icon: 'success',
                 iconColor: 'green',
                 confirmButtonText: 'Siguiente',
-
                 customClass: {
-                    title: 'titulo-celular',
                     confirmButton: 'btn-semitransparente',
-                    icon: 'icono-celular',
                 },
-                width: '50%',
+                width: '90%',
             }).then((result) => {
                 if (result.isConfirmed) {
                     ejecutarOtroMetodo();
                 }
             });
+
             await IncrementarPuntuacionEjercicio();
         } else {
             Swal.fire({
@@ -156,23 +162,17 @@ const Ejercicio1Phone: React.FC = () => {
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: 'error',
                 iconColor: 'red',
-                width: '50%',
-                confirmButtonText: 'Cerrar', // Cambia el texto del botón
+                width: '90%',
+                confirmButtonText: 'Cerrar',
                 customClass: {
-                    title: 'titulo-celular',
                     confirmButton: 'btn-cierre',
-                    icon: 'icono-celular',
                 },
             });
         }
-
-        //console.log("el resultado es: ", resultado);
     };
 
     const IncrementarPuntuacionEjercicio = async () => {
-        if (counterRate == 1) {
-            console.log('el contador es ', counterRate);
-
+        if (counterRate === 1) {
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[0]);
         }
         setcounterRate((prev) => prev + 1);
@@ -221,41 +221,41 @@ const Ejercicio1Phone: React.FC = () => {
                 </h1>
             </div>
 
-            <div className="contenedor-diagramaflujo-boton">
-                <button
-                    onClick={imprimirPosiciones}
-                    className="button-execute-flowchart"
-                >
-                    <h1>Ejecutar</h1>
-                </button>
-            </div>
-            <br />
+            <BarraControlesEjercicio
+                onEjecutar={imprimirPosiciones}
+                onGuardar={guardarManual}
+                onReiniciar={reiniciarTablero}
+                cargando={cargando}
+                guardando={guardando}
+                guardado={guardado}
+            />
 
+            <br />
             <div
                 style={{
                     background: 'white',
-                    width: '100%', // adaptativo
+                    width: '100%',
                     maxWidth: GRID_COLS * CELL_WIDTH,
                     height: GRID_ROWS * CELL_HEIGHT,
                     border: '5px solid #000',
                     margin: '0 auto',
-                    overflowX: 'auto', // scroll horizontal si hace falta
+                    overflowX: 'auto',
                 }}
             >
                 <GridLayout
                     layout={layout}
                     cols={GRID_COLS}
                     rowHeight={CELL_HEIGHT}
-                    width={GRID_COLS * CELL_WIDTH} // react-grid-layout requiere width
+                    width={GRID_COLS * CELL_WIDTH}
                     margin={[0, 0]}
                     containerPadding={[0, 0]}
-                    onLayoutChange={(newLayout) => setLayout(newLayout)}
+                    onLayoutChange={setLayout}
                     isResizable={false}
                     compactType={null}
                     preventCollision={true}
                     style={{
                         background: 'white',
-                        border: '3px solid #ffffffff',
+                        border: '4px solid #ffffffff',
                         padding: '0px',
                     }}
                 >
@@ -272,9 +272,9 @@ const Ejercicio1Phone: React.FC = () => {
                                 src={w.content}
                                 alt=""
                                 style={{
-                                    width: CELL_WIDTH * WIDGET_SCALE,
-                                    height: CELL_HEIGHT * WIDGET_SCALE,
-                                    objectFit: 'contain',
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'fill',
                                 }}
                             />
                         </div>

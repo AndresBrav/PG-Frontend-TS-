@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import GridLayout from 'react-grid-layout';
 import type { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
@@ -10,27 +10,36 @@ import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 import { ejerciciosId } from '../../../../data/ejercicios';
+import { useTableroFijo } from '../../../../hooks/useTableroFijo';
+import { BarraControlesEjercicio } from '../BarraControlesEjercicio';
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
 const CELL_WIDTH = 150; // ancho de cada celda
 const CELL_HEIGHT = 80; // alto de cada celda
-const WIDGET_SCALE = 1; // escala de imagen
+
+const defaultLayout: Layout[] = initialWidgets.map((w, idx) => ({
+    i: w.id.toString(),
+    x: Math.floor(idx / GRID_ROWS),
+    y: idx % GRID_ROWS,
+    w: 1,
+    h: 1,
+}));
 
 const Ejercicio1Laptop: React.FC = () => {
     const navigate = useNavigate();
-    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
+    const { claveAcceso } = useContext(TokenContext);
     const [counterRate, setcounterRate] = useState<number>(1);
 
-    const [layout, setLayout] = useState<Layout[]>(
-        initialWidgets.map((w, idx) => ({
-            i: w.id.toString(),
-            x: Math.floor(idx / GRID_ROWS),
-            y: idx % GRID_ROWS,
-            w: 1,
-            h: 1,
-        }))
-    );
+    const {
+        layout,
+        setLayout,
+        cargando,
+        guardando,
+        guardado,
+        guardarManual,
+        reiniciarTablero,
+    } = useTableroFijo(ejerciciosId[0], defaultLayout, claveAcceso);
 
     const imprimirPosiciones = () => {
         console.log('📋 Posiciones de widgets:');
@@ -133,7 +142,7 @@ const Ejercicio1Laptop: React.FC = () => {
                 title: 'Ejercicio completado',
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: 'success',
-                iconColor: 'green', // Verde personalizado,
+                iconColor: 'green',
                 confirmButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
@@ -151,9 +160,9 @@ const Ejercicio1Laptop: React.FC = () => {
                 title: 'Ejercicio incompleto',
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: 'error',
-                iconColor: 'red', // Rojo personalizado
+                iconColor: 'red',
                 width: '50%',
-                confirmButtonText: 'Cerrar', // Cambia el texto del botón
+                confirmButtonText: 'Cerrar',
                 customClass: {
                     confirmButton: 'btn-cierre',
                 },
@@ -163,9 +172,8 @@ const Ejercicio1Laptop: React.FC = () => {
 
     const IncrementarPuntuacionEjercicio = async () => {
         console.log('el contador aqui es ............', counterRate);
-        if (counterRate == 1) {
+        if (counterRate === 1) {
             console.log('el contador es ', counterRate);
-
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[0]);
         }
         setcounterRate((prev) => prev + 1);
@@ -214,34 +222,35 @@ const Ejercicio1Laptop: React.FC = () => {
                 </h1>
             </div>
 
-            <div className="contenedor-diagramaflujo-boton">
-                <button
-                    onClick={imprimirPosiciones}
-                    className="button-execute-flowchart"
-                >
-                    <h1>Ejecutar</h1>
-                </button>
-            </div>
+            <BarraControlesEjercicio
+                onEjecutar={imprimirPosiciones}
+                onGuardar={guardarManual}
+                onReiniciar={reiniciarTablero}
+                cargando={cargando}
+                guardando={guardando}
+                guardado={guardado}
+            />
+
             <br />
             <div
                 style={{
                     background: 'white',
-                    width: '100%', // adaptativo
+                    width: '100%',
                     maxWidth: GRID_COLS * CELL_WIDTH,
                     height: GRID_ROWS * CELL_HEIGHT,
                     border: '10px solid #000',
                     margin: '0 auto',
-                    overflowX: 'auto', // scroll horizontal si hace falta
+                    overflowX: 'auto',
                 }}
             >
                 <GridLayout
                     layout={layout}
                     cols={GRID_COLS}
                     rowHeight={CELL_HEIGHT}
-                    width={GRID_COLS * CELL_WIDTH} // react-grid-layout requiere width
+                    width={GRID_COLS * CELL_WIDTH}
                     margin={[0, 0]}
                     containerPadding={[0, 0]}
-                    onLayoutChange={(newLayout) => setLayout(newLayout)}
+                    onLayoutChange={setLayout}
                     isResizable={false}
                     compactType={null}
                     preventCollision={true}

@@ -10,27 +10,36 @@ import Swal from 'sweetalert2';
 import { ejerciciosId } from '../../../../data/ejercicios';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
+import { useTableroFijo } from '../../../../hooks/useTableroFijo';
+import { BarraControlesEjercicio } from '../BarraControlesEjercicio';
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
 const CELL_WIDTH = 150; // ancho de cada celda
 const CELL_HEIGHT = 80; // alto de cada celda
-const WIDGET_SCALE = 1; // escala de imagen
+
+const defaultLayout: Layout[] = initialWidgetsEjercicio2.map((w, idx) => ({
+    i: w.id.toString(),
+    x: Math.floor(idx / GRID_ROWS),
+    y: idx % GRID_ROWS,
+    w: 1,
+    h: 1,
+}));
 
 const Ejercicio2Laptop: React.FC = () => {
     const navigate = useNavigate();
-    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
+    const { claveAcceso } = useContext(TokenContext);
     const [counterRate, setcounterRate] = useState<number>(1);
 
-    const [layout, setLayout] = useState<Layout[]>(
-        initialWidgetsEjercicio2.map((w, idx) => ({
-            i: w.id.toString(),
-            x: Math.floor(idx / GRID_ROWS),
-            y: idx % GRID_ROWS,
-            w: 1,
-            h: 1,
-        }))
-    );
+    const {
+        layout,
+        setLayout,
+        cargando,
+        guardando,
+        guardado,
+        guardarManual,
+        reiniciarTablero,
+    } = useTableroFijo(ejerciciosId[1], defaultLayout, claveAcceso);
 
     const imprimirPosiciones = () => {
         console.log('📋 Posiciones de widgets:');
@@ -50,70 +59,33 @@ const Ejercicio2Laptop: React.FC = () => {
             filaWidget
         );
 
-        /* console.log(widgetIds);
-        console.log(columnaWidget);
-        console.log(filaWidget); */
         console.log('el resultado es: ', resultado);
-
         verificarRespuesta(resultado);
     };
 
     const verificarRespuesta = async (resultado: boolean[]) => {
         const pasos = [
             { imagen: 'https://i.imgur.com/3MzUgfA.png', estado: resultado[0] }, //inicio
-            { imagen: 'https://i.imgur.com/v8uvFLP.png', estado: resultado[4] }, //leer n1,n2
-            { imagen: 'https://i.imgur.com/r8r7BIt.png', estado: resultado[2] }, //introdusca dos numeros distintos n1,n2
-            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[3] }, //flecha abajo 2
-            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[1] }, //flecha abajo 1
-            { imagen: 'https://i.imgur.com/cJqYyTX.png', estado: resultado[9] }, // doblada izquierda 1
-            {
-                imagen: 'https://i.imgur.com/goRKMj3.png',
-                estado: resultado[10],
-            }, // n1 es mayor
-            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[5] }, //flecha abajo 3
-            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[7] }, //flecha abajo 4
-            {
-                imagen: 'https://i.imgur.com/sFAFzl4.png',
-                estado: resultado[12],
-            }, // n2 es mayor
-            { imagen: 'https://i.imgur.com/L8yntMk.png', estado: resultado[8] }, //descicion 2
+            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[1] }, //flecha abajo
+            { imagen: 'https://i.imgur.com/r8r7BIt.png', estado: resultado[2] }, //introduzca
+            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[3] }, //flecha abajo
+            { imagen: 'https://i.imgur.com/v8uvFLP.png', estado: resultado[4] }, //leer n1 n2
+            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[5] }, //flecha abajo
             { imagen: 'https://i.imgur.com/8wCxpum.png', estado: resultado[6] }, //descicion 1
-            {
-                imagen: 'https://i.imgur.com/Y7okYCi.png',
-                estado: resultado[11],
-            }, // derecha 3
-            {
-                imagen: 'https://i.imgur.com/jnKoRnc.png',
-                estado: resultado[13],
-            }, // izquierda 2
-            {
-                imagen: 'https://i.imgur.com/mt4Z8y1.png',
-                estado: resultado[15],
-            }, // fin
-            {
-                imagen: 'https://i.imgur.com/Od4jxIE.png',
-                estado: resultado[16],
-            }, // derecha 1
-            {
-                imagen: 'https://i.imgur.com/42u2BvY.png',
-                estado: resultado[14],
-            }, // derecha 4
-            {
-                imagen: 'https://i.imgur.com/L2Z7DVd.jpeg',
-                estado: resultado[17],
-            }, // linea recta  1
-            {
-                imagen: 'https://i.imgur.com/L2Z7DVd.jpeg',
-                estado: resultado[18],
-            }, // linea recta  2
-            {
-                imagen: 'https://i.imgur.com/L2Z7DVd.jpeg',
-                estado: resultado[19],
-            }, // linea recta  3
-            {
-                imagen: 'https://i.imgur.com/MSjy0TA.png',
-                estado: resultado[20],
-            }, // esquina derecha 2
+            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[10] }, //flecha abajo
+            { imagen: 'https://i.imgur.com/sFAFzl4.png', estado: resultado[11] }, //n2 es mayor
+            { imagen: 'https://i.imgur.com/L2Z7DVd.jpeg', estado: resultado[12] }, //linea
+            { imagen: 'https://i.imgur.com/MSjy0TA.png', estado: resultado[13] }, //esquina derecha 2
+            { imagen: 'https://i.imgur.com/Od4jxIE.png', estado: resultado[7] }, //esquina derecha 1
+            { imagen: 'https://i.imgur.com/L2Z7DVd.jpeg', estado: resultado[8] }, //linea
+            { imagen: 'https://i.imgur.com/L8yntMk.png', estado: resultado[9] }, //descicion 2
+            { imagen: 'https://i.imgur.com/goRKMj3.png', estado: resultado[16] }, //n1 es mayor
+            { imagen: 'https://i.imgur.com/L2Z7DVd.jpeg', estado: resultado[17] }, //linea
+            { imagen: 'https://i.imgur.com/jnKoRnc.png', estado: resultado[18] }, //esquina izquierda 2
+            { imagen: 'https://i.imgur.com/42u2BvY.png', estado: resultado[14] }, //esquina derecha 4
+            { imagen: 'https://i.imgur.com/cJqYyTX.png', estado: resultado[19] }, //esquina izquierda 1
+            { imagen: 'https://i.imgur.com/Y7okYCi.png', estado: resultado[15] }, //esquina derecha 3
+            { imagen: 'https://i.imgur.com/mt4Z8y1.png', estado: resultado[20] }, //fin
         ];
 
         const htmlContenido = `
@@ -163,7 +135,7 @@ const Ejercicio2Laptop: React.FC = () => {
                 title: 'Ejercicio completado',
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: 'success',
-                iconColor: 'green', // Verde personalizado,
+                iconColor: 'green',
                 confirmButtonText: 'Siguiente',
                 customClass: {
                     confirmButton: 'btn-semitransparente',
@@ -174,15 +146,16 @@ const Ejercicio2Laptop: React.FC = () => {
                     ejecutarOtroMetodo();
                 }
             });
+
             await IncrementarPuntuacionEjercicio();
         } else {
             Swal.fire({
                 title: 'Ejercicio incompleto',
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: 'error',
-                iconColor: 'red', // Rojo personalizado
+                iconColor: 'red',
                 width: '50%',
-                confirmButtonText: 'Cerrar', // Cambia el texto del botón
+                confirmButtonText: 'Cerrar',
                 customClass: {
                     confirmButton: 'btn-cierre',
                 },
@@ -191,9 +164,7 @@ const Ejercicio2Laptop: React.FC = () => {
     };
 
     const IncrementarPuntuacionEjercicio = async () => {
-        if (counterRate == 1) {
-            console.log('el contador es ', counterRate);
-
+        if (counterRate === 1) {
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[1]);
         }
         setcounterRate((prev) => prev + 1);
@@ -242,40 +213,41 @@ const Ejercicio2Laptop: React.FC = () => {
                 </h1>
             </div>
 
-            <div className="contenedor-diagramaflujo-boton">
-                <button
-                    onClick={imprimirPosiciones}
-                    className="button-execute-flowchart"
-                >
-                    <h1>Ejecutar</h1>
-                </button>
-            </div>
+            <BarraControlesEjercicio
+                onEjecutar={imprimirPosiciones}
+                onGuardar={guardarManual}
+                onReiniciar={reiniciarTablero}
+                cargando={cargando}
+                guardando={guardando}
+                guardado={guardado}
+            />
 
+            <br />
             <div
                 style={{
                     background: 'white',
-                    width: '100%', // adaptativo
+                    width: '100%',
                     maxWidth: GRID_COLS * CELL_WIDTH,
                     height: GRID_ROWS * CELL_HEIGHT,
                     border: '10px solid #000',
                     margin: '0 auto',
-                    overflowX: 'auto', // scroll horizontal si hace falta
+                    overflowX: 'auto',
                 }}
             >
                 <GridLayout
                     layout={layout}
                     cols={GRID_COLS}
                     rowHeight={CELL_HEIGHT}
-                    width={GRID_COLS * CELL_WIDTH} // react-grid-layout requiere width
+                    width={GRID_COLS * CELL_WIDTH}
                     margin={[0, 0]}
                     containerPadding={[0, 0]}
-                    onLayoutChange={(newLayout) => setLayout(newLayout)}
+                    onLayoutChange={setLayout}
                     isResizable={false}
                     compactType={null}
                     preventCollision={true}
                     style={{
                         background: 'white',
-                        border: '3px solid #ffffffff',
+                        border: '4px solid #ffffffff',
                         padding: '0px',
                     }}
                 >

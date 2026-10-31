@@ -10,27 +10,36 @@ import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 import { ejerciciosId } from '../../../../data/ejercicios';
+import { useTableroFijo } from '../../../../hooks/useTableroFijo';
+import { BarraControlesEjercicio } from '../BarraControlesEjercicio';
 
 const GRID_COLS = 10; // columnas fijas
 const GRID_ROWS = 10; // filas fijas
 const CELL_WIDTH = 100; // ancho de cada celda
 const CELL_HEIGHT = 50; // alto de cada celda
-const WIDGET_SCALE = 1; // escala de imagen
+
+const defaultLayout: Layout[] = initialWidgetsEjercicio5.map((w, idx) => ({
+    i: w.id.toString(),
+    x: Math.floor(idx / GRID_ROWS),
+    y: idx % GRID_ROWS,
+    w: 1,
+    h: 1,
+}));
 
 const Ejercicio5Phone: React.FC = () => {
     const navigate = useNavigate();
-    const { claveAcceso } = useContext(TokenContext); //usamos el contexto para obtener la clave de acceso
+    const { claveAcceso } = useContext(TokenContext);
     const [counterRate, setcounterRate] = useState<number>(1);
 
-    const [layout, setLayout] = useState<Layout[]>(
-        initialWidgetsEjercicio5.map((w, idx) => ({
-            i: w.id.toString(),
-            x: Math.floor(idx / GRID_ROWS),
-            y: idx % GRID_ROWS,
-            w: 1,
-            h: 1,
-        }))
-    );
+    const {
+        layout,
+        setLayout,
+        cargando,
+        guardando,
+        guardado,
+        guardarManual,
+        reiniciarTablero,
+    } = useTableroFijo(ejerciciosId[4], defaultLayout, claveAcceso);
 
     const imprimirPosiciones = () => {
         console.log('📋 Posiciones de widgets:');
@@ -50,111 +59,55 @@ const Ejercicio5Phone: React.FC = () => {
             filaWidget
         );
 
-        console.log(widgetIds);
-        console.log(columnaWidget);
-        console.log(filaWidget);
-        console.log('el resultado es: ', resultado);
-
         verificarRespuesta(resultado);
     };
 
     const verificarRespuesta = async (resultado: boolean[]) => {
         const pasos = [
             { imagen: 'https://i.imgur.com/zweLKEX.png', estado: resultado[0] }, //inicio
-            { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[1] }, //flecha abajo 1
-            { imagen: 'https://i.imgur.com/BwMrDVL.png', estado: resultado[2] }, //Ingresar N
-            { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[3] }, //flecha abajo 2
+            { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[1] }, //flecha 1
+            { imagen: 'https://i.imgur.com/BwMrDVL.png', estado: resultado[2] }, //ingrese n
+            { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[3] }, //flecha 2
             { imagen: 'https://i.imgur.com/PwPIo74.png', estado: resultado[4] }, //desicion 1
-            { imagen: 'https://i.imgur.com/VqytbNj.png', estado: resultado[5] }, //diagonal izquierda
-            { imagen: 'https://i.imgur.com/ue7FrUg.png', estado: resultado[6] }, //No es primo
-            { imagen: 'https://i.imgur.com/Rxl6UGT.png', estado: resultado[7] }, //Ir al final 1
-            { imagen: 'https://i.imgur.com/GKkw3jK.png', estado: resultado[8] }, //Fin 1
-            { imagen: 'https://i.imgur.com/ZR9Z8MJ.png', estado: resultado[9] }, //derecha descicion1
-            {
-                imagen: 'https://i.imgur.com/QRehLgq.png',
-                estado: resultado[10],
-            }, //flecha abajo 2
-            {
-                imagen: 'https://i.imgur.com/rfDPtA3.png',
-                estado: resultado[11],
-            }, //contador =2
-            {
-                imagen: 'https://i.imgur.com/QRehLgq.png',
-                estado: resultado[12],
-            }, //flecha abajo 3
-            {
-                imagen: 'https://i.imgur.com/0SSFhh7.png',
-                estado: resultado[13],
-            }, //descicion 2
-            {
-                imagen: 'https://i.imgur.com/cxdXkSx.png',
-                estado: resultado[14],
-            }, //flecha izquierda 1
-            {
-                imagen: 'https://i.imgur.com/dHDnrEA.png',
-                estado: resultado[15],
-            }, //es primo
-            {
-                imagen: 'https://i.imgur.com/Rxl6UGT.png',
-                estado: resultado[16],
-            }, //Ir al final 2
-            {
-                imagen: 'https://i.imgur.com/ASMoZbM.png',
-                estado: resultado[17],
-            }, //final 2
-            {
-                imagen: 'https://i.imgur.com/j6t9al9.png',
-                estado: resultado[18],
-            }, //ezquina derecha descicion2
-            {
-                imagen: 'https://i.imgur.com/QRehLgq.png',
-                estado: resultado[19],
-            }, //flecha abajo
-            {
-                imagen: 'https://i.imgur.com/SVOl5q9.png',
-                estado: resultado[20],
-            }, //descicion 3
-            {
-                imagen: 'https://i.imgur.com/cxdXkSx.png',
-                estado: resultado[21],
-            }, //flecha izquierda 2
-            {
-                imagen: 'https://i.imgur.com/ue7FrUg.png',
-                estado: resultado[22],
-            }, //no es primo
-            {
-                imagen: 'https://i.imgur.com/Rxl6UGT.png',
-                estado: resultado[23],
-            }, //pre final
-            {
-                imagen: 'https://i.imgur.com/3qDWaU4.png',
-                estado: resultado[24],
-            }, //fin
-            {
-                imagen: 'https://i.imgur.com/z0qDiIh.png',
-                estado: resultado[25],
-            }, //derecha descicion3
-            {
-                imagen: 'https://i.imgur.com/YgzpNdS.png',
-                estado: resultado[26],
-            }, //contador ++
+            { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[5] }, //flecha 3
+            { imagen: 'https://i.imgur.com/rfDPtA3.png', estado: resultado[6] }, //contador = 2
+            { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[7] }, //flecha 4
+            { imagen: 'https://i.imgur.com/0SSFhh7.png', estado: resultado[8] }, //desicion 2
+            { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[9] }, //flecha 5
+            { imagen: 'https://i.imgur.com/SVOl5q9.png', estado: resultado[10] }, //desicion 3
+            { imagen: 'https://i.imgur.com/dHDnrEA.png', estado: resultado[11] }, //es primo
+            { imagen: 'https://i.imgur.com/ASMoZbM.png', estado: resultado[12] }, //final 2
+            { imagen: 'https://i.imgur.com/ue7FrUg.png', estado: resultado[13] }, //no es primo 1
+            { imagen: 'https://i.imgur.com/GKkw3jK.png', estado: resultado[14] }, //final 1
+            { imagen: 'https://i.imgur.com/ue7FrUg.png', estado: resultado[15] }, //no es primo 2
+            { imagen: 'https://i.imgur.com/3qDWaU4.png', estado: resultado[16] }, //final 3
+            { imagen: 'https://i.imgur.com/YgzpNdS.png', estado: resultado[17] }, //contador++
+            { imagen: 'https://i.imgur.com/ZR9Z8MJ.png', estado: resultado[18] }, //esquina 2
+            { imagen: 'https://i.imgur.com/cxdXkSx.png', estado: resultado[19] }, //flecha izquierda 1
+            { imagen: 'https://i.imgur.com/VqytbNj.png', estado: resultado[20] }, //esquina 1
+            { imagen: 'https://i.imgur.com/z0qDiIh.png', estado: resultado[21] }, //esquina 4
+            { imagen: 'https://i.imgur.com/cxdXkSx.png', estado: resultado[22] }, //flecha izquierda 2
+            { imagen: 'https://i.imgur.com/j6t9al9.png', estado: resultado[23] }, //esquina 3
+            { imagen: 'https://i.imgur.com/Rxl6UGT.png', estado: resultado[24] }, //ir al final 1
+            { imagen: 'https://i.imgur.com/Rxl6UGT.png', estado: resultado[25] }, //ir al final 2
+            { imagen: 'https://i.imgur.com/Rxl6UGT.png', estado: resultado[26] }, //ir al final 3
         ];
 
         const htmlContenido = `
   <div style="
-      display: grid;
-      grid-template-columns: 150px;
-      grid-template-rows:auto;
-      gap: 20px;
+      display: grid; 
+      grid-template-columns: repeat(3, 100px); 
+      gap: 15px; 
       margin: 10px 0;
+      justify-content: center;
   ">
     ${pasos
         .map((paso, index) => {
             const borderColor = paso.estado ? 'green' : 'red';
             return `
-              <img src="${paso.imagen}"
-                   alt="Paso ${index + 1}"
-                   style="width:100px; height:50px; border:4px solid ${borderColor}; border-radius:8px;" />
+              <img src="${paso.imagen}" 
+                   alt="Paso ${index + 1}" 
+                   style="width:100px; height:50px; border:3px solid ${borderColor}; border-radius:6px;" />
             `;
         })
         .join('')}
@@ -194,14 +147,12 @@ const Ejercicio5Phone: React.FC = () => {
                 title: 'Ejercicio completado',
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: 'success',
-                iconColor: 'green', // Verde personalizado,
+                iconColor: 'green',
                 confirmButtonText: 'Siguiente',
                 customClass: {
-                    title: 'titulo-celular',
                     confirmButton: 'btn-semitransparente',
-                    icon: 'icono-celular',
                 },
-                width: '50%',
+                width: '90%',
             }).then((result) => {
                 if (result.isConfirmed) {
                     ejecutarOtroMetodo();
@@ -214,30 +165,25 @@ const Ejercicio5Phone: React.FC = () => {
                 title: 'Ejercicio incompleto',
                 html: `<div style="text-align:center; padding:10px;">${htmlContenido}</div>`,
                 icon: 'error',
-                iconColor: 'red', // Rojo personalizado
-                width: '50%',
-                confirmButtonText: 'Cerrar', // Cambia el texto del botón
+                iconColor: 'red',
+                width: '90%',
+                confirmButtonText: 'Cerrar',
                 customClass: {
-                    title: 'titulo-celular',
                     confirmButton: 'btn-cierre',
-                    icon: 'icono-celular',
                 },
             });
         }
     };
 
     const IncrementarPuntuacionEjercicio = async () => {
-        if (counterRate == 1) {
-            console.log('la clave de acceso va ser ', claveAcceso);
+        if (counterRate === 1) {
             await incrementarPuntuacionApi(claveAcceso, ejerciciosId[4]);
         }
         setcounterRate((prev) => prev + 1);
     };
 
     const ejecutarOtroMetodo = async () => {
-        // navigate("/ejercicio3");
         navigate('/ejercicios');
-        alert('iremos a la siguiente seccion cuando se implemente');
     };
 
     const returnDashboard = () => {
@@ -272,40 +218,46 @@ const Ejercicio5Phone: React.FC = () => {
                 <h1>Diagramas de Flujo</h1>
             </div>
             <br />
-
             <div className="contenedor-diagramaflujo-ejercicio1-explicacion">
-                <h1>Diagrama de Flujo para calcular el área de un triángulo</h1>
+                <h1>
+                    Crea un diagrama de flujo que solicite un número y verifique
+                    si es primo. El proceso debe comenzar solicitando un número,
+                    verificar si es menor que 2 (no primo), inicializar un
+                    contador en 2, verificar si el número es divisible por el
+                    contador hasta n-1, y mostrar un mensaje indicando si es
+                    "Primo" o "No Primo", finalizando el flujo.
+                </h1>
             </div>
 
-            <div className="contenedor-diagramaflujo-boton">
-                <button
-                    onClick={imprimirPosiciones}
-                    className="button-execute-flowchart"
-                >
-                    <h1>Ejecutar</h1>
-                </button>
-            </div>
+            <BarraControlesEjercicio
+                onEjecutar={imprimirPosiciones}
+                onGuardar={guardarManual}
+                onReiniciar={reiniciarTablero}
+                cargando={cargando}
+                guardando={guardando}
+                guardado={guardado}
+            />
 
+            <br />
             <div
                 style={{
                     background: 'white',
-                    width: '100%', // adaptativo
+                    width: '100%',
                     maxWidth: GRID_COLS * CELL_WIDTH,
                     height: GRID_ROWS * CELL_HEIGHT,
                     border: '5px solid #000',
                     margin: '0 auto',
-                    overflowX: 'auto', //
-                    // overflowY: "auto", //
+                    overflowX: 'auto',
                 }}
             >
                 <GridLayout
                     layout={layout}
                     cols={GRID_COLS}
                     rowHeight={CELL_HEIGHT}
-                    width={GRID_COLS * CELL_WIDTH} // react-grid-layout requiere width
+                    width={GRID_COLS * CELL_WIDTH}
                     margin={[0, 0]}
                     containerPadding={[0, 0]}
-                    onLayoutChange={(newLayout) => setLayout(newLayout)}
+                    onLayoutChange={setLayout}
                     isResizable={false}
                     compactType={null}
                     preventCollision={true}
@@ -328,9 +280,9 @@ const Ejercicio5Phone: React.FC = () => {
                                 src={w.content}
                                 alt=""
                                 style={{
-                                    width: CELL_WIDTH * WIDGET_SCALE,
-                                    height: CELL_HEIGHT * WIDGET_SCALE,
-                                    objectFit: 'contain',
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'fill',
                                 }}
                             />
                         </div>
