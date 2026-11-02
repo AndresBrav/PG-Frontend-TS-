@@ -289,29 +289,49 @@ export const TableroDiagramaGrupo: React.FC = () => {
 
     return (
         <ReactFlowProvider>
-            <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#121212] text-white">
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden' }}>
                 {/* BARRA SUPERIOR PROFESOR (MODO REVISIÓN) */}
                 {esModoRevision && (
-                    <header className="bg-slate-900 border-b border-slate-700 px-6 py-3 flex flex-wrap items-center justify-between gap-4 z-20">
-                        <div className="flex items-center gap-4">
+                    <header
+                        style={{
+                            background: '#1a1b23',
+                            borderBottom: '1px solid #2e303a',
+                            padding: '10px 20px',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            zIndex: 20,
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <Link
                                 to={`/grupos/${grupoId}`}
-                                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition"
+                                style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    background: '#252630',
+                                    color: '#9ca3af',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    textDecoration: 'none',
+                                }}
                             >
                                 ← Volver al Grupo
                             </Link>
                             <div>
-                                <h1 className="text-base font-bold text-sky-400">
+                                <h1 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#38bdf8' }}>
                                     Revisión: {titulo}
                                 </h1>
-                                <p className="text-xs text-slate-400">
-                                    Estudiante: <span className="font-semibold text-white">{estudianteRevisado?.usuario.username}</span> ({estudianteRevisado?.usuario.codigo}) | Estado: {estudianteRevisado?.completado ? '✅ Entregado' : '⏳ En progreso'}
+                                <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#9ca3af' }}>
+                                    Estudiante: <span style={{ fontWeight: 600, color: '#fff' }}>{estudianteRevisado?.usuario.username}</span> ({estudianteRevisado?.usuario.codigo}) | Estado: {estudianteRevisado?.completado ? '✅ Entregado' : '⏳ En progreso'}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <label className="text-xs font-semibold text-slate-300">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <label style={{ fontSize: '12px', fontWeight: 600, color: '#d1d5db' }}>
                                 Calificación (0 - {puntosMaximos}):
                             </label>
                             <input
@@ -322,13 +342,33 @@ export const TableroDiagramaGrupo: React.FC = () => {
                                 onChange={(e) =>
                                     setNotaAsignada(Math.max(0, Math.min(puntosMaximos, Number(e.target.value))))
                                 }
-                                className="w-20 rounded border border-slate-600 bg-slate-950 px-2 py-1 text-center font-bold text-amber-300 text-sm focus:border-amber-400 focus:outline-none"
+                                style={{
+                                    width: '70px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #4b5563',
+                                    background: '#0f172a',
+                                    padding: '4px 8px',
+                                    textAlign: 'center',
+                                    fontWeight: 700,
+                                    color: '#fbbf24',
+                                    fontSize: '14px',
+                                    outline: 'none',
+                                }}
                             />
                             <button
                                 type="button"
                                 disabled={guardandoNota}
                                 onClick={handleGuardarCalificacion}
-                                className="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-4 py-1.5 text-xs font-bold text-white transition disabled:opacity-50"
+                                style={{
+                                    borderRadius: '8px',
+                                    background: guardandoNota ? '#4b5563' : '#059669',
+                                    padding: '6px 16px',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                    color: '#fff',
+                                    border: 'none',
+                                    cursor: guardandoNota ? 'not-allowed' : 'pointer',
+                                }}
                             >
                                 {guardandoNota ? 'Guardando...' : 'Asignar Nota'}
                             </button>
@@ -338,42 +378,62 @@ export const TableroDiagramaGrupo: React.FC = () => {
 
                 {/* BARRA SUPERIOR ESTUDIANTE */}
                 {!esModoRevision && (
-                    <header className="bg-[#1e1e1e] border-b border-white/10 px-6 py-3 flex flex-wrap items-center justify-between gap-4 z-20">
-                        <div className="flex items-center gap-4">
+                    <header
+                        style={{
+                            background: '#1a1b23',
+                            borderBottom: '1px solid #2e303a',
+                            padding: '10px 20px',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            zIndex: 20,
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <Link
                                 to={`/grupos/${grupoId}`}
-                                className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-gray-300 transition"
+                                style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    background: '#252630',
+                                    color: '#9ca3af',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    textDecoration: 'none',
+                                }}
                             >
                                 ← Volver al Grupo
                             </Link>
                             <div>
-                                <h1 className="text-base font-bold text-white">
+                                <h1 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#f3f4f6' }}>
                                     {titulo}
                                 </h1>
-                                <span className="text-xs font-semibold text-amber-400">
+                                <span style={{ fontSize: '12px', fontWeight: 600, color: '#fbbf24' }}>
                                     Valor: {puntosMaximos} pts {ejercicioEstudiante?.completado && `(Tu nota: ${ejercicioEstudiante.puntosObtenidos} pts)`}
                                 </span>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                             {/* Indicador de guardado */}
-                            <span className="text-xs font-medium text-gray-400 flex items-center gap-1.5">
+                            <span style={{ fontSize: '12px', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 {estadoGuardado === 'guardando' && (
                                     <>
-                                        <span className="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                                        <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#fbbf24' }} />
                                         Guardando borrador...
                                     </>
                                 )}
                                 {estadoGuardado === 'guardado' && (
                                     <>
-                                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+                                        <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#34d399' }} />
                                         Borrador guardado
                                     </>
                                 )}
                                 {estadoGuardado === 'sin_guardar' && (
                                     <>
-                                        <span className="inline-block w-2 h-2 rounded-full bg-gray-500" />
+                                        <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#6b7280' }} />
                                         Cambios pendientes...
                                     </>
                                 )}
@@ -382,7 +442,16 @@ export const TableroDiagramaGrupo: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={handleReiniciar}
-                                className="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs font-semibold transition"
+                                style={{
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    border: '1px solid rgba(239,68,68,0.3)',
+                                    background: 'transparent',
+                                    color: '#f87171',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                }}
                             >
                                 Limpiar
                             </button>
@@ -391,7 +460,16 @@ export const TableroDiagramaGrupo: React.FC = () => {
                                 type="button"
                                 disabled={entregando}
                                 onClick={handleEntregarEjercicio}
-                                className="px-5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition shadow-lg disabled:opacity-50"
+                                style={{
+                                    padding: '6px 20px',
+                                    borderRadius: '8px',
+                                    background: entregando ? '#4b5563' : '#059669',
+                                    color: '#fff',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                    border: 'none',
+                                    cursor: entregando ? 'not-allowed' : 'pointer',
+                                }}
                             >
                                 {entregando ? 'Entregando...' : ejercicioEstudiante?.completado ? 'Actualizar Entrega' : '🚀 Entregar Ejercicio'}
                             </button>
@@ -399,14 +477,31 @@ export const TableroDiagramaGrupo: React.FC = () => {
                     </header>
                 )}
 
-                {/* ENUNCIADO DEL EJERCICIO */}
-                <div className="mx-4 my-2 px-4 py-2.5 rounded-xl bg-white/5 border-l-4 border-[#FF7C02] text-sm text-gray-200">
-                    <span className="font-bold text-[#FF9D3D] mr-2">Enunciado:</span>
-                    {enunciado || 'Sin descripción disponible'}
-                </div>
+                {/* Contenedor .app para que hereden las variables CSS del DesignBoard */}
+                <div className="app" style={{ flex: 1, minHeight: 0 }}>
+                    {/* Enunciado del ejercicio (mismo estilo del DesignBoard) */}
+                    <div
+                        style={{
+                            padding: '0px',
+                            margin: '10px',
+                            backgroundColor: 'rgba(217, 217, 217, 0.3)',
+                            borderRadius: '10px',
+                            borderLeft: '4px solid #FF7C02',
+                        }}
+                    >
+                        <p
+                            style={{
+                                margin: '0',
+                                color: '#ffffff',
+                                lineHeight: '1.6',
+                                fontSize: '16px',
+                            }}
+                        >
+                            {enunciado || 'No hay descripción disponible'}
+                        </p>
+                    </div>
 
-                {/* LIENZO DE REACTFLOW */}
-                <div className="relative flex-1 w-full overflow-hidden flex">
+                    {/* Sidebar de bloques (solo para estudiante) */}
                     {!esModoRevision && (
                         <Sidebar
                             onDragStart={onDragStart}
@@ -414,21 +509,20 @@ export const TableroDiagramaGrupo: React.FC = () => {
                         />
                     )}
 
+                    {/* Lienzo de ReactFlow */}
                     {cargando ? (
-                        <div className="flex-1 flex items-center justify-center text-gray-400">
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af' }}>
                             Cargando diagrama...
                         </div>
                     ) : (
-                        <div className="flex-1 h-full w-full relative">
-                            <FlowEditor
-                                ref={flowEditorRef}
-                                nodes={nodes}
-                                edges={edges}
-                                onNodesChange={handleNodesChange}
-                                onEdgesChange={handleEdgesChange}
-                                onFlowChange={handleFlowChange}
-                            />
-                        </div>
+                        <FlowEditor
+                            ref={flowEditorRef}
+                            nodes={nodes}
+                            edges={edges}
+                            onNodesChange={handleNodesChange}
+                            onEdgesChange={handleEdgesChange}
+                            onFlowChange={handleFlowChange}
+                        />
                     )}
                 </div>
             </div>
