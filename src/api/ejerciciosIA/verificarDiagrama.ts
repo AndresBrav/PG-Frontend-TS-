@@ -123,7 +123,11 @@
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from './getGeminiApiKey';
 
-export async function verificarDiagrama(jsonDiagrama: any, ejercicio: string, claveAcceso?: string) {
+export async function verificarDiagrama(
+    jsonDiagrama: any,
+    ejercicio: string,
+    claveAcceso?: string
+) {
     const apikeyGemini = await getGeminiApiKey(claveAcceso);
     const ai = new GoogleGenAI({
         apiKey: apikeyGemini,
@@ -208,7 +212,7 @@ ${diagramaTexto}
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-3.5-flash-lite',
             contents: prompt,
         });
         console.log('Respuesta de IA:', response.text);
