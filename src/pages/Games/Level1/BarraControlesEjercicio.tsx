@@ -2,7 +2,7 @@ import React from 'react';
 
 interface Props {
     onEjecutar: () => void;
-    onGuardar: () => void;
+    onGuardar?: () => void;
     onReiniciar: () => void;
     cargando?: boolean;
     guardando?: boolean;
@@ -11,7 +11,6 @@ interface Props {
 
 export const BarraControlesEjercicio: React.FC<Props> = ({
     onEjecutar,
-    onGuardar,
     onReiniciar,
     cargando = false,
     guardando = false,
@@ -27,30 +26,6 @@ export const BarraControlesEjercicio: React.FC<Props> = ({
                 title="Ejecutar y validar diagrama"
             >
                 <h1>Ejecutar</h1>
-            </button>
-
-            {/* Botón Guardar manual */}
-            <button
-                type="button"
-                onClick={onGuardar}
-                disabled={guardando || cargando}
-                className="px-4 py-2 rounded-full font-semibold text-white bg-blue-600/80 hover:bg-blue-600 active:scale-95 transition shadow cursor-pointer disabled:opacity-50 text-sm md:text-base flex items-center gap-2"
-                title="Guardar estado del tablero ahora"
-            >
-                <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                    />
-                </svg>
-                {guardando ? 'Guardando...' : 'Guardar'}
             </button>
 
             {/* Botón Reiniciar */}
