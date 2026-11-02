@@ -16,7 +16,7 @@ interface JuegoIA {
     descripcion: string;
     tipo_juego: string;
     usuario_id: number;
-    completado: number;
+    completado: boolean | number;
     puntos: number;
     createdAt: string;
     updatedAt: string;
@@ -174,7 +174,7 @@ const DashboardIA = () => {
             {/* Modal fijo */}
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
 
-            {/* Mostrar juegos IA dinámicamente */}
+            {/* Mostrar juegos IA dinamicamente */}
             {juegosIA.map((juego, index) => (
                 <div
                     key={juego.id}
@@ -185,7 +185,7 @@ const DashboardIA = () => {
                             index % 2 === 0
                                 ? 'circle-outer-1'
                                 : 'circle-outer-2'
-                        } ${juego.completado === 1 ? 'circle-completed' : ''}`}
+                        } ${Boolean(juego.completado) ? 'circle-completed' : ''}`}
                         onClick={() =>
                             navigate(`/designboard?id=${juego.id}`, {
                                 state: {
@@ -196,7 +196,7 @@ const DashboardIA = () => {
                         }
                     >
                         <div
-                            className={`circle-inner ${juego.completado === 1 ? 'circle-completed' : ''}`}
+                            className={`circle-inner ${Boolean(juego.completado) ? 'circle-completed' : ''}`}
                         >
                             {index + 1}
                         </div>
@@ -304,7 +304,7 @@ const DashboardIA = () => {
 
             <ModalInf2 isOpen={modalAbierto2} onClose={alternarModal2} />
 
-            {/* Mostrar juegos IA dinámicamente para Pseudocódigo */}
+            {/* Mostrar juegos IA dinÃ¡micamente para PseudocÃ³digo */}
             {juegosIAPseudo.map((juego, index) => (
                 <div
                     key={`pseudo-${juego.id}`}
@@ -315,7 +315,7 @@ const DashboardIA = () => {
                             index % 2 === 0
                                 ? 'circle-outer-1'
                                 : 'circle-outer-2'
-                        } ${juego.completado === 1 ? 'circle-completed' : ''}`}
+                        } ${Boolean(juego.completado) ? 'circle-completed' : ''}`}
                         onClick={() =>
                             navigate(`/editingboard?id=${juego.id}`, {
                                 state: {
@@ -326,7 +326,7 @@ const DashboardIA = () => {
                         }
                     >
                         <div
-                            className={`circle-inner ${juego.completado === 1 ? 'circle-completed' : ''}`}
+                            className={`circle-inner ${Boolean(juego.completado) ? 'circle-completed' : ''}`}
                         >
                             {index + 1}
                         </div>
