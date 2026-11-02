@@ -10,6 +10,7 @@ import { TokenContext } from '../../../Context/TokenContext';
 import {
     obtenerJuegoIAPorId,
     guardarEstadoTablero,
+    reiniciarEstadoTableroApi,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
 import Swal from 'sweetalert2';
 import './app.css';
@@ -28,7 +29,8 @@ function DesignBoard() {
 
     const locationState = location.state as LocationState | null;
     const queryId = searchParams.get('id');
-    const juegoId = locationState?.juegoId ?? (queryId ? Number(queryId) : undefined);
+    const juegoId =
+        locationState?.juegoId ?? (queryId ? Number(queryId) : undefined);
 
     const [juegoDescripcion, setJuegoDescripcion] = useState<string>(
         locationState?.juegoDescripcion || ''
@@ -78,7 +80,7 @@ function DesignBoard() {
         };
     }, [juegoId, claveAcceso]);
 
-    // Función de guardado (manual o automática)
+    // Funcion de guardado (manual o automatica)
     const guardarProgresoEnBD = useCallback(
         async (mostrarToast = false) => {
             if (!juegoId || !claveAcceso || !flowEditorRef.current) return;
@@ -96,7 +98,7 @@ function DesignBoard() {
                         JSON.stringify(flowData)
                     );
                 } catch {
-                    // ignorar límites de storage
+                    // ignorar li­mites de storage
                 }
 
                 if (mostrarToast) {
@@ -163,6 +165,50 @@ function DesignBoard() {
         handleFlowChange();
     };
 
+    const handleReiniciar = async () => {
+        const confirmacion = await Swal.fire({
+            title: '¿Reiniciar diagrama?',
+            text: 'Se eliminarán todos los bloques y conexiones del diagrama para comenzar desde cero.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, reiniciar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e11919',
+        });
+
+        if (confirmacion.isConfirmed) {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+
+            flowEditorRef.current?.loadFlowState({ nodes: [], edges: [] });
+            setNodes([]);
+            setEdges([]);
+
+            if (juegoId) {
+                try {
+                    localStorage.removeItem(`flow_draft_${juegoId}`);
+                } catch {
+                    // ignorar
+                }
+
+                if (claveAcceso) {
+                    await reiniciarEstadoTableroApi(claveAcceso, juegoId);
+                }
+            }
+
+            setEstadoGuardado('guardado');
+
+            Swal.fire({
+                title: 'Diagrama reiniciado',
+                text: 'El lienzo se ha restablecido a su estado inicial.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+            });
+        }
+    };
+
     return (
         <ReactFlowProvider>
             <div className="app">
@@ -174,6 +220,7 @@ function DesignBoard() {
                     juegoDescripcion={juegoDescripcion}
                     estadoGuardado={estadoGuardado}
                     onGuardarManual={() => void guardarProgresoEnBD(true)}
+                    onReiniciar={handleReiniciar}
                 />
                 <div
                     style={{
@@ -192,7 +239,7 @@ function DesignBoard() {
                             fontSize: '16px',
                         }}
                     >
-                        {juegoDescripcion || 'No hay descripción disponible'}
+                        {juegoDescripcion || 'No hay descripcion disponible'}
                     </p>
                 </div>
                 <Sidebar

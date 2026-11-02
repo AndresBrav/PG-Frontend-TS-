@@ -1,4 +1,10 @@
-import React, { useState, useRef, useContext, useEffect, useCallback } from 'react';
+import React, {
+    useState,
+    useRef,
+    useContext,
+    useEffect,
+    useCallback,
+} from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
@@ -8,6 +14,7 @@ import { ejecutarPseudocodigo } from './pseintCompiler';
 import {
     obtenerJuegoIAPorId,
     guardarEstadoTablero,
+    reiniciarEstadoTableroApi,
 } from '../../../../api/ejerciciosIA/ejercicioIAapi';
 import '../app.css';
 
@@ -21,6 +28,24 @@ const DEFAULT_INSTRUCCIONES = 'Diseña un programa ';
 const DEFAULT_CODE = `Algoritmo Inicio
    
 FinAlgoritmo`;
+
+const obtenerCodigoPlantilla = (textoEnunciado: string) => {
+    if (
+        textoEnunciado === DEFAULT_INSTRUCCIONES ||
+        (textoEnunciado.includes('dos n') && textoEnunciado.includes('sume'))
+    ) {
+        return DEFAULT_CODE;
+    }
+    return `Algoritmo SolucionIA
+    // 1. Definir variables (Ej: Definir x Como Real)
+    
+    // 2. Leer entrada (Ej: Leer x)
+    
+    // 3. Operar (Ej: y <- x * 2)
+    
+    // 4. Mostrar resultado (Ej: Escribir y)
+FinAlgoritmo`;
+};
 
 const EditingBoard: React.FC = () => {
     const location = useLocation();
@@ -37,27 +62,11 @@ const EditingBoard: React.FC = () => {
         locationState?.juegoDescripcion || DEFAULT_INSTRUCCIONES
     );
 
-    // Código inicial: si el enunciado es el de suma, cargamos el por defecto para demostración,
-    // si no, cargamos una plantilla vacía.
+    // Código inicial: según el enunciado cargamos la plantilla adecuada
     const [code, setCode] = useState<string>(() => {
         const initialEnunciado =
             locationState?.juegoDescripcion || DEFAULT_INSTRUCCIONES;
-        if (
-            initialEnunciado === DEFAULT_INSTRUCCIONES ||
-            (initialEnunciado.includes('dos números') &&
-                initialEnunciado.includes('sume'))
-        ) {
-            return DEFAULT_CODE;
-        }
-        return `Algoritmo SolucionIA
-    // 1. Definir variables (Ej: Definir x Como Real)
-    
-    // 2. Leer entrada (Ej: Leer x)
-    
-    // 3. Operar (Ej: y <- x * 2)
-    
-    // 4. Mostrar resultado (Ej: Escribir y)
-FinAlgoritmo`;
+        return obtenerCodigoPlantilla(initialEnunciado);
     });
 
     const [estadoGuardado, setEstadoGuardado] = useState<
@@ -108,7 +117,7 @@ FinAlgoritmo`;
         };
     }, [juegoId, claveAcceso]);
 
-    // Función de guardado en la base de datos
+    // Funcion de guardado en la base de datos
     const guardarProgresoEnBD = useCallback(
         async (codigoAGuardar: string, mostrarToast = false) => {
             if (!juegoId || !claveAcceso) return;
@@ -127,7 +136,7 @@ FinAlgoritmo`;
                         codigoAGuardar
                     );
                 } catch {
-                    // ignorar límites de storage
+                    // ignorar li­mites de storage
                 }
 
                 if (mostrarToast) {
@@ -143,7 +152,7 @@ FinAlgoritmo`;
                 }
             } catch (error) {
                 console.error(
-                    'Error guardando progreso de pseudocódigo:',
+                    'Error guardando progreso de pseudocodigo:',
                     error
                 );
                 setEstadoGuardado('sin_guardar');
@@ -165,6 +174,50 @@ FinAlgoritmo`;
         }, 1500);
     };
 
+    const handleReiniciar = async () => {
+        const confirmacion = await Swal.fire({
+            title: '¿Reiniciar ejercicio?',
+            text: 'Se restablecerá el editor de pseudocódigo a la plantilla inicial y se limpiará la consola.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, reiniciar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e11919',
+        });
+
+        if (confirmacion.isConfirmed) {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+
+            const plantilla = obtenerCodigoPlantilla(enunciado);
+            setCode(plantilla);
+            setConsoleOutput([]);
+
+            if (juegoId) {
+                try {
+                    localStorage.removeItem(`editing_draft_${juegoId}`);
+                } catch {
+                    // ignorar
+                }
+
+                if (claveAcceso) {
+                    await reiniciarEstadoTableroApi(claveAcceso, juegoId);
+                }
+            }
+
+            setEstadoGuardado('guardado');
+
+            Swal.fire({
+                title: 'Código reiniciado',
+                text: 'El editor ha vuelto a su plantilla inicial.',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+            });
+        }
+    };
+
     useEffect(() => {
         return () => {
             if (debounceTimerRef.current) {
@@ -181,7 +234,7 @@ FinAlgoritmo`;
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
 
-    // Sincronizar scroll entre textarea y números de línea
+    // Sincronizar scroll entre textarea y numeros de linea
     const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
         if (lineNumbersRef.current) {
             lineNumbersRef.current.scrollTop = e.currentTarget.scrollTop;
@@ -209,7 +262,7 @@ FinAlgoritmo`;
             }, 0);
         }
 
-        // Enter -> Auto-indentación
+        // Enter -> Auto-indentacion
         if (e.key === 'Enter') {
             e.preventDefault();
             const linesBeforeCursor = value
@@ -217,7 +270,7 @@ FinAlgoritmo`;
                 .split('\n');
             const currentLine = linesBeforeCursor[linesBeforeCursor.length - 1];
 
-            // Buscar espacios iniciales de la línea actual
+            // Buscar espacios iniciales de la li­nea actual
             const match = currentLine.match(/^(\s*)/);
             const leadingWhitespace = match ? match[0] : '';
 
@@ -235,12 +288,12 @@ FinAlgoritmo`;
         }
     };
 
-    // Ejecutar el pseudocódigo localmente (transpilado a JavaScript)
+    // Ejecutar el pseudocodigo localmente (transpilado a JavaScript)
     const handleEjecutar = async () => {
         if (!code.trim()) {
             Swal.fire({
-                title: 'Código vacío',
-                text: 'Por favor, escribe tu pseudocódigo antes de ejecutar.',
+                title: 'Codigo vaci­o',
+                text: 'Por favor, escribe tu pseudocodigo antes de ejecutar.',
                 icon: 'warning',
                 confirmButtonText: 'Entendido',
                 confirmButtonColor: '#FF7C02',
@@ -249,7 +302,7 @@ FinAlgoritmo`;
         }
 
         setIsRunning(true);
-        setConsoleOutput(['[Sistema] Iniciando ejecución del pseudocódigo...']);
+        setConsoleOutput(['[Sistema] Iniciando ejecucion del pseudocodigo...']);
 
         try {
             const result = await ejecutarPseudocodigo(code, {
@@ -289,7 +342,7 @@ FinAlgoritmo`;
             setIsRunning(false);
             setConsoleOutput((prev) => [
                 ...prev,
-                '[Sistema] Ejecución finalizada.',
+                '[Sistema] Ejecucion finalizada.',
             ]);
 
             if (result.error) {
@@ -298,7 +351,7 @@ FinAlgoritmo`;
                     `[Error] ${result.error}`,
                 ]);
                 Swal.fire({
-                    title: 'Error en la ejecución',
+                    title: 'Error en la ejecucion',
                     text: result.error,
                     icon: 'error',
                     confirmButtonText: 'Cerrar',
@@ -326,8 +379,8 @@ FinAlgoritmo`;
     const handleVerificarIA = async () => {
         if (!code.trim()) {
             Swal.fire({
-                title: 'Código vacío',
-                text: 'Por favor, escribe tu pseudocódigo antes de verificar.',
+                title: 'Codigo vaci­o',
+                text: 'Por favor, escribe tu pseudocodigo antes de verificar.',
                 icon: 'warning',
                 confirmButtonText: 'Entendido',
                 confirmButtonColor: '#FF7C02',
@@ -337,8 +390,8 @@ FinAlgoritmo`;
 
         setIsVerifying(true);
         Swal.fire({
-            title: 'Verificando pseudocódigo...',
-            html: 'Por favor espera mientras la IA analiza la lógica de tu solución.',
+            title: 'Verificando pseudocodigo...',
+            html: 'Por favor espera mientras la IA analiza la logica de tu solucion.',
             icon: 'info',
             iconColor: '#FF7C02',
             allowOutsideClick: false,
@@ -359,8 +412,8 @@ FinAlgoritmo`;
 
             const swalResult = await Swal.fire({
                 title: esValido
-                    ? '✓ Pseudocódigo Correcto'
-                    : '✗ Solución Incorrecta',
+                    ? '✓ Pseudocodigo Correcto'
+                    : '✗ Solucion Incorrecta',
                 html: `<div style="text-align: left; color: #333; line-height: 1.6;">${resultado}</div>`,
                 icon: esValido ? 'success' : 'error',
                 iconColor: esValido ? 'green' : '#e74c3c',
@@ -373,7 +426,7 @@ FinAlgoritmo`;
                 width: '80%',
             });
 
-            // Si es válido y hay juegoId, marcar como completado y guardar estado
+            // Si es valido y hay juegoId, marcar como completado y guardar estado
             if (esValido && swalResult.isConfirmed) {
                 if (juegoId && claveAcceso) {
                     try {
@@ -381,7 +434,7 @@ FinAlgoritmo`;
                         if (counterRate === 1) {
                             await completarJuego(claveAcceso, juegoId);
                             console.log(
-                                'Juego de pseudocódigo completado en base de datos:',
+                                'Juego de pseudocodigo completado en base de datos:',
                                 juegoId
                             );
                         }
@@ -395,8 +448,8 @@ FinAlgoritmo`;
             setIsVerifying(false);
             console.error('Error al verificar:', error);
             Swal.fire({
-                title: 'Error de verificación',
-                text: 'No se pudo comunicar con el servidor de IA. Inténtalo de nuevo.',
+                title: 'Error de verificacion',
+                text: 'No se pudo comunicar con el servidor de IA. Intente de nuevo.',
                 icon: 'error',
                 confirmButtonText: 'Cerrar',
             });
@@ -446,12 +499,16 @@ FinAlgoritmo`;
                             color: 'var(--text-h)',
                         }}
                     >
-                        Editor de Pseudocódigo
+                        Editor de Pseudocodigo
                     </h2>
                 </div>
                 <div
                     className="toolbar-actions"
-                    style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                    }}
                 >
                     {juegoId && (
                         <div
@@ -465,8 +522,8 @@ FinAlgoritmo`;
                                     estadoGuardado === 'guardando'
                                         ? '#FBBF24'
                                         : estadoGuardado === 'guardado'
-                                        ? '#34D399'
-                                        : '#9CA3AF',
+                                          ? '#34D399'
+                                          : '#9CA3AF',
                                 marginRight: '6px',
                             }}
                         >
@@ -479,16 +536,16 @@ FinAlgoritmo`;
                                         estadoGuardado === 'guardando'
                                             ? '#FBBF24'
                                             : estadoGuardado === 'guardado'
-                                            ? '#34D399'
-                                            : '#9CA3AF',
+                                              ? '#34D399'
+                                              : '#9CA3AF',
                                 }}
                             />
                             <span>
                                 {estadoGuardado === 'guardando'
                                     ? 'Guardando...'
                                     : estadoGuardado === 'guardado'
-                                    ? 'Guardado'
-                                    : 'Sin guardar'}
+                                      ? 'Guardado'
+                                      : 'Sin guardar'}
                             </span>
                         </div>
                     )}
@@ -531,6 +588,59 @@ FinAlgoritmo`;
                                 <polyline points="7 3 7 8 15 8"></polyline>
                             </svg>
                             Guardar
+                        </button>
+                    )}
+                    {juegoId && (
+                        <button
+                            type="button"
+                            onClick={handleReiniciar}
+                            disabled={estadoGuardado === 'guardando'}
+                            style={{
+                                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                                color: '#fca5a5',
+                                border: '1px solid rgba(239, 68, 68, 0.4)',
+                                padding: '10px 18px',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                cursor:
+                                    estadoGuardado === 'guardando'
+                                        ? 'not-allowed'
+                                        : 'pointer',
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (estadoGuardado !== 'guardando') {
+                                    e.currentTarget.style.backgroundColor =
+                                        'rgba(239, 68, 68, 0.35)';
+                                    e.currentTarget.style.color = '#ffffff';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (estadoGuardado !== 'guardando') {
+                                    e.currentTarget.style.backgroundColor =
+                                        'rgba(239, 68, 68, 0.2)';
+                                    e.currentTarget.style.color = '#fca5a5';
+                                }
+                            }}
+                            title="Restablecer código a plantilla inicial"
+                        >
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Reiniciar
                         </button>
                     )}
                     <button
@@ -644,7 +754,7 @@ FinAlgoritmo`;
                     }}
                     className="main-layout-panels"
                 >
-                    {/* Panel Izquierdo: Editor con Sidebar de Números Integrado */}
+                    {/* Panel Izquierdo: Editor con Sidebar de Numeros Integrado */}
                     <div
                         style={{
                             flex: 2,
@@ -687,7 +797,7 @@ FinAlgoritmo`;
                             </span>
                         </div>
 
-                        {/* Editor Body: Sidebar de números + Textarea contenidos */}
+                        {/* Editor Body: Sidebar de numeros + Textarea contenidos */}
                         <div
                             style={{
                                 display: 'flex',
@@ -697,7 +807,7 @@ FinAlgoritmo`;
                                 minHeight: 0,
                             }}
                         >
-                            {/* Panel/Sidebar de Números de línea */}
+                            {/* Panel/Sidebar de Numeros de linea */}
                             <div
                                 ref={lineNumbersRef}
                                 style={{
@@ -730,11 +840,13 @@ FinAlgoritmo`;
                                 ))}
                             </div>
 
-                            {/* Campo de Texto del Código */}
+                            {/* Campo de Texto del Codigo */}
                             <textarea
                                 ref={textareaRef}
                                 value={code}
-                                onChange={(e) => handleCodeChange(e.target.value)}
+                                onChange={(e) =>
+                                    handleCodeChange(e.target.value)
+                                }
                                 onKeyDown={handleKeyDown}
                                 onScroll={handleScroll}
                                 wrap="off"
@@ -753,12 +865,12 @@ FinAlgoritmo`;
                                     overflow: 'auto',
                                     boxSizing: 'border-box',
                                 }}
-                                placeholder="// Escribe tu pseudocódigo aquí..."
+                                placeholder="// Escribe tu pseudocodigo aqui..."
                             />
                         </div>
                     </div>
 
-                    {/* Panel Derecho: Consola y Guía Rápida */}
+                    {/* Panel Derecho: Consola y Guia Rapida */}
                     <div
                         style={{
                             flex: 1,
@@ -770,7 +882,7 @@ FinAlgoritmo`;
                             overflow: 'hidden',
                         }}
                     >
-                        {/* Simulación de Consola */}
+                        {/* Simulacion de Consola */}
                         <div
                             style={{
                                 flex: 1,
@@ -825,7 +937,7 @@ FinAlgoritmo`;
                                 {consoleOutput.length === 0 ? (
                                     <span style={{ color: '#888' }}>
                                         Haz clic en "Ejecutar" para ver la
-                                        simulación de tu código aquí.
+                                        simulacion de tu codigo aqui.
                                     </span>
                                 ) : (
                                     consoleOutput.map((log, index) => (
@@ -840,7 +952,7 @@ FinAlgoritmo`;
                             </div>
                         </div>
 
-                        {/* Guía Rápida */}
+                        {/* Guia Rapida */}
                         <div
                             style={{
                                 backgroundColor: 'var(--sidebar-bg)',
@@ -862,7 +974,7 @@ FinAlgoritmo`;
                                     fontWeight: 'bold',
                                 }}
                             >
-                                💡 Guía Rápida de Pseudocódigo (PseInt)
+                                💡 Guia Rapida de Pseudocodigo (PseInt)
                             </h4>
                             <ul style={{ paddingLeft: '18px', margin: 0 }}>
                                 <li style={{ marginBottom: '4px' }}>
@@ -872,13 +984,10 @@ FinAlgoritmo`;
                                 </li>
                                 <li style={{ marginBottom: '4px' }}>
                                     <strong>Variables:</strong>{' '}
-                                    <code>
-                                        Definir variable Como Real
-                                    </code>
-                                    .
+                                    <code>Definir variable Como Real</code>.
                                 </li>
                                 <li style={{ marginBottom: '4px' }}>
-                                    <strong>Asignación:</strong> Usa{' '}
+                                    <strong>Asignacion:</strong> Usa{' '}
                                     <code>&lt;-</code> (Ej:{' '}
                                     <code>a &lt;- b + c</code>).
                                 </li>

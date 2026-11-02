@@ -15,6 +15,7 @@ interface ToolbarProps {
     juegoDescripcion?: string;
     estadoGuardado?: 'guardado' | 'guardando' | 'sin_guardar';
     onGuardarManual?: () => void;
+    onReiniciar?: () => void;
 }
 
 function Toolbar({
@@ -25,6 +26,7 @@ function Toolbar({
     juegoDescripcion,
     estadoGuardado = 'guardado',
     onGuardarManual,
+    onReiniciar,
 }: ToolbarProps) {
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
@@ -51,7 +53,7 @@ function Toolbar({
         // Validar que hay diagrama
         if (nodes.length === 0) {
             Swal.fire({
-                title: 'Diagrama vacío',
+                title: 'Diagrama vacio',
                 text: 'Por favor, crea un diagrama antes de verificar',
                 icon: 'warning',
                 confirmButtonText: 'Entendido',
@@ -86,7 +88,7 @@ function Toolbar({
                 juegoDescripcion || ''
             );
 
-            // Verificar si el resultado indica corrección
+            // Verificar si el resultado indica correccion
             const esValido =
                 !resultado.toLowerCase().includes('incorrecto') &&
                 !resultado.toLowerCase().includes('error') &&
@@ -108,7 +110,7 @@ function Toolbar({
                 width: '80%',
             });
 
-            // Si el usuario confirma y el diagrama es válido, llamar al endpoint para completar juego
+            // Si el usuario confirma y el diagrama es valido, llamar al endpoint para completar juego
             if (esValido && swalResult.isConfirmed) {
                 if (juegoId) {
                     try {
@@ -129,7 +131,7 @@ function Toolbar({
                     setCounterRate((prev) => prev + 1);
                 } else {
                     console.warn(
-                        'No se proporcionó juegoId para completarJuego'
+                        'No se proporciono juegoId para completarJuego'
                     );
                 }
             }
@@ -206,8 +208,8 @@ function Toolbar({
                                 estadoGuardado === 'guardando'
                                     ? '#FBBF24'
                                     : estadoGuardado === 'guardado'
-                                    ? '#34D399'
-                                    : '#9CA3AF',
+                                      ? '#34D399'
+                                      : '#9CA3AF',
                         }}
                     >
                         <span
@@ -219,16 +221,16 @@ function Toolbar({
                                     estadoGuardado === 'guardando'
                                         ? '#FBBF24'
                                         : estadoGuardado === 'guardado'
-                                        ? '#34D399'
-                                        : '#9CA3AF',
+                                          ? '#34D399'
+                                          : '#9CA3AF',
                             }}
                         />
                         <span>
                             {estadoGuardado === 'guardando'
                                 ? 'Guardando...'
                                 : estadoGuardado === 'guardado'
-                                ? 'Guardado'
-                                : 'Sin guardar'}
+                                  ? 'Guardado'
+                                  : 'Sin guardar'}
                         </span>
                     </div>
                 )}
@@ -271,6 +273,59 @@ function Toolbar({
                             <polyline points="7 3 7 8 15 8"></polyline>
                         </svg>
                         Guardar
+                    </button>
+                )}
+                {onReiniciar && (
+                    <button
+                        type="button"
+                        onClick={onReiniciar}
+                        disabled={estadoGuardado === 'guardando'}
+                        style={{
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            color: '#fca5a5',
+                            border: '1px solid rgba(239, 68, 68, 0.4)',
+                            padding: '10px 18px',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor:
+                                estadoGuardado === 'guardando'
+                                    ? 'not-allowed'
+                                    : 'pointer',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                        onMouseEnter={(e) => {
+                            if (estadoGuardado !== 'guardando') {
+                                e.currentTarget.style.backgroundColor =
+                                    'rgba(239, 68, 68, 0.35)';
+                                e.currentTarget.style.color = '#ffffff';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            if (estadoGuardado !== 'guardando') {
+                                e.currentTarget.style.backgroundColor =
+                                    'rgba(239, 68, 68, 0.2)';
+                                e.currentTarget.style.color = '#fca5a5';
+                            }
+                        }}
+                        title="Restablecer diagrama al inicio"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Reiniciar
                     </button>
                 )}
                 <button

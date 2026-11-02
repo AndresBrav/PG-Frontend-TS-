@@ -3,7 +3,7 @@ const API = import.meta.env.VITE_API_URL;
 
 export const traerJuegosIA = async (clave: string): Promise<any> => {
     try {
-        // Axios devuelve un objeto AxiosResponse, y el dato útil está en .data
+        // Axios devuelve un objeto AxiosResponse, y el dato util esta en .data
         const response = await axios.get(`${API}/juegos/traerJuegosConIA`, {
             headers: {
                 Authorization: clave,
@@ -27,7 +27,8 @@ export const traerJuegosIA = async (clave: string): Promise<any> => {
 
 export const traerJuegosIAPseudo = async (clave: string): Promise<any> => {
     try {
-        // Axios devuelve un objeto AxiosResponse, y el dato útil está en .data
+        // Axios devuelve un objeto AxiosResponse, y el dato util esta
+        //  en .data
         const response = await axios.get(
             `${API}/juegos/traerJuegosConIAPseudo`,
             {
@@ -127,5 +128,27 @@ export const guardarEstadoTablero = async (
     } catch (error) {
         console.error('Error guardando estado del tablero:', error);
         return null;
+    }
+};
+
+export const reiniciarEstadoTableroApi = async (
+    clave: string,
+    juegoId: number
+): Promise<boolean> => {
+    try {
+        await axios.put(
+            `${API}/juegos/reiniciarTablero/${juegoId}`,
+            {},
+            {
+                headers: {
+                    Authorization: clave,
+                    'ngrok-skip-browser-warning': 'true',
+                },
+            }
+        );
+        return true;
+    } catch (error) {
+        console.error('Error al reiniciar estado del tablero IA:', error);
+        return false;
     }
 };
