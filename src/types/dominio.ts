@@ -1,6 +1,6 @@
 export type Rol = 'estudiante' | 'profesor' | 'admin';
 
-/** Roles que un usuario puede elegir desde el registro público. */
+/** Roles que un usuario puede elegir desde el registro pÃºblico. */
 export type RolDeRegistro = Exclude<Rol, 'admin'>;
 
 export interface PerfilUsuario {
@@ -206,4 +206,66 @@ export interface DatosCrearProfesor {
     username: string;
     edad: number;
     password: string;
+}
+
+export type TipoEjercicioGrupo = 'diagrama' | 'pseudocodigo';
+
+export interface EjercicioGrupoProfesor {
+    id: number;
+    grupo_id: number;
+    titulo: string;
+    enunciado: string;
+    tipo: TipoEjercicioGrupo;
+    puntos: number;
+    createdAt: string;
+    updatedAt: string;
+    completados: number;
+    totalEstudiantes: number;
+}
+
+export interface EjercicioGrupoEstudiante {
+    id: number;
+    grupo_id: number;
+    titulo: string;
+    enunciado: string;
+    tipo: TipoEjercicioGrupo;
+    puntos: number;
+    completado: boolean;
+    puntosObtenidos: number;
+    fecha_completado: string | null;
+    ultima_actividad: string | null;
+    estado_tablero?: string | null;
+}
+
+export interface SolucionEstudianteGrupo {
+    usuario: {
+        id: number;
+        codigo: string;
+        username: string;
+    };
+    completado: boolean;
+    puntos: number;
+    fecha_completado: string | null;
+    ultima_actividad: string | null;
+    tieneSolucion: boolean;
+    estado_tablero: string | null;
+}
+
+export interface DetalleSolucionesGrupo {
+    ejercicio: {
+        id: number;
+        grupo_id: number;
+        titulo: string;
+        enunciado: string;
+        tipo: TipoEjercicioGrupo;
+        puntos: number;
+    };
+    soluciones: SolucionEstudianteGrupo[];
+}
+
+export interface DatosCrearEjercicioGrupo {
+    titulo: string;
+    enunciado: string;
+    tipo: TipoEjercicioGrupo;
+    puntos: number;
 }

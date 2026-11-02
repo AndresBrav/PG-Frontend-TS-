@@ -60,8 +60,8 @@ const AppHeader = () => {
         setPerfilAbierto(false);
     }, [location.pathname]);
 
-    // Mientras haya un panel modal abierto, evitamos que la página de fondo
-    // siga desplazándose y permitimos cerrarlo con Escape.
+    // Mientras haya un panel modal abierto, evitamos que la pÃ¡gina de fondo
+    // siga desplazÃ¡ndose y permitimos cerrarlo con Escape.
     useEffect(() => {
         if (!perfilAbierto && !avatarAbierto) return;
 
@@ -198,8 +198,8 @@ const AppHeader = () => {
             setErrorAvatar(
                 obtenerMensajeError(
                     errorDesconocido,
-                    'No se pudo actualizar el avatar',
-                ),
+                    'No se pudo actualizar el avatar'
+                )
             );
         } finally {
             setGuardandoAvatar(false);
@@ -213,12 +213,13 @@ const AppHeader = () => {
 
     const enlaces: { to: string; texto: string }[] = [
         { to: '/dashboard', texto: 'Inicio' },
+        { to: '/grupos', texto: 'Grupos' },
         { to: '/ejercicios', texto: 'Ejercicios' },
         { to: '/ejercicios-ia', texto: 'Ejercicios IA' },
     ];
 
     if (usuario?.rol === 'admin') {
-        enlaces.push({ to: '/admin', texto: 'Administración' });
+        enlaces.push({ to: '/admin', texto: 'AdministraciÃ³n' });
     }
 
     if (!usuario) return null;
@@ -286,7 +287,9 @@ const AppHeader = () => {
                                 >
                                     <div
                                         className="w-[min(90vw,360px)] rounded-2xl border border-white/10 bg-[#202020] p-4 text-white shadow-2xl"
-                                        onClick={(evento) => evento.stopPropagation()}
+                                        onClick={(evento) =>
+                                            evento.stopPropagation()
+                                        }
                                     >
                                         <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2">
                                             <span className="text-xs font-bold uppercase tracking-wider text-[#FF7C02]">
@@ -294,7 +297,9 @@ const AppHeader = () => {
                                             </span>
                                             <button
                                                 type="button"
-                                                onClick={() => setPanelAbierto(null)}
+                                                onClick={() =>
+                                                    setPanelAbierto(null)
+                                                }
                                                 className="rounded-lg bg-white/10 px-2 py-1 text-xs font-semibold text-gray-300 transition hover:bg-white/20 hover:text-white"
                                             >
                                                 Cerrar
@@ -315,56 +320,67 @@ const AppHeader = () => {
                                                     Sin puntuaciones registradas
                                                 </p>
                                             ) : (
-                                                scoreboard.map((jugador, indice) => {
-                                                    let estilo =
-                                                        'border-white/10 bg-white/5';
-                                                    let insignia =
-                                                        'bg-white/10 text-gray-300';
+                                                scoreboard.map(
+                                                    (jugador, indice) => {
+                                                        let estilo =
+                                                            'border-white/10 bg-white/5';
+                                                        let insignia =
+                                                            'bg-white/10 text-gray-300';
 
-                                                    if (indice === 0) {
-                                                        estilo =
-                                                            'border-amber-400/30 bg-amber-400/10';
-                                                        insignia =
-                                                            'bg-amber-400 text-black';
-                                                    } else if (indice === 1) {
-                                                        estilo =
-                                                            'border-slate-300/20 bg-slate-300/10';
-                                                        insignia =
-                                                            'bg-slate-300 text-black';
-                                                    } else if (indice === 2) {
-                                                        estilo =
-                                                            'border-amber-700/30 bg-amber-700/15';
-                                                        insignia =
-                                                            'bg-amber-700 text-amber-100';
-                                                    }
+                                                        if (indice === 0) {
+                                                            estilo =
+                                                                'border-amber-400/30 bg-amber-400/10';
+                                                            insignia =
+                                                                'bg-amber-400 text-black';
+                                                        } else if (
+                                                            indice === 1
+                                                        ) {
+                                                            estilo =
+                                                                'border-slate-300/20 bg-slate-300/10';
+                                                            insignia =
+                                                                'bg-slate-300 text-black';
+                                                        } else if (
+                                                            indice === 2
+                                                        ) {
+                                                            estilo =
+                                                                'border-amber-700/30 bg-amber-700/15';
+                                                            insignia =
+                                                                'bg-amber-700 text-amber-100';
+                                                        }
 
-                                                    return (
-                                                        <div
-                                                            key={`${jugador.username}-${indice}`}
-                                                            className={`flex items-center justify-between rounded-xl border p-2.5 ${estilo}`}
-                                                        >
-                                                            <div className="flex min-w-0 items-center gap-2">
-                                                                <span
-                                                                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${insignia}`}
-                                                                >
-                                                                    {indice + 1}
-                                                                </span>
-                                                                <span className="truncate text-xs font-semibold text-gray-200">
-                                                                    {jugador.username}
+                                                        return (
+                                                            <div
+                                                                key={`${jugador.username}-${indice}`}
+                                                                className={`flex items-center justify-between rounded-xl border p-2.5 ${estilo}`}
+                                                            >
+                                                                <div className="flex min-w-0 items-center gap-2">
+                                                                    <span
+                                                                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${insignia}`}
+                                                                    >
+                                                                        {indice +
+                                                                            1}
+                                                                    </span>
+                                                                    <span className="truncate text-xs font-semibold text-gray-200">
+                                                                        {
+                                                                            jugador.username
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                <span className="ml-3 shrink-0 text-xs font-bold text-[#FF7C02]">
+                                                                    {
+                                                                        jugador.puntuacionTotal
+                                                                    }{' '}
+                                                                    pts
                                                                 </span>
                                                             </div>
-                                                            <span className="ml-3 shrink-0 text-xs font-bold text-[#FF7C02]">
-                                                                {jugador.puntuacionTotal}{' '}
-                                                                pts
-                                                            </span>
-                                                        </div>
-                                                    );
-                                                })
+                                                        );
+                                                    }
+                                                )
                                             )}
                                         </div>
                                     </div>
                                 </div>,
-                                document.body,
+                                document.body
                             )}
                     </div>
 
@@ -444,15 +460,15 @@ const AppHeader = () => {
 
                                                     void enviarIdNotificacion(
                                                         noti.id,
-                                                        claveAcceso,
+                                                        claveAcceso
                                                     );
                                                     setNotificaciones(
                                                         (anteriores) =>
                                                             anteriores.filter(
                                                                 (item) =>
                                                                     item.id !==
-                                                                    noti.id,
-                                                            ),
+                                                                    noti.id
+                                                            )
                                                     );
                                                 }}
                                                 className="rounded-xl border border-white/10 bg-white/5 p-3 text-left transition hover:border-[#FF7C02]/40 hover:bg-[#FF7C02]/10"
@@ -462,7 +478,7 @@ const AppHeader = () => {
                                                 </p>
                                                 <p className="mt-1 text-xs text-gray-400">
                                                     {formatearFechaHora(
-                                                        noti.fecha,
+                                                        noti.fecha
                                                     )}
                                                 </p>
                                             </button>
@@ -523,79 +539,83 @@ const AppHeader = () => {
                             aria-modal="true"
                             aria-label="Mi perfil"
                         >
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-white">
-                                Mi perfil
-                            </h2>
-                            <button
-                                type="button"
-                                onClick={() => setPerfilAbierto(false)}
-                                className="rounded-lg p-2 text-gray-400 transition hover:bg-white/10 hover:text-white"
-                                aria-label="Cerrar perfil"
-                            >
-                                <svg
-                                    className="h-5 w-5"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-bold text-white">
+                                    Mi perfil
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setPerfilAbierto(false)}
+                                    className="rounded-lg p-2 text-gray-400 transition hover:bg-white/10 hover:text-white"
+                                    aria-label="Cerrar perfil"
                                 >
-                                    <path d="M18 6L6 18M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="mt-8 flex flex-col items-center text-center">
-                            <img
-                                src={usuario.avatarUrl || profileIcon}
-                                alt="Avatar del usuario"
-                                className="h-28 w-28 rounded-full border-4 border-[#FF7C02]/40 object-cover"
-                            />
-                            <h3 className="mt-4 text-2xl font-extrabold text-white">
-                                {usuario.username}
-                            </h3>
-                            <p className="mt-1 text-sm text-gray-400">
-                                Código: {usuario.codigo}
-                            </p>
-                            <div className="mt-3">
-                                <EtiquetaRol rol={usuario.rol} />
+                                    <svg
+                                        className="h-5 w-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                    >
+                                        <path d="M18 6L6 18M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
-                        </div>
 
-                        <div className="mt-8 grid grid-cols-2 gap-3">
-                            <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
-                                <p className="text-xs text-gray-400">Puntos</p>
-                                <p className="mt-1 text-xl font-bold text-[#FF7C02]">
-                                    {puntuacion}
+                            <div className="mt-8 flex flex-col items-center text-center">
+                                <img
+                                    src={usuario.avatarUrl || profileIcon}
+                                    alt="Avatar del usuario"
+                                    className="h-28 w-28 rounded-full border-4 border-[#FF7C02]/40 object-cover"
+                                />
+                                <h3 className="mt-4 text-2xl font-extrabold text-white">
+                                    {usuario.username}
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-400">
+                                    Codigo: {usuario.codigo}
                                 </p>
+                                <div className="mt-3">
+                                    <EtiquetaRol rol={usuario.rol} />
+                                </div>
                             </div>
-                            <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
-                                <p className="text-xs text-gray-400">Edad</p>
-                                <p className="mt-1 text-xl font-bold text-white">
-                                    {usuario.edad}
-                                </p>
-                            </div>
-                        </div>
 
-                        <div className="mt-8 flex flex-col gap-3">
-                            <button
-                                type="button"
-                                onClick={abrirSelectorAvatar}
-                                className="rounded-xl border border-white/15 px-4 py-3 font-semibold text-white transition hover:bg-white/10"
-                            >
-                                Cambiar avatar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={salir}
-                                className="rounded-xl bg-red-500/15 px-4 py-3 font-semibold text-red-300 transition hover:bg-red-500/25"
-                            >
-                                Cerrar sesión
-                            </button>
-                        </div>
+                            <div className="mt-8 grid grid-cols-2 gap-3">
+                                <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
+                                    <p className="text-xs text-gray-400">
+                                        Puntos
+                                    </p>
+                                    <p className="mt-1 text-xl font-bold text-[#FF7C02]">
+                                        {puntuacion}
+                                    </p>
+                                </div>
+                                <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
+                                    <p className="text-xs text-gray-400">
+                                        Edad
+                                    </p>
+                                    <p className="mt-1 text-xl font-bold text-white">
+                                        {usuario.edad}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 flex flex-col gap-3">
+                                <button
+                                    type="button"
+                                    onClick={abrirSelectorAvatar}
+                                    className="rounded-xl border border-white/15 px-4 py-3 font-semibold text-white transition hover:bg-white/10"
+                                >
+                                    Cambiar avatar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={salir}
+                                    className="rounded-xl bg-red-500/15 px-4 py-3 font-semibold text-red-300 transition hover:bg-red-500/25"
+                                >
+                                    Cerrar sesion
+                                </button>
+                            </div>
                         </aside>
                     </div>,
-                    document.body,
+                    document.body
                 )}
 
             {avatarAbierto &&
@@ -611,93 +631,95 @@ const AppHeader = () => {
                             aria-modal="true"
                             aria-label="Elegir avatar"
                         >
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-lg font-bold text-white">
-                                Elige tu avatar
-                            </h2>
-                            <button
-                                type="button"
-                                onClick={() => setAvatarAbierto(false)}
-                                className="rounded-lg p-2 text-gray-400 transition hover:bg-white/10 hover:text-white"
-                                aria-label="Cerrar selector de avatar"
-                            >
-                                <svg
-                                    className="h-5 w-5"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-bold text-white">
+                                    Elige tu avatar
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setAvatarAbierto(false)}
+                                    className="rounded-lg p-2 text-gray-400 transition hover:bg-white/10 hover:text-white"
+                                    aria-label="Cerrar selector de avatar"
                                 >
-                                    <path d="M18 6L6 18M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4">
-                            {avatars.map((avatar) => {
-                                const esActual =
-                                    selectedAvatar === null &&
-                                    usuario.avatarUrl === avatar.url;
-                                const seleccionado =
-                                    selectedAvatar === avatar.id || esActual;
-
-                                return (
-                                    <button
-                                        type="button"
-                                        key={avatar.id}
-                                        onClick={() =>
-                                            setSelectedAvatar(avatar.id)
-                                        }
-                                        className={`overflow-hidden rounded-2xl border-2 p-1 transition ${
-                                            seleccionado
-                                                ? 'border-[#FF7C02] bg-[#FF7C02]/10'
-                                                : 'border-white/10 bg-white/5 hover:border-white/30'
-                                        }`}
-                                        aria-label={`Seleccionar avatar ${avatar.id}`}
+                                    <svg
+                                        className="h-5 w-5"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
                                     >
-                                        <img
-                                            src={avatar.url}
-                                            alt={`Avatar ${avatar.id}`}
-                                            className="aspect-square w-full rounded-xl object-cover"
-                                        />
-                                    </button>
-                                );
-                            })}
-                        </div>
+                                        <path d="M18 6L6 18M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
 
-                        {errorAvatar && (
-                            <p className="mt-4 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-                                {errorAvatar}
-                            </p>
-                        )}
+                            <div className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4">
+                                {avatars.map((avatar) => {
+                                    const esActual =
+                                        selectedAvatar === null &&
+                                        usuario.avatarUrl === avatar.url;
+                                    const seleccionado =
+                                        selectedAvatar === avatar.id ||
+                                        esActual;
 
-                        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                            <button
-                                type="button"
-                                onClick={() => setAvatarAbierto(false)}
-                                className="rounded-xl border border-white/15 px-4 py-2.5 font-semibold text-white transition hover:bg-white/10"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    void guardarAvatar();
-                                }}
-                                disabled={
-                                    selectedAvatar === null || guardandoAvatar
-                                }
-                                className="rounded-xl bg-[#FF7C02] px-4 py-2.5 font-bold text-black transition hover:bg-[#ff8f2b] disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {guardandoAvatar
-                                    ? 'Guardando...'
-                                    : 'Guardar avatar'}
-                            </button>
+                                    return (
+                                        <button
+                                            type="button"
+                                            key={avatar.id}
+                                            onClick={() =>
+                                                setSelectedAvatar(avatar.id)
+                                            }
+                                            className={`overflow-hidden rounded-2xl border-2 p-1 transition ${
+                                                seleccionado
+                                                    ? 'border-[#FF7C02] bg-[#FF7C02]/10'
+                                                    : 'border-white/10 bg-white/5 hover:border-white/30'
+                                            }`}
+                                            aria-label={`Seleccionar avatar ${avatar.id}`}
+                                        >
+                                            <img
+                                                src={avatar.url}
+                                                alt={`Avatar ${avatar.id}`}
+                                                className="aspect-square w-full rounded-xl object-cover"
+                                            />
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {errorAvatar && (
+                                <p className="mt-4 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                                    {errorAvatar}
+                                </p>
+                            )}
+
+                            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setAvatarAbierto(false)}
+                                    className="rounded-xl border border-white/15 px-4 py-2.5 font-semibold text-white transition hover:bg-white/10"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        void guardarAvatar();
+                                    }}
+                                    disabled={
+                                        selectedAvatar === null ||
+                                        guardandoAvatar
+                                    }
+                                    className="rounded-xl bg-[#FF7C02] px-4 py-2.5 font-bold text-black transition hover:bg-[#ff8f2b] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {guardandoAvatar
+                                        ? 'Guardando...'
+                                        : 'Guardar avatar'}
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                </div>,
-                document.body,
-            )}
+                    </div>,
+                    document.body
+                )}
         </header>
     );
 };

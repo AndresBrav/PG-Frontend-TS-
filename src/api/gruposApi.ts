@@ -1,6 +1,11 @@
 import { api, configConToken } from './http';
 import type {
+    DatosCrearEjercicioGrupo,
+    DetalleSolucionesGrupo,
+    EjercicioGrupoEstudiante,
+    EjercicioGrupoProfesor,
     GrupoCreado,
+    GrupoDetalle,
     GrupoEstudiante,
     GrupoProfesor,
 } from '../types/dominio';
@@ -65,6 +70,135 @@ export const eliminarGrupo = async (
 ): Promise<void> => {
     await api.delete(
         `/profesor/grupos/${grupoId}`,
+        configConToken(clave),
+    );
+};
+
+export const obtenerDetalleGrupo = async (
+    clave: string,
+    grupoId: number,
+): Promise<GrupoDetalle> => {
+    const { data } = await api.get<GrupoDetalle>(
+        `/profesor/grupos/${grupoId}`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+// -------------------------------------------------------------
+// Ejercicios de Grupo (Profesor)
+// -------------------------------------------------------------
+
+export const listarEjerciciosGrupoProfesor = async (
+    clave: string,
+    grupoId: number,
+): Promise<EjercicioGrupoProfesor[]> => {
+    const { data } = await api.get<EjercicioGrupoProfesor[]>(
+        `/profesor/grupos/${grupoId}/ejercicios`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const crearEjercicioGrupo = async (
+    clave: string,
+    grupoId: number,
+    datos: DatosCrearEjercicioGrupo,
+): Promise<EjercicioGrupoProfesor> => {
+    const { data } = await api.post<EjercicioGrupoProfesor>(
+        `/profesor/grupos/${grupoId}/ejercicios`,
+        datos,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const eliminarEjercicioGrupo = async (
+    clave: string,
+    ejercicioId: number,
+): Promise<void> => {
+    await api.delete(
+        `/profesor/ejercicios/${ejercicioId}`,
+        configConToken(clave),
+    );
+};
+
+export const listarSolucionesEjercicio = async (
+    clave: string,
+    ejercicioId: number,
+    estudianteId?: number,
+): Promise<DetalleSolucionesGrupo> => {
+    const query = estudianteId ? `?estudianteId=${estudianteId}` : '';
+    const { data } = await api.get<DetalleSolucionesGrupo>(
+        `/profesor/ejercicios/${ejercicioId}/soluciones${query}`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const calificarEntrega = async (
+    clave: string,
+    ejercicioId: number,
+    estudianteId: number,
+    puntos: number,
+): Promise<{ message: string }> => {
+    const { data } = await api.put<{ message: string }>(
+        `/profesor/ejercicios/${ejercicioId}/calificar/${estudianteId}`,
+        { puntos },
+        configConToken(clave),
+    );
+    return data;
+};
+
+// -------------------------------------------------------------
+// Ejercicios de Grupo (Estudiante)
+// -------------------------------------------------------------
+
+export const listarEjerciciosGrupoEstudiante = async (
+    clave: string,
+    grupoId: number,
+): Promise<EjercicioGrupoEstudiante[]> => {
+    const { data } = await api.get<EjercicioGrupoEstudiante[]>(
+        `/estudiante/grupos/${grupoId}/ejercicios`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const obtenerEjercicioEstudiante = async (
+    clave: string,
+    grupoId: number,
+    ejercicioId: number,
+): Promise<EjercicioGrupoEstudiante> => {
+    const { data } = await api.get<EjercicioGrupoEstudiante>(
+        `/estudiante/grupos/${grupoId}/ejercicios/${ejercicioId}`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const guardarEstadoEjercicioEstudiante = async (
+    clave: string,
+    grupoId: number,
+    ejercicioId: number,
+    estadoTablero: any,
+): Promise<void> => {
+    await api.put(
+        `/estudiante/grupos/${grupoId}/ejercicios/${ejercicioId}/estado`,
+        { estado_tablero: estadoTablero },
+        configConToken(clave),
+    );
+};
+
+export const entregarEjercicioEstudiante = async (
+    clave: string,
+    grupoId: number,
+    ejercicioId: number,
+    estadoTablero: any,
+): Promise<void> => {
+    await api.post(
+        `/estudiante/grupos/${grupoId}/ejercicios/${ejercicioId}/completar`,
+        { estado_tablero: estadoTablero },
         configConToken(clave),
     );
 };

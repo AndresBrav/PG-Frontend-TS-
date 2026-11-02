@@ -34,6 +34,10 @@ import EjercicioP10 from './pages/Games/Nivel2/EjercicioP10';
 import DesignBoard from './pages/Games/GeneradosPorIA/DesignBoard';
 import DashboardIA from './pages/Games/GeneradosPorIA/DashboardIA';
 import EditingBoard from './pages/Games/GeneradosPorIA/EditingBoard/EditingBoard';
+import GruposInicio from './pages/Grupos/GruposInicio';
+import GrupoDetalle from './pages/Grupos/GrupoDetalle';
+import TableroDiagramaGrupo from './pages/Grupos/tableros/TableroDiagramaGrupo';
+import TableroPseudocodigoGrupo from './pages/Grupos/tableros/TableroPseudocodigoGrupo';
 
 function App() {
     return (
@@ -149,6 +153,22 @@ function App() {
                                     path="/editingboard"
                                     element={<EditingBoard />}
                                 />
+                                <Route
+                                    path="/grupos"
+                                    element={<GruposInicio />}
+                                />
+                                <Route
+                                    path="/grupos/:id"
+                                    element={<GrupoDetalle />}
+                                />
+                                <Route
+                                    path="/grupos/:id/ejercicios/:ejercicioId/diagrama"
+                                    element={<TableroDiagramaGrupo />}
+                                />
+                                <Route
+                                    path="/grupos/:id/ejercicios/:ejercicioId/pseudocodigo"
+                                    element={<TableroPseudocodigoGrupo />}
+                                />
 
                                 <Route
                                     element={
@@ -158,7 +178,7 @@ function App() {
                                     }
                                 >
                                     <Route
-                                        path="/grupos/:id"
+                                        path="/grupos/:id/reporte"
                                         element={<DetalleGrupo />}
                                     />
                                     <Route
