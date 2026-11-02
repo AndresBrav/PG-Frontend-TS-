@@ -21,7 +21,7 @@ export const traerUsuarios = async (
             {
                 headers: {
                     Authorization: clave,
-                    "ngrok-skip-browser-warning": "true", // ← ESTA LÍNEA ES LA CLAVE
+                    "ngrok-skip-browser-warning": "true",
                 },
             }
         );
@@ -37,19 +37,20 @@ export const traerUsuarios = async (
 };
 
 export const traerPuntuacion = async (
-    clave: string
+    clave: string,
+    tipo?: 'fijos' | 'ia' | 'total'
 ): Promise<Puntos | null> => {
     try {
+        const query = tipo ? `?tipo=${tipo}` : '';
         const response = await axios.get<Puntos>(
-            `${API}/usuarios/traerPuntuacion`,
+            `${API}/usuarios/traerPuntuacion${query}`,
             {
                 headers: {
                     Authorization: clave,
-                    "ngrok-skip-browser-warning": "true", // ← ESTA LÍNEA ES LA CLAVE
+                    "ngrok-skip-browser-warning": "true",
                 },
             }
         );
-        console.log(response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching score:", error);
@@ -81,19 +82,17 @@ export const traerJuegosCompletados = async (
 };
 
 export const actualizarFotoPerfil = async (clave: string, idAvatar: string) => {
-    console.log("la clave de acceso es ", clave);
     try {
         const response = await axios.put(
-            `${API}/usuarios/actualizarPefilFoto/${idAvatar}`, // ruta correcta
-            {}, // body vacío
+            `${API}/usuarios/actualizarPefilFoto/${idAvatar}`,
+            {},
             {
                 headers: {
-                    Authorization: clave, // 🔑 agrega Bearer si tu backend lo espera
+                    Authorization: clave,
                     "ngrok-skip-browser-warning": "true",
                 },
             }
         );
-
         console.log(response.data);
     } catch (error: any) {
         console.error(
@@ -110,17 +109,17 @@ export const incrementarPuntuacionApi = async (
 ) => {
     try {
         const response = await axios.put(
-            `${API}/usuarios/incrpuntos/${juego_id}`, // ruta correcta
-            {}, // body vacío
+            `${API}/usuarios/incrpuntos/${juego_id}`,
+            {},
             {
                 headers: {
-                    Authorization: clave, // 🔑 agrega Bearer si tu backend lo espera
+                    Authorization: clave,
                     "ngrok-skip-browser-warning": "true",
                 },
             }
         );
         console.log(response.data);
     } catch (error: any) {
-        ("error fetching data:");
+        console.error("error fetching data:", error);
     }
 };

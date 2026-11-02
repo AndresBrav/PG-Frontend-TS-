@@ -269,3 +269,12 @@ export interface DatosCrearEjercicioGrupo {
     tipo: TipoEjercicioGrupo;
     puntos: number;
 }
+
+export interface EstudianteRankingGrupo {
+    id: number;
+    codigo: string;
+    username: string;
+    puntosTotales: number;
+    completados: number;
+    totalEjercicios: number;
+}

@@ -16,7 +16,6 @@ export const traerNotificaciones = async (
     clave: string
 ): Promise<RespuestaNotificaciones | null> => {
     try {
-        // Axios devuelve un objeto AxiosResponse, y el dato útil está en .data
         const response = await axios.get<RespuestaNotificaciones>(
             `${API}/notificaciones/consultar`,
             {
@@ -27,9 +26,7 @@ export const traerNotificaciones = async (
             }
         );
 
-        // response.data ya es de tipo RespuestaNotificaciones
         if (!response.data) return null;
-        console.log('el arreglo que se trae es ', response.data.arreglonoti);
         const { msg, arreglonoti } = response.data;
         return { msg, arreglonoti };
     } catch (error) {
@@ -39,20 +36,17 @@ export const traerNotificaciones = async (
 };
 
 export const enviarIdNotificacion = async (id: number, claveAcceso: string) => {
-    console.log('la clave de acceso es ', claveAcceso);
     try {
-        const response = await axios.put(
-            `${API}/notificaciones/actualizar/${id}`, // ruta correcta
-            {}, // body vacío
+        await axios.put(
+            `${API}/notificaciones/actualizar/${id}`,
+            {},
             {
                 headers: {
-                    Authorization: claveAcceso, // 🔑 agrega Bearer si tu backend lo espera
+                    Authorization: claveAcceso,
                     'ngrok-skip-browser-warning': 'true',
                 },
             }
         );
-
-        console.log('la respuesta del servidor es ', response.data);
     } catch (error: any) {
         console.error(
             'error fetching data:',
@@ -68,11 +62,13 @@ export interface PuntuacionUsuario {
 }
 
 export const traerTableroPuntuacion = async (
-    clave: string
+    clave: string,
+    tipo?: 'fijos' | 'ia' | 'total'
 ): Promise<PuntuacionUsuario[] | null> => {
     try {
+        const query = tipo ? `?tipo=${tipo}` : '';
         const response = await axios.get<PuntuacionUsuario[]>(
-            `${API}/notificaciones/puntuacion`,
+            `${API}/notificaciones/puntuacion${query}`,
             {
                 headers: {
                     Authorization: clave,

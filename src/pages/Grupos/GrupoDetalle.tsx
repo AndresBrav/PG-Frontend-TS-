@@ -10,12 +10,14 @@ import {
     listarEjerciciosGrupoProfesor,
     listarMisGrupos,
     obtenerDetalleGrupo,
+    obtenerRankingGrupo,
 } from '../../api/gruposApi';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
 import type {
     EjercicioGrupoEstudiante,
     EjercicioGrupoProfesor,
+    EstudianteRankingGrupo,
     GrupoDetalle as IGrupoDetalle,
     GrupoEstudiante,
     TipoEjercicioGrupo,
@@ -36,7 +38,7 @@ export const GrupoDetalle = () => {
     // Estados para Profesor
     const [detalleGrupoProfesor, setDetalleGrupoProfesor] = useState<IGrupoDetalle | null>(null);
     const [ejerciciosProfesor, setEjerciciosProfesor] = useState<EjercicioGrupoProfesor[]>([]);
-    const [tabProfesor, setTabProfesor] = useState<'ejercicios' | 'estudiantes'>('ejercicios');
+    const [tabProfesor, setTabProfesor] = useState<'ejercicios' | 'estudiantes' | 'ranking'>('ejercicios');
     const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
 
     // Modal de Revisar
@@ -50,6 +52,11 @@ export const GrupoDetalle = () => {
     // Estados para Estudiante
     const [infoGrupoEstudiante, setInfoGrupoEstudiante] = useState<GrupoEstudiante | null>(null);
     const [ejerciciosEstudiante, setEjerciciosEstudiante] = useState<EjercicioGrupoEstudiante[]>([]);
+    const [tabEstudiante, setTabEstudiante] = useState<'ejercicios' | 'ranking'>('ejercicios');
+
+    // Ranking del Grupo (Mejores notas)
+    const [rankingGrupo, setRankingGrupo] = useState<EstudianteRankingGrupo[]>([]);
+    const [cargandoRanking, setCargandoRanking] = useState(false);
 
     // Estados generales
     const [cargando, setCargando] = useState(true);
@@ -67,6 +74,19 @@ export const GrupoDetalle = () => {
         },
         [cerrarSesion, navigate],
     );
+
+    const cargarRanking = useCallback(async () => {
+        if (!claveAcceso || !grupoId) return;
+        setCargandoRanking(true);
+        try {
+            const data = await obtenerRankingGrupo(claveAcceso, grupoId, esProfesorOAdmin);
+            setRankingGrupo(data);
+        } catch (err) {
+            console.error('Error cargando ranking del grupo:', err);
+        } finally {
+            setCargandoRanking(false);
+        }
+    }, [claveAcceso, grupoId, esProfesorOAdmin]);
 
     const cargarDatos = useCallback(async () => {
         if (!claveAcceso || !usuario || !grupoId) return;
@@ -90,13 +110,14 @@ export const GrupoDetalle = () => {
                 setInfoGrupoEstudiante(actual);
                 setEjerciciosEstudiante(ejercicios);
             }
+            void cargarRanking();
         } catch (err) {
             if (manejarErrorSesion(err)) return;
             setError(obtenerMensajeError(err, 'No se pudo cargar la información del grupo'));
         } finally {
             setCargando(false);
         }
-    }, [claveAcceso, usuario, grupoId, esProfesorOAdmin, manejarErrorSesion]);
+    }, [claveAcceso, usuario, grupoId, esProfesorOAdmin, manejarErrorSesion, cargarRanking]);
 
     useEffect(() => {
         void cargarDatos();
@@ -128,6 +149,7 @@ export const GrupoDetalle = () => {
         try {
             await eliminarEjercicioGrupo(claveAcceso, ejercicio.id);
             setEjerciciosProfesor((prev) => prev.filter((e) => e.id !== ejercicio.id));
+            void cargarRanking();
             void Swal.fire('Eliminado', 'El ejercicio ha sido eliminado.', 'success');
         } catch (err) {
             if (manejarErrorSesion(err)) return;
@@ -142,6 +164,122 @@ export const GrupoDetalle = () => {
     const codigoGrupo = esProfesorOAdmin
         ? detalleGrupoProfesor?.codigo ?? ''
         : infoGrupoEstudiante?.codigo ?? '';
+
+    // Render de la pestaña de Ranking / Mejores notas
+    const renderRanking = () => {
+        if (cargandoRanking) {
+            return (
+                <div className="py-12 text-center text-sm text-gray-400">
+                    Cargando mejores notas del grupo...
+                </div>
+            );
+        }
+
+        if (rankingGrupo.length === 0) {
+            return (
+                <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-12 text-center">
+                    <p className="text-base font-semibold text-white">
+                        Aún no hay puntuaciones registradas en este grupo
+                    </p>
+                    <p className="mt-1 text-sm text-gray-400">
+                        Los estudiantes aparecerán aquí a medida que entreguen ejercicios y reciban su nota.
+                    </p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            <span>🏆</span> Mejores Notas del Grupo
+                        </h2>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            Clasificación de los estudiantes basada exclusivamente en los puntos de este grupo.
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => void cargarRanking()}
+                        className="rounded-lg bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-semibold text-gray-300 transition"
+                    >
+                        🔄 Actualizar
+                    </button>
+                </div>
+
+                {/* Tabla de Ranking */}
+                <div className="rounded-2xl border border-white/10 bg-[#181818] overflow-hidden shadow-xl">
+                    <table className="w-full text-left text-sm text-gray-300">
+                        <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
+                            <tr>
+                                <th className="py-3 px-4 w-20 text-center">Lugar</th>
+                                <th className="py-3 px-4">Estudiante</th>
+                                <th className="py-3 px-4">Código</th>
+                                <th className="py-3 px-4 text-center">Ejercicios</th>
+                                <th className="py-3 px-4 text-right">Puntuación Total</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {rankingGrupo.map((est, index) => {
+                                let estiloFila = 'hover:bg-white/5';
+                                let badgeLugar = (
+                                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-gray-400">
+                                        {index + 1}º
+                                    </span>
+                                );
+
+                                if (index === 0) {
+                                    estiloFila = 'bg-amber-400/5 hover:bg-amber-400/10';
+                                    badgeLugar = (
+                                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-black text-sm font-black shadow-md shadow-amber-400/20">
+                                            🥇 1º
+                                        </span>
+                                    );
+                                } else if (index === 1) {
+                                    estiloFila = 'bg-slate-300/5 hover:bg-slate-300/10';
+                                    badgeLugar = (
+                                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-black text-sm font-black shadow-md shadow-slate-300/20">
+                                            🥈 2º
+                                        </span>
+                                    );
+                                } else if (index === 2) {
+                                    estiloFila = 'bg-amber-700/10 hover:bg-amber-700/15';
+                                    badgeLugar = (
+                                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-700 text-amber-100 text-sm font-black shadow-md shadow-amber-700/20">
+                                            🥉 3º
+                                        </span>
+                                    );
+                                }
+
+                                return (
+                                    <tr key={est.id} className={estiloFila}>
+                                        <td className="py-3.5 px-4 text-center">
+                                            {badgeLugar}
+                                        </td>
+                                        <td className="py-3.5 px-4 font-semibold text-white">
+                                            {est.username}
+                                        </td>
+                                        <td className="py-3.5 px-4 font-mono text-xs text-gray-400">
+                                            {est.codigo}
+                                        </td>
+                                        <td className="py-3.5 px-4 text-center text-xs">
+                                            <span className="rounded-full bg-white/5 px-2.5 py-1 font-semibold text-gray-300">
+                                                {est.completados} / {est.totalEjercicios}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 px-4 text-right font-mono font-bold text-base text-amber-400">
+                                            {est.puntosTotales} pts
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <AppShell>
@@ -226,11 +364,29 @@ export const GrupoDetalle = () => {
                             >
                                 Estudiantes Inscritos ({detalleGrupoProfesor?.estudiantes?.length ?? 0})
                             </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setTabProfesor('ranking');
+                                    void cargarRanking();
+                                }}
+                                className={`text-sm font-bold transition pb-1 border-b-2 ${
+                                    tabProfesor === 'ranking'
+                                        ? 'border-[#FF7C02] text-[#FF9D3D]'
+                                        : 'border-transparent text-gray-400 hover:text-white'
+                                }`}
+                            >
+                                🏆 Mejores Notas
+                            </button>
                         </div>
 
                         {cargando ? (
                             <div className="py-12 text-center text-sm text-gray-400">
                                 Cargando información del grupo...
+                            </div>
+                        ) : tabProfesor === 'ranking' ? (
+                            <div className="mt-6">
+                                {renderRanking()}
                             </div>
                         ) : tabProfesor === 'ejercicios' ? (
                             <div className="mt-6">
@@ -367,15 +523,42 @@ export const GrupoDetalle = () => {
                 {/* VISTA ESTUDIANTE */}
                 {!esProfesorOAdmin && (
                     <div className="mt-8">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-bold text-white">
+                        {/* Pestañas para estudiante */}
+                        <div className="flex items-center gap-4 border-b border-white/10 pb-3 mb-6">
+                            <button
+                                type="button"
+                                onClick={() => setTabEstudiante('ejercicios')}
+                                className={`text-sm font-bold transition pb-1 border-b-2 ${
+                                    tabEstudiante === 'ejercicios'
+                                        ? 'border-emerald-500 text-emerald-400'
+                                        : 'border-transparent text-gray-400 hover:text-white'
+                                }`}
+                            >
                                 Ejercicios Asignados ({ejerciciosEstudiante.length})
-                            </h2>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setTabEstudiante('ranking');
+                                    void cargarRanking();
+                                }}
+                                className={`text-sm font-bold transition pb-1 border-b-2 ${
+                                    tabEstudiante === 'ranking'
+                                        ? 'border-emerald-500 text-emerald-400'
+                                        : 'border-transparent text-gray-400 hover:text-white'
+                                }`}
+                            >
+                                🏆 Mejores Notas
+                            </button>
                         </div>
 
                         {cargando ? (
                             <div className="py-12 text-center text-sm text-gray-400">
                                 Cargando ejercicios...
+                            </div>
+                        ) : tabEstudiante === 'ranking' ? (
+                            <div className="mt-6">
+                                {renderRanking()}
                             </div>
                         ) : ejerciciosEstudiante.length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-12 text-center">

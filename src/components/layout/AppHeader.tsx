@@ -51,6 +51,29 @@ const AppHeader = () => {
     const [errorAvatar, setErrorAvatar] = useState<string | null>(null);
     const headerRef = useRef<HTMLHeaderElement>(null);
 
+    const estaEnGrupos = location.pathname.startsWith('/grupos');
+    const estaEnIA =
+        location.pathname.startsWith('/ejercicios-ia') ||
+        location.pathname.startsWith('/dashboardIA') ||
+        location.pathname.startsWith('/designboard') ||
+        location.pathname.startsWith('/editingboard');
+    const estaEnFijos =
+        !estaEnIA &&
+        (location.pathname.startsWith('/ejercicios') ||
+            /^\/ejercicio\d/.test(location.pathname));
+
+    const tipoPuntuacion: 'fijos' | 'ia' | 'total' = estaEnFijos
+        ? 'fijos'
+        : estaEnIA
+          ? 'ia'
+          : 'total';
+
+    const tituloTablero = estaEnFijos
+        ? 'Puntuaciones - Ejercicios'
+        : estaEnIA
+          ? 'Puntuaciones - Ejercicios IA'
+          : 'Tablero de puntuaciones';
+
     useEffect(() => {
         setPuntuacion(usuario?.puntos ?? 0);
     }, [usuario?.puntos]);
@@ -110,7 +133,7 @@ const AppHeader = () => {
         const cargarResumen = async () => {
             const [dataNotificaciones, dataPuntuacion] = await Promise.all([
                 traerNotificaciones(claveAcceso),
-                traerPuntuacion(claveAcceso),
+                traerPuntuacion(claveAcceso, tipoPuntuacion),
             ]);
 
             if (!activo) return;
@@ -135,7 +158,7 @@ const AppHeader = () => {
         if (!claveAcceso) return;
 
         setCargandoScoreboard(true);
-        const data = await traerTableroPuntuacion(claveAcceso);
+        const data = await traerTableroPuntuacion(claveAcceso, tipoPuntuacion);
 
         if (data) {
             setScoreboard(data);
@@ -258,6 +281,7 @@ const AppHeader = () => {
                 </nav>
 
                 <div className="flex items-center gap-1 sm:gap-3">
+                    {!estaEnGrupos && (
                     <div className="relative">
                         <button
                             type="button"
@@ -293,7 +317,7 @@ const AppHeader = () => {
                                     >
                                         <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2">
                                             <span className="text-xs font-bold uppercase tracking-wider text-[#FF7C02]">
-                                                Tablero de puntuaciones
+                                                {tituloTablero}
                                             </span>
                                             <button
                                                 type="button"
@@ -383,6 +407,7 @@ const AppHeader = () => {
                                 document.body
                             )}
                     </div>
+                    )}
 
                     <div className="flex items-center gap-1 rounded-xl bg-white/5 px-2 py-1.5 text-sm font-bold text-white sm:gap-1.5 sm:px-3">
                         <svg
@@ -396,7 +421,7 @@ const AppHeader = () => {
                         </svg>
                         <span>{puntuacion}</span>
                         <span className="hidden text-[11px] font-medium text-gray-400 sm:inline">
-                            pts
+                            {estaEnFijos ? 'pts (fijos)' : estaEnIA ? 'pts (IA)' : 'pts'}
                         </span>
                     </div>
 

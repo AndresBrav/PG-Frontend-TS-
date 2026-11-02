@@ -4,6 +4,7 @@ import type {
     DetalleSolucionesGrupo,
     EjercicioGrupoEstudiante,
     EjercicioGrupoProfesor,
+    EstudianteRankingGrupo,
     GrupoCreado,
     GrupoDetalle,
     GrupoEstudiante,
@@ -201,4 +202,17 @@ export const entregarEjercicioEstudiante = async (
         { estado_tablero: estadoTablero },
         configConToken(clave),
     );
+};
+
+export const obtenerRankingGrupo = async (
+    clave: string,
+    grupoId: number,
+    esProfesor: boolean,
+): Promise<EstudianteRankingGrupo[]> => {
+    const prefijo = esProfesor ? '/profesor' : '/estudiante';
+    const { data } = await api.get<EstudianteRankingGrupo[]>(
+        `${prefijo}/grupos/${grupoId}/ranking`,
+        configConToken(clave),
+    );
+    return data;
 };
