@@ -152,7 +152,7 @@ export const GruposInicio = () => {
         try {
             const resultado = await unirseAGrupo(claveAcceso!, cod);
             setCodigoUnirse('');
-            void Swal.fire('¡Te has unido!', `Te inscribiste a: "${resultado.grupo.nombre}"`, 'success');
+            void Swal.fire('¡Te has unido!', `Te inscribiste a: "${resultado.nombre}"`, 'success');
             await cargarDatos();
         } catch (err) {
             if (manejarErrorSesion(err)) return;

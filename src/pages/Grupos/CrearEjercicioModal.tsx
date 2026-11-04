@@ -1,62 +1,106 @@
-import React, { useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import type { FormEvent } from 'react';
 import type { TipoEjercicioGrupo, DatosCrearEjercicioGrupo } from '../../types/dominio';
+import { TokenContext } from '../../Context/TokenContext';
+import { crearEjercicioGrupo } from '../../api/gruposApi';
+import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
+import useCerrarSesion from '../../hooks/useCerrarSesion';
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onCrear: (datos: DatosCrearEjercicioGrupo) => Promise<void>;
-    creando: boolean;
+    grupoId: number;
+    onEjercicioCreado?: () => void;
 }
 
 export const CrearEjercicioModal: React.FC<Props> = ({
     isOpen,
     onClose,
-    onCrear,
-    creando,
+    grupoId,
+    onEjercicioCreado,
 }) => {
+    const { claveAcceso } = useContext(TokenContext);
+    const cerrarSesion = useCerrarSesion();
     const [titulo, setTitulo] = useState('');
     const [tipo, setTipo] = useState<TipoEjercicioGrupo>('diagrama');
     const [puntos, setPuntos] = useState(10);
     const [enunciado, setEnunciado] = useState('');
     const [error, setError] = useState<string | null>(null);
+    const [creando, setCreando] = useState(false);
 
     if (!isOpen) return null;
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        setError(null);
+    const handleSubmit = useCallback(
+        async (e: FormEvent) => {
+            e.preventDefault();
 
-        if (!titulo.trim()) {
-            setError('Ingresa un título para el ejercicio');
-            return;
-        }
+            if (creando) return;
 
-        if (!enunciado.trim()) {
-            setError('Ingresa el enunciado o consigna del ejercicio');
-            return;
-        }
+            setError(null);
 
-        if (puntos <= 0) {
-            setError('Los puntos deben ser mayores a 0');
-            return;
-        }
+            if (!titulo.trim()) {
+                setError('Ingresa un título para el ejercicio');
+                return;
+            }
 
-        try {
-            await onCrear({
+            if (!enunciado.trim()) {
+                setError('Ingresa el enunciado o consigna del ejercicio');
+                return;
+            }
+
+            if (puntos <= 0) {
+                setError('Los puntos deben ser mayores a 0');
+                return;
+            }
+
+            if (!claveAcceso) {
+                setError('Sesión no válida. Inicia sesión de nuevo.');
+                cerrarSesion();
+                return;
+            }
+
+            const datos: DatosCrearEjercicioGrupo = {
                 titulo: titulo.trim(),
                 tipo,
                 puntos,
                 enunciado: enunciado.trim(),
-            });
-            setTitulo('');
-            setEnunciado('');
-            setPuntos(10);
-            onClose();
-        } catch (err: any) {
-            setError(err?.message || 'Error al crear el ejercicio');
-        }
-    };
+            };
+
+            setCreando(true);
+
+            try {
+                await crearEjercicioGrupo(claveAcceso, grupoId, datos);
+                setTitulo('');
+                setEnunciado('');
+                setPuntos(10);
+                setTipo('diagrama');
+                setCreando(false);
+                onEjercicioCreado?.();
+                onClose();
+            } catch (err) {
+                setCreando(false);
+                if (esErrorDeSesion(err)) {
+                    cerrarSesion();
+                    return;
+                }
+                setError(
+                    obtenerMensajeError(err, 'Error al crear el ejercicio'),
+                );
+            }
+        },
+        [
+            creando,
+            titulo,
+            enunciado,
+            puntos,
+            tipo,
+            claveAcceso,
+            grupoId,
+            onEjercicioCreado,
+            onClose,
+            cerrarSesion,
+        ],
+    );
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
