@@ -94,6 +94,28 @@ const DetalleEstudiante = () => {
         ...actividad.map((dia) => dia.puntos),
     );
 
+    const estadoDe = (ejercicio: {
+        completado: boolean;
+        entregado: boolean;
+    }) => {
+        if (ejercicio.completado) {
+            return {
+                texto: 'Completado',
+                clase: 'bg-emerald-400/15 text-emerald-300',
+            };
+        }
+        if (ejercicio.entregado) {
+            return {
+                texto: 'Entregado',
+                clase: 'bg-amber-400/15 text-amber-300',
+            };
+        }
+        return {
+            texto: 'Pendiente',
+            clase: 'bg-white/10 text-gray-400',
+        };
+    };
+
     return (
         <AppShell>
             <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-10">
@@ -144,12 +166,6 @@ const DetalleEstudiante = () => {
                                         />
                                     </div>
                                 </div>
-                                <Link
-                                    to="/ejercicios"
-                                    className="rounded-xl border border-white/15 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-white/10"
-                                >
-                                    Ver ejercicios
-                                </Link>
                             </div>
                         </div>
 
@@ -159,7 +175,7 @@ const DetalleEstudiante = () => {
                                 valor={formatearNumero(
                                     reporte.resumen.puntos,
                                 )}
-                                detalle="Fijos y con IA"
+                                detalle="Obtenidos en tus grupos"
                                 acento="naranja"
                             />
                             <TarjetaResumen
@@ -167,19 +183,19 @@ const DetalleEstudiante = () => {
                                 valor={formatearPorcentaje(
                                     reporte.resumen.progreso,
                                 )}
-                                detalle="Sobre ejercicios disponibles"
+                                detalle="Sobre ejercicios de grupo"
                                 acento="verde"
                             />
                             <TarjetaResumen
-                                titulo="Ejercicios fijos"
-                                valor={`${reporte.resumen.fijosCompletados}/${reporte.resumen.fijosTotales}`}
-                                detalle="Diagramas y pseudocódigo"
+                                titulo="Completados"
+                                valor={`${reporte.resumen.ejerciciosCompletados}/${reporte.resumen.ejerciciosTotales}`}
+                                detalle="Ejercicios de grupo"
                                 acento="azul"
                             />
                             <TarjetaResumen
-                                titulo="Ejercicios con IA"
-                                valor={`${reporte.resumen.iaCompletados}/${reporte.resumen.iaGenerados}`}
-                                detalle="Generados por el estudiante"
+                                titulo="Entregas"
+                                valor={`${reporte.resumen.ejerciciosEntregados}/${reporte.resumen.ejerciciosTotales}`}
+                                detalle="Respuestas guardadas"
                                 acento="blanco"
                             />
                         </div>
@@ -239,210 +255,190 @@ const DetalleEstudiante = () => {
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div>
                                     <h2 className="text-xl font-bold text-white">
-                                        Ejercicios fijos
+                                        Ejercicios de grupo
                                     </h2>
                                     <p className="mt-1 text-sm text-gray-400">
-                                        Diagramas y pseudocódigo con su fecha de
-                                        finalización.
+                                        Ejercicios asignados en los grupos y su
+                                        fecha de finalización.
                                     </p>
                                 </div>
                                 <span className="rounded-full bg-sky-400/15 px-3 py-1 text-xs font-bold text-sky-300">
-                                    {reporte.resumen.fijosCompletados}/
-                                    {reporte.resumen.fijosTotales}
+                                    {reporte.resumen.ejerciciosCompletados}/
+                                    {reporte.resumen.ejerciciosTotales}
                                 </span>
                             </div>
 
-                            <div className="mt-5 hidden overflow-x-auto lg:block">
-                                <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
-                                    <thead>
-                                        <tr className="text-xs uppercase tracking-wider text-gray-400">
-                                            <th className="px-3 py-2">
-                                                Ejercicio
-                                            </th>
-                                            <th className="px-3 py-2">
-                                                Nivel
-                                            </th>
-                                            <th className="px-3 py-2">
-                                                Estado
-                                            </th>
-                                            <th className="px-3 py-2">
-                                                Puntos
-                                            </th>
-                                            <th className="px-3 py-2">
-                                                Intentos
-                                            </th>
-                                            <th className="px-3 py-2">
-                                                Fecha de finalización
-                                            </th>
-                                            <th className="px-3 py-2">
-                                                Última actividad
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {reporte.ejercicios.map(
-                                            (ejercicio) => (
-                                                <tr
-                                                    key={ejercicio.juego_id}
-                                                    className="bg-[#181818]"
-                                                >
-                                                    <td className="rounded-l-xl px-3 py-3 font-semibold text-white">
-                                                        {ejercicio.nombre}
-                                                    </td>
-                                                    <td className="px-3 py-3 text-gray-300">
-                                                        {ejercicio.nivel}
-                                                    </td>
-                                                    <td className="px-3 py-3">
-                                                        <span
-                                                            className={`rounded-full px-2 py-1 text-xs font-bold ${
-                                                                ejercicio.completado
-                                                                    ? 'bg-emerald-400/15 text-emerald-300'
-                                                                    : 'bg-white/10 text-gray-400'
-                                                            }`}
-                                                        >
-                                                            {ejercicio.completado
-                                                                ? 'Completado'
-                                                                : 'Pendiente'}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-3 py-3 font-bold text-[#FF7C02]">
-                                                        {ejercicio.puntos}
-                                                    </td>
-                                                    <td className="px-3 py-3 text-gray-300">
-                                                        {ejercicio.intentos}
-                                                    </td>
-                                                    <td className="px-3 py-3 text-xs text-gray-400">
-                                                        {formatearFechaHora(
-                                                            ejercicio.fecha_completado,
-                                                            'Sin completar',
-                                                        )}
-                                                    </td>
-                                                    <td className="rounded-r-xl px-3 py-3 text-xs text-gray-400">
-                                                        {formatearFechaHora(
-                                                            ejercicio.ultima_actividad,
-                                                        )}
-                                                    </td>
-                                                </tr>
-                                            ),
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="mt-5 grid gap-3 lg:hidden">
-                                {reporte.ejercicios.map((ejercicio) => (
-                                    <article
-                                        key={ejercicio.juego_id}
-                                        className="rounded-2xl border border-white/10 bg-[#181818] p-4"
-                                    >
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div>
-                                                <h3 className="font-bold text-white">
-                                                    {ejercicio.nombre}
-                                                </h3>
-                                                <p className="mt-1 text-xs text-gray-400">
-                                                    Nivel {ejercicio.nivel} ·{' '}
-                                                    {ejercicio.intentos}{' '}
-                                                    intentos
-                                                </p>
-                                            </div>
-                                            <span
-                                                className={`shrink-0 rounded-full px-2 py-1 text-xs font-bold ${
-                                                    ejercicio.completado
-                                                        ? 'bg-emerald-400/15 text-emerald-300'
-                                                        : 'bg-white/10 text-gray-400'
-                                                }`}
-                                            >
-                                                {ejercicio.completado
-                                                    ? 'Completado'
-                                                    : 'Pendiente'}
-                                            </span>
-                                        </div>
-                                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-400">
-                                            <span className="rounded-lg bg-white/5 px-2 py-1">
-                                                {ejercicio.puntos} pts
-                                            </span>
-                                            <span className="rounded-lg bg-white/5 px-2 py-1">
-                                                Finalizado:{' '}
-                                                {formatearFechaHora(
-                                                    ejercicio.fecha_completado,
-                                                    'Sin completar',
-                                                )}
-                                            </span>
-                                            <span className="rounded-lg bg-white/5 px-2 py-1">
-                                                Última actividad:{' '}
-                                                {formatearFechaHora(
-                                                    ejercicio.ultima_actividad,
-                                                )}
-                                            </span>
-                                        </div>
-                                    </article>
-                                ))}
-                            </div>
-                        </section>
-
-                        <section className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg sm:p-6">
-                            <div className="flex flex-wrap items-center justify-between gap-2">
-                                <div>
-                                    <h2 className="text-xl font-bold text-white">
-                                        Ejercicios con IA
-                                    </h2>
-                                    <p className="mt-1 text-sm text-gray-400">
-                                        Retos generados y su fecha de
-                                        finalización.
-                                    </p>
-                                </div>
-                                <span className="rounded-full bg-[#FF7C02]/15 px-3 py-1 text-xs font-bold text-[#FF9D3D]">
-                                    {reporte.resumen.iaCompletados}/
-                                    {reporte.resumen.iaGenerados}
-                                </span>
-                            </div>
-
-                            {reporte.ia.length === 0 ? (
+                            {reporte.ejercicios.length === 0 ? (
                                 <p className="mt-5 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
-                                    El estudiante todavía no ha generado
-                                    ejercicios con IA.
+                                    El estudiante no tiene ejercicios asignados
+                                    {usuario?.rol === 'admin' ? '' : ' en tus grupos'}.
                                 </p>
                             ) : (
-                                <div className="mt-5 grid gap-3 md:grid-cols-2">
-                                    {reporte.ia.map((juego) => (
-                                        <article
-                                            key={juego.id}
-                                            className="rounded-2xl border border-white/10 bg-[#181818] p-4"
-                                        >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <p className="line-clamp-3 text-sm text-gray-200">
-                                                    {juego.descripcion}
-                                                </p>
-                                                <span
-                                                    className={`shrink-0 rounded-full px-2 py-1 text-xs font-bold ${
-                                                        juego.completado
-                                                            ? 'bg-emerald-400/15 text-emerald-300'
-                                                            : 'bg-white/10 text-gray-400'
-                                                    }`}
-                                                >
-                                                    {juego.completado
-                                                        ? 'Completado'
-                                                        : 'Pendiente'}
-                                                </span>
-                                            </div>
-                                            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-400">
-                                                <span className="rounded-lg bg-white/5 px-2 py-1">
-                                                    {juego.tipo}
-                                                </span>
-                                                <span className="rounded-lg bg-white/5 px-2 py-1">
-                                                    {juego.puntos} pts
-                                                </span>
-                                                <span className="rounded-lg bg-white/5 px-2 py-1">
-                                                    {formatearFechaHora(
-                                                        juego.fecha_completado,
-                                                        'Sin completar',
-                                                    )}
-                                                </span>
-                                            </div>
-                                        </article>
-                                    ))}
-                                </div>
+                                <>
+                                    <div className="mt-5 hidden overflow-x-auto lg:block">
+                                        <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
+                                            <thead>
+                                                <tr className="text-xs uppercase tracking-wider text-gray-400">
+                                                    <th className="px-3 py-2">
+                                                        Grupo
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Ejercicio
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Tipo
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Estado
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Puntos
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Fecha de finalización
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Última actividad
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {reporte.ejercicios.map(
+                                                    (ejercicio) => {
+                                                        const estado = estadoDe(
+                                                            ejercicio,
+                                                        );
+                                                        return (
+                                                            <tr
+                                                                key={
+                                                                    ejercicio.ejercicio_id
+                                                                }
+                                                                className="bg-[#181818]"
+                                                            >
+                                                                <td className="rounded-l-xl px-3 py-3 text-gray-300">
+                                                                    {
+                                                                        ejercicio
+                                                                            .grupo
+                                                                            .nombre
+                                                                    }
+                                                                </td>
+                                                                <td className="px-3 py-3 font-semibold text-white">
+                                                                    {
+                                                                        ejercicio.titulo
+                                                                    }
+                                                                </td>
+                                                                <td className="px-3 py-3 text-gray-300">
+                                                                    {ejercicio.tipo ===
+                                                                    'pseudocodigo'
+                                                                        ? 'Pseudocódigo'
+                                                                        : 'Diagrama'}
+                                                                </td>
+                                                                <td className="px-3 py-3">
+                                                                    <span
+                                                                        className={`rounded-full px-2 py-1 text-xs font-bold ${estado.clase}`}
+                                                                    >
+                                                                        {
+                                                                            estado.texto
+                                                                        }
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-3 py-3 font-bold text-[#FF7C02]">
+                                                                    {
+                                                                        ejercicio.puntos
+                                                                    }
+                                                                </td>
+                                                                <td className="px-3 py-3 text-xs text-gray-400">
+                                                                    {formatearFechaHora(
+                                                                        ejercicio.fecha_completado,
+                                                                        'Sin completar',
+                                                                    )}
+                                                                </td>
+                                                                <td className="rounded-r-xl px-3 py-3 text-xs text-gray-400">
+                                                                    {formatearFechaHora(
+                                                                        ejercicio.ultima_actividad,
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    },
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div className="mt-5 grid gap-3 lg:hidden">
+                                        {reporte.ejercicios.map(
+                                            (ejercicio) => {
+                                                const estado = estadoDe(
+                                                    ejercicio,
+                                                );
+                                                return (
+                                                    <article
+                                                        key={
+                                                            ejercicio.ejercicio_id
+                                                        }
+                                                        className="rounded-2xl border border-white/10 bg-[#181818] p-4"
+                                                    >
+                                                        <div className="flex items-start justify-between gap-3">
+                                                            <div>
+                                                                <h3 className="font-bold text-white">
+                                                                    {
+                                                                        ejercicio.titulo
+                                                                    }
+                                                                </h3>
+                                                                <p className="mt-1 text-xs text-gray-400">
+                                                                    {
+                                                                        ejercicio
+                                                                            .grupo
+                                                                            .nombre
+                                                                    }{' '}
+                                                                    ·{' '}
+                                                                    {ejercicio.tipo ===
+                                                                    'pseudocodigo'
+                                                                        ? 'Pseudocódigo'
+                                                                        : 'Diagrama'}
+                                                                </p>
+                                                            </div>
+                                                            <span
+                                                                className={`shrink-0 rounded-full px-2 py-1 text-xs font-bold ${estado.clase}`}
+                                                            >
+                                                                {
+                                                                    estado.texto
+                                                                }
+                                                            </span>
+                                                        </div>
+                                                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-400">
+                                                            <span className="rounded-lg bg-white/5 px-2 py-1">
+                                                                {
+                                                                    ejercicio.puntos
+                                                                }{' '}
+                                                                /{' '}
+                                                                {
+                                                                    ejercicio.puntos_ejercicio
+                                                                }{' '}
+                                                                pts
+                                                            </span>
+                                                            <span className="rounded-lg bg-white/5 px-2 py-1">
+                                                                Finalizado:{' '}
+                                                                {formatearFechaHora(
+                                                                    ejercicio.fecha_completado,
+                                                                    'Sin completar',
+                                                                )}
+                                                            </span>
+                                                            <span className="rounded-lg bg-white/5 px-2 py-1">
+                                                                Última
+                                                                actividad:{' '}
+                                                                {formatearFechaHora(
+                                                                    ejercicio.ultima_actividad,
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                    </article>
+                                                );
+                                            },
+                                        )}
+                                    </div>
+                                </>
                             )}
                         </section>
                     </>

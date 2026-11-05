@@ -7,7 +7,6 @@ import {
 import type { FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell';
-import BarraProgreso from '../../components/ui/BarraProgreso';
 import TarjetaResumen from '../../components/ui/TarjetaResumen';
 import { TokenContext } from '../../Context/TokenContext';
 import { UsuarioContext } from '../../Context/UsuarioContext';
@@ -16,7 +15,6 @@ import { obtenerReporteGrupo } from '../../api/reportesApi';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
 import type { ReporteGrupo } from '../../types/dominio';
 import {
-    formatearFechaHora,
     formatearNumero,
     formatearPorcentaje,
     rangoUltimosDias,
@@ -273,7 +271,7 @@ const DetalleGrupo = () => {
                                 valor={formatearNumero(
                                     reporte.resumen.completadosEnRango,
                                 )}
-                                detalle="Ejercicios fijos y con IA"
+                                detalle="Ejercicios de grupo"
                                 acento="blanco"
                             />
                         </div>
@@ -305,8 +303,8 @@ const DetalleGrupo = () => {
                                         Estudiantes
                                     </h2>
                                     <p className="mt-1 text-sm text-gray-400">
-                                        Abre el detalle para revisar cada
-                                        ejercicio y su fecha de finalización.
+                                        Abre el detalle para revisar los
+                                        ejercicios de grupo del estudiante.
                                     </p>
                                 </div>
                                 <span className="rounded-full bg-[#FF7C02]/15 px-3 py-1 text-xs font-bold text-[#FF9D3D]">
@@ -335,21 +333,6 @@ const DetalleGrupo = () => {
                                                     <th className="px-3 py-2">
                                                         Código
                                                     </th>
-                                                    <th className="px-3 py-2">
-                                                        Puntos
-                                                    </th>
-                                                    <th className="px-3 py-2">
-                                                        Fijos
-                                                    </th>
-                                                    <th className="px-3 py-2">
-                                                        IA
-                                                    </th>
-                                                    <th className="px-3 py-2">
-                                                        Progreso
-                                                    </th>
-                                                    <th className="px-3 py-2">
-                                                        Última actividad
-                                                    </th>
                                                     <th className="px-3 py-2" />
                                                 </tr>
                                             </thead>
@@ -369,49 +352,6 @@ const DetalleGrupo = () => {
                                                                 {
                                                                     estudiante.codigo
                                                                 }
-                                                            </td>
-                                                            <td className="px-3 py-3 font-bold text-[#FF7C02]">
-                                                                {formatearNumero(
-                                                                    estudiante.puntos,
-                                                                )}
-                                                            </td>
-                                                            <td className="px-3 py-3 text-sky-300">
-                                                                {
-                                                                    estudiante.fijosCompletados
-                                                                }
-                                                                /
-                                                                {
-                                                                    estudiante.fijosTotales
-                                                                }
-                                                            </td>
-                                                            <td className="px-3 py-3 text-emerald-300">
-                                                                {
-                                                                    estudiante.iaCompletados
-                                                                }
-                                                                /
-                                                                {
-                                                                    estudiante.iaGenerados
-                                                                }
-                                                            </td>
-                                                            <td className="px-3 py-3">
-                                                                <div className="w-32">
-                                                                    <BarraProgreso
-                                                                        valor={
-                                                                            estudiante.progreso
-                                                                        }
-                                                                        color="#38BDF8"
-                                                                    />
-                                                                </div>
-                                                                <span className="mt-1 block text-xs text-gray-400">
-                                                                    {formatearPorcentaje(
-                                                                        estudiante.progreso,
-                                                                    )}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-3 py-3 text-xs text-gray-400">
-                                                                {formatearFechaHora(
-                                                                    estudiante.ultimaActividad,
-                                                                )}
                                                             </td>
                                                             <td className="rounded-r-xl px-3 py-3 text-right">
                                                                 <Link
@@ -448,56 +388,13 @@ const DetalleGrupo = () => {
                                                                 }
                                                             </p>
                                                         </div>
-                                                        <span className="shrink-0 text-sm font-bold text-[#FF7C02]">
-                                                            {formatearNumero(
-                                                                estudiante.puntos,
-                                                            )}{' '}
-                                                            pts
-                                                        </span>
+                                                        <Link
+                                                            to={`/estudiantes/${estudiante.id}`}
+                                                            className="shrink-0 rounded-xl bg-[#FF7C02] px-3 py-2 text-xs font-bold text-black transition hover:bg-[#ff8f2b]"
+                                                        >
+                                                            Ver detalle
+                                                        </Link>
                                                     </div>
-                                                    <div className="mt-3">
-                                                        <BarraProgreso
-                                                            valor={
-                                                                estudiante.progreso
-                                                            }
-                                                            etiqueta="Progreso"
-                                                            color="#38BDF8"
-                                                        />
-                                                    </div>
-                                                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                                        <span className="rounded-lg bg-white/5 px-2 py-1.5 text-gray-300">
-                                                            Fijos:{' '}
-                                                            {
-                                                                estudiante.fijosCompletados
-                                                            }
-                                                            /
-                                                            {
-                                                                estudiante.fijosTotales
-                                                            }
-                                                        </span>
-                                                        <span className="rounded-lg bg-white/5 px-2 py-1.5 text-gray-300">
-                                                            IA:{' '}
-                                                            {
-                                                                estudiante.iaCompletados
-                                                            }
-                                                            /
-                                                            {
-                                                                estudiante.iaGenerados
-                                                            }
-                                                        </span>
-                                                    </div>
-                                                    <p className="mt-2 text-xs text-gray-400">
-                                                        Última actividad:{' '}
-                                                        {formatearFechaHora(
-                                                            estudiante.ultimaActividad,
-                                                        )}
-                                                    </p>
-                                                    <Link
-                                                        to={`/estudiantes/${estudiante.id}`}
-                                                        className="mt-3 inline-block rounded-xl bg-[#FF7C02] px-3 py-2 text-xs font-bold text-black transition hover:bg-[#ff8f2b]"
-                                                    >
-                                                        Ver detalle
-                                                    </Link>
                                                 </article>
                                             ),
                                         )}

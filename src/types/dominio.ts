@@ -78,13 +78,6 @@ export interface EstudianteReporteGrupo {
     id: number;
     codigo: string;
     username: string;
-    puntos: number;
-    fijosCompletados: number;
-    iaCompletados: number;
-    fijosTotales: number;
-    iaGenerados: number;
-    progreso: number;
-    ultimaActividad: string | null;
 }
 
 export interface SerieEvolucion {
@@ -112,38 +105,33 @@ export interface ReporteGrupo {
     };
 }
 
-export interface EjercicioReporte {
-    juego_id: number;
-    nombre: string;
-    nivel: number;
-    completado: boolean;
-    puntos: number;
-    intentos: number;
-    fecha_completado: string | null;
-    ultima_actividad: string | null;
-}
-
-export interface JuegoIAReporte {
-    id: number;
-    descripcion: string;
-    tipo: string;
-    completado: boolean;
-    puntos: number;
-    fecha_completado: string | null;
-}
-
 export interface ActividadDia {
     fecha: string;
     completados: number;
     puntos: number;
 }
 
+export interface EjercicioGrupoReporteEstudiante {
+    ejercicio_id: number;
+    titulo: string;
+    tipo: 'diagrama' | 'pseudocodigo';
+    puntos_ejercicio: number;
+    grupo: {
+        id: number;
+        nombre: string;
+    };
+    entregado: boolean;
+    completado: boolean;
+    puntos: number;
+    fecha_completado: string | null;
+    ultima_actividad: string | null;
+}
+
 export interface ResumenReporteEstudiante {
     puntos: number;
-    fijosCompletados: number;
-    fijosTotales: number;
-    iaCompletados: number;
-    iaGenerados: number;
+    ejerciciosCompletados: number;
+    ejerciciosEntregados: number;
+    ejerciciosTotales: number;
     progreso: number;
 }
 
@@ -156,8 +144,7 @@ export interface ReporteEstudiante {
         rol: Rol;
     };
     resumen: ResumenReporteEstudiante;
-    ejercicios: EjercicioReporte[];
-    ia: JuegoIAReporte[];
+    ejercicios: EjercicioGrupoReporteEstudiante[];
     actividadPorDia: ActividadDia[];
 }
 
