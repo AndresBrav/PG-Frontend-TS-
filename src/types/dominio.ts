@@ -200,6 +200,8 @@ export type TipoEjercicioGrupo = 'diagrama' | 'pseudocodigo';
 export interface EjercicioGrupoProfesor {
     id: number;
     grupo_id: number;
+    temario_id: number;
+    temario?: { id: number; nombre: string; orden: number } | null;
     titulo: string;
     enunciado: string;
     tipo: TipoEjercicioGrupo;
@@ -213,6 +215,8 @@ export interface EjercicioGrupoProfesor {
 export interface EjercicioGrupoEstudiante {
     id: number;
     grupo_id: number;
+    temario_id: number;
+    temario?: { id: number; nombre: string; orden: number } | null;
     titulo: string;
     enunciado: string;
     tipo: TipoEjercicioGrupo;
@@ -250,11 +254,30 @@ export interface DetalleSolucionesGrupo {
     soluciones: SolucionEstudianteGrupo[];
 }
 
+export interface TemarioGrupo {
+    id: number;
+    grupo_id: number;
+    nombre: string;
+    descripcion: string | null;
+    orden: number;
+    /** Cantidad de ejercicios del temario. */
+    totalEjercicios: number;
+    /** Cuántos completó el estudiante (null en la vista del profesor). */
+    completadosEstudiante: number | null;
+}
+
+export interface TemarioReferencia {
+    id: number;
+    nombre: string;
+    orden: number;
+}
+
 export interface DatosCrearEjercicioGrupo {
     titulo: string;
     enunciado: string;
     tipo: TipoEjercicioGrupo;
     puntos: number;
+    temario_id: number;
 }
 
 export interface EstudianteRankingGrupo {

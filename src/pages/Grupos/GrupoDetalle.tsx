@@ -5,10 +5,15 @@ import AppShell from '../../components/layout/AppShell';
 import { TokenContext } from '../../Context/TokenContext';
 import { UsuarioContext } from '../../Context/UsuarioContext';
 import {
+    crearTemario,
+    editarTemario,
     eliminarEjercicioGrupo,
+    eliminarTemario,
     listarEjerciciosGrupoEstudiante,
     listarEjerciciosGrupoProfesor,
     listarMisGrupos,
+    listarTemariosEstudiante,
+    listarTemariosProfesor,
     obtenerDetalleGrupo,
     obtenerRankingGrupo,
 } from '../../api/gruposApi';
@@ -20,6 +25,7 @@ import type {
     EstudianteRankingGrupo,
     GrupoDetalle as IGrupoDetalle,
     GrupoEstudiante,
+    TemarioGrupo,
     TipoEjercicioGrupo,
 } from '../../types/dominio';
 import { CrearEjercicioModal } from './CrearEjercicioModal';
@@ -40,6 +46,10 @@ export const GrupoDetalle = () => {
     const [ejerciciosProfesor, setEjerciciosProfesor] = useState<EjercicioGrupoProfesor[]>([]);
     const [tabProfesor, setTabProfesor] = useState<'ejercicios' | 'estudiantes' | 'ranking'>('ejercicios');
     const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
+
+    // Temarios del grupo (vistas de profesor y estudiante)
+    const [temarios, setTemarios] = useState<TemarioGrupo[]>([]);
+    const [temarioFiltro, setTemarioFiltro] = useState<'todos' | number>('todos');
 
     // Modal de Revisar
     const [ejercicioARevisar, setEjercicioARevisar] = useState<{
@@ -95,21 +105,37 @@ export const GrupoDetalle = () => {
 
         try {
             if (esProfesorOAdmin) {
-                const [grupoInfo, ejercicios] = await Promise.all([
+                const [grupoInfo, ejercicios, listaTemarios] = await Promise.all([
                     obtenerDetalleGrupo(claveAcceso, grupoId),
                     listarEjerciciosGrupoProfesor(claveAcceso, grupoId),
+                    listarTemariosProfesor(claveAcceso, grupoId),
                 ]);
                 setDetalleGrupoProfesor(grupoInfo);
                 setEjerciciosProfesor(ejercicios);
+                setTemarios(listaTemarios);
+                // Si el filtro apunta a un temario que ya no existe, vuelve a "todos"
+                setTemarioFiltro((prev) =>
+                    prev !== 'todos' && listaTemarios.some((t) => t.id === prev)
+                        ? prev
+                        : 'todos',
+                );
             } else {
-                const [misGrupos, ejercicios] = await Promise.all([
+                const [misGrupos, ejercicios, listaTemarios] = await Promise.all([
                     listarMisGrupos(claveAcceso),
                     listarEjerciciosGrupoEstudiante(claveAcceso, grupoId),
+                    listarTemariosEstudiante(claveAcceso, grupoId),
                 ]);
                 const actual = misGrupos.find((g) => g.id === grupoId) || null;
                 setInfoGrupoEstudiante(actual);
                 setEjerciciosEstudiante(ejercicios);
+                setTemarios(listaTemarios);
+                setTemarioFiltro((prev) =>
+                    prev !== 'todos' && listaTemarios.some((t) => t.id === prev)
+                        ? prev
+                        : 'todos',
+                );
             }
+            // Si el filtro actual apunta a un temario que ya no existe, vuelve a "todos"
             void cargarRanking();
         } catch (err) {
             if (manejarErrorSesion(err)) return;
@@ -160,6 +186,106 @@ export const GrupoDetalle = () => {
     const nombreGrupo = esProfesorOAdmin
         ? detalleGrupoProfesor?.nombre ?? 'Grupo'
         : infoGrupoEstudiante?.nombre ?? 'Grupo';
+
+    const nombreTemario = (id: number) =>
+        temarios.find((t) => t.id === id)?.nombre ?? 'Temario';
+
+    const ejerciciosFiltradosProfesor = ejerciciosProfesor.filter(
+        (ej) => temarioFiltro === 'todos' || ej.temario_id === temarioFiltro,
+    );
+
+    const ejerciciosFiltradosEstudiante = ejerciciosEstudiante.filter(
+        (ej) => temarioFiltro === 'todos' || ej.temario_id === temarioFiltro,
+    );
+
+    const handleCrearTemario = async () => {
+        if (!claveAcceso) return;
+
+        const resultado = await Swal.fire({
+            title: 'Nuevo temario',
+            input: 'text',
+            inputPlaceholder: 'Ej. Condicionales',
+            showCancelButton: true,
+            confirmButtonColor: '#FF7C02',
+            confirmButtonText: 'Crear',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (valor) => {
+                const limpio = (valor ?? '').trim();
+                if (limpio.length < 2) return 'Ingresa al menos 2 caracteres';
+                if (limpio.length > 80) return 'Máximo 80 caracteres';
+                return null;
+            },
+        });
+
+        if (!resultado.isConfirmed || !resultado.value) return;
+        const nombre = String(resultado.value).trim();
+
+        try {
+            await crearTemario(claveAcceso, grupoId, { nombre });
+            await cargarDatos();
+            void Swal.fire('Temario creado', `"${nombre}" ya está disponible.`, 'success');
+        } catch (err) {
+            if (manejarErrorSesion(err)) return;
+            void Swal.fire('Error', obtenerMensajeError(err, 'No se pudo crear el temario'), 'error');
+        }
+    };
+
+    const handleRenombrarTemario = async (temario: TemarioGrupo) => {
+        if (!claveAcceso) return;
+
+        const resultado = await Swal.fire({
+            title: `Renombrar "${temario.nombre}"`,
+            input: 'text',
+            inputValue: temario.nombre,
+            showCancelButton: true,
+            confirmButtonColor: '#FF7C02',
+            confirmButtonText: 'Guardar',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (valor) => {
+                const limpio = (valor ?? '').trim();
+                if (limpio.length < 2) return 'Ingresa al menos 2 caracteres';
+                if (limpio.length > 80) return 'Máximo 80 caracteres';
+                return null;
+            },
+        });
+
+        if (!resultado.isConfirmed || !resultado.value) return;
+        const nombre = String(resultado.value).trim();
+        if (nombre === temario.nombre) return;
+
+        try {
+            await editarTemario(claveAcceso, temario.id, { nombre });
+            await cargarDatos();
+        } catch (err) {
+            if (manejarErrorSesion(err)) return;
+            void Swal.fire('Error', obtenerMensajeError(err, 'No se pudo renombrar el temario'), 'error');
+        }
+    };
+
+    const handleEliminarTemario = async (temario: TemarioGrupo) => {
+        if (!claveAcceso) return;
+
+        const confirmacion = await Swal.fire({
+            title: `¿Eliminar el temario "${temario.nombre}"?`,
+            text: 'Solo se puede eliminar si no tiene ejercicios.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+            await eliminarTemario(claveAcceso, temario.id);
+            await cargarDatos();
+            void Swal.fire('Eliminado', 'El temario ha sido eliminado.', 'success');
+        } catch (err) {
+            if (manejarErrorSesion(err)) return;
+            void Swal.fire('Error', obtenerMensajeError(err, 'No se pudo eliminar el temario'), 'error');
+        }
+    };
 
     const codigoGrupo = esProfesorOAdmin
         ? detalleGrupoProfesor?.codigo ?? ''
@@ -390,13 +516,87 @@ export const GrupoDetalle = () => {
                             </div>
                         ) : tabProfesor === 'ejercicios' ? (
                             <div className="mt-6">
-                                {ejerciciosProfesor.length === 0 ? (
+                                {/* Filtro por temario + gestión */}
+                                <div className="mb-5 flex flex-wrap items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setTemarioFiltro('todos')}
+                                        className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                                            temarioFiltro === 'todos'
+                                                ? 'bg-[#FF7C02] text-black'
+                                                : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                        }`}
+                                    >
+                                        Todos ({ejerciciosProfesor.length})
+                                    </button>
+                                    {temarios.map((temario) => {
+                                        const total = ejerciciosProfesor.filter(
+                                            (ej) => ej.temario_id === temario.id,
+                                        ).length;
+                                        return (
+                                            <button
+                                                key={temario.id}
+                                                type="button"
+                                                onClick={() => setTemarioFiltro(temario.id)}
+                                                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                                                    temarioFiltro === temario.id
+                                                        ? 'bg-[#FF7C02] text-black'
+                                                        : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                }`}
+                                                title={`Ejercicios: ${total}`}
+                                            >
+                                                📚 {temario.nombre} ({total})
+                                            </button>
+                                        );
+                                    })}
+                                    <button
+                                        type="button"
+                                        onClick={() => void handleCrearTemario()}
+                                        className="rounded-full bg-emerald-600/80 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 transition"
+                                    >
+                                        + Temario
+                                    </button>
+                                    {temarioFiltro !== 'todos' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const temario = temarios.find(
+                                                    (t) => t.id === temarioFiltro,
+                                                );
+                                                if (temario) void handleRenombrarTemario(temario);
+                                            }}
+                                            className="rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-white/10 transition"
+                                        >
+                                            ✏️ Renombrar
+                                        </button>
+                                    )}
+                                    {temarioFiltro !== 'todos' && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const temario = temarios.find(
+                                                    (t) => t.id === temarioFiltro,
+                                                );
+                                                if (temario) void handleEliminarTemario(temario);
+                                            }}
+                                            className="rounded-full border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition"
+                                        >
+                                            🗑️ Eliminar temario
+                                        </button>
+                                    )}
+                                </div>
+
+                                {ejerciciosFiltradosProfesor.length === 0 ? (
                                     <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-12 text-center">
                                         <p className="text-base font-semibold text-white">
-                                            No hay ejercicios creados para este grupo
+                                            {temarioFiltro === 'todos'
+                                                ? 'No hay ejercicios creados para este grupo'
+                                                : `No hay ejercicios en "${nombreTemario(temarioFiltro)}"`}
                                         </p>
                                         <p className="mt-1 text-sm text-gray-400">
-                                            Crea el primer ejercicio de diagrama de flujo o pseudocódigo PSeInt con el botón superior.
+                                            {temarioFiltro === 'todos'
+                                                ? 'Crea el primer ejercicio de diagrama de flujo o pseudocódigo PSeInt con el botón superior.'
+                                                : 'Crea un ejercicio dentro de este temario con el botón superior, o elige otro temario.'}
                                         </p>
                                         <button
                                             type="button"
@@ -408,7 +608,7 @@ export const GrupoDetalle = () => {
                                     </div>
                                 ) : (
                                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        {ejerciciosProfesor.map((ej) => (
+                                        {ejerciciosFiltradosProfesor.map((ej) => (
                                             <div
                                                 key={ej.id}
                                                 className="rounded-2xl border border-white/10 bg-[#181818] p-5 shadow-lg flex flex-col justify-between transition hover:border-[#FF7C02]/40"
@@ -431,6 +631,9 @@ export const GrupoDetalle = () => {
                                                     <h3 className="mt-3 text-base font-bold text-white line-clamp-1">
                                                         {ej.titulo}
                                                     </h3>
+                                                    <p className="mt-1 text-[11px] font-semibold text-violet-300">
+                                                        📚 {ej.temario?.nombre ?? nombreTemario(ej.temario_id)}
+                                                    </p>
                                                     <p className="mt-2 text-xs text-gray-400 line-clamp-3">
                                                         {ej.enunciado}
                                                     </p>
@@ -560,18 +763,61 @@ export const GrupoDetalle = () => {
                             <div className="mt-6">
                                 {renderRanking()}
                             </div>
-                        ) : ejerciciosEstudiante.length === 0 ? (
-                            <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-12 text-center">
-                                <p className="text-base font-semibold text-white">
-                                    Tu profesor aún no ha publicado ejercicios en este grupo.
-                                </p>
-                                <p className="mt-1 text-sm text-gray-400">
-                                    Vuelve a revisar más tarde cuando se publiquen nuevas tareas.
-                                </p>
-                            </div>
                         ) : (
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                {ejerciciosEstudiante.map((ej) => {
+                            <>
+                                {/* Filtro por temario (avance libre) */}
+                                <div className="mb-5 flex flex-wrap items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setTemarioFiltro('todos')}
+                                        className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                                            temarioFiltro === 'todos'
+                                                ? 'bg-emerald-500 text-black'
+                                                : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                        }`}
+                                    >
+                                        Todos ({ejerciciosEstudiante.length})
+                                    </button>
+                                    {temarios.map((temario) => {
+                                        const delTemario = ejerciciosEstudiante.filter(
+                                            (ej) => ej.temario_id === temario.id,
+                                        );
+                                        const completados = delTemario.filter(
+                                            (ej) => ej.completado,
+                                        ).length;
+                                        return (
+                                            <button
+                                                key={temario.id}
+                                                type="button"
+                                                onClick={() => setTemarioFiltro(temario.id)}
+                                                className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                                                    temarioFiltro === temario.id
+                                                        ? 'bg-emerald-500 text-black'
+                                                        : 'bg-white/5 text-gray-300 hover:bg-white/10'
+                                                }`}
+                                                title={`Completados: ${completados} / ${delTemario.length}`}
+                                            >
+                                                📚 {temario.nombre} ({completados}/
+                                                {delTemario.length})
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {ejerciciosFiltradosEstudiante.length === 0 ? (
+                                    <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-12 text-center">
+                                        <p className="text-base font-semibold text-white">
+                                            {temarioFiltro === 'todos'
+                                                ? 'Tu profesor aún no ha publicado ejercicios en este grupo.'
+                                                : `Aún no hay ejercicios en "${nombreTemario(temarioFiltro)}".`}
+                                        </p>
+                                        <p className="mt-1 text-sm text-gray-400">
+                                            Vuelve a revisar más tarde cuando se publiquen nuevas tareas.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                        {ejerciciosFiltradosEstudiante.map((ej) => {
                                     const rutaTablero =
                                         ej.tipo === 'diagrama'
                                             ? `/grupos/${grupoId}/ejercicios/${ej.id}/diagrama`
@@ -611,6 +857,9 @@ export const GrupoDetalle = () => {
                                                 <h3 className="mt-3 text-base font-bold text-white line-clamp-1">
                                                     {ej.titulo}
                                                 </h3>
+                                                <p className="mt-1 text-[11px] font-semibold text-violet-300">
+                                                    📚 {ej.temario?.nombre ?? nombreTemario(ej.temario_id)}
+                                                </p>
                                                 <p className="mt-2 text-xs text-gray-400 line-clamp-3">
                                                     {ej.enunciado}
                                                 </p>
@@ -631,8 +880,10 @@ export const GrupoDetalle = () => {
                                         </div>
                                     );
                                 })}
-                            </div>
-                        )}
+                                    </div>
+                                )}
+                                </>
+                            )}
                     </div>
                 )}
             </main>

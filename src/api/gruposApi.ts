@@ -8,6 +8,7 @@ import type {
     GrupoCreado,
     GrupoDetalle,
     GrupoEstudiante,
+    TemarioGrupo,
     GrupoProfesor,
 } from '../types/dominio';
 
@@ -31,6 +32,78 @@ export const unirseAGrupo = async (
         configConToken(clave),
     );
     return data;
+};
+
+// ---------- Temarios de grupo ----------
+
+export const listarTemariosProfesor = async (
+    clave: string,
+    grupoId: number,
+): Promise<TemarioGrupo[]> => {
+    const { data } = await api.get<TemarioGrupo[]>(
+        `/profesor/grupos/${grupoId}/temarios`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const listarTemariosEstudiante = async (
+    clave: string,
+    grupoId: number,
+): Promise<TemarioGrupo[]> => {
+    const { data } = await api.get<TemarioGrupo[]>(
+        `/estudiante/grupos/${grupoId}/temarios`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const crearTemario = async (
+    clave: string,
+    grupoId: number,
+    datos: { nombre: string; descripcion?: string | null },
+): Promise<unknown> => {
+    const { data } = await api.post(
+        `/profesor/grupos/${grupoId}/temarios`,
+        datos,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const editarTemario = async (
+    clave: string,
+    temarioId: number,
+    datos: { nombre?: string; descripcion?: string | null; orden?: number },
+): Promise<unknown> => {
+    const { data } = await api.put(
+        `/profesor/temarios/${temarioId}`,
+        datos,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const eliminarTemario = async (
+    clave: string,
+    temarioId: number,
+): Promise<void> => {
+    await api.delete(
+        `/profesor/temarios/${temarioId}`,
+        configConToken(clave),
+    );
+};
+
+export const reordenarTemarios = async (
+    clave: string,
+    grupoId: number,
+    orden: number[],
+): Promise<void> => {
+    await api.put(
+        `/profesor/grupos/${grupoId}/temarios/reordenar`,
+        { orden },
+        configConToken(clave),
+    );
 };
 
 export const salirDeGrupo = async (

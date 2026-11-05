@@ -1,8 +1,8 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import type { TipoEjercicioGrupo, DatosCrearEjercicioGrupo } from '../../types/dominio';
+import type { TipoEjercicioGrupo, DatosCrearEjercicioGrupo, TemarioGrupo } from '../../types/dominio';
 import { TokenContext } from '../../Context/TokenContext';
-import { crearEjercicioGrupo } from '../../api/gruposApi';
+import { crearEjercicioGrupo, listarTemariosProfesor } from '../../api/gruposApi';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
 
@@ -27,8 +27,38 @@ export const CrearEjercicioModal: React.FC<Props> = ({
     const [enunciado, setEnunciado] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [creando, setCreando] = useState(false);
+    const [temarios, setTemarios] = useState<TemarioGrupo[]>([]);
+    const [temarioId, setTemarioId] = useState<number | null>(null);
 
-    if (!isOpen) return null;
+    // Cargar los temarios del grupo al abrir el modal
+    useEffect(() => {
+        if (!isOpen || !claveAcceso || !Number.isInteger(grupoId)) return;
+
+        let activo = true;
+
+        const cargar = async () => {
+            try {
+                const lista = await listarTemariosProfesor(claveAcceso, grupoId);
+                if (activo) {
+                    setTemarios(lista);
+                    // Si la lista cambió, conserva la selección válida
+                    setTemarioId((prev) =>
+                        prev !== null && lista.some((t) => t.id === prev)
+                            ? prev
+                            : (lista[0]?.id ?? null),
+                    );
+                }
+            } catch {
+                if (activo) setTemarios([]);
+            }
+        };
+
+        void cargar();
+
+        return () => {
+            activo = false;
+        };
+    }, [isOpen, claveAcceso, grupoId]);
 
     const handleSubmit = useCallback(
         async (e: FormEvent) => {
@@ -53,6 +83,11 @@ export const CrearEjercicioModal: React.FC<Props> = ({
                 return;
             }
 
+            if (temarioId === null) {
+                setError('Selecciona el temario del ejercicio');
+                return;
+            }
+
             if (!claveAcceso) {
                 setError('Sesión no válida. Inicia sesión de nuevo.');
                 cerrarSesion();
@@ -64,6 +99,7 @@ export const CrearEjercicioModal: React.FC<Props> = ({
                 tipo,
                 puntos,
                 enunciado: enunciado.trim(),
+                temario_id: temarioId,
             };
 
             setCreando(true);
@@ -94,6 +130,7 @@ export const CrearEjercicioModal: React.FC<Props> = ({
             enunciado,
             puntos,
             tipo,
+            temarioId,
             claveAcceso,
             grupoId,
             onEjercicioCreado,
@@ -101,6 +138,8 @@ export const CrearEjercicioModal: React.FC<Props> = ({
             cerrarSesion,
         ],
     );
+
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
@@ -127,6 +166,33 @@ export const CrearEjercicioModal: React.FC<Props> = ({
                             {error}
                         </div>
                     )}
+
+                    <div>
+                        <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-300">
+                            Temario
+                        </label>
+                        {temarios.length === 0 ? (
+                            <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-3.5 py-2.5 text-sm text-amber-300">
+                                Este grupo todavía no tiene temarios. Crea uno
+                                primero en el detalle del grupo.
+                            </p>
+                        ) : (
+                            <select
+                                value={temarioId ?? ''}
+                                onChange={(e) =>
+                                    setTemarioId(Number(e.target.value))
+                                }
+                                className="w-full rounded-xl border border-white/15 bg-[#181818] px-3.5 py-2.5 text-sm text-white outline-none focus:border-[#FF7C02]"
+                                required
+                            >
+                                {temarios.map((temario) => (
+                                    <option key={temario.id} value={temario.id}>
+                                        {temario.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
 
                     <div>
                         <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-300">
