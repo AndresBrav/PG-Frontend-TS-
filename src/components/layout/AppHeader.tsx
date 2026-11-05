@@ -242,7 +242,7 @@ const AppHeader = () => {
     ];
 
     if (usuario?.rol === 'admin') {
-        enlaces.push({ to: '/admin', texto: 'AdministraciÃ³n' });
+        enlaces.push({ to: '/admin', texto: 'Administracion' });
     }
 
     if (!usuario) return null;
@@ -282,131 +282,134 @@ const AppHeader = () => {
 
                 <div className="flex items-center gap-1 sm:gap-3">
                     {!estaEnGrupos && (
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() => alternarPanel('tablero')}
-                            className="flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-white/10"
-                            title="Ver tablero de puntuaciones"
-                            aria-label="Ver tablero de puntuaciones"
-                        >
-                            <svg
-                                className="h-6 w-6"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => alternarPanel('tablero')}
+                                className="flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-white/10"
+                                title="Ver tablero de puntuaciones"
+                                aria-label="Ver tablero de puntuaciones"
                             >
-                                <path
-                                    d="M19 5H18V3C18 2.45 17.55 2 17 2H7C6.45 2 6 2.45 6 3V5H5C3.9 5 3 5.9 3 7V9C3 11.24 4.61 13.12 6.78 13.82C7.57 15.34 9.04 16.43 10.8 16.78V19H9C8.45 19 8 19.45 8 20V21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21V20C16 19.45 15.55 19 15 19H13.2V16.78C14.96 16.43 16.43 15.34 17.22 13.82C19.39 13.12 21 11.24 21 9V7C21 5.9 20.1 5 19 5ZM5 9V7H6V11C4.9 10.6 4.1 9.9 5 9ZM19 9C19.9 9.9 19.1 10.6 18 11V7H19V9Z"
-                                    fill="#FF7C02"
-                                />
-                            </svg>
-                        </button>
-
-                        {panelAbierto === 'tablero' &&
-                            createPortal(
-                                <div
-                                    className="fixed inset-x-0 z-[120] flex justify-center px-4"
-                                    style={{ top: scoreboardTop }}
+                                <svg
+                                    className="h-6 w-6"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
                                 >
+                                    <path
+                                        d="M19 5H18V3C18 2.45 17.55 2 17 2H7C6.45 2 6 2.45 6 3V5H5C3.9 5 3 5.9 3 7V9C3 11.24 4.61 13.12 6.78 13.82C7.57 15.34 9.04 16.43 10.8 16.78V19H9C8.45 19 8 19.45 8 20V21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21V20C16 19.45 15.55 19 15 19H13.2V16.78C14.96 16.43 16.43 15.34 17.22 13.82C19.39 13.12 21 11.24 21 9V7C21 5.9 20.1 5 19 5ZM5 9V7H6V11C4.9 10.6 4.1 9.9 5 9ZM19 9C19.9 9.9 19.1 10.6 18 11V7H19V9Z"
+                                        fill="#FF7C02"
+                                    />
+                                </svg>
+                            </button>
+
+                            {panelAbierto === 'tablero' &&
+                                createPortal(
                                     <div
-                                        className="w-[min(90vw,360px)] rounded-2xl border border-white/10 bg-[#202020] p-4 text-white shadow-2xl"
-                                        onClick={(evento) =>
-                                            evento.stopPropagation()
-                                        }
+                                        className="fixed inset-x-0 z-[120] flex justify-center px-4"
+                                        style={{ top: scoreboardTop }}
                                     >
-                                        <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2">
-                                            <span className="text-xs font-bold uppercase tracking-wider text-[#FF7C02]">
-                                                {tituloTablero}
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    setPanelAbierto(null)
-                                                }
-                                                className="rounded-lg bg-white/10 px-2 py-1 text-xs font-semibold text-gray-300 transition hover:bg-white/20 hover:text-white"
-                                            >
-                                                Cerrar
-                                            </button>
-                                        </div>
-
                                         <div
-                                            className="flex max-h-[320px] flex-col gap-2 overflow-y-auto pr-1"
-                                            style={{ scrollbarWidth: 'thin' }}
+                                            className="w-[min(90vw,360px)] rounded-2xl border border-white/10 bg-[#202020] p-4 text-white shadow-2xl"
+                                            onClick={(evento) =>
+                                                evento.stopPropagation()
+                                            }
                                         >
-                                            {cargandoScoreboard ? (
-                                                <div className="flex flex-col items-center py-6 text-xs text-gray-400">
-                                                    <div className="mb-2 h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-[#FF7C02]" />
-                                                    Cargando tablero...
-                                                </div>
-                                            ) : scoreboard.length === 0 ? (
-                                                <p className="py-6 text-center text-xs text-gray-400">
-                                                    Sin puntuaciones registradas
-                                                </p>
-                                            ) : (
-                                                scoreboard.map(
-                                                    (jugador, indice) => {
-                                                        let estilo =
-                                                            'border-white/10 bg-white/5';
-                                                        let insignia =
-                                                            'bg-white/10 text-gray-300';
+                                            <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-2">
+                                                <span className="text-xs font-bold uppercase tracking-wider text-[#FF7C02]">
+                                                    {tituloTablero}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setPanelAbierto(null)
+                                                    }
+                                                    className="rounded-lg bg-white/10 px-2 py-1 text-xs font-semibold text-gray-300 transition hover:bg-white/20 hover:text-white"
+                                                >
+                                                    Cerrar
+                                                </button>
+                                            </div>
 
-                                                        if (indice === 0) {
-                                                            estilo =
-                                                                'border-amber-400/30 bg-amber-400/10';
-                                                            insignia =
-                                                                'bg-amber-400 text-black';
-                                                        } else if (
-                                                            indice === 1
-                                                        ) {
-                                                            estilo =
-                                                                'border-slate-300/20 bg-slate-300/10';
-                                                            insignia =
-                                                                'bg-slate-300 text-black';
-                                                        } else if (
-                                                            indice === 2
-                                                        ) {
-                                                            estilo =
-                                                                'border-amber-700/30 bg-amber-700/15';
-                                                            insignia =
-                                                                'bg-amber-700 text-amber-100';
-                                                        }
+                                            <div
+                                                className="flex max-h-[320px] flex-col gap-2 overflow-y-auto pr-1"
+                                                style={{
+                                                    scrollbarWidth: 'thin',
+                                                }}
+                                            >
+                                                {cargandoScoreboard ? (
+                                                    <div className="flex flex-col items-center py-6 text-xs text-gray-400">
+                                                        <div className="mb-2 h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-[#FF7C02]" />
+                                                        Cargando tablero...
+                                                    </div>
+                                                ) : scoreboard.length === 0 ? (
+                                                    <p className="py-6 text-center text-xs text-gray-400">
+                                                        Sin puntuaciones
+                                                        registradas
+                                                    </p>
+                                                ) : (
+                                                    scoreboard.map(
+                                                        (jugador, indice) => {
+                                                            let estilo =
+                                                                'border-white/10 bg-white/5';
+                                                            let insignia =
+                                                                'bg-white/10 text-gray-300';
 
-                                                        return (
-                                                            <div
-                                                                key={`${jugador.username}-${indice}`}
-                                                                className={`flex items-center justify-between rounded-xl border p-2.5 ${estilo}`}
-                                                            >
-                                                                <div className="flex min-w-0 items-center gap-2">
-                                                                    <span
-                                                                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${insignia}`}
-                                                                    >
-                                                                        {indice +
-                                                                            1}
-                                                                    </span>
-                                                                    <span className="truncate text-xs font-semibold text-gray-200">
+                                                            if (indice === 0) {
+                                                                estilo =
+                                                                    'border-amber-400/30 bg-amber-400/10';
+                                                                insignia =
+                                                                    'bg-amber-400 text-black';
+                                                            } else if (
+                                                                indice === 1
+                                                            ) {
+                                                                estilo =
+                                                                    'border-slate-300/20 bg-slate-300/10';
+                                                                insignia =
+                                                                    'bg-slate-300 text-black';
+                                                            } else if (
+                                                                indice === 2
+                                                            ) {
+                                                                estilo =
+                                                                    'border-amber-700/30 bg-amber-700/15';
+                                                                insignia =
+                                                                    'bg-amber-700 text-amber-100';
+                                                            }
+
+                                                            return (
+                                                                <div
+                                                                    key={`${jugador.username}-${indice}`}
+                                                                    className={`flex items-center justify-between rounded-xl border p-2.5 ${estilo}`}
+                                                                >
+                                                                    <div className="flex min-w-0 items-center gap-2">
+                                                                        <span
+                                                                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${insignia}`}
+                                                                        >
+                                                                            {indice +
+                                                                                1}
+                                                                        </span>
+                                                                        <span className="truncate text-xs font-semibold text-gray-200">
+                                                                            {
+                                                                                jugador.username
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="ml-3 shrink-0 text-xs font-bold text-[#FF7C02]">
                                                                         {
-                                                                            jugador.username
-                                                                        }
+                                                                            jugador.puntuacionTotal
+                                                                        }{' '}
+                                                                        pts
                                                                     </span>
                                                                 </div>
-                                                                <span className="ml-3 shrink-0 text-xs font-bold text-[#FF7C02]">
-                                                                    {
-                                                                        jugador.puntuacionTotal
-                                                                    }{' '}
-                                                                    pts
-                                                                </span>
-                                                            </div>
-                                                        );
-                                                    }
-                                                )
-                                            )}
+                                                            );
+                                                        }
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>,
-                                document.body
-                            )}
-                    </div>
+                                    </div>,
+                                    document.body
+                                )}
+                        </div>
                     )}
 
                     <div className="flex items-center gap-1 rounded-xl bg-white/5 px-2 py-1.5 text-sm font-bold text-white sm:gap-1.5 sm:px-3">
@@ -421,7 +424,11 @@ const AppHeader = () => {
                         </svg>
                         <span>{puntuacion}</span>
                         <span className="hidden text-[11px] font-medium text-gray-400 sm:inline">
-                            {estaEnFijos ? 'pts (fijos)' : estaEnIA ? 'pts (IA)' : 'pts'}
+                            {estaEnFijos
+                                ? 'pts (fijos)'
+                                : estaEnIA
+                                  ? 'pts (IA)'
+                                  : 'pts'}
                         </span>
                     </div>
 
