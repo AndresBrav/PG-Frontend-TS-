@@ -7,7 +7,9 @@ import {
     ERROR_CANCELADO,
     ejecutarPseudocodigo,
     esCanceladoPorUsuario,
+    type EstadoEjecucion,
 } from '../../Games/GeneradosPorIA/EditingBoard/pseintCompiler';
+import PanelVariablesEjecucion from '../../Games/GeneradosPorIA/EditingBoard/PanelVariablesEjecucion';
 import {
     obtenerEjercicioEstudiante,
     guardarEstadoEjercicioEstudiante,
@@ -63,6 +65,13 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
     // Código y Consola
     const [code, setCode] = useState<string>(DEFAULT_CODE);
     const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
+
+    // Modo debug: variables declaradas y su evolución por paso
+    const [estadoVariables, setEstadoVariables] =
+        useState<EstadoEjecucion | null>(null);
+    const [historialVariables, setHistorialVariables] = useState<
+        EstadoEjecucion[]
+    >([]);
     const [isRunning, setIsRunning] = useState<boolean>(false);
     const [estadoGuardado, setEstadoGuardado] = useState<'guardado' | 'guardando' | 'sin_guardar'>('guardado');
     const [cargando, setCargando] = useState<boolean>(true);
@@ -217,11 +226,17 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
 
         setIsRunning(true);
         setConsoleOutput(['[Sistema] Iniciando ejecución del pseudocódigo...']);
+        setEstadoVariables(null);
+        setHistorialVariables([]);
 
         try {
             const result = await ejecutarPseudocodigo(code, {
                 imprimir: (texto) => {
                     setConsoleOutput((prev) => [...prev, texto]);
+                },
+                onEstado: (estado) => {
+                    setEstadoVariables(estado);
+                    setHistorialVariables((prev) => [...prev.slice(-199), estado]);
                 },
                 pedirEntrada: async (nombre, _tipo, mensajePrevio) => {
                     const aviso = mensajePrevio
@@ -529,6 +544,13 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                             )}
                         </div>
                     </div>
+
+                    {/* Panel de variables en ejecución (debug) */}
+                    <PanelVariablesEjecucion
+                        estado={estadoVariables}
+                        historial={historialVariables}
+                        enEjecucion={isRunning}
+                    />
 
                     {/* Guía Rápida */}
                     <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-gray-300 space-y-2">

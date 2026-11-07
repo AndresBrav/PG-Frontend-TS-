@@ -14,7 +14,9 @@ import {
     ERROR_CANCELADO,
     ejecutarPseudocodigo,
     esCanceladoPorUsuario,
+    type EstadoEjecucion,
 } from './pseintCompiler';
+import PanelVariablesEjecucion from './PanelVariablesEjecucion';
 import {
     obtenerJuegoIAPorId,
     guardarEstadoTablero,
@@ -235,6 +237,13 @@ const EditingBoard: React.FC = () => {
     const [isRunning, setIsRunning] = useState<boolean>(false);
     const [counterRate, setCounterRate] = useState<number>(1);
 
+    // Modo debug: variables declaradas y su evolución por paso
+    const [estadoVariables, setEstadoVariables] =
+        useState<EstadoEjecucion | null>(null);
+    const [historialVariables, setHistorialVariables] = useState<
+        EstadoEjecucion[]
+    >([]);
+
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
 
@@ -307,11 +316,17 @@ const EditingBoard: React.FC = () => {
 
         setIsRunning(true);
         setConsoleOutput(['[Sistema] Iniciando ejecucion del pseudocodigo...']);
+        setEstadoVariables(null);
+        setHistorialVariables([]);
 
         try {
             const result = await ejecutarPseudocodigo(code, {
                 imprimir: (texto) => {
                     setConsoleOutput((prev) => [...prev, texto]);
+                },
+                onEstado: (estado) => {
+                    setEstadoVariables(estado);
+                    setHistorialVariables((prev) => [...prev.slice(-199), estado]);
                 },
                 pedirEntrada: async (nombre, _tipo, mensajePrevio) => {
                     const aviso = mensajePrevio
@@ -935,6 +950,13 @@ const EditingBoard: React.FC = () => {
                                 )}
                             </div>
                         </div>
+
+                        {/* Panel de variables en ejecución (debug) */}
+                        <PanelVariablesEjecucion
+                            estado={estadoVariables}
+                            historial={historialVariables}
+                            enEjecucion={isRunning}
+                        />
 
                         {/* Guia Rapida */}
                         <div

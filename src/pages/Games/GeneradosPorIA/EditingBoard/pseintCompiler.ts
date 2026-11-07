@@ -5,6 +5,19 @@ export interface CallbacksEjecucion {
         tipo: string,
         mensajePrevio?: string
     ) => Promise<string>;
+    /** Copia de las variables tras cada instrucción (modo debug). */
+    onEstado?: (estado: EstadoEjecucion) => void;
+}
+
+export interface VariableEstado {
+    nombre: string;
+    valor: string;
+}
+
+export interface EstadoEjecucion {
+    /** Número de instrucción ejecutada (1-based). */
+    paso: number;
+    variables: VariableEstado[];
 }
 
 export interface ResultadoEjecucion {
@@ -390,9 +403,11 @@ class Compilador {
     private i = 0;
     private out: string[] = [];
     private contador = 0;
+    private debug: boolean;
 
-    constructor(lineas: Linea[]) {
+    constructor(lineas: Linea[], debug = false) {
         this.lineas = lineas;
+        this.debug = debug;
     }
 
     compilar(): string {
@@ -413,6 +428,8 @@ class Compilador {
 
     private compilarSentencia(): void {
         const k = this.clave();
+        // Las declaraciones puras no generan captura de variables
+        const esDeclaracion = k === 'definir' || k === 'dimension';
         switch (k) {
             case 'definir':
                 this.compilarDefinir();
@@ -457,6 +474,27 @@ class Compilador {
             default:
                 this.compilarAsignacion();
         }
+        if (this.debug && !esDeclaracion) {
+            this.emitirDebug();
+        }
+    }
+
+    /**
+     * Modo debug: tras cada instrucción emite una llamada __debug(...)
+     * con los valores actuales de las variables declaradas hasta aquí.
+     */
+    private emitirDebug(): void {
+        const nombres = [...this.declaradas];
+        if (nombres.length === 0) {
+            return;
+        }
+        const pares = nombres
+            .map(
+                (v) =>
+                    `['${v}', typeof ${v} === 'object' && ${v} !== null ? JSON.stringify(${v}) : ${v}]`
+            )
+            .join(', ');
+        this.out.push(`try { __debug([${pares}]); } catch (e) {}`);
     }
 
     private clave(): string {
@@ -750,6 +788,8 @@ class Compilador {
         this.out.push(
             `for (${vNombre} = ${ini}; ${pasoVar} > 0 ? ${vNombre} <= ${fin} : ${vNombre} >= ${fin}; ${vNombre} = ${vNombre} + ${pasoVar}) { __paso();`
         );
+        // Snapshot al inicio de cada iteración (ve el iterador cambiar)
+        this.emitirDebug();
         this.i++;
         this.recorrerHasta(['finpara']);
         if (this.clave() === 'finpara') {
@@ -1098,9 +1138,9 @@ class Compilador {
     }
 }
 
-export function ejecutarPseudo(codigo: string): string {
+export function ejecutarPseudo(codigo: string, debug = false): string {
     const lineas = preprocesar(codigo);
-    const c = new Compilador(lineas);
+    const c = new Compilador(lineas, debug);
     return c.compilar();
 }
 
@@ -1181,7 +1221,7 @@ export async function ejecutarPseudocodigo(
 ): Promise<ResultadoEjecucion> {
     let fuente: string;
     try {
-        fuente = ejecutarPseudo(codigo);
+        fuente = ejecutarPseudo(codigo, Boolean(callbacks.onEstado));
     } catch (err) {
         return {
             salida: [],
@@ -1197,6 +1237,25 @@ export async function ejecutarPseudocodigo(
         if (__pasos > __MAX_PASOS) {
             throw new Error('Se superó el límite de ${MAX_PASOS} pasos. ¿Tienes un bucle infinito?');
         }
+    };
+    let __debugPaso = 0;
+    let __debugUltimo = '';
+    const __debug = (pares) => {
+        if (!callbacks.onEstado) return;
+        __debugPaso++;
+        // Para programas con cientos de miles de pasos solo se
+        // reenvían al panel los primeros 300 pasos y luego 1 de cada 1000.
+        if (__debugPaso > 300 && __debugPaso % 1000 !== 0) return;
+        const variables = [];
+        for (const par of pares) {
+            if (par[1] === undefined) continue;
+            variables.push({ nombre: par[0], valor: typeof par[1] === 'boolean' ? (par[1] ? 'VERDADERO' : 'FALSO') : String(par[1]) });
+        }
+        // Sin cambios desde la última captura: no se reenvía al panel
+        const huella = JSON.stringify(variables);
+        if (huella === __debugUltimo) return;
+        __debugUltimo = huella;
+        callbacks.onEstado({ paso: __debugPaso, variables });
     };
     const __ultimoMensaje = { valor: '' };
     const __leer = async (nombre, tipo) => {
