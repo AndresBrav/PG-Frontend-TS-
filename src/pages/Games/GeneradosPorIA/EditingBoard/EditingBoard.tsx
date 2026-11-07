@@ -10,7 +10,11 @@ import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { completarJuego } from '../../../../api/ejerciciosIA/ejercicios';
 import { verificarPseudocodigo } from '../../../../api/ejerciciosIA/verificarPseudocodigo';
-import { ejecutarPseudocodigo } from './pseintCompiler';
+import {
+    ERROR_CANCELADO,
+    ejecutarPseudocodigo,
+    esCanceladoPorUsuario,
+} from './pseintCompiler';
 import {
     obtenerJuegoIAPorId,
     guardarEstadoTablero,
@@ -330,7 +334,16 @@ const EditingBoard: React.FC = () => {
                         width: '80%',
                     });
 
-                    const valor = isConfirmed ? (value ?? '') : '';
+                    if (!isConfirmed) {
+                        // Cancelar detiene TODA la ejecución, no solo esta iteración
+                        setConsoleOutput((prev) => [
+                            ...prev,
+                            `> ${nombre} = (cancelado)`,
+                            '[Sistema] Ejecucion cancelada por el usuario.',
+                        ]);
+                        throw new Error(ERROR_CANCELADO);
+                    }
+                    const valor = value ?? '';
                     setConsoleOutput((prev) => [
                         ...prev,
                         `> ${nombre} = ${valor}`,
@@ -340,14 +353,14 @@ const EditingBoard: React.FC = () => {
             });
 
             setIsRunning(false);
-            setConsoleOutput((prev) => [
-                ...prev,
-                '[Sistema] Ejecucion finalizada.',
-            ]);
 
             if (result.error) {
+                if (esCanceladoPorUsuario(result.error)) {
+                    return;
+                }
                 setConsoleOutput((prev) => [
                     ...prev,
+                    '[Sistema] Ejecucion finalizada.',
                     `[Error] ${result.error}`,
                 ]);
                 Swal.fire({
@@ -359,8 +372,20 @@ const EditingBoard: React.FC = () => {
                 });
                 return;
             }
+
+            setConsoleOutput((prev) => [
+                ...prev,
+                '[Sistema] Ejecucion finalizada.',
+            ]);
         } catch (err) {
             setIsRunning(false);
+            if (esCanceladoPorUsuario(err)) {
+                setConsoleOutput((prev) => [
+                    ...prev,
+                    '[Sistema] Ejecucion cancelada por el usuario.',
+                ]);
+                return;
+            }
             setConsoleOutput((prev) => [
                 ...prev,
                 `[Error] ${err instanceof Error ? err.message : String(err)}`,

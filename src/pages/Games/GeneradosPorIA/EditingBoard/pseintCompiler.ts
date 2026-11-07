@@ -12,6 +12,29 @@ export interface ResultadoEjecucion {
     error?: string;
 }
 
+/** Marcador de ejecución cancelada por el usuario (botón Cancelar de un "Leer"). */
+export const ERROR_CANCELADO = 'EJECUCION_CANCELADA';
+
+/** Clase de error para abortar la ejecución completa al cancelar una entrada. */
+export class ErrorCanceladoPorUsuario extends Error {
+    constructor() {
+        super(ERROR_CANCELADO);
+        this.name = 'ErrorCanceladoPorUsuario';
+    }
+}
+
+/**
+ * Indica si un error corresponde a una cancelación del usuario
+ * (no debe mostrarse como error, solo como ejecución detenida).
+ * Acepta el Error lanzado o el `result.error` (string) del compilador.
+ */
+export const esCanceladoPorUsuario = (
+    error: unknown,
+): boolean =>
+    error instanceof ErrorCanceladoPorUsuario ||
+    (error instanceof Error && error.message === ERROR_CANCELADO) ||
+    (typeof error === 'string' && error === ERROR_CANCELADO);
+
 const MAX_PASOS = 1000000;
 
 type TokenTipo = 'word' | 'num' | 'str' | 'punt';

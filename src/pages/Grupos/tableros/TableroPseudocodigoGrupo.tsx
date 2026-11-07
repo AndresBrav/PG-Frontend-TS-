@@ -3,7 +3,11 @@ import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom'
 import Swal from 'sweetalert2';
 import { TokenContext } from '../../../Context/TokenContext';
 import { UsuarioContext } from '../../../Context/UsuarioContext';
-import { ejecutarPseudocodigo } from '../../Games/GeneradosPorIA/EditingBoard/pseintCompiler';
+import {
+    ERROR_CANCELADO,
+    ejecutarPseudocodigo,
+    esCanceladoPorUsuario,
+} from '../../Games/GeneradosPorIA/EditingBoard/pseintCompiler';
 import {
     obtenerEjercicioEstudiante,
     guardarEstadoEjercicioEstudiante,
@@ -234,21 +238,37 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                         confirmButtonColor: '#FF7C02',
                     });
 
-                    const valor = isConfirmed ? value ?? '' : '';
+                    if (!isConfirmed) {
+                        // Cancelar detiene TODA la ejecución, no solo esta iteración
+                        setConsoleOutput((prev) => [
+                            ...prev,
+                            `> ${nombre} = (cancelado)`,
+                            '[Sistema] Ejecución cancelada por el usuario.',
+                        ]);
+                        throw new Error(ERROR_CANCELADO);
+                    }
+                    const valor = value ?? '';
                     setConsoleOutput((prev) => [...prev, `> ${nombre} = ${valor}`]);
                     return String(valor);
                 },
             });
 
             setIsRunning(false);
-            setConsoleOutput((prev) => [...prev, '[Sistema] Ejecución finalizada con éxito.']);
 
             if (result.error) {
+                if (esCanceladoPorUsuario(result.error)) {
+                    return;
+                }
                 setConsoleOutput((prev) => [...prev, `[Error] ${result.error}`]);
                 void Swal.fire('Error en ejecución', result.error, 'error');
+            } else {
+                setConsoleOutput((prev) => [...prev, '[Sistema] Ejecución finalizada con éxito.']);
             }
         } catch (err: any) {
             setIsRunning(false);
+            if (esCanceladoPorUsuario(err?.message ?? err)) {
+                return;
+            }
             const msg = err instanceof Error ? err.message : String(err);
             setConsoleOutput((prev) => [...prev, `[Error] ${msg}`]);
             void Swal.fire('Error inesperado', msg, 'error');
