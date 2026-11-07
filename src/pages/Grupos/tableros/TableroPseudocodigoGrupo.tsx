@@ -9,7 +9,9 @@ import {
     esCanceladoPorUsuario,
     type EstadoEjecucion,
 } from '../../Games/GeneradosPorIA/EditingBoard/pseintCompiler';
-import PanelVariablesEjecucion from '../../Games/GeneradosPorIA/EditingBoard/PanelVariablesEjecucion';
+import PanelVariablesEjecucion, {
+    construirHtmlVariablesEnModal,
+} from '../../Games/GeneradosPorIA/EditingBoard/PanelVariablesEjecucion';
 import {
     obtenerEjercicioEstudiante,
     guardarEstadoEjercicioEstudiante,
@@ -72,6 +74,8 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
     const [historialVariables, setHistorialVariables] = useState<
         EstadoEjecucion[]
     >([]);
+    const estadoVariablesRef = useRef<EstadoEjecucion | null>(null);
+    const historialVariablesRef = useRef<EstadoEjecucion[]>([]);
     const [isRunning, setIsRunning] = useState<boolean>(false);
     const [estadoGuardado, setEstadoGuardado] = useState<'guardado' | 'guardando' | 'sin_guardar'>('guardado');
     const [cargando, setCargando] = useState<boolean>(true);
@@ -228,6 +232,8 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
         setConsoleOutput(['[Sistema] Iniciando ejecución del pseudocódigo...']);
         setEstadoVariables(null);
         setHistorialVariables([]);
+        estadoVariablesRef.current = null;
+        historialVariablesRef.current = [];
 
         try {
             const result = await ejecutarPseudocodigo(code, {
@@ -235,6 +241,11 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                     setConsoleOutput((prev) => [...prev, texto]);
                 },
                 onEstado: (estado) => {
+                    estadoVariablesRef.current = estado;
+                    historialVariablesRef.current = [
+                        ...historialVariablesRef.current.slice(-199),
+                        estado,
+                    ];
                     setEstadoVariables(estado);
                     setHistorialVariables((prev) => [...prev.slice(-199), estado]);
                 },
@@ -242,9 +253,14 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                     const aviso = mensajePrevio
                         ? `<div style="text-align:left;color:#555;font-weight:bold;margin-bottom:8px;">${mensajePrevio}</div>`
                         : '';
+                    const fichaVariables = construirHtmlVariablesEnModal(
+                        estadoVariablesRef.current,
+                        historialVariablesRef.current,
+                        nombre,
+                    );
                     const { value, isConfirmed } = await Swal.fire({
                         title: 'Entrada requerida (Leer)',
-                        html: `${aviso}<div style="text-align:left;color:#333;">El algoritmo solicita el valor para <strong>${nombre}</strong>:</div>`,
+                        html: `${aviso}<div style="text-align:left;color:#333;">El algoritmo solicita el valor para <strong>${nombre}</strong>:</div>${fichaVariables}`,
                         input: 'text',
                         inputPlaceholder: `Valor para ${nombre}...`,
                         showCancelButton: true,
@@ -479,9 +495,9 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
             </div>
 
             {/* ZONA DE TRABAJO (EDITOR + CONSOLA) */}
-            <div className="flex-1 px-4 pb-4 overflow-hidden flex gap-4 min-h-0">
+            <div className="flex-1 px-4 pb-4 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row gap-4 min-h-0">
                 {/* Panel Izquierdo: Editor PSeInt */}
-                <div className="flex-1 flex flex-col rounded-xl border border-white/10 bg-[#181818] overflow-hidden shadow-2xl min-w-0">
+                <div className="flex-1 flex flex-col min-h-[55vh] lg:min-h-0 rounded-xl border border-white/10 bg-[#181818] overflow-hidden shadow-2xl min-w-0">
                     <div className="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs text-gray-400 font-mono">
                         <span>pseint_algoritmo.psc</span>
                         <span>{lines.length} líneas</span>
@@ -517,9 +533,9 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                 </div>
 
                 {/* Panel Derecho: Consola y Guía */}
-                <div className="w-96 flex flex-col gap-4 min-h-0">
+                <div className="w-full shrink-0 lg:w-96 lg:min-h-0 flex flex-col gap-4">
                     {/* Consola de Salida */}
-                    <div className="flex-1 flex flex-col rounded-xl border border-white/10 bg-[#0d1117] overflow-hidden shadow-2xl min-h-0">
+                    <div className="h-64 lg:h-auto lg:flex-1 flex flex-col rounded-xl border border-white/10 bg-[#0d1117] overflow-hidden shadow-2xl min-h-0">
                         <div className="bg-black/40 px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs text-gray-400">
                             <span className="font-semibold text-gray-300">📟 Consola de Salida</span>
                             <button
@@ -553,7 +569,7 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                     />
 
                     {/* Guía Rápida */}
-                    <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-gray-300 space-y-2">
+                    <div className="hidden lg:block rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-gray-300 space-y-2">
                         <h4 className="font-bold text-amber-400">💡 Sintaxis Básica PSeInt</h4>
                         <ul className="list-disc pl-4 space-y-1 text-gray-400">
                             <li><b className="text-gray-200">Algoritmo Nombre ... FinAlgoritmo</b></li>

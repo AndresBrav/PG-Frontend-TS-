@@ -212,18 +212,6 @@ const PanelVariablesEjecucion = ({
                                     top: 0,
                                 }}
                             >
-                                <th
-                                    style={{
-                                        padding: '5px 10px',
-                                        fontSize: 11,
-                                        color: '#888',
-                                        textAlign: 'right',
-                                        borderBottom: '1px solid var(--border)',
-                                        borderRight: '1px solid var(--border)',
-                                    }}
-                                >
-                                    #
-                                </th>
                                 {nombres.map((nombre) => (
                                     <th
                                         key={nombre}
@@ -245,18 +233,6 @@ const PanelVariablesEjecucion = ({
                         <tbody>
                             {armarFilas().map((fila, indice) => (
                                 <tr key={indice}>
-                                    <td
-                                        style={{
-                                            padding: '3px 10px',
-                                            fontSize: 10,
-                                            color: '#666',
-                                            textAlign: 'right',
-                                            borderRight: '1px solid var(--border)',
-                                            fontFamily: 'var(--mono)',
-                                        }}
-                                    >
-                                        {filas[indice].paso}
-                                    </td>
                                     {nombres.map((nombre) => (
                                         <td
                                             key={nombre}
@@ -286,3 +262,101 @@ const PanelVariablesEjecucion = ({
 
 export default PanelVariablesEjecucion;
 export type { EstadoEjecucion, VariableEstado };
+
+const COLORES_FICHA = [
+    '#22c55e',
+    '#60a5fa',
+    '#f472b6',
+    '#eab308',
+    '#a78bfa',
+    '#2dd4bf',
+    '#fb923c',
+    '#f87171',
+];
+
+const FILAS_MINI_TRAZA = 5;
+
+/**
+ * HTML del bloque de variables para incrustar en el modal de
+ * "Entrada requerida (Leer)": chips con el valor actual de cada
+ * variable + mini traza de las últimas capturas.
+ */
+export const construirHtmlVariablesEnModal = (
+    estado: EstadoEjecucion | null,
+    historial: EstadoEjecucion[],
+    nombreSolicitado: string,
+): string => {
+    const variables = estado?.variables ?? [];
+    if (variables.length === 0) {
+        return '';
+    }
+
+    const chips = variables
+        .map((v, indice) => {
+            const color = COLORES_FICHA[indice % COLORES_FICHA.length];
+            const esSolicitada = v.nombre === nombreSolicitado;
+            return `<span style="display:inline-block;margin:0 6px 4px 0;padding:2px 8px;border-radius:6px;background:${esSolicitada ? 'rgba(251,191,36,0.15)' : 'rgba(0,0,0,0.05)'};outline:1px solid ${esSolicitada ? '#f59e0b' : 'transparent'};font-family:monospace;font-size:12px;">
+<b style="color:${color};">${v.nombre}</b> = ${v.valor}${esSolicitada ? '<i style="color:#b45309;font-size:11px;"> (a ingresar)</i>' : ''}
+</span>`;
+        })
+        .join('');
+
+    const bloques =
+        `<div style="margin-top:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
+<div style="font-size:12px;font-weight:bold;color:#4b5563;margin-bottom:6px;">🔍 Variables en Ejecución <span style="color:#9ca3af;font-weight:500;font-size:11px;">(paso ${estado?.paso ?? 0})</span></div>
+<div style="line-height:1.6;">${chips}</div>
+</div>`;
+
+    // Mini traza: últimas 5 filas
+    const filas = historial.slice(-FILAS_MINI_TRAZA);
+    if (filas.length === 0) {
+        return bloques;
+    }
+
+    const nombres: string[] = [];
+    const presentes = new Set<string>();
+    for (const captura of [...historial.slice(-FILAS_MINI_TRAZA)]) {
+        for (const v of captura.variables) {
+            if (!presentes.has(v.nombre)) {
+                presentes.add(v.nombre);
+                nombres.push(v.nombre);
+            }
+        }
+    }
+
+    const celdas = (valores: Record<string, string>) =>
+        nombres
+            .map(
+                (nombre) =>
+                    `<td style="padding:2px 10px;font-family:monospace;font-size:12px;white-space:nowrap;color:${valores[nombre] === undefined ? '#cbd5e1' : '#1f2937'};">${valores[nombre] ?? '—'}</td>`
+            )
+            .join('');
+
+    const filasHtml = filas
+        .map((captura) => {
+            const valores: Record<string, string> = {};
+            for (const v of captura.variables) {
+                valores[v.nombre] = v.valor;
+            }
+            return `<tr>${celdas(valores)}</tr>`;
+        })
+        .join('');
+
+    const encabezados = nombres
+        .map(
+            (nombre, indice) =>
+                `<th style="padding:2px 10px;font-family:monospace;font-size:12px;text-align:left;color:${COLORES_FICHA[indice % COLORES_FICHA.length]};">${nombre}</th>`
+        )
+        .join('');
+
+    const tabla =
+        `<div style="margin-top:8px;max-height:150px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;">
+<table style="border-collapse:collapse;min-width:100%;">
+<thead><tr style="background:#f3f4f6;">${encabezados}</tr></thead>
+<tbody>${filasHtml}</tbody>
+</table>
+</div>
+<div style="margin-top:4px;font-size:11px;color:#9ca3af;">Últimas ${filas.length} filas de la traza</div>`;
+
+    return bloques + tabla;
+};

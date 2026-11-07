@@ -16,7 +16,9 @@ import {
     esCanceladoPorUsuario,
     type EstadoEjecucion,
 } from './pseintCompiler';
-import PanelVariablesEjecucion from './PanelVariablesEjecucion';
+import PanelVariablesEjecucion, {
+    construirHtmlVariablesEnModal,
+} from './PanelVariablesEjecucion';
 import {
     obtenerJuegoIAPorId,
     guardarEstadoTablero,
@@ -243,6 +245,9 @@ const EditingBoard: React.FC = () => {
     const [historialVariables, setHistorialVariables] = useState<
         EstadoEjecucion[]
     >([]);
+    // Copia accesible dentro de pedirEntrada (evita closures viejas de React)
+    const estadoVariablesRef = useRef<EstadoEjecucion | null>(null);
+    const historialVariablesRef = useRef<EstadoEjecucion[]>([]);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
@@ -318,6 +323,8 @@ const EditingBoard: React.FC = () => {
         setConsoleOutput(['[Sistema] Iniciando ejecucion del pseudocodigo...']);
         setEstadoVariables(null);
         setHistorialVariables([]);
+        estadoVariablesRef.current = null;
+        historialVariablesRef.current = [];
 
         try {
             const result = await ejecutarPseudocodigo(code, {
@@ -325,6 +332,11 @@ const EditingBoard: React.FC = () => {
                     setConsoleOutput((prev) => [...prev, texto]);
                 },
                 onEstado: (estado) => {
+                    estadoVariablesRef.current = estado;
+                    historialVariablesRef.current = [
+                        ...historialVariablesRef.current.slice(-199),
+                        estado,
+                    ];
                     setEstadoVariables(estado);
                     setHistorialVariables((prev) => [...prev.slice(-199), estado]);
                 },
@@ -332,9 +344,14 @@ const EditingBoard: React.FC = () => {
                     const aviso = mensajePrevio
                         ? `<div style="text-align:left;color:#555;line-height:1.5;font-weight:bold;margin-bottom:8px;">${mensajePrevio}</div>`
                         : '';
+                    const fichaVariables = construirHtmlVariablesEnModal(
+                        estadoVariablesRef.current,
+                        historialVariablesRef.current,
+                        nombre,
+                    );
                     const { value, isConfirmed } = await Swal.fire({
                         title: 'Entrada requerida (Leer)',
-                        html: `${aviso}<div style="text-align:left;color:#333;line-height:1.5;">El algoritmo necesita el valor de <strong>${nombre}</strong>.</div>`,
+                        html: `${aviso}<div style="text-align:left;color:#333;line-height:1.5;">El algoritmo necesita el valor de <strong>${nombre}</strong>.</div>${fichaVariables}`,
                         input: 'text',
                         inputPlaceholder: `Escribe un valor para ${nombre}...`,
                         showCancelButton: true,
