@@ -32,7 +32,7 @@ const PanelVariablesEjecucion = ({
     historial,
     enEjecucion,
 }: PanelVariablesEjecucionProps) => {
-    const [mostrarHistorial, setMostrarHistorial] = useState(true);
+    const [mostrarHistorial, setMostrarHistorial] = useState(false);
 
     // Variables vigentes con el estado más reciente
     const variables = estado?.variables ?? [];
@@ -90,6 +90,8 @@ const PanelVariablesEjecucion = ({
                 color: 'var(--text)',
                 flexShrink: 0,
                 overflow: 'hidden',
+                maxHeight: '45%',
+                overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 8,
@@ -198,7 +200,7 @@ const PanelVariablesEjecucion = ({
                 <div
                     style={{
                         overflow: 'auto',
-                        maxHeight: 220,
+                        maxHeight: 140,
                         border: '1px solid var(--border)',
                         borderRadius: 8,
                     }}
