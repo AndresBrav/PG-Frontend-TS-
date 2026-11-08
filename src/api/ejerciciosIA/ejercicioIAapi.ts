@@ -58,7 +58,24 @@ interface DatosJuegoIA {
     tipo_juego: string;
     completado: boolean;
     puntos: number;
+    temario_id?: number;
 }
+
+/** Temarios globales de IA (clasificación de ejercicios de pseudocódigo). */
+export const traerTemariosIA = async (clave: string): Promise<any> => {
+    try {
+        const response = await axios.get(`${API}/juegos/temarios`, {
+            headers: {
+                Authorization: clave,
+                'ngrok-skip-browser-warning': 'true',
+            },
+        });
+        return response.data?.temarios ?? [];
+    } catch (error) {
+        console.error('Error al traer temarios IA:', error);
+        return [];
+    }
+};
 
 export const guardarJuegoIA = async (
     clave: string,

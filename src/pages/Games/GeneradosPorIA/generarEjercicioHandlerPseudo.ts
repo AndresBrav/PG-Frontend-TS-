@@ -3,12 +3,16 @@ import { consultarEjercicioPseudo } from '../../../api/ejerciciosIA/consultarEje
 import {
     guardarJuegoIA,
     traerJuegosIAPseudo,
+    traerTemariosIA,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
 
-// Handler para generar y guardar un ejercicio de pseudocódigo IA
+// Handler para generar y guardar un ejercicio de pseudocódigo IA.
+// Si temarioElegido viene dado (chip activo del Dashboard), el prompt
+// se enfoca en ese temario y el guardado lo asocia sin pedir selección.
 export async function generarEjercicioHandlerPseudo(
     claveAcceso: any,
-    setJuegosIAPseudo: any
+    setJuegosIAPseudo: any,
+    temarioElegido?: { id: number; nombre: string } | null
 ) {
     // Mostrar loading
     Swal.fire({
@@ -24,8 +28,20 @@ export async function generarEjercicioHandlerPseudo(
     });
 
     try {
-        // Consultar el ejercicio a la IA
-        const ejercicioGenerado = await consultarEjercicioPseudo();
+        // Temarios globales de IA (si fallan, se continúa sin temario)
+        const temarios = temarioElegido ? [] : await traerTemariosIA(claveAcceso);
+        const opcionesTemario = temarios
+            .map(
+                (t: any) =>
+                    `<option value="${t.id}">${t.nombre}</option>`
+            )
+            .join('');
+
+        // Consultar el ejercicio a la IA (con foco en el temario elegido)
+        const ejercicioGenerado = await consultarEjercicioPseudo(
+            claveAcceso,
+            temarioElegido?.nombre ?? undefined,
+        );
 
         // Mostrar el ejercicio generado
         const result = await Swal.fire({
@@ -36,6 +52,12 @@ export async function generarEjercicioHandlerPseudo(
                         <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
                             ${ejercicioGenerado}
                         </p>
+                        ${
+                            opcionesTemario
+                                ? `<label style="display:block; text-align:left; color:#333; font-weight:bold; font-size:14px; margin-bottom:4px;">Temario:</label>
+                        <select id="select-temario-ia" class="swal2-input" style="display:flex; width:100%; margin:0 0 8px 0; font-size:14px;">${opcionesTemario}</select>`
+                                : ''
+                        }
                     </div>
                 `,
             icon: 'info',
@@ -56,11 +78,24 @@ export async function generarEjercicioHandlerPseudo(
             try {
                 // Guardar el juego en la base de datos
                 if (claveAcceso) {
+                    let temarioId: number | undefined = temarioElegido?.id;
+
+                    // Sin temario pre-elegido: se pide en el modal
+                    if (!temarioId) {
+                        const selectTemario = document.getElementById(
+                            'select-temario-ia'
+                        ) as HTMLSelectElement | null;
+                        if (selectTemario && selectTemario.value) {
+                            temarioId = Number(selectTemario.value);
+                        }
+                    }
+
                     const datosJuego = {
                         descripcion: ejercicioGenerado,
                         tipo_juego: 'iapseudo',
                         completado: false,
                         puntos: 0,
+                        ...(temarioId ? { temario_id: temarioId } : {}),
                     };
                     await guardarJuegoIA(claveAcceso, datosJuego);
 

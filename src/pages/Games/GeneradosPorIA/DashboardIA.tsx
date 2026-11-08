@@ -5,11 +5,18 @@ import { TokenContext } from '../../../Context/TokenContext';
 import {
     traerJuegosIA,
     traerJuegosIAPseudo,
+    traerTemariosIA,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
 import { generarEjercicioHandler } from './generarEjercicioHandler';
 import { generarEjercicioHandlerPseudo } from './generarEjercicioHandlerPseudo';
 import ModalInf1 from '../Presentation/ModalInf1';
 import ModalInf2 from '../Presentation/ModalInf2';
+
+interface TemarioIA {
+    id: number;
+    nombre: string;
+    orden: number;
+}
 
 interface JuegoIA {
     id: number;
@@ -18,6 +25,8 @@ interface JuegoIA {
     usuario_id: number;
     completado: boolean | number;
     puntos: number;
+    temario_id?: number | null;
+    temario_nombre?: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -26,6 +35,8 @@ const DashboardIA = () => {
     const { claveAcceso } = useContext(TokenContext);
     const [juegosIA, setJuegosIA] = useState<JuegoIA[]>([]);
     const [juegosIAPseudo, setJuegosIAPseudo] = useState<JuegoIA[]>([]);
+    const [temarios, setTemarios] = useState<TemarioIA[]>([]);
+    const [temarioFiltro, setTemarioFiltro] = useState<number | null>(null);
 
     const [modalAbierto, setModalAbierto] = useState(false);
     const alternarModal = () => setModalAbierto(!modalAbierto);
@@ -41,9 +52,10 @@ const DashboardIA = () => {
         let activo = true;
 
         const cargarDatos = async () => {
-            const [dataIA, dataIAPseudo] = await Promise.all([
+            const [dataIA, dataIAPseudo, dataTemarios] = await Promise.all([
                 traerJuegosIA(claveAcceso),
                 traerJuegosIAPseudo(claveAcceso),
+                traerTemariosIA(claveAcceso),
             ]);
 
             if (!activo) return;
@@ -53,6 +65,9 @@ const DashboardIA = () => {
             }
             if (dataIAPseudo?.juegosIA) {
                 setJuegosIAPseudo(dataIAPseudo.juegosIA);
+            }
+            if (Array.isArray(dataTemarios)) {
+                setTemarios(dataTemarios);
             }
         };
 
@@ -68,7 +83,41 @@ const DashboardIA = () => {
     };
 
     const handleGenerarEjercicioPseudo = async () => {
-        await generarEjercicioHandlerPseudo(claveAcceso, setJuegosIAPseudo);
+        // El temario del dropdown define el foco: null (Todos) deja
+        // el flujo con selección en el modal de guardar
+        const temario = temarioFiltro
+            ? {
+                  id: temarioFiltro,
+                  nombre:
+                      temarios.find((t) => t.id === temarioFiltro)?.nombre ??
+                      '',
+              }
+            : null;
+        await generarEjercicioHandlerPseudo(
+            claveAcceso,
+            setJuegosIAPseudo,
+            temario && temario.nombre ? temario : null
+        );
+    };
+
+    // Ejercicios pseudo filtrados por el temario seleccionado
+    // (null = Todos)
+    const pseudoFiltrados =
+        temarioFiltro === null
+            ? juegosIAPseudo
+            : juegosIAPseudo.filter(
+                  (juego) => juego.temario_id === temarioFiltro
+              );
+
+    // Contadores completados/total por temario
+    const contadorTemario = (temarioId: number) => {
+        const delTemario = juegosIAPseudo.filter(
+            (juego) => juego.temario_id === temarioId
+        );
+        const completados = delTemario.filter((juego) =>
+            Boolean(juego.completado)
+        ).length;
+        return { completados, total: delTemario.length };
     };
 
     return (
@@ -304,8 +353,67 @@ const DashboardIA = () => {
 
             <ModalInf2 isOpen={modalAbierto2} onClose={alternarModal2} />
 
+            {/* Dropdown de temarios (Etapa 2 - Pseudocódigo) */}
+            {temarios.length > 0 && (
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 10,
+                        flexWrap: 'wrap',
+                        padding: '4px 20px 0 20px',
+                    }}
+                >
+                    <label
+                        htmlFor="select-temarios-ia"
+                        style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: '#d1d5db',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        Ejercicios de:
+                    </label>
+                    <select
+                        id="select-temarios-ia"
+                        value={temarioFiltro ?? ''}
+                        onChange={(e) =>
+                            setTemarioFiltro(
+                                e.target.value ? Number(e.target.value) : null
+                            )
+                        }
+                        style={{
+                            background: '#181818',
+                            border: '1px solid rgba(255,255,255,0.25)',
+                            borderRadius: 999,
+                            color: '#fff',
+                            fontSize: 13,
+                            padding: '6px 30px 6px 14px',
+                            cursor: 'pointer',
+                            maxWidth: '100%',
+                        }}
+                    >
+                        <option value="">
+                            Todos ({juegosIAPseudo.length})
+                        </option>
+                        {temarios.map((temario) => {
+                            const { completados, total } = contadorTemario(
+                                temario.id
+                            );
+                            return (
+                                <option key={temario.id} value={temario.id}>
+                                    📚 {temario.nombre} ({completados}/{total})
+                                </option>
+                            );
+                        })}
+                    </select>
+                </div>
+            )}
+
             {/* Mostrar juegos IA dinÃ¡micamente para PseudocÃ³digo */}
-            {juegosIAPseudo.map((juego, index) => (
+            {pseudoFiltrados.map((juego, index) => (
                 <div
                     key={`pseudo-${juego.id}`}
                     className="contenedo-diagrama-flujo-primer-ejercicio"
