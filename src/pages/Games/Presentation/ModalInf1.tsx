@@ -678,10 +678,9 @@ const DiagramaRepetitivas = () => (
         <text x="170" y="253" style={estiloTexto}>
             i &lt;- i + 1
         </text>
-
-        {/* Regreso del bucle (flecha que vuelve al rombo) */}
+        {/* Regreso del bucle al vértice superior del rombo */}
         <polyline
-            points="170,261 35,261 35,140 118,140"
+            points="170,261 35,261 35,100 170,100 170,111"
             fill="none"
             stroke="var(--edge-color, #6b6375)"
             strokeWidth="2"
@@ -732,8 +731,10 @@ const DiagramaRepetitivas = () => (
 
 /* --- 5. Arreglos (Vectores) --- */
 const DiagramaArreglos = () => (
-    <svg viewBox="0 0 340 375" style={{ maxWidth: 440, width: '100%' }}>
+    <svg viewBox="0 0 340 430" style={{ maxWidth: 440, width: '100%' }}>
         <FlechaMarker id="fle-arr" />
+
+        {/* Inicio */}
         <ellipse
             cx="170"
             cy="20"
@@ -746,6 +747,7 @@ const DiagramaArreglos = () => (
         <text x="170" y="24" style={estiloTexto}>
             Inicio
         </text>
+
         <line
             x1="170"
             y1="34"
@@ -756,6 +758,7 @@ const DiagramaArreglos = () => (
             markerEnd="url(#fle-arr)"
         />
 
+        {/* Dimension numeros[5] */}
         <rect
             x="85"
             y="57"
@@ -769,6 +772,7 @@ const DiagramaArreglos = () => (
         <text x="170" y="77" style={estiloTexto}>
             Dimension numeros[5]
         </text>
+
         <line
             x1="170"
             y1="87"
@@ -779,6 +783,7 @@ const DiagramaArreglos = () => (
             markerEnd="url(#fle-arr)"
         />
 
+        {/* i <- 1 */}
         <rect
             x="135"
             y="111"
@@ -792,6 +797,7 @@ const DiagramaArreglos = () => (
         <text x="170" y="130" style={estiloTexto}>
             i &lt;- 1
         </text>
+
         <line
             x1="170"
             y1="139"
@@ -802,6 +808,7 @@ const DiagramaArreglos = () => (
             markerEnd="url(#fle-arr)"
         />
 
+        {/* Decisión */}
         <polygon
             points="170,159 220,188 170,217 120,188"
             fill="var(--node-decision, #fce4ec)"
@@ -812,10 +819,10 @@ const DiagramaArreglos = () => (
             i &lt;= 5 ?
         </text>
 
-        {/* Sí: cuerpo del bucle */}
+        {/* Sí */}
         <text
-            x="182"
-            y="225"
+            x="185"
+            y="228"
             fill="var(--yes-color, #2e7d32)"
             fontSize="9"
             fontWeight="bold"
@@ -823,6 +830,7 @@ const DiagramaArreglos = () => (
         >
             Sí
         </text>
+
         <line
             x1="170"
             y1="217"
@@ -832,6 +840,8 @@ const DiagramaArreglos = () => (
             strokeWidth="2"
             markerEnd="url(#fle-arr)"
         />
+
+        {/* Leer numeros[i] */}
         <rect
             x="118"
             y="234"
@@ -845,6 +855,7 @@ const DiagramaArreglos = () => (
         <text x="170" y="252" style={estiloTexto}>
             Leer numeros[i]
         </text>
+
         <line
             x1="170"
             y1="262"
@@ -854,6 +865,8 @@ const DiagramaArreglos = () => (
             strokeWidth="2"
             markerEnd="url(#fle-arr)"
         />
+
+        {/* Escribir numeros[i] */}
         <rect
             x="108"
             y="279"
@@ -864,23 +877,48 @@ const DiagramaArreglos = () => (
             stroke="var(--node-data-border, #ff9800)"
             strokeWidth="2"
         />
-        <text x="170" y="299" style={{ ...estiloTexto, fontSize: 9 }}>
+        <text x="170" y="298" style={{ ...estiloTexto, fontSize: 9 }}>
             Escribir numeros[i]
         </text>
 
-        {/* Regreso del bucle */}
+        <line
+            x1="170"
+            y1="307"
+            x2="170"
+            y2="323"
+            stroke="var(--edge-color, #6b6375)"
+            strokeWidth="2"
+            markerEnd="url(#fle-arr)"
+        />
+
+        {/* i <- i + 1 */}
+        <rect
+            x="120"
+            y="324"
+            width="100"
+            height="28"
+            rx="4"
+            fill="var(--node-process, #e3f2fd)"
+            stroke="var(--node-process-border, #2196f3)"
+            strokeWidth="2"
+        />
+        <text x="170" y="343" style={estiloTexto}>
+            i &lt;- i + 1
+        </text>
+
+        {/* Regreso del bucle al vértice superior */}
         <polyline
-            points="170,307 35,307 35,188 118,188"
+            points="170,352 35,352 35,159 170,159"
             fill="none"
             stroke="var(--edge-color, #6b6375)"
             strokeWidth="2"
             markerEnd="url(#fle-arr)"
         />
 
-        {/* No: hacia Fin */}
+        {/* No */}
         <text
-            x="233"
-            y="180"
+            x="235"
+            y="181"
             fill="var(--no-color, #c62828)"
             fontSize="9"
             fontWeight="bold"
@@ -888,32 +926,35 @@ const DiagramaArreglos = () => (
         >
             No
         </text>
+
         <line
             x1="220"
             y1="188"
-            x2="312"
+            x2="300"
             y2="188"
             stroke="var(--edge-color, #6b6375)"
             strokeWidth="2"
         />
+
         <polyline
-            points="312,188 312,352 208,352"
+            points="300,188 300,395 208,395"
             fill="none"
             stroke="var(--edge-color, #6b6375)"
             strokeWidth="2"
             markerEnd="url(#fle-arr)"
         />
 
+        {/* Fin */}
         <ellipse
             cx="170"
-            cy="352"
+            cy="395"
             rx="36"
             ry="14"
             fill="var(--node-startend, #e8f5e9)"
             stroke="var(--node-startend-border, #4caf50)"
             strokeWidth="2"
         />
-        <text x="170" y="356" style={estiloTexto}>
+        <text x="170" y="399" style={estiloTexto}>
             Fin
         </text>
     </svg>
