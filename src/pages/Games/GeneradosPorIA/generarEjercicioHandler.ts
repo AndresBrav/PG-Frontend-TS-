@@ -8,7 +8,8 @@ import {
 // Handler para generar y guardar un ejercicio IA
 export async function generarEjercicioHandler(
     claveAcceso: any,
-    setJuegosIA: any
+    setJuegosIA: any,
+    temarioElegido?: { id: number; nombre: string } | null
 ) {
     // Mostrar loading
     Swal.fire({
@@ -25,7 +26,10 @@ export async function generarEjercicioHandler(
 
     try {
         // Consultar el ejercicio a la IA
-        const ejercicioGenerado = await consultarEjercicio();
+        const ejercicioGenerado = await consultarEjercicio(
+            claveAcceso,
+            temarioElegido?.nombre
+        );
 
         // Mostrar el ejercicio generado
         const result = await Swal.fire({
@@ -61,6 +65,9 @@ export async function generarEjercicioHandler(
                         tipo_juego: 'ia',
                         completado: false,
                         puntos: 0,
+                        ...(temarioElegido
+                            ? { temario_id: temarioElegido.id }
+                            : {}),
                     };
                     await guardarJuegoIA(claveAcceso, datosJuego);
 

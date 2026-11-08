@@ -36,6 +36,9 @@ const DashboardIA = () => {
     const [juegosIA, setJuegosIA] = useState<JuegoIA[]>([]);
     const [juegosIAPseudo, setJuegosIAPseudo] = useState<JuegoIA[]>([]);
     const [temarios, setTemarios] = useState<TemarioIA[]>([]);
+    const [temarioFiltroDiagrama, setTemarioFiltroDiagrama] = useState<
+        number | null
+    >(null);
     const [temarioFiltro, setTemarioFiltro] = useState<number | null>(null);
 
     const [modalAbierto, setModalAbierto] = useState(false);
@@ -45,6 +48,10 @@ const DashboardIA = () => {
     const alternarModal2 = () => setModalAbierto2(!modalAbierto2);
 
     const navigate = useNavigate();
+
+    const temariosDiagrama = temarios.filter(
+        (temario) => temario.nombre !== 'Funciones y SubProcesos'
+    );
 
     useEffect(() => {
         if (!claveAcceso) return;
@@ -79,7 +86,14 @@ const DashboardIA = () => {
     }, [claveAcceso]);
 
     const handleGenerarEjercicio = async () => {
-        await generarEjercicioHandler(claveAcceso, setJuegosIA);
+        const temario = temariosDiagrama.find(
+            (item) => item.id === temarioFiltroDiagrama
+        );
+        await generarEjercicioHandler(
+            claveAcceso,
+            setJuegosIA,
+            temario ?? null
+        );
     };
 
     const handleGenerarEjercicioPseudo = async () => {
@@ -108,6 +122,23 @@ const DashboardIA = () => {
             : juegosIAPseudo.filter(
                   (juego) => juego.temario_id === temarioFiltro
               );
+
+    const diagramasFiltrados =
+        temarioFiltroDiagrama === null
+            ? juegosIA
+            : juegosIA.filter(
+                  (juego) => juego.temario_id === temarioFiltroDiagrama
+              );
+
+    const contadorTemarioDiagrama = (temarioId: number) => {
+        const delTemario = juegosIA.filter(
+            (juego) => juego.temario_id === temarioId
+        );
+        const completados = delTemario.filter((juego) =>
+            Boolean(juego.completado)
+        ).length;
+        return { completados, total: delTemario.length };
+    };
 
     // Contadores completados/total por temario
     const contadorTemario = (temarioId: number) => {
@@ -223,8 +254,64 @@ const DashboardIA = () => {
             {/* Modal fijo */}
             <ModalInf1 isOpen={modalAbierto} onClose={alternarModal} />
 
+            {/* Filtro de temarios para diagramas de flujo */}
+            {temariosDiagrama.length > 0 && (
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        gap: 10,
+                        flexWrap: 'wrap',
+                        padding: '4px 20px 0 20px',
+                    }}
+                >
+                    <label
+                        htmlFor="select-temarios-diagrama-ia"
+                        style={{
+                            fontSize: 12,
+                            fontWeight: 600,
+                            color: '#d1d5db',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        Ejercicios de:
+                    </label>
+                    <select
+                        id="select-temarios-diagrama-ia"
+                        value={temarioFiltroDiagrama ?? ''}
+                        onChange={(e) =>
+                            setTemarioFiltroDiagrama(
+                                e.target.value ? Number(e.target.value) : null
+                            )
+                        }
+                        style={{
+                            background: '#181818',
+                            border: '1px solid rgba(255,255,255,0.25)',
+                            borderRadius: 999,
+                            color: '#fff',
+                            fontSize: 13,
+                            padding: '6px 30px 6px 14px',
+                            cursor: 'pointer',
+                            maxWidth: '100%',
+                        }}
+                    >
+                        <option value="">Todos ({juegosIA.length})</option>
+                        {temariosDiagrama.map((temario) => {
+                            const { completados, total } =
+                                contadorTemarioDiagrama(temario.id);
+                            return (
+                                <option key={temario.id} value={temario.id}>
+                                    📚 {temario.nombre} ({completados}/{total})
+                                </option>
+                            );
+                        })}
+                    </select>
+                </div>
+            )}
+
             {/* Mostrar juegos IA dinamicamente */}
-            {juegosIA.map((juego, index) => (
+            {diagramasFiltrados.map((juego, index) => (
                 <div
                     key={juego.id}
                     className="contenedo-diagrama-flujo-primer-ejercicio"

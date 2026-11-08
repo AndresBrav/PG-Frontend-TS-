@@ -1,7 +1,10 @@
 import { GoogleGenAI } from '@google/genai';
 import { getGeminiApiKey } from './getGeminiApiKey';
 
-export async function consultarEjercicio(claveAcceso?: string) {
+export async function consultarEjercicio(
+    claveAcceso?: string,
+    temarioNombre?: string | null
+) {
     const apikeyGemini = await getGeminiApiKey(claveAcceso);
     const ai = new GoogleGenAI({
         apiKey: apikeyGemini,
@@ -27,10 +30,34 @@ export async function consultarEjercicio(claveAcceso?: string) {
 
     const temaRandom = temas[Math.floor(Math.random() * temas.length)];
 
+    const focosTemario: Record<string, string> = {
+        Variables: `El ejercicio debe practicar únicamente variables, lectura, escritura y cálculos secuenciales.
+- No debe requerir decisiones, ciclos ni arreglos.`,
+        Condicionales: `El ejercicio debe requerir una decisión simple con una condición y sus posibles resultados.
+- No debe requerir decisiones anidadas, ciclos ni arreglos.`,
+        'Decisiones Anidada': `El ejercicio debe requerir una decisión dentro de otra decisión, para evaluar dos criterios paso a paso.
+- No debe requerir ciclos ni arreglos.`,
+        Repetitivas: `El ejercicio debe practicar un ciclo simple (con cantidad de repeticiones o condición de salida claramente indicada), usando un contador o acumulador.
+- No debe requerir arreglos ni decisiones anidadas.`,
+        Arreglos: `El ejercicio debe requerir procesar un arreglo unidimensional de tamaño definido, recorriéndolo para leer o calcular resultados.
+- No debe requerir funciones, subprocesos ni matrices.`,
+        Mixto: `El ejercicio debe combinar de forma necesaria al menos dos de estos temas: variables, condicionales, decisiones anidadas, ciclos o arreglos.
+- No debe incluir funciones ni subprocesos.`,
+    };
+
+    const foco =
+        temarioNombre && focosTemario[temarioNombre]
+            ? `${focosTemario[temarioNombre]}
+
+Este requisito prevalece sobre la lista general de estructuras permitidas.`
+            : '';
+
     const prompt = `
 Genera UN SOLO ejercicio corto y diferente para resolver mediante un diagrama de flujo.
 
 El ejercicio debe estar relacionado con ${temaRandom}.
+
+${foco}
 
 El enunciado debe:
 
@@ -56,6 +83,8 @@ Si usas ciclos:
 - deben ser muy simples
 - debe quedar claro cuántas veces se repite
 - o cuál es la condición para terminar
+
+No uses funciones ni subprocesos.
 
 No generes:
 
