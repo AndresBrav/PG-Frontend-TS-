@@ -237,8 +237,8 @@ const AppHeader = () => {
     const enlaces: { to: string; texto: string }[] = [
         { to: '/dashboard', texto: 'Inicio' },
         { to: '/grupos', texto: 'Grupos' },
-        { to: '/ejercicios', texto: 'Ejercicios' },
         { to: '/ejercicios-ia', texto: 'Ejercicios IA' },
+        { to: '/ejercicios', texto: 'Ejercicios' },
     ];
 
     if (usuario?.rol === 'admin') {
