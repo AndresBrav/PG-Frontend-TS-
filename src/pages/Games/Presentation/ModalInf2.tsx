@@ -25,7 +25,7 @@ interface CategoriaPseint {
 
 const CATEGORIAS: CategoriaPseint[] = [
     {
-        emoji: '📘',
+        emoji: '',
         color: '#60A5FA',
         titulo: 'Estructura Secuencial',
         tipos: 'Definir · Leer · Escribir · Asignar (<-)',
@@ -53,7 +53,7 @@ FinAlgoritmo`,
 FinAlgoritmo`,
     },
     {
-        emoji: '🔀',
+        emoji: '',
         color: '#F472B6',
         titulo: 'Estructuras Selectivas',
         tipos: 'Si · SiNo · Según · De Otro Modo',
@@ -91,7 +91,7 @@ FinSegun`,
 FinAlgoritmo`,
     },
     {
-        emoji: '🌳',
+        emoji: '',
         color: '#A78BFA',
         titulo: 'Decisiones Anidadas',
         tipos: 'Si dentro de Si · Si dentro de SiNo',
@@ -125,7 +125,7 @@ FinSi`,
 FinAlgoritmo`,
     },
     {
-        emoji: '🔁',
+        emoji: '',
         color: '#4ADE80',
         titulo: 'Estructuras Repetitivas',
         tipos: 'Mientras · Repetir-Hasta Que · Para (Con Paso)',
@@ -151,7 +151,7 @@ FinPara`,
 FinAlgoritmo`,
     },
     {
-        emoji: '🧩',
+        emoji: '',
         color: '#FACC15',
         titulo: 'Funciones y SubProcesos',
         tipos: 'Funcion (con retorno) · SubProceso (sin retorno)',
@@ -183,7 +183,7 @@ Algoritmo EjemploFuncion
 FinAlgoritmo`,
     },
     {
-        emoji: '📦',
+        emoji: '',
         color: '#FB923C',
         titulo: 'Arreglos (Vectores)',
         tipos: 'Dimension · lectura y escritura por índice [i]',
@@ -214,7 +214,7 @@ const estiloBarraCopiar = {
     background: 'rgba(255,255,255,0.08)',
     borderRadius: 8,
     padding: '10px 12px',
-    fontFamily: 'var(--mono)',
+    fontFamily: 'var(--mono, monospace)',
     fontSize: 12,
     whiteSpace: 'pre-wrap' as const,
     color: '#e2e8f0',
@@ -282,7 +282,9 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             margin: 0,
                         }}
                     >
-                        {categoria ? categoria.emoji + ' ' + categoria.titulo : '📚 Estructuras del Pseudocódigo'}
+                        {categoria
+                            ? categoria.emoji + ' ' + categoria.titulo
+                            : '📚 Estructuras del Pseudocódigo'}
                     </h2>
                     <svg
                         fill="#E11919"
@@ -338,9 +340,7 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                                         }}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <span
-                                                style={{ fontSize: 22 }}
-                                            >
+                                            <span style={{ fontSize: 22 }}>
                                                 {item.emoji}
                                             </span>
                                             <span
@@ -388,9 +388,7 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             </button>
 
                             {/* Tipos que abarca */}
-                            <div
-                                className="flex flex-wrap items-center gap-1 mb-4"
-                            >
+                            <div className="flex flex-wrap items-center gap-1 mb-4">
                                 {categoria.tipos.split('·').map((tipo) => (
                                     <span
                                         key={tipo}
@@ -398,11 +396,11 @@ const ModalInf2: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                                             fontSize: 11,
                                             padding: '3px 8px',
                                             borderRadius: 6,
-                                            background:
-                                                categoria.color + '22',
+                                            background: categoria.color + '22',
                                             outline:
                                                 '1px solid ' +
-                                                categoria.color + '55',
+                                                categoria.color +
+                                                '55',
                                             color: '#e5e7eb',
                                             whiteSpace: 'nowrap',
                                         }}
