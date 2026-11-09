@@ -226,7 +226,7 @@ export const RevisionEntregas = () => {
                                                     }
                                                     className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md bg-sky-600 hover:bg-sky-500 text-white transition"
                                                 >
-                                                    👁️ Ver Tablero
+                                                    Ver Tablero
                                                 </button>
                                             </td>
                                             <td className="py-3 px-4 text-center">
@@ -238,12 +238,14 @@ export const RevisionEntregas = () => {
                                                             max={puntosMaximos}
                                                             value={
                                                                 notasLocales[
-                                                                    sol.usuario.id
+                                                                    sol.usuario
+                                                                        .id
                                                                 ] ?? 0
                                                             }
                                                             onChange={(e) =>
                                                                 handleNotaChange(
-                                                                    sol.usuario.id,
+                                                                    sol.usuario
+                                                                        .id,
                                                                     Number(
                                                                         e.target
                                                                             .value

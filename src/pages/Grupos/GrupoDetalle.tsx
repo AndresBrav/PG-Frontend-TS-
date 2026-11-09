@@ -37,25 +37,40 @@ export const GrupoDetalle = () => {
     const { claveAcceso } = useContext(TokenContext);
     const { usuario } = useContext(UsuarioContext);
 
-    const esProfesorOAdmin = usuario?.rol === 'profesor' || usuario?.rol === 'admin';
+    const esProfesorOAdmin =
+        usuario?.rol === 'profesor' || usuario?.rol === 'admin';
 
     // Estados para Profesor
-    const [detalleGrupoProfesor, setDetalleGrupoProfesor] = useState<IGrupoDetalle | null>(null);
-    const [ejerciciosProfesor, setEjerciciosProfesor] = useState<EjercicioGrupoProfesor[]>([]);
-    const [tabProfesor, setTabProfesor] = useState<'ejercicios' | 'estudiantes' | 'ranking'>('ejercicios');
+    const [detalleGrupoProfesor, setDetalleGrupoProfesor] =
+        useState<IGrupoDetalle | null>(null);
+    const [ejerciciosProfesor, setEjerciciosProfesor] = useState<
+        EjercicioGrupoProfesor[]
+    >([]);
+    const [tabProfesor, setTabProfesor] = useState<
+        'ejercicios' | 'estudiantes' | 'ranking'
+    >('ejercicios');
     const [modalCrearAbierto, setModalCrearAbierto] = useState(false);
 
     // Temarios del grupo (vistas de profesor y estudiante)
     const [temarios, setTemarios] = useState<TemarioGrupo[]>([]);
-    const [temarioFiltro, setTemarioFiltro] = useState<'todos' | number>('todos');
+    const [temarioFiltro, setTemarioFiltro] = useState<'todos' | number>(
+        'todos'
+    );
 
     // Estados para Estudiante
-    const [infoGrupoEstudiante, setInfoGrupoEstudiante] = useState<GrupoEstudiante | null>(null);
-    const [ejerciciosEstudiante, setEjerciciosEstudiante] = useState<EjercicioGrupoEstudiante[]>([]);
-    const [tabEstudiante, setTabEstudiante] = useState<'ejercicios' | 'ranking'>('ejercicios');
+    const [infoGrupoEstudiante, setInfoGrupoEstudiante] =
+        useState<GrupoEstudiante | null>(null);
+    const [ejerciciosEstudiante, setEjerciciosEstudiante] = useState<
+        EjercicioGrupoEstudiante[]
+    >([]);
+    const [tabEstudiante, setTabEstudiante] = useState<
+        'ejercicios' | 'ranking'
+    >('ejercicios');
 
     // Ranking del Grupo (Mejores notas)
-    const [rankingGrupo, setRankingGrupo] = useState<EstudianteRankingGrupo[]>([]);
+    const [rankingGrupo, setRankingGrupo] = useState<EstudianteRankingGrupo[]>(
+        []
+    );
     const [cargandoRanking, setCargandoRanking] = useState(false);
 
     // Estados generales
@@ -72,14 +87,18 @@ export const GrupoDetalle = () => {
             }
             return false;
         },
-        [cerrarSesion, navigate],
+        [cerrarSesion, navigate]
     );
 
     const cargarRanking = useCallback(async () => {
         if (!claveAcceso || !grupoId) return;
         setCargandoRanking(true);
         try {
-            const data = await obtenerRankingGrupo(claveAcceso, grupoId, esProfesorOAdmin);
+            const data = await obtenerRankingGrupo(
+                claveAcceso,
+                grupoId,
+                esProfesorOAdmin
+            );
             setRankingGrupo(data);
         } catch (err) {
             console.error('Error cargando ranking del grupo:', err);
@@ -95,11 +114,12 @@ export const GrupoDetalle = () => {
 
         try {
             if (esProfesorOAdmin) {
-                const [grupoInfo, ejercicios, listaTemarios] = await Promise.all([
-                    obtenerDetalleGrupo(claveAcceso, grupoId),
-                    listarEjerciciosGrupoProfesor(claveAcceso, grupoId),
-                    listarTemariosProfesor(claveAcceso, grupoId),
-                ]);
+                const [grupoInfo, ejercicios, listaTemarios] =
+                    await Promise.all([
+                        obtenerDetalleGrupo(claveAcceso, grupoId),
+                        listarEjerciciosGrupoProfesor(claveAcceso, grupoId),
+                        listarTemariosProfesor(claveAcceso, grupoId),
+                    ]);
                 setDetalleGrupoProfesor(grupoInfo);
                 setEjerciciosProfesor(ejercicios);
                 setTemarios(listaTemarios);
@@ -107,14 +127,15 @@ export const GrupoDetalle = () => {
                 setTemarioFiltro((prev) =>
                     prev !== 'todos' && listaTemarios.some((t) => t.id === prev)
                         ? prev
-                        : 'todos',
+                        : 'todos'
                 );
             } else {
-                const [misGrupos, ejercicios, listaTemarios] = await Promise.all([
-                    listarMisGrupos(claveAcceso),
-                    listarEjerciciosGrupoEstudiante(claveAcceso, grupoId),
-                    listarTemariosEstudiante(claveAcceso, grupoId),
-                ]);
+                const [misGrupos, ejercicios, listaTemarios] =
+                    await Promise.all([
+                        listarMisGrupos(claveAcceso),
+                        listarEjerciciosGrupoEstudiante(claveAcceso, grupoId),
+                        listarTemariosEstudiante(claveAcceso, grupoId),
+                    ]);
                 const actual = misGrupos.find((g) => g.id === grupoId) || null;
                 setInfoGrupoEstudiante(actual);
                 setEjerciciosEstudiante(ejercicios);
@@ -122,18 +143,30 @@ export const GrupoDetalle = () => {
                 setTemarioFiltro((prev) =>
                     prev !== 'todos' && listaTemarios.some((t) => t.id === prev)
                         ? prev
-                        : 'todos',
+                        : 'todos'
                 );
             }
             // Si el filtro actual apunta a un temario que ya no existe, vuelve a "todos"
             void cargarRanking();
         } catch (err) {
             if (manejarErrorSesion(err)) return;
-            setError(obtenerMensajeError(err, 'No se pudo cargar la información del grupo'));
+            setError(
+                obtenerMensajeError(
+                    err,
+                    'No se pudo cargar la información del grupo'
+                )
+            );
         } finally {
             setCargando(false);
         }
-    }, [claveAcceso, usuario, grupoId, esProfesorOAdmin, manejarErrorSesion, cargarRanking]);
+    }, [
+        claveAcceso,
+        usuario,
+        grupoId,
+        esProfesorOAdmin,
+        manejarErrorSesion,
+        cargarRanking,
+    ]);
 
     useEffect(() => {
         void cargarDatos();
@@ -149,7 +182,9 @@ export const GrupoDetalle = () => {
         }
     };
 
-    const handleEliminarEjercicio = async (ejercicio: EjercicioGrupoProfesor) => {
+    const handleEliminarEjercicio = async (
+        ejercicio: EjercicioGrupoProfesor
+    ) => {
         const confirmacion = await Swal.fire({
             title: `¿Eliminar "${ejercicio.titulo}"?`,
             text: 'Se eliminarán también las entregas y notas asociadas.',
@@ -164,28 +199,38 @@ export const GrupoDetalle = () => {
 
         try {
             await eliminarEjercicioGrupo(claveAcceso, ejercicio.id);
-            setEjerciciosProfesor((prev) => prev.filter((e) => e.id !== ejercicio.id));
+            setEjerciciosProfesor((prev) =>
+                prev.filter((e) => e.id !== ejercicio.id)
+            );
             void cargarRanking();
-            void Swal.fire('Eliminado', 'El ejercicio ha sido eliminado.', 'success');
+            void Swal.fire(
+                'Eliminado',
+                'El ejercicio ha sido eliminado.',
+                'success'
+            );
         } catch (err) {
             if (manejarErrorSesion(err)) return;
-            void Swal.fire('Error', obtenerMensajeError(err, 'No se pudo eliminar el ejercicio'), 'error');
+            void Swal.fire(
+                'Error',
+                obtenerMensajeError(err, 'No se pudo eliminar el ejercicio'),
+                'error'
+            );
         }
     };
 
     const nombreGrupo = esProfesorOAdmin
-        ? detalleGrupoProfesor?.nombre ?? 'Grupo'
-        : infoGrupoEstudiante?.nombre ?? 'Grupo';
+        ? (detalleGrupoProfesor?.nombre ?? 'Grupo')
+        : (infoGrupoEstudiante?.nombre ?? 'Grupo');
 
     const nombreTemario = (id: number) =>
         temarios.find((t) => t.id === id)?.nombre ?? 'Temario';
 
     const ejerciciosFiltradosProfesor = ejerciciosProfesor.filter(
-        (ej) => temarioFiltro === 'todos' || ej.temario_id === temarioFiltro,
+        (ej) => temarioFiltro === 'todos' || ej.temario_id === temarioFiltro
     );
 
     const ejerciciosFiltradosEstudiante = ejerciciosEstudiante.filter(
-        (ej) => temarioFiltro === 'todos' || ej.temario_id === temarioFiltro,
+        (ej) => temarioFiltro === 'todos' || ej.temario_id === temarioFiltro
     );
 
     const handleCrearTemario = async () => {
@@ -213,10 +258,18 @@ export const GrupoDetalle = () => {
         try {
             await crearTemario(claveAcceso, grupoId, { nombre });
             await cargarDatos();
-            void Swal.fire('Temario creado', `"${nombre}" ya está disponible.`, 'success');
+            void Swal.fire(
+                'Temario creado',
+                `"${nombre}" ya está disponible.`,
+                'success'
+            );
         } catch (err) {
             if (manejarErrorSesion(err)) return;
-            void Swal.fire('Error', obtenerMensajeError(err, 'No se pudo crear el temario'), 'error');
+            void Swal.fire(
+                'Error',
+                obtenerMensajeError(err, 'No se pudo crear el temario'),
+                'error'
+            );
         }
     };
 
@@ -248,7 +301,11 @@ export const GrupoDetalle = () => {
             await cargarDatos();
         } catch (err) {
             if (manejarErrorSesion(err)) return;
-            void Swal.fire('Error', obtenerMensajeError(err, 'No se pudo renombrar el temario'), 'error');
+            void Swal.fire(
+                'Error',
+                obtenerMensajeError(err, 'No se pudo renombrar el temario'),
+                'error'
+            );
         }
     };
 
@@ -270,16 +327,24 @@ export const GrupoDetalle = () => {
         try {
             await eliminarTemario(claveAcceso, temario.id);
             await cargarDatos();
-            void Swal.fire('Eliminado', 'El temario ha sido eliminado.', 'success');
+            void Swal.fire(
+                'Eliminado',
+                'El temario ha sido eliminado.',
+                'success'
+            );
         } catch (err) {
             if (manejarErrorSesion(err)) return;
-            void Swal.fire('Error', obtenerMensajeError(err, 'No se pudo eliminar el temario'), 'error');
+            void Swal.fire(
+                'Error',
+                obtenerMensajeError(err, 'No se pudo eliminar el temario'),
+                'error'
+            );
         }
     };
 
     const codigoGrupo = esProfesorOAdmin
-        ? detalleGrupoProfesor?.codigo ?? ''
-        : infoGrupoEstudiante?.codigo ?? '';
+        ? (detalleGrupoProfesor?.codigo ?? '')
+        : (infoGrupoEstudiante?.codigo ?? '');
 
     // Render de la pestaña de Ranking / Mejores notas
     const renderRanking = () => {
@@ -298,7 +363,8 @@ export const GrupoDetalle = () => {
                         Aún no hay puntuaciones registradas en este grupo
                     </p>
                     <p className="mt-1 text-sm text-gray-400">
-                        Los estudiantes aparecerán aquí a medida que entreguen ejercicios y reciban su nota.
+                        Los estudiantes aparecerán aquí a medida que entreguen
+                        ejercicios y reciban su nota.
                     </p>
                 </div>
             );
@@ -312,7 +378,8 @@ export const GrupoDetalle = () => {
                             <span>🏆</span> Mejores Notas del Grupo
                         </h2>
                         <p className="text-xs text-gray-400 mt-0.5">
-                            Clasificación de los estudiantes basada exclusivamente en los puntos de este grupo.
+                            Clasificación de los estudiantes basada
+                            exclusivamente en los puntos de este grupo.
                         </p>
                     </div>
                     <button
@@ -329,11 +396,17 @@ export const GrupoDetalle = () => {
                     <table className="w-full text-left text-sm text-gray-300">
                         <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
                             <tr>
-                                <th className="py-3 px-4 w-20 text-center">Lugar</th>
+                                <th className="py-3 px-4 w-20 text-center">
+                                    Lugar
+                                </th>
                                 <th className="py-3 px-4">Estudiante</th>
                                 <th className="py-3 px-4">Código</th>
-                                <th className="py-3 px-4 text-center">Ejercicios</th>
-                                <th className="py-3 px-4 text-right">Puntuación Total</th>
+                                <th className="py-3 px-4 text-center">
+                                    Ejercicios
+                                </th>
+                                <th className="py-3 px-4 text-right">
+                                    Puntuación Total
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -346,21 +419,24 @@ export const GrupoDetalle = () => {
                                 );
 
                                 if (index === 0) {
-                                    estiloFila = 'bg-amber-400/5 hover:bg-amber-400/10';
+                                    estiloFila =
+                                        'bg-amber-400/5 hover:bg-amber-400/10';
                                     badgeLugar = (
                                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-400 text-black text-sm font-black shadow-md shadow-amber-400/20">
                                             🥇 1º
                                         </span>
                                     );
                                 } else if (index === 1) {
-                                    estiloFila = 'bg-slate-300/5 hover:bg-slate-300/10';
+                                    estiloFila =
+                                        'bg-slate-300/5 hover:bg-slate-300/10';
                                     badgeLugar = (
                                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-black text-sm font-black shadow-md shadow-slate-300/20">
                                             🥈 2º
                                         </span>
                                     );
                                 } else if (index === 2) {
-                                    estiloFila = 'bg-amber-700/10 hover:bg-amber-700/15';
+                                    estiloFila =
+                                        'bg-amber-700/10 hover:bg-amber-700/15';
                                     badgeLugar = (
                                         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-700 text-amber-100 text-sm font-black shadow-md shadow-amber-700/20">
                                             🥉 3º
@@ -381,7 +457,8 @@ export const GrupoDetalle = () => {
                                         </td>
                                         <td className="py-3.5 px-4 text-center text-xs">
                                             <span className="rounded-full bg-white/5 px-2.5 py-1 font-semibold text-gray-300">
-                                                {est.completados} / {est.totalEjercicios}
+                                                {est.completados} /{' '}
+                                                {est.totalEjercicios}
                                             </span>
                                         </td>
                                         <td className="py-3.5 px-4 text-right font-mono font-bold text-base text-amber-400">
@@ -404,7 +481,10 @@ export const GrupoDetalle = () => {
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
                     <div>
                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
-                            <Link to="/grupos" className="hover:text-white transition">
+                            <Link
+                                to="/grupos"
+                                className="hover:text-white transition"
+                            >
                                 ← Volver a Grupos
                             </Link>
                         </div>
@@ -413,7 +493,9 @@ export const GrupoDetalle = () => {
                             {codigoGrupo && (
                                 <button
                                     type="button"
-                                    onClick={() => void copiarCodigo(codigoGrupo)}
+                                    onClick={() =>
+                                        void copiarCodigo(codigoGrupo)
+                                    }
                                     title="Click para copiar código"
                                     className="font-mono text-sm font-bold px-2.5 py-1 rounded bg-[#FF7C02]/15 text-[#FF9D3D] hover:bg-[#FF7C02]/30 transition"
                                 >
@@ -423,7 +505,10 @@ export const GrupoDetalle = () => {
                         </h1>
                         {!esProfesorOAdmin && infoGrupoEstudiante?.profesor && (
                             <p className="mt-1 text-sm text-gray-400">
-                                Profesor: <span className="text-white font-medium">{infoGrupoEstudiante.profesor.username}</span>
+                                Profesor:{' '}
+                                <span className="text-white font-medium">
+                                    {infoGrupoEstudiante.profesor.username}
+                                </span>
                             </p>
                         )}
                     </div>
@@ -467,7 +552,8 @@ export const GrupoDetalle = () => {
                                         : 'border-transparent text-gray-400 hover:text-white'
                                 }`}
                             >
-                                Ejercicios Asignados ({ejerciciosProfesor.length})
+                                Ejercicios Asignados (
+                                {ejerciciosProfesor.length})
                             </button>
                             <button
                                 type="button"
@@ -478,7 +564,9 @@ export const GrupoDetalle = () => {
                                         : 'border-transparent text-gray-400 hover:text-white'
                                 }`}
                             >
-                                Estudiantes Inscritos ({detalleGrupoProfesor?.estudiantes?.length ?? 0})
+                                Estudiantes Inscritos (
+                                {detalleGrupoProfesor?.estudiantes?.length ?? 0}
+                                )
                             </button>
                             <button
                                 type="button"
@@ -501,16 +589,16 @@ export const GrupoDetalle = () => {
                                 Cargando información del grupo...
                             </div>
                         ) : tabProfesor === 'ranking' ? (
-                            <div className="mt-6">
-                                {renderRanking()}
-                            </div>
+                            <div className="mt-6">{renderRanking()}</div>
                         ) : tabProfesor === 'ejercicios' ? (
                             <div className="mt-6">
                                 {/* Filtro por temario + gestión */}
                                 <div className="mb-5 flex flex-wrap items-center gap-2">
                                     <button
                                         type="button"
-                                        onClick={() => setTemarioFiltro('todos')}
+                                        onClick={() =>
+                                            setTemarioFiltro('todos')
+                                        }
                                         className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
                                             temarioFiltro === 'todos'
                                                 ? 'bg-[#FF7C02] text-black'
@@ -521,13 +609,15 @@ export const GrupoDetalle = () => {
                                     </button>
                                     {temarios.map((temario) => {
                                         const total = ejerciciosProfesor.filter(
-                                            (ej) => ej.temario_id === temario.id,
+                                            (ej) => ej.temario_id === temario.id
                                         ).length;
                                         return (
                                             <button
                                                 key={temario.id}
                                                 type="button"
-                                                onClick={() => setTemarioFiltro(temario.id)}
+                                                onClick={() =>
+                                                    setTemarioFiltro(temario.id)
+                                                }
                                                 className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
                                                     temarioFiltro === temario.id
                                                         ? 'bg-[#FF7C02] text-black'
@@ -541,7 +631,9 @@ export const GrupoDetalle = () => {
                                     })}
                                     <button
                                         type="button"
-                                        onClick={() => void handleCrearTemario()}
+                                        onClick={() =>
+                                            void handleCrearTemario()
+                                        }
                                         className="rounded-full bg-emerald-600/80 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-500 transition"
                                     >
                                         + Temario
@@ -551,9 +643,13 @@ export const GrupoDetalle = () => {
                                             type="button"
                                             onClick={() => {
                                                 const temario = temarios.find(
-                                                    (t) => t.id === temarioFiltro,
+                                                    (t) =>
+                                                        t.id === temarioFiltro
                                                 );
-                                                if (temario) void handleRenombrarTemario(temario);
+                                                if (temario)
+                                                    void handleRenombrarTemario(
+                                                        temario
+                                                    );
                                             }}
                                             className="rounded-full bg-white/5 px-3 py-1.5 text-xs font-semibold text-gray-300 hover:bg-white/10 transition"
                                         >
@@ -565,9 +661,13 @@ export const GrupoDetalle = () => {
                                             type="button"
                                             onClick={() => {
                                                 const temario = temarios.find(
-                                                    (t) => t.id === temarioFiltro,
+                                                    (t) =>
+                                                        t.id === temarioFiltro
                                                 );
-                                                if (temario) void handleEliminarTemario(temario);
+                                                if (temario)
+                                                    void handleEliminarTemario(
+                                                        temario
+                                                    );
                                             }}
                                             className="rounded-full border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 transition"
                                         >
@@ -590,7 +690,9 @@ export const GrupoDetalle = () => {
                                         </p>
                                         <button
                                             type="button"
-                                            onClick={() => setModalCrearAbierto(true)}
+                                            onClick={() =>
+                                                setModalCrearAbierto(true)
+                                            }
                                             className="mt-4 rounded-xl bg-[#FF7C02] px-4 py-2 text-xs font-bold text-black hover:bg-[#ff8f2b] transition"
                                         >
                                             + Crear Ejercicio Ahora
@@ -598,78 +700,107 @@ export const GrupoDetalle = () => {
                                     </div>
                                 ) : (
                                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        {ejerciciosFiltradosProfesor.map((ej) => (
-                                            <div
-                                                key={ej.id}
-                                                className="rounded-2xl border border-white/10 bg-[#181818] p-5 shadow-lg flex flex-col justify-between transition hover:border-[#FF7C02]/40"
-                                            >
-                                                <div>
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <span
-                                                            className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${
-                                                                ej.tipo === 'diagrama'
-                                                                    ? 'bg-sky-500/20 text-sky-300'
-                                                                    : 'bg-emerald-500/20 text-emerald-300'
-                                                            }`}
-                                                        >
-                                                            {ej.tipo === 'diagrama' ? '📊 Diagrama' : '💻 Pseudocódigo'}
-                                                        </span>
-                                                        <span className="font-bold text-amber-400 text-xs">
-                                                            {ej.puntos} pts
-                                                        </span>
+                                        {ejerciciosFiltradosProfesor.map(
+                                            (ej) => (
+                                                <div
+                                                    key={ej.id}
+                                                    className="rounded-2xl border border-white/10 bg-[#181818] p-5 shadow-lg flex flex-col justify-between transition hover:border-[#FF7C02]/40"
+                                                >
+                                                    <div>
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <span
+                                                                className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${
+                                                                    ej.tipo ===
+                                                                    'diagrama'
+                                                                        ? 'bg-sky-500/20 text-sky-300'
+                                                                        : 'bg-emerald-500/20 text-emerald-300'
+                                                                }`}
+                                                            >
+                                                                {ej.tipo ===
+                                                                'diagrama'
+                                                                    ? '📊 Diagrama'
+                                                                    : '💻 Pseudocódigo'}
+                                                            </span>
+                                                            <span className="font-bold text-amber-400 text-xs">
+                                                                {ej.puntos} pts
+                                                            </span>
+                                                        </div>
+                                                        <h3 className="mt-3 text-base font-bold text-white line-clamp-1">
+                                                            {ej.titulo}
+                                                        </h3>
+                                                        <p className="mt-1 text-[11px] font-semibold text-violet-300">
+                                                            📚{' '}
+                                                            {ej.temario
+                                                                ?.nombre ??
+                                                                nombreTemario(
+                                                                    ej.temario_id
+                                                                )}
+                                                        </p>
+                                                        <p className="mt-2 text-xs text-gray-400 line-clamp-3">
+                                                            {ej.enunciado}
+                                                        </p>
+                                                        <div className="mt-4 rounded-lg bg-white/5 px-3 py-2 text-xs text-gray-300 flex items-center justify-between">
+                                                            <span>
+                                                                Entregas
+                                                                completadas:
+                                                            </span>
+                                                            <span className="font-bold text-white">
+                                                                {ej.completados}{' '}
+                                                                /{' '}
+                                                                {
+                                                                    ej.totalEstudiantes
+                                                                }
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                    <h3 className="mt-3 text-base font-bold text-white line-clamp-1">
-                                                        {ej.titulo}
-                                                    </h3>
-                                                    <p className="mt-1 text-[11px] font-semibold text-violet-300">
-                                                        📚 {ej.temario?.nombre ?? nombreTemario(ej.temario_id)}
-                                                    </p>
-                                                    <p className="mt-2 text-xs text-gray-400 line-clamp-3">
-                                                        {ej.enunciado}
-                                                    </p>
-                                                    <div className="mt-4 rounded-lg bg-white/5 px-3 py-2 text-xs text-gray-300 flex items-center justify-between">
-                                                        <span>Entregas completadas:</span>
-                                                        <span className="font-bold text-white">
-                                                            {ej.completados} / {ej.totalEstudiantes}
-                                                        </span>
-                                                    </div>
-                                                </div>
 
-                                                <div className="mt-5 flex items-center gap-2 border-t border-white/10 pt-4">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            navigate(
-                                                                `/grupos/${grupoId}/ejercicios/${ej.id}/revision`
-                                                            )
-                                                        }
-                                                        className="flex-1 rounded-xl bg-sky-600 hover:bg-sky-500 text-center py-2 px-3 text-xs font-bold text-white transition"
-                                                    >
-                                                        👁️ Revisar y Calificar
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => void handleEliminarEjercicio(ej)}
-                                                        className="rounded-xl border border-red-500/30 p-2 text-xs text-red-400 hover:bg-red-500/10 transition"
-                                                        title="Eliminar ejercicio"
-                                                    >
-                                                        🗑️
-                                                    </button>
+                                                    <div className="mt-5 flex items-center gap-2 border-t border-white/10 pt-4">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    `/grupos/${grupoId}/ejercicios/${ej.id}/revision`
+                                                                )
+                                                            }
+                                                            className="flex-1 rounded-xl bg-sky-600 hover:bg-sky-500 text-center py-2 px-3 text-xs font-bold text-white transition"
+                                                        >
+                                                            Revisar y Calificar
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                void handleEliminarEjercicio(
+                                                                    ej
+                                                                )
+                                                            }
+                                                            className="rounded-xl border border-red-500/30 p-2 text-xs text-red-400 hover:bg-red-500/10 transition"
+                                                            title="Eliminar ejercicio"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        )}
                                     </div>
                                 )}
                             </div>
                         ) : (
                             <div className="mt-6">
-                                {!detalleGrupoProfesor?.estudiantes || detalleGrupoProfesor.estudiantes.length === 0 ? (
+                                {!detalleGrupoProfesor?.estudiantes ||
+                                detalleGrupoProfesor.estudiantes.length ===
+                                    0 ? (
                                     <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-12 text-center">
                                         <p className="text-base font-semibold text-white">
                                             No hay estudiantes inscritos aún
                                         </p>
                                         <p className="mt-1 text-sm text-gray-400">
-                                            Comparte el código <b className="text-amber-400 font-mono">{codigoGrupo}</b> con tus estudiantes para que se unan.
+                                            Comparte el código{' '}
+                                            <b className="text-amber-400 font-mono">
+                                                {codigoGrupo}
+                                            </b>{' '}
+                                            con tus estudiantes para que se
+                                            unan.
                                         </p>
                                     </div>
                                 ) : (
@@ -677,30 +808,43 @@ export const GrupoDetalle = () => {
                                         <table className="w-full text-left text-sm text-gray-300">
                                             <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
                                                 <tr>
-                                                    <th className="py-3 px-4">Estudiante</th>
-                                                    <th className="py-3 px-4">Código</th>
-                                                    <th className="py-3 px-4 text-right">Acción</th>
+                                                    <th className="py-3 px-4">
+                                                        Estudiante
+                                                    </th>
+                                                    <th className="py-3 px-4">
+                                                        Código
+                                                    </th>
+                                                    <th className="py-3 px-4 text-right">
+                                                        Acción
+                                                    </th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-white/5">
-                                                {detalleGrupoProfesor.estudiantes.map((est) => (
-                                                    <tr key={est.id} className="hover:bg-white/5">
-                                                        <td className="py-3 px-4 font-semibold text-white">
-                                                            {est.username}
-                                                        </td>
-                                                        <td className="py-3 px-4 font-mono text-xs text-gray-400">
-                                                            {est.codigo}
-                                                        </td>
-                                                        <td className="py-3 px-4 text-right">
-                                                            <Link
-                                                                to={`/estudiantes/${est.id}`}
-                                                                className="text-xs text-sky-400 hover:text-sky-300 font-semibold"
-                                                            >
-                                                                Ver Historial Estudiante →
-                                                            </Link>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {detalleGrupoProfesor.estudiantes.map(
+                                                    (est) => (
+                                                        <tr
+                                                            key={est.id}
+                                                            className="hover:bg-white/5"
+                                                        >
+                                                            <td className="py-3 px-4 font-semibold text-white">
+                                                                {est.username}
+                                                            </td>
+                                                            <td className="py-3 px-4 font-mono text-xs text-gray-400">
+                                                                {est.codigo}
+                                                            </td>
+                                                            <td className="py-3 px-4 text-right">
+                                                                <Link
+                                                                    to={`/estudiantes/${est.id}`}
+                                                                    className="text-xs text-sky-400 hover:text-sky-300 font-semibold"
+                                                                >
+                                                                    Ver
+                                                                    Historial
+                                                                    Estudiante →
+                                                                </Link>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>
@@ -724,7 +868,8 @@ export const GrupoDetalle = () => {
                                         : 'border-transparent text-gray-400 hover:text-white'
                                 }`}
                             >
-                                Ejercicios Asignados ({ejerciciosEstudiante.length})
+                                Ejercicios Asignados (
+                                {ejerciciosEstudiante.length})
                             </button>
                             <button
                                 type="button"
@@ -747,16 +892,16 @@ export const GrupoDetalle = () => {
                                 Cargando ejercicios...
                             </div>
                         ) : tabEstudiante === 'ranking' ? (
-                            <div className="mt-6">
-                                {renderRanking()}
-                            </div>
+                            <div className="mt-6">{renderRanking()}</div>
                         ) : (
                             <>
                                 {/* Filtro por temario (avance libre) */}
                                 <div className="mb-5 flex flex-wrap items-center gap-2">
                                     <button
                                         type="button"
-                                        onClick={() => setTemarioFiltro('todos')}
+                                        onClick={() =>
+                                            setTemarioFiltro('todos')
+                                        }
                                         className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
                                             temarioFiltro === 'todos'
                                                 ? 'bg-emerald-500 text-black'
@@ -766,17 +911,21 @@ export const GrupoDetalle = () => {
                                         Todos ({ejerciciosEstudiante.length})
                                     </button>
                                     {temarios.map((temario) => {
-                                        const delTemario = ejerciciosEstudiante.filter(
-                                            (ej) => ej.temario_id === temario.id,
-                                        );
+                                        const delTemario =
+                                            ejerciciosEstudiante.filter(
+                                                (ej) =>
+                                                    ej.temario_id === temario.id
+                                            );
                                         const completados = delTemario.filter(
-                                            (ej) => ej.completado,
+                                            (ej) => ej.completado
                                         ).length;
                                         return (
                                             <button
                                                 key={temario.id}
                                                 type="button"
-                                                onClick={() => setTemarioFiltro(temario.id)}
+                                                onClick={() =>
+                                                    setTemarioFiltro(temario.id)
+                                                }
                                                 className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
                                                     temarioFiltro === temario.id
                                                         ? 'bg-emerald-500 text-black'
@@ -784,7 +933,8 @@ export const GrupoDetalle = () => {
                                                 }`}
                                                 title={`Completados: ${completados} / ${delTemario.length}`}
                                             >
-                                                📚 {temario.nombre} ({completados}/
+                                                📚 {temario.nombre} (
+                                                {completados}/
                                                 {delTemario.length})
                                             </button>
                                         );
@@ -799,78 +949,105 @@ export const GrupoDetalle = () => {
                                                 : `Aún no hay ejercicios en "${nombreTemario(temarioFiltro)}".`}
                                         </p>
                                         <p className="mt-1 text-sm text-gray-400">
-                                            Vuelve a revisar más tarde cuando se publiquen nuevas tareas.
+                                            Vuelve a revisar más tarde cuando se
+                                            publiquen nuevas tareas.
                                         </p>
                                     </div>
                                 ) : (
                                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                        {ejerciciosFiltradosEstudiante.map((ej) => {
-                                    const rutaTablero =
-                                        ej.tipo === 'diagrama'
-                                            ? `/grupos/${grupoId}/ejercicios/${ej.id}/diagrama`
-                                            : `/grupos/${grupoId}/ejercicios/${ej.id}/pseudocodigo`;
+                                        {ejerciciosFiltradosEstudiante.map(
+                                            (ej) => {
+                                                const rutaTablero =
+                                                    ej.tipo === 'diagrama'
+                                                        ? `/grupos/${grupoId}/ejercicios/${ej.id}/diagrama`
+                                                        : `/grupos/${grupoId}/ejercicios/${ej.id}/pseudocodigo`;
 
-                                    return (
-                                        <div
-                                            key={ej.id}
-                                            className={`rounded-2xl border p-5 shadow-lg flex flex-col justify-between transition ${
-                                                ej.completado
-                                                    ? 'border-emerald-500/30 bg-[#13221b]'
-                                                    : 'border-white/10 bg-[#181818] hover:border-sky-500/40'
-                                            }`}
-                                        >
-                                            <div>
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <span
-                                                        className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${
-                                                            ej.tipo === 'diagrama'
-                                                                ? 'bg-sky-500/20 text-sky-300'
-                                                                : 'bg-emerald-500/20 text-emerald-300'
+                                                return (
+                                                    <div
+                                                        key={ej.id}
+                                                        className={`rounded-2xl border p-5 shadow-lg flex flex-col justify-between transition ${
+                                                            ej.completado
+                                                                ? 'border-emerald-500/30 bg-[#13221b]'
+                                                                : 'border-white/10 bg-[#181818] hover:border-sky-500/40'
                                                         }`}
                                                     >
-                                                        {ej.tipo === 'diagrama' ? '📊 Diagrama' : '💻 Pseudocódigo'}
-                                                    </span>
-                                                    {ej.completado ? (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700">
-                                                            ✓ Entregado ({ej.puntosObtenidos} / {ej.puntos} pts)
-                                                        </span>
-                                                    ) : (
-                                                        <span className="font-bold text-amber-400 text-xs">
-                                                            {ej.puntos} pts
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                        <div>
+                                                            <div className="flex items-center justify-between gap-2">
+                                                                <span
+                                                                    className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${
+                                                                        ej.tipo ===
+                                                                        'diagrama'
+                                                                            ? 'bg-sky-500/20 text-sky-300'
+                                                                            : 'bg-emerald-500/20 text-emerald-300'
+                                                                    }`}
+                                                                >
+                                                                    {ej.tipo ===
+                                                                    'diagrama'
+                                                                        ? '📊 Diagrama'
+                                                                        : '💻 Pseudocódigo'}
+                                                                </span>
+                                                                {ej.completado ? (
+                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700">
+                                                                        ✓
+                                                                        Entregado
+                                                                        (
+                                                                        {
+                                                                            ej.puntosObtenidos
+                                                                        }{' '}
+                                                                        /{' '}
+                                                                        {
+                                                                            ej.puntos
+                                                                        }{' '}
+                                                                        pts)
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="font-bold text-amber-400 text-xs">
+                                                                        {
+                                                                            ej.puntos
+                                                                        }{' '}
+                                                                        pts
+                                                                    </span>
+                                                                )}
+                                                            </div>
 
-                                                <h3 className="mt-3 text-base font-bold text-white line-clamp-1">
-                                                    {ej.titulo}
-                                                </h3>
-                                                <p className="mt-1 text-[11px] font-semibold text-violet-300">
-                                                    📚 {ej.temario?.nombre ?? nombreTemario(ej.temario_id)}
-                                                </p>
-                                                <p className="mt-2 text-xs text-gray-400 line-clamp-3">
-                                                    {ej.enunciado}
-                                                </p>
-                                            </div>
+                                                            <h3 className="mt-3 text-base font-bold text-white line-clamp-1">
+                                                                {ej.titulo}
+                                                            </h3>
+                                                            <p className="mt-1 text-[11px] font-semibold text-violet-300">
+                                                                📚{' '}
+                                                                {ej.temario
+                                                                    ?.nombre ??
+                                                                    nombreTemario(
+                                                                        ej.temario_id
+                                                                    )}
+                                                            </p>
+                                                            <p className="mt-2 text-xs text-gray-400 line-clamp-3">
+                                                                {ej.enunciado}
+                                                            </p>
+                                                        </div>
 
-                                            <div className="mt-6 border-t border-white/10 pt-4">
-                                                <Link
-                                                    to={rutaTablero}
-                                                    className={`w-full block text-center py-2.5 px-4 rounded-xl text-xs font-bold transition ${
-                                                        ej.completado
-                                                            ? 'bg-slate-800 hover:bg-slate-700 text-slate-200'
-                                                            : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'
-                                                    }`}
-                                                >
-                                                    {ej.completado ? 'Ver mi entrega / Editar' : '🚀 Resolver Ejercicio'}
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                                        <div className="mt-6 border-t border-white/10 pt-4">
+                                                            <Link
+                                                                to={rutaTablero}
+                                                                className={`w-full block text-center py-2.5 px-4 rounded-xl text-xs font-bold transition ${
+                                                                    ej.completado
+                                                                        ? 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                                                                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg'
+                                                                }`}
+                                                            >
+                                                                {ej.completado
+                                                                    ? 'Ver mi entrega / Editar'
+                                                                    : '🚀 Resolver Ejercicio'}
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                        )}
                                     </div>
                                 )}
-                                </>
-                            )}
+                            </>
+                        )}
                     </div>
                 )}
             </main>
@@ -886,7 +1063,6 @@ export const GrupoDetalle = () => {
                     }}
                 />
             )}
-
         </AppShell>
     );
 };
