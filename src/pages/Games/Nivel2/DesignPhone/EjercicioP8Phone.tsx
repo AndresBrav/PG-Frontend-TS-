@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import { verificarResultadoPseudocodigo8 } from '../VerificarResultadoPseudo';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { usePseudoFijo } from '../../../../hooks/usePseudoFijo';
+import { BarraControlesEjercicio } from '../../Level1/BarraControlesEjercicio';
 import { ejerciciosId } from '../../../../data/ejercicios';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 
@@ -45,8 +46,10 @@ const EjercicioP8Phone: React.FC = () => {
         selected,
         setAvailable,
         setSelected,
+        cargando,
         guardando,
         guardado,
+        reiniciarTablero,
     } = usePseudoFijo(ejerciciosId[12], initialCode, claveAcceso);
 
     const ejecutarOtroMetodo = () => {
@@ -378,15 +381,14 @@ const EjercicioP8Phone: React.FC = () => {
             <br />
             <br />
 
-            {/* Botón ejecutar */}
-            <div className="contenedor-diagramaflujo-boton">
-                <button
-                    onClick={printOrder}
-                    className="button-execute-flowchart"
-                >
-                    <h1>Ejecutar</h1>
-                </button>
-            </div>
+            {/* Barra de controles: Ejecutar / Reiniciar / estado de guardado */}
+            <BarraControlesEjercicio
+                onEjecutar={printOrder}
+                onReiniciar={reiniciarTablero}
+                cargando={cargando}
+                guardando={guardando}
+                guardado={guardado}
+            />
 
             {/* ================= CONSTRUCCIÓN ================= */}
             <br />

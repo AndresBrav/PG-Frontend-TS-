@@ -8,6 +8,7 @@ import { ejerciciosId } from '../../../../data/ejercicios';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { usePseudoFijo } from '../../../../hooks/usePseudoFijo';
+import { BarraControlesEjercicio } from '../../Level1/BarraControlesEjercicio';
 
 interface CodeLine {
     id: string;
@@ -47,8 +48,10 @@ const EjercicioP6Phone: React.FC = () => {
         selected,
         setAvailable,
         setSelected,
+        cargando,
         guardando,
         guardado,
+        reiniciarTablero,
     } = usePseudoFijo(ejerciciosId[10], initialCode, claveAcceso);
 
     const ejecutarOtroMetodo = () => {
@@ -383,15 +386,14 @@ const EjercicioP6Phone: React.FC = () => {
             <br />
             <br />
 
-            {/* Botón ejecutar */}
-            <div className="contenedor-diagramaflujo-boton">
-                <button
-                    onClick={printOrder}
-                    className="button-execute-flowchart"
-                >
-                    <h1>Ejecutar</h1>
-                </button>
-            </div>
+            {/* Barra de controles: Ejecutar / Reiniciar / estado de guardado */}
+            <BarraControlesEjercicio
+                onEjecutar={printOrder}
+                onReiniciar={reiniciarTablero}
+                cargando={cargando}
+                guardando={guardando}
+                guardado={guardado}
+            />
 
             {/* ================= CONSTRUCCIÓN ================= */}
             <br />

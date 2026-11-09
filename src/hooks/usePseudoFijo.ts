@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Swal from 'sweetalert2';
 import {
     obtenerEstadoJuegoApi,
     guardarEstadoJuegoApi,
@@ -126,7 +127,20 @@ export function usePseudoFijo<T>(
     };
 
     // 4. Reiniciar: borra el estado guardado y devuelve las líneas al banco
+    // (con la misma confirmación que useTableroFijo en Nivel 1)
     const reiniciarTablero = async () => {
+        const confirmacion = await Swal.fire({
+            title: '¿Reiniciar ejercicio?',
+            text: 'Se restablecerán las líneas a su orden original.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, reiniciar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e11919',
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
         if (!claveAcceso) return;
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
@@ -138,6 +152,13 @@ export function usePseudoFijo<T>(
             selected: [],
         });
         await reiniciarEstadoJuegoApi(claveAcceso, juegoId);
+
+        Swal.fire({
+            title: 'Tablero reiniciado',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false,
+        });
     };
 
     return {
