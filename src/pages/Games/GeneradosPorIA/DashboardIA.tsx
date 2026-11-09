@@ -153,6 +153,19 @@ const DashboardIA = () => {
 
     return (
         <AppShell>
+            <div className="px-4 pt-6 pb-2 sm:px-6">
+                <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-white/5 p-5 text-center sm:p-6">
+                    <h2 className="text-lg font-bold text-white sm:text-xl md:text-2xl">
+                        🤖 Ejercicios generados con IA
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-gray-300 sm:text-base">
+                        Retos creados dinámicamente para ti por Gemini y
+                        organizados por temas. Usa el selector "Ejercicios
+                        de:" para filtrar el tema con el que quieres
+                        practicar.
+                    </p>
+                </div>
+            </div>
             <div className="information-design-level-style-container-grid">
                 <div className="item-information-design-level-style-1">
                     <h1 className="design-font-information-1">Etapa 1</h1>
