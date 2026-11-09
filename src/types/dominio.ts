@@ -133,6 +133,10 @@ export interface ResumenReporteEstudiante {
     ejerciciosEntregados: number;
     ejerciciosTotales: number;
     progreso: number;
+    fijosCompletados: number;
+    fijosTotales: number;
+    iaCompletados: number;
+    iaGenerados: number;
 }
 
 export interface ReporteEstudiante {

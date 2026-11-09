@@ -52,10 +52,7 @@ const PanelVariablesEjecucion = ({
         return vistos;
     }, [historial, estado]);
 
-    const filas = useMemo(
-        () => historial.slice(-MAX_FILAS),
-        [historial],
-    );
+    const filas = useMemo(() => historial.slice(-MAX_FILAS), [historial]);
 
     // Valores de la fila anterior, para resaltar el cambio
     const valoresAnteriores = useMemo(() => {
@@ -126,18 +123,16 @@ const PanelVariablesEjecucion = ({
                             ● vivo
                         </span>
                     )}
-                    <span
+                    {/* <span
                         style={{ fontSize: 11, color: '#888', fontWeight: 500 }}
                     >
                         (paso {estado.paso})
-                    </span>
+                    </span> */}
                 </span>
                 {nombres.length > 0 && (
                     <button
                         type="button"
-                        onClick={() =>
-                            setMostrarHistorial((prev) => !prev)
-                        }
+                        onClick={() => setMostrarHistorial((prev) => !prev)}
                         style={{
                             background: 'transparent',
                             border: 'none',
@@ -153,13 +148,10 @@ const PanelVariablesEjecucion = ({
             </div>
 
             {/* Valores actuales */}
-            <div
-                style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 10px' }}
-            >
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 10px' }}>
                 {variables.map((v) => {
                     const previo = valoresAnteriores.get(v.nombre);
-                    const cambio =
-                        filas.length > 0 && previo !== v.valor;
+                    const cambio = filas.length > 0 && previo !== v.valor;
                     return (
                         <span
                             key={v.nombre}
@@ -205,7 +197,9 @@ const PanelVariablesEjecucion = ({
                         borderRadius: 8,
                     }}
                 >
-                    <table style={{ borderCollapse: 'collapse', minWidth: '100%' }}>
+                    <table
+                        style={{ borderCollapse: 'collapse', minWidth: '100%' }}
+                    >
                         <thead>
                             <tr
                                 style={{
@@ -222,7 +216,8 @@ const PanelVariablesEjecucion = ({
                                             fontSize: 12,
                                             fontFamily: 'var(--mono)',
                                             textAlign: 'left',
-                                            borderBottom: '1px solid var(--border)',
+                                            borderBottom:
+                                                '1px solid var(--border)',
                                             color: colorDe(nombre),
                                             whiteSpace: 'nowrap',
                                         }}
@@ -286,7 +281,7 @@ const FILAS_MINI_TRAZA = 5;
 export const construirHtmlVariablesEnModal = (
     estado: EstadoEjecucion | null,
     historial: EstadoEjecucion[],
-    nombreSolicitado: string,
+    nombreSolicitado: string
 ): string => {
     const variables = estado?.variables ?? [];
     if (variables.length === 0) {
@@ -303,8 +298,7 @@ export const construirHtmlVariablesEnModal = (
         })
         .join('');
 
-    const bloques =
-        `<div style="margin-top:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
+    const bloques = `<div style="margin-top:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
 <div style="font-size:12px;font-weight:bold;color:#4b5563;margin-bottom:6px;">🔍 Variables en Ejecución <span style="color:#9ca3af;font-weight:500;font-size:11px;">(paso ${estado?.paso ?? 0})</span></div>
 <div style="line-height:1.6;">${chips}</div>
 </div>`;
@@ -351,8 +345,7 @@ export const construirHtmlVariablesEnModal = (
         )
         .join('');
 
-    const tabla =
-        `<div style="margin-top:8px;max-height:150px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;">
+    const tabla = `<div style="margin-top:8px;max-height:150px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;">
 <table style="border-collapse:collapse;min-width:100%;">
 <thead><tr style="background:#f3f4f6;">${encabezados}</tr></thead>
 <tbody>${filasHtml}</tbody>
