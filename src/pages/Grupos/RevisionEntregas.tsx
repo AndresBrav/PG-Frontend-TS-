@@ -230,53 +230,71 @@ export const RevisionEntregas = () => {
                                                 </button>
                                             </td>
                                             <td className="py-3 px-4 text-center">
-                                                <div className="inline-flex items-center gap-2">
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        max={puntosMaximos}
-                                                        value={
-                                                            notasLocales[
-                                                                sol.usuario.id
-                                                            ] ?? 0
-                                                        }
-                                                        onChange={(e) =>
-                                                            handleNotaChange(
-                                                                sol.usuario.id,
-                                                                Number(
-                                                                    e.target
-                                                                        .value
+                                                {sol.completado ? (
+                                                    <div className="inline-flex items-center gap-2">
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            max={puntosMaximos}
+                                                            value={
+                                                                notasLocales[
+                                                                    sol.usuario.id
+                                                                ] ?? 0
+                                                            }
+                                                            onChange={(e) =>
+                                                                handleNotaChange(
+                                                                    sol.usuario.id,
+                                                                    Number(
+                                                                        e.target
+                                                                            .value
+                                                                    )
                                                                 )
-                                                            )
-                                                        }
-                                                        className="w-16 rounded border border-slate-600 bg-slate-950 px-2 py-1 text-center font-bold text-amber-300 focus:border-amber-400 focus:outline-none"
-                                                    />
-                                                    <span className="text-xs text-slate-400">
-                                                        / {puntosMaximos}
+                                                            }
+                                                            className="w-16 rounded border border-slate-600 bg-slate-950 px-2 py-1 text-center font-bold text-amber-300 focus:border-amber-400 focus:outline-none"
+                                                        />
+                                                        <span className="text-xs text-slate-400">
+                                                            / {puntosMaximos}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span
+                                                        className="text-xs text-slate-500 italic"
+                                                        title="El estudiante aún no ha entregado; solo se califican entregas reales"
+                                                    >
+                                                        —
                                                     </span>
-                                                </div>
+                                                )}
                                             </td>
                                             <td className="py-3 px-4 text-right">
-                                                <button
-                                                    type="button"
-                                                    disabled={
-                                                        guardandoNota[
+                                                {sol.completado ? (
+                                                    <button
+                                                        type="button"
+                                                        disabled={
+                                                            guardandoNota[
+                                                                sol.usuario.id
+                                                            ]
+                                                        }
+                                                        onClick={() =>
+                                                            handleGuardarNota(
+                                                                sol.usuario.id
+                                                            )
+                                                        }
+                                                        className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs font-medium text-white transition disabled:opacity-50"
+                                                    >
+                                                        {guardandoNota[
                                                             sol.usuario.id
                                                         ]
-                                                    }
-                                                    onClick={() =>
-                                                        handleGuardarNota(
-                                                            sol.usuario.id
-                                                        )
-                                                    }
-                                                    className="rounded bg-emerald-600 hover:bg-emerald-500 px-3 py-1 text-xs font-medium text-white transition disabled:opacity-50"
-                                                >
-                                                    {guardandoNota[
-                                                        sol.usuario.id
-                                                    ]
-                                                        ? 'Guardando...'
-                                                        : 'Asignar Nota'}
-                                                </button>
+                                                            ? 'Guardando...'
+                                                            : 'Asignar Nota'}
+                                                    </button>
+                                                ) : (
+                                                    <span
+                                                        className="text-xs text-slate-500"
+                                                        title="El estudiante aún no ha entregado el ejercicio"
+                                                    >
+                                                        Sin entrega
+                                                    </span>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
