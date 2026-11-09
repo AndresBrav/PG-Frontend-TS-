@@ -241,6 +241,7 @@ export interface SolucionEstudianteGrupo {
     };
     completado: boolean;
     puntos: number;
+    calificado: boolean;
     fecha_completado: string | null;
     ultima_actividad: string | null;
     tieneSolucion: boolean;

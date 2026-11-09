@@ -100,7 +100,9 @@ export const RevisionEntregas = () => {
             );
             setSoluciones((prev) =>
                 prev.map((s) =>
-                    s.usuario.id === estudianteId ? { ...s, puntos: nota } : s
+                    s.usuario.id === estudianteId
+                        ? { ...s, puntos: nota, calificado: true }
+                        : s
                 )
             );
             setMensajeExito(
@@ -172,7 +174,7 @@ export const RevisionEntregas = () => {
                                 No hay estudiantes inscritos en este grupo aún.
                             </div>
                         ) : (
-                            <table className="w-full text-left text-sm text-slate-300 min-w-[640px]">
+                            <table className="w-full text-left text-sm text-slate-300 min-w-[720px]">
                                 <thead className="bg-slate-800 text-xs uppercase tracking-wider text-slate-400">
                                     <tr>
                                         <th className="py-3 px-4 rounded-l-lg">
@@ -181,6 +183,9 @@ export const RevisionEntregas = () => {
                                         <th className="py-3 px-4">Código</th>
                                         <th className="py-3 px-4">Estado</th>
                                         <th className="py-3 px-4">Solución</th>
+                                        <th className="py-3 px-4 text-center">
+                                            Calificado
+                                        </th>
                                         <th className="py-3 px-4 text-center">
                                             Calificación (0 - {puntosMaximos})
                                         </th>
@@ -228,6 +233,17 @@ export const RevisionEntregas = () => {
                                                 >
                                                     Ver Tablero
                                                 </button>
+                                            </td>
+                                            <td className="py-3 px-4 text-center">
+                                                {sol.calificado ? (
+                                                    <span className="inline-flex items-center rounded-full border border-emerald-700 bg-emerald-900/60 px-2 py-0.5 text-xs font-semibold text-emerald-300">
+                                                        Sí
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-xs font-semibold text-slate-400">
+                                                        No
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="py-3 px-4 text-center">
                                                 {sol.completado ? (
