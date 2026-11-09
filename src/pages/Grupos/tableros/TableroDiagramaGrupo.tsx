@@ -307,7 +307,7 @@ export const TableroDiagramaGrupo: React.FC = () => {
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <Link
-                                to={`/grupos/${grupoId}`}
+                                to={`/grupos/${grupoId}/ejercicios/${ejercicioId}/revision`}
                                 style={{
                                     padding: '6px 12px',
                                     borderRadius: '8px',
@@ -318,7 +318,7 @@ export const TableroDiagramaGrupo: React.FC = () => {
                                     textDecoration: 'none',
                                 }}
                             >
-                                ← Volver al Grupo
+                                ← Volver a Revisar Entregas
                             </Link>
                             <div>
                                 <h1 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#38bdf8' }}>

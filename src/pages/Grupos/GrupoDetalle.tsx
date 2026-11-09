@@ -26,10 +26,8 @@ import type {
     GrupoDetalle as IGrupoDetalle,
     GrupoEstudiante,
     TemarioGrupo,
-    TipoEjercicioGrupo,
 } from '../../types/dominio';
 import { CrearEjercicioModal } from './CrearEjercicioModal';
-import { RevisarEntregasModal } from './RevisarEntregasModal';
 
 export const GrupoDetalle = () => {
     const { id } = useParams<{ id: string }>();
@@ -50,14 +48,6 @@ export const GrupoDetalle = () => {
     // Temarios del grupo (vistas de profesor y estudiante)
     const [temarios, setTemarios] = useState<TemarioGrupo[]>([]);
     const [temarioFiltro, setTemarioFiltro] = useState<'todos' | number>('todos');
-
-    // Modal de Revisar
-    const [ejercicioARevisar, setEjercicioARevisar] = useState<{
-        id: number;
-        titulo: string;
-        tipo: TipoEjercicioGrupo;
-        puntos: number;
-    } | null>(null);
 
     // Estados para Estudiante
     const [infoGrupoEstudiante, setInfoGrupoEstudiante] = useState<GrupoEstudiante | null>(null);
@@ -649,12 +639,9 @@ export const GrupoDetalle = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() =>
-                                                            setEjercicioARevisar({
-                                                                id: ej.id,
-                                                                titulo: ej.titulo,
-                                                                tipo: ej.tipo,
-                                                                puntos: ej.puntos,
-                                                            })
+                                                            navigate(
+                                                                `/grupos/${grupoId}/ejercicios/${ej.id}/revision`
+                                                            )
                                                         }
                                                         className="flex-1 rounded-xl bg-sky-600 hover:bg-sky-500 text-center py-2 px-3 text-xs font-bold text-white transition"
                                                     >
@@ -900,18 +887,6 @@ export const GrupoDetalle = () => {
                 />
             )}
 
-            {/* Modal para Revisar Entregas (Profesor) */}
-            {ejercicioARevisar && (
-                <RevisarEntregasModal
-                    isOpen={Boolean(ejercicioARevisar)}
-                    onClose={() => setEjercicioARevisar(null)}
-                    grupoId={grupoId}
-                    ejercicioId={ejercicioARevisar.id}
-                    tituloEjercicio={ejercicioARevisar.titulo}
-                    tipoEjercicio={ejercicioARevisar.tipo}
-                    puntosMaximos={ejercicioARevisar.puntos}
-                />
-            )}
         </AppShell>
     );
 };

@@ -374,10 +374,10 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                 <header className="bg-slate-900 border-b border-slate-700 px-6 py-3 flex flex-wrap items-center justify-between gap-4 z-20">
                     <div className="flex items-center gap-4">
                         <Link
-                            to={`/grupos/${grupoId}`}
+                            to={`/grupos/${grupoId}/ejercicios/${ejercicioId}/revision`}
                             className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition"
                         >
-                            ← Volver al Grupo
+                            ← Volver a Revisar Entregas
                         </Link>
                         <div>
                             <h1 className="text-base font-bold text-sky-400">
