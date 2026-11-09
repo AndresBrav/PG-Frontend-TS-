@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { verificarResultadoPseudocodigo8 } from '../VerificarResultadoPseudo';
 import { TokenContext } from '../../../../Context/TokenContext';
+import { usePseudoFijo } from '../../../../hooks/usePseudoFijo';
 import { ejerciciosId } from '../../../../data/ejercicios';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 
@@ -36,11 +37,17 @@ const initialCode: CodeLine[] = [
 ];
 
 const EjercicioP8Phone: React.FC = () => {
-    const [available, setAvailable] = useState<CodeLine[]>(initialCode);
-    const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
+    const {
+        available,
+        selected,
+        setAvailable,
+        setSelected,
+        guardando,
+        guardado,
+    } = usePseudoFijo(ejerciciosId[12], initialCode, claveAcceso);
 
     const ejecutarOtroMetodo = () => {
         navigate('/ejercicio9-pseudocodigo');

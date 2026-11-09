@@ -7,6 +7,7 @@ import { verificarResultadoPseudocodigo6 } from '../VerificarResultadoPseudo';
 import { ejerciciosId } from '../../../../data/ejercicios';
 import { incrementarPuntuacionApi } from '../../../../api/usuarioApi';
 import { TokenContext } from '../../../../Context/TokenContext';
+import { usePseudoFijo } from '../../../../hooks/usePseudoFijo';
 
 interface CodeLine {
     id: string;
@@ -38,11 +39,17 @@ const initialCode: CodeLine[] = [
 ];
 
 const EjercicioP6Phone: React.FC = () => {
-    const [available, setAvailable] = useState<CodeLine[]>(initialCode);
-    const [selected, setSelected] = useState<CodeLine[]>([]);
     const navigate = useNavigate();
     const [counterRate, setcounterRate] = useState<number>(1);
     const { claveAcceso } = useContext(TokenContext);
+    const {
+        available,
+        selected,
+        setAvailable,
+        setSelected,
+        guardando,
+        guardado,
+    } = usePseudoFijo(ejerciciosId[10], initialCode, claveAcceso);
 
     const ejecutarOtroMetodo = () => {
         navigate('/ejercicio7-pseudocodigo');
