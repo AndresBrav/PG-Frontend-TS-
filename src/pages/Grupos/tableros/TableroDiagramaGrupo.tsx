@@ -14,6 +14,7 @@ import {
     entregarEjercicioEstudiante,
     listarSolucionesEjercicio,
     calificarEntrega,
+    guardarComentarioEntrega,
 } from '../../../api/gruposApi';
 import type { EjercicioGrupoEstudiante, SolucionEstudianteGrupo } from '../../../types/dominio';
 import '../../Games/GeneradosPorIA/app.css';
@@ -45,6 +46,8 @@ export const TableroDiagramaGrupo: React.FC = () => {
     const [estudianteRevisado, setEstudianteRevisado] = useState<SolucionEstudianteGrupo | null>(null);
     const [notaAsignada, setNotaAsignada] = useState<number>(0);
     const [guardandoNota, setGuardandoNota] = useState<boolean>(false);
+    const [comentarioProfesor, setComentarioProfesor] = useState<string>('');
+    const [guardandoComentario, setGuardandoComentario] = useState<boolean>(false);
 
     // Estado del estudiante resolviendo (Estudiante)
     const [ejercicioEstudiante, setEjercicioEstudiante] = useState<EjercicioGrupoEstudiante | null>(null);
@@ -67,6 +70,9 @@ export const TableroDiagramaGrupo: React.FC = () => {
 
         const cargarDatos = async () => {
             setCargando(true);
+            setComentarioProfesor('');
+            setEstudianteRevisado(null);
+            setNotaAsignada(0);
             try {
                 if (esModoRevision && revisarEstudianteId) {
                     // Modo Profesor: Revisar solución del estudiante
@@ -81,6 +87,7 @@ export const TableroDiagramaGrupo: React.FC = () => {
                     if (sol) {
                         setEstudianteRevisado(sol);
                         setNotaAsignada(sol.puntos ?? 0);
+                        setComentarioProfesor(sol.comentario_profesor ?? '');
                         if (sol.estado_tablero) {
                             try {
                                 const parsed =
@@ -263,6 +270,46 @@ export const TableroDiagramaGrupo: React.FC = () => {
             void Swal.fire('Error', err.response?.data?.message || 'No se pudo guardar la calificación.', 'error');
         } finally {
             setGuardandoNota(false);
+        }
+    };
+
+    const handleGuardarComentario = async () => {
+        if (
+            !claveAcceso ||
+            !revisarEstudianteId ||
+            !estudianteRevisado?.completado
+        ) {
+            return;
+        }
+
+        setGuardandoComentario(true);
+        try {
+            const resultado = await guardarComentarioEntrega(
+                claveAcceso,
+                ejercicioId,
+                revisarEstudianteId,
+                comentarioProfesor,
+            );
+            const comentarioGuardado = resultado.comentario_profesor ?? '';
+            setComentarioProfesor(comentarioGuardado);
+            setEstudianteRevisado({
+                ...estudianteRevisado,
+                comentario_profesor: resultado.comentario_profesor,
+            });
+            void Swal.fire({
+                title: 'Comentario guardado',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+            });
+        } catch (err: any) {
+            void Swal.fire(
+                'Error',
+                err.response?.data?.message || 'No se pudo guardar el comentario.',
+                'error',
+            );
+        } finally {
+            setGuardandoComentario(false);
         }
     };
 
@@ -476,6 +523,133 @@ export const TableroDiagramaGrupo: React.FC = () => {
                         </div>
                     </header>
                 )}
+
+                {esModoRevision && (
+                    <section
+                        style={{
+                            margin: '10px 20px',
+                            padding: '12px',
+                            border: '1px solid #075985',
+                            borderRadius: '10px',
+                            background: '#111827',
+                        }}
+                    >
+                        <label
+                            htmlFor="comentario-profesor"
+                            style={{
+                                display: 'block',
+                                marginBottom: '8px',
+                                color: '#7dd3fc',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                            }}
+                        >
+                            Comentario para el estudiante (opcional)
+                        </label>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '8px',
+                            }}
+                        >
+                            <textarea
+                                id="comentario-profesor"
+                                value={comentarioProfesor}
+                                onChange={(e) =>
+                                    setComentarioProfesor(e.target.value)
+                                }
+                                disabled={
+                                    !estudianteRevisado?.completado ||
+                                    guardandoComentario
+                                }
+                                rows={2}
+                                placeholder="Escribe una observación sobre la entrega..."
+                                style={{
+                                    flex: '1 1 320px',
+                                    minHeight: '64px',
+                                    resize: 'vertical',
+                                    border: '1px solid #374151',
+                                    borderRadius: '8px',
+                                    background: '#030712',
+                                    padding: '8px',
+                                    color: '#f9fafb',
+                                }}
+                            />
+                            <button
+                                type="button"
+                                disabled={
+                                    !estudianteRevisado?.completado ||
+                                    guardandoComentario
+                                }
+                                onClick={handleGuardarComentario}
+                                style={{
+                                    alignSelf: 'flex-end',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    background: guardandoComentario
+                                        ? '#4b5563'
+                                        : '#0369a1',
+                                    padding: '8px 14px',
+                                    color: '#fff',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                    cursor: guardandoComentario
+                                        ? 'not-allowed'
+                                        : 'pointer',
+                                }}
+                            >
+                                {guardandoComentario
+                                    ? 'Guardando...'
+                                    : 'Guardar comentario'}
+                            </button>
+                        </div>
+                        {!estudianteRevisado?.completado && (
+                            <p
+                                style={{
+                                    margin: '6px 0 0',
+                                    color: '#9ca3af',
+                                    fontSize: '12px',
+                                }}
+                            >
+                                Solo puedes comentar una entrega completada.
+                            </p>
+                        )}
+                    </section>
+                )}
+
+                {!esModoRevision &&
+                    ejercicioEstudiante?.comentario_profesor?.trim() && (
+                        <section
+                            style={{
+                                margin: '10px 20px',
+                                padding: '12px 16px',
+                                border: '1px solid #075985',
+                                borderRadius: '10px',
+                                background: '#111827',
+                            }}
+                        >
+                            <h2
+                                style={{
+                                    margin: '0 0 6px',
+                                    color: '#7dd3fc',
+                                    fontSize: '14px',
+                                }}
+                            >
+                                Comentario del profesor
+                            </h2>
+                            <p
+                                style={{
+                                    margin: 0,
+                                    color: '#f3f4f6',
+                                    fontSize: '13px',
+                                    whiteSpace: 'pre-wrap',
+                                }}
+                            >
+                                {ejercicioEstudiante.comentario_profesor}
+                            </p>
+                        </section>
+                    )}
 
                 {/* Contenedor .app para que hereden las variables CSS del DesignBoard */}
                 <div className="app" style={{ flex: 1, minHeight: 0 }}>

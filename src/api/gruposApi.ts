@@ -224,6 +224,23 @@ export const calificarEntrega = async (
     return data;
 };
 
+export const guardarComentarioEntrega = async (
+    clave: string,
+    ejercicioId: number,
+    estudianteId: number,
+    comentario: string,
+): Promise<{ message: string; comentario_profesor: string | null }> => {
+    const { data } = await api.put<{
+        message: string;
+        comentario_profesor: string | null;
+    }>(
+        `/profesor/ejercicios/${ejercicioId}/comentario/${estudianteId}`,
+        { comentario },
+        configConToken(clave),
+    );
+    return data;
+};
+
 // -------------------------------------------------------------
 // Ejercicios de Grupo (Estudiante)
 // -------------------------------------------------------------

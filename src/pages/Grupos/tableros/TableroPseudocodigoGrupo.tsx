@@ -18,6 +18,7 @@ import {
     entregarEjercicioEstudiante,
     listarSolucionesEjercicio,
     calificarEntrega,
+    guardarComentarioEntrega,
 } from '../../../api/gruposApi';
 import type { EjercicioGrupoEstudiante, SolucionEstudianteGrupo } from '../../../types/dominio';
 import '../../Games/GeneradosPorIA/app.css';
@@ -59,6 +60,8 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
     const [estudianteRevisado, setEstudianteRevisado] = useState<SolucionEstudianteGrupo | null>(null);
     const [notaAsignada, setNotaAsignada] = useState<number>(0);
     const [guardandoNota, setGuardandoNota] = useState<boolean>(false);
+    const [comentarioProfesor, setComentarioProfesor] = useState<string>('');
+    const [guardandoComentario, setGuardandoComentario] = useState<boolean>(false);
 
     // Estado del estudiante resolviendo (Estudiante)
     const [ejercicioEstudiante, setEjercicioEstudiante] = useState<EjercicioGrupoEstudiante | null>(null);
@@ -92,6 +95,9 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
 
         const cargarDatos = async () => {
             setCargando(true);
+            setComentarioProfesor('');
+            setEstudianteRevisado(null);
+            setNotaAsignada(0);
             try {
                 if (esModoRevision && revisarEstudianteId) {
                     // Modo Profesor: Solución del estudiante
@@ -106,6 +112,7 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                     if (sol) {
                         setEstudianteRevisado(sol);
                         setNotaAsignada(sol.puntos ?? 0);
+                        setComentarioProfesor(sol.comentario_profesor ?? '');
                         if (sol.estado_tablero) {
                             try {
                                 const parsed =
@@ -365,6 +372,46 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
         }
     };
 
+    const handleGuardarComentario = async () => {
+        if (
+            !claveAcceso ||
+            !revisarEstudianteId ||
+            !estudianteRevisado?.completado
+        ) {
+            return;
+        }
+
+        setGuardandoComentario(true);
+        try {
+            const resultado = await guardarComentarioEntrega(
+                claveAcceso,
+                ejercicioId,
+                revisarEstudianteId,
+                comentarioProfesor,
+            );
+            const comentarioGuardado = resultado.comentario_profesor ?? '';
+            setComentarioProfesor(comentarioGuardado);
+            setEstudianteRevisado({
+                ...estudianteRevisado,
+                comentario_profesor: resultado.comentario_profesor,
+            });
+            void Swal.fire({
+                title: 'Comentario guardado',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false,
+            });
+        } catch (err: any) {
+            void Swal.fire(
+                'Error',
+                err.response?.data?.message || 'No se pudo guardar el comentario.',
+                'error',
+            );
+        } finally {
+            setGuardandoComentario(false);
+        }
+    };
+
     const lines = code.split('\n');
 
     return (
@@ -486,6 +533,52 @@ export const TableroPseudocodigoGrupo: React.FC = () => {
                         </button>
                     </div>
                 </header>
+            )}
+
+            {esModoRevision && (
+                <section className="mx-4 my-2 rounded-xl border border-sky-800 bg-slate-900 p-3">
+                    <label
+                        htmlFor="comentario-profesor"
+                        className="mb-2 block text-sm font-semibold text-sky-300"
+                    >
+                        Comentario para el estudiante (opcional)
+                    </label>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <textarea
+                            id="comentario-profesor"
+                            value={comentarioProfesor}
+                            onChange={(e) => setComentarioProfesor(e.target.value)}
+                            disabled={!estudianteRevisado?.completado || guardandoComentario}
+                            rows={2}
+                            className="min-h-16 flex-1 resize-y rounded-lg border border-slate-700 bg-slate-950 p-2 text-sm text-white disabled:opacity-60"
+                            placeholder="Escribe una observación sobre la entrega..."
+                        />
+                        <button
+                            type="button"
+                            disabled={!estudianteRevisado?.completado || guardandoComentario}
+                            onClick={handleGuardarComentario}
+                            className="self-end rounded-lg bg-sky-700 px-4 py-2 text-xs font-bold text-white transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {guardandoComentario ? 'Guardando...' : 'Guardar comentario'}
+                        </button>
+                    </div>
+                    {!estudianteRevisado?.completado && (
+                        <p className="mt-1 text-xs text-slate-400">
+                            Solo puedes comentar una entrega completada.
+                        </p>
+                    )}
+                </section>
+            )}
+
+            {!esModoRevision && ejercicioEstudiante?.comentario_profesor?.trim() && (
+                <section className="mx-4 my-2 rounded-xl border border-sky-800 bg-slate-900 px-4 py-3">
+                    <h2 className="mb-1 text-sm font-bold text-sky-300">
+                        Comentario del profesor
+                    </h2>
+                    <p className="whitespace-pre-wrap text-sm text-slate-100">
+                        {ejercicioEstudiante.comentario_profesor}
+                    </p>
+                </section>
             )}
 
             {/* ENUNCIADO DEL PROBLEMA */}

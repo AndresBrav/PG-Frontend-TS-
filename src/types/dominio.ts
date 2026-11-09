@@ -230,6 +230,7 @@ export interface EjercicioGrupoEstudiante {
     fecha_completado: string | null;
     ultima_actividad: string | null;
     estado_tablero?: string | null;
+    comentario_profesor?: string | null;
 }
 
 export interface SolucionEstudianteGrupo {
@@ -244,6 +245,7 @@ export interface SolucionEstudianteGrupo {
     ultima_actividad: string | null;
     tieneSolucion: boolean;
     estado_tablero: string | null;
+    comentario_profesor: string | null;
 }
 
 export interface DetalleSolucionesGrupo {
