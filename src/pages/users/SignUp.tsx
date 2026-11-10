@@ -4,29 +4,6 @@ import { Link } from 'react-router-dom';
 import { TokenContext } from '../../Context/TokenContext';
 import { registerUser } from '../../Services/authService';
 import BotonMostrarPassword from '../../components/auth/BotonMostrarPassword';
-import type { RolDeRegistro } from '../../types/dominio';
-
-interface OpcionRol {
-    valor: RolDeRegistro;
-    nombre: string;
-    descripcion: string;
-    icono: string;
-}
-
-const OPCIONES_ROL: OpcionRol[] = [
-    {
-        valor: 'estudiante',
-        nombre: 'Estudiante',
-        descripcion: 'Aprende y únete a grupos',
-        icono: '🎓',
-    },
-    {
-        valor: 'profesor',
-        nombre: 'Profesor',
-        descripcion: 'Crea grupos y revisa reportes',
-        icono: '📚',
-    },
-];
 
 const SignUp = () => {
     const [codigo, setCodigo] = useState<string>('');
@@ -34,7 +11,6 @@ const SignUp = () => {
     const [edad, setEdad] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [confirmarPassword, setConfirmarPassword] = useState<string>('');
-    const [rol, setRol] = useState<RolDeRegistro>('estudiante');
     const [mostrarPassword, setMostrarPassword] = useState<boolean>(false);
     const [cargando, setCargando] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string | null>(null);
@@ -90,7 +66,6 @@ const SignUp = () => {
                 username: username.trim(),
                 edad: Number(edad),
                 password,
-                rol,
             });
 
             setClaveAcceso(data.token);
@@ -179,46 +154,6 @@ const SignUp = () => {
                         inputMode="numeric"
                         required
                     />
-                </div>
-
-                <div className="auth-field">
-                    <span className="auth-label">Tipo de cuenta</span>
-                    <div
-                        className="auth-role-group"
-                        role="radiogroup"
-                        aria-label="Tipo de cuenta"
-                    >
-                        {OPCIONES_ROL.map((opcion) => (
-                            <label
-                                key={opcion.valor}
-                                className={
-                                    rol === opcion.valor
-                                        ? 'auth-role-option seleccionado'
-                                        : 'auth-role-option'
-                                }
-                            >
-                                <input
-                                    type="radio"
-                                    name="rol"
-                                    value={opcion.valor}
-                                    checked={rol === opcion.valor}
-                                    onChange={() => setRol(opcion.valor)}
-                                />
-                                <span
-                                    className="auth-role-icon"
-                                    aria-hidden="true"
-                                >
-                                    {opcion.icono}
-                                </span>
-                                <span className="auth-role-name">
-                                    {opcion.nombre}
-                                </span>
-                                <span className="auth-role-description">
-                                    {opcion.descripcion}
-                                </span>
-                            </label>
-                        ))}
-                    </div>
                 </div>
 
                 <div className="auth-field">

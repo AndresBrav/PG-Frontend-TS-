@@ -3,17 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { obtenerMiProgreso } from '../../api/reportesApi';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
-import type {
-    PerfilUsuario,
-    ReporteEstudiante,
-} from '../../types/dominio';
+import type { MiProgreso, PerfilUsuario } from '../../types/dominio';
 import TarjetaResumen from '../../components/ui/TarjetaResumen';
 import BarraProgreso from '../../components/ui/BarraProgreso';
-import {
-    formatearFecha,
-    formatearNumero,
-    formatearPorcentaje,
-} from '../../utils/fechas';
+import { formatearNumero, formatearPorcentaje } from '../../utils/fechas';
 
 interface SeccionEstudianteProps {
     claveAcceso: string;
@@ -27,7 +20,7 @@ const SeccionEstudiante = ({
     const navigate = useNavigate();
     const cerrarSesion = useCerrarSesion();
 
-    const [progreso, setProgreso] = useState<ReporteEstudiante | null>(null);
+    const [progreso, setProgreso] = useState<MiProgreso | null>(null);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -81,9 +74,8 @@ const SeccionEstudiante = ({
                     Hola, {usuario.username}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300 sm:text-base">
-                    Sigue practicando lógica de programación. Únete a los
-                    grupos de tus profesores para que puedan acompañar tu
-                    progreso.
+                    Sigue practicando lógica de programación con diagramas de
+                    flujo y pseudocódigo.
                 </p>
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                     <Link
@@ -129,110 +121,43 @@ const SeccionEstudiante = ({
             </div>
 
             <aside className="space-y-6">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                            <h2 className="text-lg font-bold text-white">
-                                ¿Dónde está "Mis grupos"?
-                            </h2>
-                            <p className="mt-1 max-w-xl text-sm text-gray-400">
-                                Gestiona los grupos a los que perteneces desde
-                                la sección{' '}
-                                <Link
-                                    to="/grupos"
-                                    className="font-bold text-[#FF9D3D] hover:underline"
-                                >
-                                    Grupos
-                                </Link>{' '}
-                                del menú superior: únete con el código de tu
-                                profesor y revisa tus ejercicios asignados.
+                {error && (
+                    <p className="rounded-2xl border border-red-400/20 bg-red-500/10 p-5 text-sm text-red-300">
+                        {error}
+                    </p>
+                )}
+
+                <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                    <h2 className="text-lg font-bold text-white">
+                        Mi progreso
+                    </h2>
+                    <div className="mt-4">
+                        <BarraProgreso
+                            valor={resumen?.progreso ?? 0}
+                            etiqueta="Progreso total"
+                            color="#22C55E"
+                        />
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-center">
+                        <div className="rounded-xl bg-[#181818] p-3">
+                            <p className="text-xs text-gray-400">Fijos</p>
+                            <p className="mt-1 text-lg font-bold text-sky-400">
+                                {resumen?.fijosCompletados ?? 0}
                             </p>
                         </div>
-                        {cargando ? (
-                            <span className="text-xs text-gray-400">
-                                Cargando resumen...
-                            </span>
-                        ) : null}
+                        <div className="rounded-xl bg-[#181818] p-3">
+                            <p className="text-xs text-gray-400">Con IA</p>
+                            <p className="mt-1 text-lg font-bold text-[#FF7C02]">
+                                {resumen?.iaCompletados ?? 0}
+                            </p>
+                        </div>
                     </div>
-                    {error && (
-                        <p className="mt-3 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-                            {error}
+                    {cargando ? (
+                        <p className="mt-3 text-xs text-gray-400">
+                            Cargando resumen...
                         </p>
-                    )}
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                        <h2 className="text-lg font-bold text-white">
-                            Mi progreso
-                        </h2>
-                        <div className="mt-4">
-                            <BarraProgreso
-                                valor={resumen?.progreso ?? 0}
-                                etiqueta="Progreso total"
-                                color="#22C55E"
-                            />
-                        </div>
-                        <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-                            <div className="rounded-xl bg-[#181818] p-3">
-                                <p className="text-xs text-gray-400">Fijos</p>
-                                <p className="mt-1 text-lg font-bold text-sky-400">
-                                    {resumen?.fijosCompletados ?? 0}
-                                </p>
-                            </div>
-                            <div className="rounded-xl bg-[#181818] p-3">
-                                <p className="text-xs text-gray-400">Con IA</p>
-                                <p className="mt-1 text-lg font-bold text-[#FF7C02]">
-                                    {resumen?.iaCompletados ?? 0}
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                        <div className="flex items-center justify-between gap-2">
-                            <h2 className="text-lg font-bold text-white">
-                                Actividad reciente
-                            </h2>
-                            <span className="text-xs text-gray-400">
-                                Últimos días
-                            </span>
-                        </div>
-                        <div className="mt-4 space-y-2">
-                            {progreso?.actividadPorDia.length ? (
-                                [...progreso.actividadPorDia]
-                                    .slice(-5)
-                                    .reverse()
-                                    .map((dia) => (
-                                        <div
-                                            key={dia.fecha}
-                                            className="flex items-center justify-between rounded-xl bg-[#181818] px-3 py-2.5"
-                                        >
-                                            <div>
-                                                <p className="text-sm font-semibold text-white">
-                                                    {formatearFecha(dia.fecha)}
-                                                </p>
-                                                <p className="text-xs text-gray-400">
-                                                    {dia.completados}{' '}
-                                                    {dia.completados === 1
-                                                        ? 'ejercicio'
-                                                        : 'ejercicios'}
-                                                </p>
-                                            </div>
-                                            <span className="text-sm font-bold text-[#FF7C02]">
-                                                +{dia.puntos} pts
-                                            </span>
-                                        </div>
-                                    ))
-                            ) : (
-                                <p className="rounded-xl border border-dashed border-white/15 px-3 py-6 text-center text-sm text-gray-400">
-                                    Aún no registras actividad. ¡Resuelve tu
-                                    primer ejercicio!
-                                </p>
-                            )}
-                        </div>
-                    </section>
-                </div>
+                    ) : null}
+                </section>
             </aside>
         </section>
     );

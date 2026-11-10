@@ -1,7 +1,4 @@
-export type Rol = 'estudiante' | 'profesor' | 'admin';
-
-/** Roles que un usuario puede elegir desde el registro pÃºblico. */
-export type RolDeRegistro = Exclude<Rol, 'admin'>;
+export type Rol = 'estudiante' | 'admin';
 
 export interface PerfilUsuario {
     id: number;
@@ -13,133 +10,8 @@ export interface PerfilUsuario {
     puntos: number;
 }
 
-export interface ProfesorBasico {
-    id: number;
-    codigo: string;
-    username: string;
-}
-
-export interface GrupoEstudiante {
-    id: number;
-    nombre: string;
-    codigo: string;
-    profesor_id?: number;
-    createdAt?: string;
-    updatedAt?: string;
-    profesor?: ProfesorBasico | null;
-}
-
-export interface GrupoProfesor {
-    id: number;
-    nombre: string;
-    codigo: string;
-    createdAt: string;
-    estudiantes: number;
-}
-
-export interface GrupoAdmin {
-    id: number;
-    nombre: string;
-    codigo: string;
-    profesor?: ProfesorBasico | null;
-    estudiantes: number;
-    createdAt: string;
-}
-
-export interface GrupoCreado {
-    id: number;
-    nombre: string;
-    codigo: string;
-}
-
-export interface EstudianteBasico {
-    id: number;
-    codigo: string;
-    username: string;
-    edad?: number;
-}
-
-export interface GrupoDetalle {
-    id: number;
-    nombre: string;
-    codigo: string;
-    profesor?: ProfesorBasico | null;
-    estudiantes: EstudianteBasico[];
-}
-
-export interface ResumenReporteGrupo {
-    estudiantes: number;
-    promedioPuntos: number;
-    promedioProgreso: number;
-    completadosEnRango: number;
-}
-
-export interface EstudianteReporteGrupo {
-    id: number;
-    codigo: string;
-    username: string;
-}
-
-export interface SerieEvolucion {
-    estudiante_id: number;
-    codigo: string;
-    username: string;
-    acumulado: number[];
-}
-
-export interface ReporteGrupo {
-    grupo: {
-        id: number;
-        nombre: string;
-        codigo: string;
-    };
-    rango: {
-        desde: string | null;
-        hasta: string | null;
-    };
-    resumen: ResumenReporteGrupo;
-    estudiantes: EstudianteReporteGrupo[];
-    evolucion: {
-        fechas: string[];
-        series: SerieEvolucion[];
-    };
-}
-
-export interface ActividadDia {
-    fecha: string;
-    completados: number;
-    puntos: number;
-}
-
-export interface EjercicioGrupoReporteEstudiante {
-    ejercicio_id: number;
-    titulo: string;
-    tipo: 'diagrama' | 'pseudocodigo';
-    puntos_ejercicio: number;
-    grupo: {
-        id: number;
-        nombre: string;
-    };
-    entregado: boolean;
-    completado: boolean;
-    puntos: number;
-    fecha_completado: string | null;
-    ultima_actividad: string | null;
-}
-
-export interface ResumenReporteEstudiante {
-    puntos: number;
-    ejerciciosCompletados: number;
-    ejerciciosEntregados: number;
-    ejerciciosTotales: number;
-    progreso: number;
-    fijosCompletados: number;
-    fijosTotales: number;
-    iaCompletados: number;
-    iaGenerados: number;
-}
-
-export interface ReporteEstudiante {
+/** Resumen de progreso propio (suma de ejercicios fijos y con IA). */
+export interface MiProgreso {
     usuario: {
         id: number;
         codigo: string;
@@ -147,19 +19,21 @@ export interface ReporteEstudiante {
         edad: number;
         rol: Rol;
     };
-    resumen: ResumenReporteEstudiante;
-    ejercicios: EjercicioGrupoReporteEstudiante[];
-    actividadPorDia: ActividadDia[];
+    resumen: {
+        fijosCompletados: number;
+        fijosTotales: number;
+        iaCompletados: number;
+        iaGenerados: number;
+        /** Progreso total entre 0 y 1. */
+        progreso: number;
+    };
 }
 
 export interface EstadisticasAdmin {
     usuarios: {
         estudiantes: number;
-        profesores: number;
         admins: number;
     };
-    grupos: number;
-    matriculas: number;
     completados: {
         fijos: number;
         ia: number;
@@ -172,126 +46,12 @@ export interface EstadisticasAdmin {
     ultimaActividad: string | null;
 }
 
-export interface ProfesorAdmin {
-    id: number;
-    codigo: string;
-    username: string;
-    edad: number;
-    createdAt: string;
-    grupos: number;
-    estudiantes: number;
-}
-
 export interface EstudianteAdmin {
     id: number;
     codigo: string;
     username: string;
     edad: number;
-    grupos: number;
-    puntos: number;
-    completados: number;
-}
-
-export interface DatosCrearProfesor {
-    codigo: string;
-    username: string;
-    edad: number;
-    password: string;
-}
-
-export type TipoEjercicioGrupo = 'diagrama' | 'pseudocodigo';
-
-export interface EjercicioGrupoProfesor {
-    id: number;
-    grupo_id: number;
-    temario_id: number;
-    temario?: { id: number; nombre: string; orden: number } | null;
-    titulo: string;
-    enunciado: string;
-    tipo: TipoEjercicioGrupo;
-    puntos: number;
     createdAt: string;
-    updatedAt: string;
+    puntos: number;
     completados: number;
-    totalEstudiantes: number;
-}
-
-export interface EjercicioGrupoEstudiante {
-    id: number;
-    grupo_id: number;
-    temario_id: number;
-    temario?: { id: number; nombre: string; orden: number } | null;
-    titulo: string;
-    enunciado: string;
-    tipo: TipoEjercicioGrupo;
-    puntos: number;
-    completado: boolean;
-    puntosObtenidos: number;
-    fecha_completado: string | null;
-    ultima_actividad: string | null;
-    estado_tablero?: string | null;
-    comentario_profesor?: string | null;
-}
-
-export interface SolucionEstudianteGrupo {
-    usuario: {
-        id: number;
-        codigo: string;
-        username: string;
-    };
-    completado: boolean;
-    puntos: number;
-    calificado: boolean;
-    fecha_completado: string | null;
-    ultima_actividad: string | null;
-    tieneSolucion: boolean;
-    estado_tablero: string | null;
-    comentario_profesor: string | null;
-}
-
-export interface DetalleSolucionesGrupo {
-    ejercicio: {
-        id: number;
-        grupo_id: number;
-        titulo: string;
-        enunciado: string;
-        tipo: TipoEjercicioGrupo;
-        puntos: number;
-    };
-    soluciones: SolucionEstudianteGrupo[];
-}
-
-export interface TemarioGrupo {
-    id: number;
-    grupo_id: number;
-    nombre: string;
-    descripcion: string | null;
-    orden: number;
-    /** Cantidad de ejercicios del temario. */
-    totalEjercicios: number;
-    /** Cuántos completó el estudiante (null en la vista del profesor). */
-    completadosEstudiante: number | null;
-}
-
-export interface TemarioReferencia {
-    id: number;
-    nombre: string;
-    orden: number;
-}
-
-export interface DatosCrearEjercicioGrupo {
-    titulo: string;
-    enunciado: string;
-    tipo: TipoEjercicioGrupo;
-    puntos: number;
-    temario_id: number;
-}
-
-export interface EstudianteRankingGrupo {
-    id: number;
-    codigo: string;
-    username: string;
-    puntosTotales: number;
-    completados: number;
-    totalEjercicios: number;
 }

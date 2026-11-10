@@ -12,8 +12,6 @@ import RutaPublica from './components/rutas/RutaPublica';
 import Login from './pages/users/Login';
 import SignUp from './pages/users/SignUp';
 import DashboardInicio from './pages/Home/DashboardInicio';
-import DetalleGrupo from './pages/Profesor/DetalleGrupo';
-import DetalleEstudiante from './pages/Profesor/DetalleEstudiante';
 import PanelAdmin from './pages/Admin/PanelAdmin';
 import Dashboard from './pages/Games/Presentation/Dashboard';
 import Ejercicio1 from './pages/Games/Level1/Ejercicio1';
@@ -34,11 +32,6 @@ import EjercicioP10 from './pages/Games/Nivel2/EjercicioP10';
 import DesignBoard from './pages/Games/GeneradosPorIA/DesignBoard';
 import DashboardIA from './pages/Games/GeneradosPorIA/DashboardIA';
 import EditingBoard from './pages/Games/GeneradosPorIA/EditingBoard/EditingBoard';
-import GruposInicio from './pages/Grupos/GruposInicio';
-import GrupoDetalle from './pages/Grupos/GrupoDetalle';
-import { RevisionEntregas } from './pages/Grupos/RevisionEntregas';
-import TableroDiagramaGrupo from './pages/Grupos/tableros/TableroDiagramaGrupo';
-import TableroPseudocodigoGrupo from './pages/Grupos/tableros/TableroPseudocodigoGrupo';
 
 function App() {
     return (
@@ -154,43 +147,6 @@ function App() {
                                     path="/editingboard"
                                     element={<EditingBoard />}
                                 />
-                                <Route
-                                    path="/grupos"
-                                    element={<GruposInicio />}
-                                />
-                                <Route
-                                    path="/grupos/:id"
-                                    element={<GrupoDetalle />}
-                                />
-                                <Route
-                                    path="/grupos/:id/ejercicios/:ejercicioId/diagrama"
-                                    element={<TableroDiagramaGrupo />}
-                                />
-                                <Route
-                                    path="/grupos/:id/ejercicios/:ejercicioId/pseudocodigo"
-                                    element={<TableroPseudocodigoGrupo />}
-                                />
-
-                                <Route
-                                    element={
-                                        <RutaPorRol
-                                            roles={['profesor', 'admin']}
-                                        />
-                                    }
-                                >
-                                    <Route
-                                        path="/grupos/:id/reporte"
-                                        element={<DetalleGrupo />}
-                                    />
-                                    <Route
-                                        path="/grupos/:id/ejercicios/:ejercicioId/revision"
-                                        element={<RevisionEntregas />}
-                                    />
-                                    <Route
-                                        path="/estudiantes/:id"
-                                        element={<DetalleEstudiante />}
-                                    />
-                                </Route>
 
                                 <Route
                                     element={

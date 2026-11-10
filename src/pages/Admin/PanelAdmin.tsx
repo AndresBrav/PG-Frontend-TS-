@@ -1,52 +1,27 @@
-import {
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from 'react';
-import type { FormEvent } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell';
 import TarjetaResumen from '../../components/ui/TarjetaResumen';
 import { TokenContext } from '../../Context/TokenContext';
 import { UsuarioContext } from '../../Context/UsuarioContext';
 import {
-    crearProfesorAdmin,
     listarEstudiantesAdmin,
-    listarGruposAdmin,
-    listarProfesoresAdmin,
     obtenerEstadisticasAdmin,
 } from '../../api/adminApi';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
 import type {
-    DatosCrearProfesor,
     EstadisticasAdmin,
     EstudianteAdmin,
-    GrupoAdmin,
-    ProfesorAdmin,
 } from '../../types/dominio';
-import {
-    formatearFecha,
-    formatearFechaHora,
-    formatearNumero,
-} from '../../utils/fechas';
+import { formatearFechaHora, formatearNumero } from '../../utils/fechas';
 
-type TabAdmin = 'resumen' | 'profesores' | 'grupos' | 'estudiantes';
+type TabAdmin = 'resumen' | 'estudiantes';
 
 const TABS: { id: TabAdmin; nombre: string }[] = [
     { id: 'resumen', nombre: 'Resumen' },
-    { id: 'profesores', nombre: 'Profesores' },
-    { id: 'grupos', nombre: 'Grupos' },
     { id: 'estudiantes', nombre: 'Estudiantes' },
 ];
-
-const FORMULARIO_INICIAL: DatosCrearProfesor = {
-    codigo: '',
-    username: '',
-    edad: 0,
-    password: '',
-};
 
 const PanelAdmin = () => {
     const navigate = useNavigate();
@@ -62,19 +37,9 @@ const PanelAdmin = () => {
 
     const [estadisticas, setEstadisticas] =
         useState<EstadisticasAdmin | null>(null);
-    const [profesores, setProfesores] = useState<ProfesorAdmin[]>([]);
-    const [grupos, setGrupos] = useState<GrupoAdmin[]>([]);
     const [estudiantes, setEstudiantes] = useState<EstudianteAdmin[]>([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    const [formulario, setFormulario] =
-        useState<DatosCrearProfesor>(FORMULARIO_INICIAL);
-    const [creando, setCreando] = useState(false);
-    const [errorFormulario, setErrorFormulario] = useState<string | null>(
-        null,
-    );
-    const [mensajeExito, setMensajeExito] = useState<string | null>(null);
 
     const manejarErrorSesion = useCallback(
         (errorDesconocido: unknown) => {
@@ -96,21 +61,12 @@ const PanelAdmin = () => {
         setError(null);
 
         try {
-            const [
-                datosEstadisticas,
-                datosProfesores,
-                datosGrupos,
-                datosEstudiantes,
-            ] = await Promise.all([
+            const [datosEstadisticas, datosEstudiantes] = await Promise.all([
                 obtenerEstadisticasAdmin(claveAcceso),
-                listarProfesoresAdmin(claveAcceso),
-                listarGruposAdmin(claveAcceso),
                 listarEstudiantesAdmin(claveAcceso),
             ]);
 
             setEstadisticas(datosEstadisticas);
-            setProfesores(datosProfesores);
-            setGrupos(datosGrupos);
             setEstudiantes(datosEstudiantes);
         } catch (errorDesconocido) {
             if (manejarErrorSesion(errorDesconocido)) return;
@@ -132,79 +88,6 @@ const PanelAdmin = () => {
 
     const cambiarTab = (nuevoTab: TabAdmin) => {
         setSearchParams({ tab: nuevoTab }, { replace: true });
-        setMensajeExito(null);
-    };
-
-    const actualizarCampo = (
-        campo: keyof DatosCrearProfesor,
-        valor: string,
-    ) => {
-        setFormulario((anterior) => ({
-            ...anterior,
-            [campo]: campo === 'edad' ? Number(valor) : valor,
-        }));
-        setErrorFormulario(null);
-        setMensajeExito(null);
-    };
-
-    const crearProfesor = async (evento: FormEvent<HTMLFormElement>) => {
-        evento.preventDefault();
-
-        const codigo = formulario.codigo.trim().toUpperCase();
-        const username = formulario.username.trim();
-        const edad = Number(formulario.edad);
-
-        if (!/^[A-Z0-9]{4,20}$/.test(codigo)) {
-            setErrorFormulario(
-                'El código debe ser alfanumérico de 4 a 20 caracteres',
-            );
-            return;
-        }
-
-        if (username.length < 3) {
-            setErrorFormulario('El usuario debe tener al menos 3 caracteres');
-            return;
-        }
-
-        if (!Number.isInteger(edad) || edad <= 0 || edad > 120) {
-            setErrorFormulario('La edad debe estar entre 1 y 120 años');
-            return;
-        }
-
-        if (formulario.password.length < 4) {
-            setErrorFormulario('La contraseña debe tener al menos 4 caracteres');
-            return;
-        }
-
-        setCreando(true);
-        setErrorFormulario(null);
-        setMensajeExito(null);
-
-        try {
-            const creado = await crearProfesorAdmin(claveAcceso, {
-                codigo,
-                username,
-                edad,
-                password: formulario.password,
-            });
-
-            setMensajeExito(
-                `Profesor ${creado.username} creado con el código ${creado.codigo}`,
-            );
-            setFormulario(FORMULARIO_INICIAL);
-            await cargarTodo();
-        } catch (errorDesconocido) {
-            if (manejarErrorSesion(errorDesconocido)) return;
-
-            setErrorFormulario(
-                obtenerMensajeError(
-                    errorDesconocido,
-                    'No se pudo crear el profesor',
-                ),
-            );
-        } finally {
-            setCreando(false);
-        }
     };
 
     if (!usuario || usuario.rol !== 'admin') return null;
@@ -220,8 +103,8 @@ const PanelAdmin = () => {
                         Panel administrativo
                     </h1>
                     <p className="mt-3 max-w-2xl text-sm leading-relaxed text-gray-300 sm:text-base">
-                        Gestiona profesores y revisa la información global de
-                        grupos, estudiantes y reportes.
+                        Revisa la información global de la plataforma y consulta
+                        el avance de los estudiantes.
                     </p>
                 </div>
 
@@ -260,119 +143,6 @@ const PanelAdmin = () => {
                             <TabResumen estadisticas={estadisticas} />
                         )}
 
-                        {tab === 'profesores' && (
-                            <div className="grid gap-6 xl:grid-cols-[0.7fr_1.3fr]">
-                                <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg sm:p-6">
-                                    <h2 className="text-xl font-bold text-white">
-                                        Crear profesor
-                                    </h2>
-                                    <p className="mt-1 text-sm text-gray-400">
-                                        El profesor podrá iniciar sesión y crear
-                                        sus propios grupos.
-                                    </p>
-
-                                    <form
-                                        onSubmit={(evento) => {
-                                            void crearProfesor(evento);
-                                        }}
-                                        className="mt-5 space-y-3"
-                                    >
-                                        <CampoFormulario
-                                            id="profesor-codigo"
-                                            etiqueta="Código institucional"
-                                            valor={formulario.codigo}
-                                            onChange={(valor) =>
-                                                actualizarCampo(
-                                                    'codigo',
-                                                    valor.toUpperCase(),
-                                                )
-                                            }
-                                            placeholder="Ej. PROF-2026-01"
-                                            autoComplete="off"
-                                        />
-                                        <CampoFormulario
-                                            id="profesor-username"
-                                            etiqueta="Usuario"
-                                            valor={formulario.username}
-                                            onChange={(valor) =>
-                                                actualizarCampo(
-                                                    'username',
-                                                    valor,
-                                                )
-                                            }
-                                            placeholder="Nombre de usuario"
-                                            autoComplete="off"
-                                        />
-                                        <div>
-                                            <label
-                                                htmlFor="profesor-edad"
-                                                className="mb-1.5 block text-sm font-medium text-gray-200"
-                                            >
-                                                Edad
-                                            </label>
-                                            <input
-                                                id="profesor-edad"
-                                                type="number"
-                                                min={1}
-                                                max={120}
-                                                value={
-                                                    formulario.edad || ''
-                                                }
-                                                onChange={(evento) =>
-                                                    actualizarCampo(
-                                                        'edad',
-                                                        evento.target.value,
-                                                    )
-                                                }
-                                                className="w-full rounded-xl border border-white/15 bg-[#181818] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-gray-500 focus:border-[#FF7C02]"
-                                                placeholder="Años"
-                                            />
-                                        </div>
-                                        <CampoFormulario
-                                            id="profesor-password"
-                                            etiqueta="Contraseña"
-                                            tipo="password"
-                                            valor={formulario.password}
-                                            onChange={(valor) =>
-                                                actualizarCampo(
-                                                    'password',
-                                                    valor,
-                                                )
-                                            }
-                                            placeholder="Contraseña temporal"
-                                            autoComplete="new-password"
-                                        />
-                                        <button
-                                            type="submit"
-                                            disabled={creando}
-                                            className="w-full rounded-xl bg-[#FF7C02] px-4 py-2.5 text-sm font-bold text-black transition hover:bg-[#ff8f2b] disabled:cursor-not-allowed disabled:opacity-60"
-                                        >
-                                            {creando
-                                                ? 'Creando profesor...'
-                                                : 'Crear profesor'}
-                                        </button>
-                                    </form>
-
-                                    {errorFormulario && (
-                                        <p className="mt-3 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-                                            {errorFormulario}
-                                        </p>
-                                    )}
-                                    {mensajeExito && (
-                                        <p className="mt-3 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-300">
-                                            {mensajeExito}
-                                        </p>
-                                    )}
-                                </section>
-
-                                <TablaProfesores profesores={profesores} />
-                            </div>
-                        )}
-
-                        {tab === 'grupos' && (
-                            <TablaGrupos grupos={grupos} />
-                        )}
-
                         {tab === 'estudiantes' && (
                             <TablaEstudiantes estudiantes={estudiantes} />
                         )}
@@ -382,44 +152,6 @@ const PanelAdmin = () => {
         </AppShell>
     );
 };
-
-interface CampoFormularioProps {
-    id: string;
-    etiqueta: string;
-    valor: string;
-    onChange: (valor: string) => void;
-    placeholder?: string;
-    tipo?: 'text' | 'password';
-    autoComplete?: string;
-}
-
-const CampoFormulario = ({
-    id,
-    etiqueta,
-    valor,
-    onChange,
-    placeholder,
-    tipo = 'text',
-    autoComplete,
-}: CampoFormularioProps) => (
-    <div>
-        <label
-            htmlFor={id}
-            className="mb-1.5 block text-sm font-medium text-gray-200"
-        >
-            {etiqueta}
-        </label>
-        <input
-            id={id}
-            type={tipo}
-            value={valor}
-            onChange={(evento) => onChange(evento.target.value)}
-            placeholder={placeholder}
-            autoComplete={autoComplete}
-            className="w-full rounded-xl border border-white/15 bg-[#181818] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-gray-500 focus:border-[#FF7C02]"
-        />
-    </div>
-);
 
 const TabResumen = ({
     estadisticas,
@@ -444,22 +176,25 @@ const TabResumen = ({
                     acento="azul"
                 />
                 <TarjetaResumen
-                    titulo="Profesores"
-                    valor={formatearNumero(estadisticas.usuarios.profesores)}
-                    detalle={`${formatearNumero(estadisticas.usuarios.admins)} administradores`}
-                    acento="naranja"
-                />
-                <TarjetaResumen
-                    titulo="Grupos y matrículas"
-                    valor={formatearNumero(estadisticas.grupos)}
-                    detalle={`${formatearNumero(estadisticas.matriculas)} matrículas`}
+                    titulo="Ejercicios completados"
+                    valor={formatearNumero(
+                        estadisticas.completados.fijos +
+                            estadisticas.completados.ia,
+                    )}
+                    detalle="Fijos y con IA"
                     acento="verde"
                 />
                 <TarjetaResumen
                     titulo="Puntos totales"
                     valor={formatearNumero(estadisticas.puntos.total)}
-                    detalle={`${formatearNumero(estadisticas.completados.fijos + estadisticas.completados.ia)} ejercicios completados`}
+                    detalle="Acumulados en la plataforma"
                     acento="blanco"
+                />
+                <TarjetaResumen
+                    titulo="Última actividad"
+                    valor={formatearFechaHora(estadisticas.ultimaActividad)}
+                    detalle="Resuelto más reciente"
+                    acento="naranja"
                 />
             </div>
 
@@ -500,14 +235,6 @@ const TabResumen = ({
                             </dd>
                         </div>
                     </dl>
-                    <p className="mt-4 rounded-xl bg-[#181818] px-3 py-2.5 text-xs text-gray-400">
-                        Última actividad:{' '}
-                        <span className="font-semibold text-gray-200">
-                            {formatearFechaHora(
-                                estadisticas.ultimaActividad,
-                            )}
-                        </span>
-                    </p>
                 </section>
 
                 <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
@@ -522,11 +249,6 @@ const TabResumen = ({
                                 color: 'bg-sky-400',
                             },
                             {
-                                nombre: 'Profesores',
-                                valor: estadisticas.usuarios.profesores,
-                                color: 'bg-[#FF7C02]',
-                            },
-                            {
                                 nombre: 'Administradores',
                                 valor: estadisticas.usuarios.admins,
                                 color: 'bg-purple-400',
@@ -534,7 +256,6 @@ const TabResumen = ({
                         ].map((item) => {
                             const total =
                                 estadisticas.usuarios.estudiantes +
-                                estadisticas.usuarios.profesores +
                                 estadisticas.usuarios.admins;
                             const porcentaje = total
                                 ? Math.round((item.valor / total) * 100)
@@ -561,225 +282,17 @@ const TabResumen = ({
                             );
                         })}
                     </div>
+                    <p className="mt-4 rounded-xl bg-[#181818] px-3 py-2.5 text-xs text-gray-400">
+                        Última actividad:{' '}
+                        <span className="font-semibold text-gray-200">
+                            {formatearFechaHora(estadisticas.ultimaActividad)}
+                        </span>
+                    </p>
                 </section>
             </div>
         </div>
     );
 };
-
-const TablaProfesores = ({
-    profesores,
-}: {
-    profesores: ProfesorAdmin[];
-}) => (
-    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-                <h2 className="text-xl font-bold text-white">Profesores</h2>
-                <p className="mt-1 text-sm text-gray-400">
-                    Cuentas con rol de profesor y sus grupos.
-                </p>
-            </div>
-            <span className="rounded-full bg-[#FF7C02]/15 px-3 py-1 text-xs font-bold text-[#FF9D3D]">
-                {profesores.length}
-            </span>
-        </div>
-
-        {profesores.length === 0 ? (
-            <p className="mt-6 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
-                Todavía no hay profesores registrados.
-            </p>
-        ) : (
-            <>
-                <div className="mt-5 hidden overflow-x-auto lg:block">
-                    <table className="w-full min-w-[720px] border-separate border-spacing-y-2 text-left text-sm">
-                        <thead>
-                            <tr className="text-xs uppercase tracking-wider text-gray-400">
-                                <th className="px-3 py-2">Profesor</th>
-                                <th className="px-3 py-2">Código</th>
-                                <th className="px-3 py-2">Edad</th>
-                                <th className="px-3 py-2">Grupos</th>
-                                <th className="px-3 py-2">Estudiantes</th>
-                                <th className="px-3 py-2">Registro</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {profesores.map((profesor) => (
-                                <tr
-                                    key={profesor.id}
-                                    className="bg-[#181818]"
-                                >
-                                    <td className="rounded-l-xl px-3 py-3 font-semibold text-white">
-                                        {profesor.username}
-                                    </td>
-                                    <td className="px-3 py-3 font-mono text-xs text-gray-300">
-                                        {profesor.codigo}
-                                    </td>
-                                    <td className="px-3 py-3 text-gray-300">
-                                        {profesor.edad}
-                                    </td>
-                                    <td className="px-3 py-3 text-sky-300">
-                                        {profesor.grupos}
-                                    </td>
-                                    <td className="px-3 py-3 text-emerald-300">
-                                        {profesor.estudiantes}
-                                    </td>
-                                    <td className="rounded-r-xl px-3 py-3 text-xs text-gray-400">
-                                        {formatearFecha(
-                                            profesor.createdAt,
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="mt-5 grid gap-3 lg:hidden">
-                    {profesores.map((profesor) => (
-                        <article
-                            key={profesor.id}
-                            className="rounded-2xl border border-white/10 bg-[#181818] p-4"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 className="font-bold text-white">
-                                        {profesor.username}
-                                    </h3>
-                                    <p className="mt-1 font-mono text-xs text-gray-400">
-                                        {profesor.codigo}
-                                    </p>
-                                </div>
-                                <span className="text-xs text-gray-400">
-                                    {profesor.edad} años
-                                </span>
-                            </div>
-                            <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                                <span className="rounded-lg bg-white/5 px-2 py-1 text-sky-300">
-                                    {profesor.grupos} grupos
-                                </span>
-                                <span className="rounded-lg bg-white/5 px-2 py-1 text-emerald-300">
-                                    {profesor.estudiantes} estudiantes
-                                </span>
-                                <span className="rounded-lg bg-white/5 px-2 py-1 text-gray-400">
-                                    {formatearFecha(profesor.createdAt)}
-                                </span>
-                            </div>
-                        </article>
-                    ))}
-                </div>
-            </>
-        )}
-    </section>
-);
-
-const TablaGrupos = ({ grupos }: { grupos: GrupoAdmin[] }) => (
-    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-                <h2 className="text-xl font-bold text-white">Grupos</h2>
-                <p className="mt-1 text-sm text-gray-400">
-                    Todos los grupos de la plataforma y su profesor.
-                </p>
-            </div>
-            <span className="rounded-full bg-sky-400/15 px-3 py-1 text-xs font-bold text-sky-300">
-                {grupos.length}
-            </span>
-        </div>
-
-        {grupos.length === 0 ? (
-            <p className="mt-6 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
-                Todavía no hay grupos creados.
-            </p>
-        ) : (
-            <>
-                <div className="mt-5 hidden overflow-x-auto lg:block">
-                    <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
-                        <thead>
-                            <tr className="text-xs uppercase tracking-wider text-gray-400">
-                                <th className="px-3 py-2">Grupo</th>
-                                <th className="px-3 py-2">Código</th>
-                                <th className="px-3 py-2">Profesor</th>
-                                <th className="px-3 py-2">Estudiantes</th>
-                                <th className="px-3 py-2">Creado</th>
-                                <th className="px-3 py-2" />
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {grupos.map((grupo) => (
-                                <tr key={grupo.id} className="bg-[#181818]">
-                                    <td className="rounded-l-xl px-3 py-3 font-semibold text-white">
-                                        {grupo.nombre}
-                                    </td>
-                                    <td className="px-3 py-3 font-mono text-xs text-[#FF9D3D]">
-                                        {grupo.codigo}
-                                    </td>
-                                    <td className="px-3 py-3 text-gray-300">
-                                        {grupo.profesor?.username ??
-                                            'Sin asignar'}
-                                    </td>
-                                    <td className="px-3 py-3 text-sky-300">
-                                        {grupo.estudiantes}
-                                    </td>
-                                    <td className="px-3 py-3 text-xs text-gray-400">
-                                        {formatearFecha(grupo.createdAt)}
-                                    </td>
-                                    <td className="rounded-r-xl px-3 py-3 text-right">
-                                        <Link
-                                            to={`/grupos/${grupo.id}`}
-                                            className="rounded-lg bg-[#FF7C02] px-3 py-1.5 text-xs font-bold text-black transition hover:bg-[#ff8f2b]"
-                                        >
-                                            Ver reporte
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="mt-5 grid gap-3 lg:hidden">
-                    {grupos.map((grupo) => (
-                        <article
-                            key={grupo.id}
-                            className="rounded-2xl border border-white/10 bg-[#181818] p-4"
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <h3 className="font-bold text-white">
-                                        {grupo.nombre}
-                                    </h3>
-                                    <p className="mt-1 text-xs text-gray-400">
-                                        Profesor:{' '}
-                                        {grupo.profesor?.username ??
-                                            'Sin asignar'}
-                                    </p>
-                                </div>
-                                <span className="rounded-lg bg-[#FF7C02]/15 px-2 py-1 font-mono text-[11px] font-bold tracking-wider text-[#FF9D3D]">
-                                    {grupo.codigo}
-                                </span>
-                            </div>
-                            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-400">
-                                <span className="rounded-lg bg-white/5 px-2 py-1">
-                                    {grupo.estudiantes} estudiantes
-                                </span>
-                                <span className="rounded-lg bg-white/5 px-2 py-1">
-                                    {formatearFecha(grupo.createdAt)}
-                                </span>
-                            </div>
-                            <Link
-                                to={`/grupos/${grupo.id}`}
-                                className="mt-3 inline-block rounded-xl bg-[#FF7C02] px-3 py-2 text-xs font-bold text-black transition hover:bg-[#ff8f2b]"
-                            >
-                                Ver reporte
-                            </Link>
-                        </article>
-                    ))}
-                </div>
-            </>
-        )}
-    </section>
-);
 
 const TablaEstudiantes = ({
     estudiantes,
@@ -791,7 +304,7 @@ const TablaEstudiantes = ({
             <div>
                 <h2 className="text-xl font-bold text-white">Estudiantes</h2>
                 <p className="mt-1 text-sm text-gray-400">
-                    Puntos, grupos y ejercicios completados por estudiante.
+                    Puntos y ejercicios completados por estudiante.
                 </p>
             </div>
             <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-bold text-emerald-300">
@@ -806,16 +319,14 @@ const TablaEstudiantes = ({
         ) : (
             <>
                 <div className="mt-5 hidden overflow-x-auto lg:block">
-                    <table className="w-full min-w-[780px] border-separate border-spacing-y-2 text-left text-sm">
+                    <table className="w-full min-w-[560px] border-separate border-spacing-y-2 text-left text-sm">
                         <thead>
                             <tr className="text-xs uppercase tracking-wider text-gray-400">
                                 <th className="px-3 py-2">Estudiante</th>
                                 <th className="px-3 py-2">Código</th>
                                 <th className="px-3 py-2">Edad</th>
-                                <th className="px-3 py-2">Grupos</th>
                                 <th className="px-3 py-2">Puntos</th>
                                 <th className="px-3 py-2">Completados</th>
-                                <th className="px-3 py-2" />
                             </tr>
                         </thead>
                         <tbody>
@@ -833,22 +344,11 @@ const TablaEstudiantes = ({
                                     <td className="px-3 py-3 text-gray-300">
                                         {estudiante.edad}
                                     </td>
-                                    <td className="px-3 py-3 text-sky-300">
-                                        {estudiante.grupos}
-                                    </td>
                                     <td className="px-3 py-3 font-bold text-[#FF7C02]">
                                         {formatearNumero(estudiante.puntos)}
                                     </td>
-                                    <td className="px-3 py-3 text-emerald-300">
+                                    <td className="rounded-r-xl px-3 py-3 text-emerald-300">
                                         {estudiante.completados}
-                                    </td>
-                                    <td className="rounded-r-xl px-3 py-3 text-right">
-                                        <Link
-                                            to={`/estudiantes/${estudiante.id}`}
-                                            className="rounded-lg bg-[#FF7C02] px-3 py-1.5 text-xs font-bold text-black transition hover:bg-[#ff8f2b]"
-                                        >
-                                            Ver reporte
-                                        </Link>
                                     </td>
                                 </tr>
                             ))}
@@ -879,19 +379,10 @@ const TablaEstudiantes = ({
                                 <span className="rounded-lg bg-white/5 px-2 py-1 text-gray-400">
                                     {estudiante.edad} años
                                 </span>
-                                <span className="rounded-lg bg-white/5 px-2 py-1 text-sky-300">
-                                    {estudiante.grupos} grupos
-                                </span>
                                 <span className="rounded-lg bg-white/5 px-2 py-1 text-emerald-300">
                                     {estudiante.completados} completados
                                 </span>
                             </div>
-                            <Link
-                                to={`/estudiantes/${estudiante.id}`}
-                                className="mt-3 inline-block rounded-xl bg-[#FF7C02] px-3 py-2 text-xs font-bold text-black transition hover:bg-[#ff8f2b]"
-                            >
-                                Ver reporte
-                            </Link>
                         </article>
                     ))}
                 </div>

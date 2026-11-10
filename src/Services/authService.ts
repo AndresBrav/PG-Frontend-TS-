@@ -1,5 +1,4 @@
 import { api, obtenerMensajeError } from '../api/http';
-import type { RolDeRegistro } from '../types/dominio';
 
 export interface LoginResponse {
     token: string;
@@ -10,7 +9,6 @@ export interface DatosRegistro {
     username: string;
     edad: number;
     password: string;
-    rol: RolDeRegistro;
 }
 
 interface RespuestaAuth {

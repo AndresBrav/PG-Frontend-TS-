@@ -51,7 +51,6 @@ const AppHeader = () => {
     const [errorAvatar, setErrorAvatar] = useState<string | null>(null);
     const headerRef = useRef<HTMLHeaderElement>(null);
 
-    const estaEnGrupos = location.pathname.startsWith('/grupos');
     const estaEnIA =
         location.pathname.startsWith('/ejercicios-ia') ||
         location.pathname.startsWith('/dashboardIA') ||
@@ -236,7 +235,6 @@ const AppHeader = () => {
 
     const enlaces: { to: string; texto: string }[] = [
         { to: '/dashboard', texto: 'Inicio' },
-        { to: '/grupos', texto: 'Grupos' },
         { to: '/ejercicios-ia', texto: 'Ejercicios IA' },
         { to: '/ejercicios', texto: 'Ejercicios' },
     ];
@@ -281,8 +279,7 @@ const AppHeader = () => {
                 </nav>
 
                 <div className="flex items-center gap-1 sm:gap-3">
-                    {!estaEnGrupos && (
-                        <div className="relative">
+                    <div className="relative">
                             <button
                                 type="button"
                                 onClick={() => alternarPanel('tablero')}
@@ -409,8 +406,7 @@ const AppHeader = () => {
                                     </div>,
                                     document.body
                                 )}
-                        </div>
-                    )}
+                    </div>
 
                     <div className="flex items-center gap-1 rounded-xl bg-white/5 px-2 py-1.5 text-sm font-bold text-white sm:gap-1.5 sm:px-3">
                         <svg
