@@ -466,6 +466,19 @@
         font-size: 13px;
     }
 
+    /* Botones de la toolbar compactos en tablet/celular
+       (!important para pisar los estilos inline de los botones) */
+    .toolbar-actions button {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+        gap: 4px !important;
+    }
+
+    .toolbar-actions button svg {
+        width: 14px;
+        height: 14px;
+    }
+
     .sidebar {
         padding: 8px 10px;
     }
@@ -561,6 +574,26 @@
     .toolbar-actions {
         width: 100%;
         justify-content: center;
+        /* Los 5 elementos (guardado + 4 botones) fluyen a 2 filas si no caben */
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+
+    .toolbar-actions button {
+        padding: 5px 8px !important;
+        font-size: 11px !important;
+        gap: 4px !important;
+    }
+
+    .toolbar-actions button svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* Chip "Guardado/Sin guardar" más discreto */
+    .toolbar-actions > div {
+        font-size: 11px !important;
+        margin-right: 0 !important;
     }
 
     .sidebar {

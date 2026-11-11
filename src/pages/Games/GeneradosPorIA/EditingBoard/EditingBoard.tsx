@@ -258,6 +258,19 @@ const EditingBoard: React.FC = () => {
     const [lineaActiva, setLineaActiva] = useState<number | null>(null);
     const [scrollTopEditor, setScrollTopEditor] = useState(0);
 
+    // Guia Rapida como modal (boton en la toolbar)
+    const [guiaAbierta, setGuiaAbierta] = useState<boolean>(false);
+
+    // Cerrar el modal de Guia Rapida con la tecla Escape
+    useEffect(() => {
+        if (!guiaAbierta) return;
+        const manejarTecla = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setGuiaAbierta(false);
+        };
+        window.addEventListener('keydown', manejarTecla);
+        return () => window.removeEventListener('keydown', manejarTecla);
+    }, [guiaAbierta]);
+
     // Sincronizar scroll entre textarea y numeros de linea
     const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
         if (lineNumbersRef.current) {
@@ -720,6 +733,33 @@ const EditingBoard: React.FC = () => {
                     >
                         ✨ Verificar con IA
                     </button>
+                    <button
+                        type="button"
+                        className="btn"
+                        onClick={() => setGuiaAbierta(true)}
+                        style={{
+                            backgroundColor: 'rgba(255, 124, 2, 0.15)',
+                            color: '#FF7C02',
+                            border: '1px solid rgba(255, 124, 2, 0.4)',
+                            padding: '10px 18px',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                'rgba(255, 124, 2, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                'rgba(255, 124, 2, 0.15)';
+                        }}
+                        title="Ver guía rápida de pseudocódigo (PseInt)"
+                    >
+                        💡 Guia Rapida
+                    </button>
                 </div>
             </div>
 
@@ -1012,47 +1052,107 @@ const EditingBoard: React.FC = () => {
                             enEjecucion={isRunning}
                             onLineaActiva={setLineaActiva}
                         />
+                    </div>
+                </div>
+            </div>
 
-                        {/* Guia Rapida */}
+            {/* Modal de Guia Rapida de Pseudocodigo (PseInt) */}
+            {guiaAbierta && (
+                <div
+                    onClick={() => setGuiaAbierta(false)}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                        zIndex: 10000,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px',
+                    }}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            backgroundColor: 'var(--sidebar-bg, #ffffff)',
+                            border: '1px solid var(--border, #d9d9d9)',
+                            borderRadius: '12px',
+                            maxWidth: '520px',
+                            width: '100%',
+                            maxHeight: '80vh',
+                            overflowY: 'auto',
+                            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+                        }}
+                    >
                         <div
                             style={{
-                                backgroundColor: 'var(--sidebar-bg)',
-                                border: '1px solid var(--border)',
-                                borderRadius: '10px',
-                                padding: '15px',
-                                fontSize: '13px',
-                                color: 'var(--text)',
-                                lineHeight: '1.5',
-                                flexShrink: 0,
-                                overflowY: 'auto',
-                                maxHeight: '45%',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '14px 18px',
+                                borderBottom: '1px solid var(--border, #d9d9d9)',
+                                position: 'sticky',
+                                top: 0,
+                                backgroundColor: 'var(--sidebar-bg, #ffffff)',
+                                zIndex: 1,
                             }}
                         >
                             <h4
                                 style={{
-                                    margin: '0 0 10px 0',
-                                    color: 'var(--text-h)',
+                                    margin: 0,
+                                    color: 'var(--text-h, #333333)',
                                     fontWeight: 'bold',
+                                    fontSize: '15px',
                                 }}
                             >
                                 💡 Guia Rapida de Pseudocodigo (PseInt)
                             </h4>
-                            <ul style={{ paddingLeft: '18px', margin: 0 }}>
-                                <li style={{ marginBottom: '4px' }}>
+                            <button
+                                onClick={() => setGuiaAbierta(false)}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: 'var(--text, #555555)',
+                                    fontSize: '20px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer',
+                                    lineHeight: 1,
+                                    padding: '4px',
+                                }}
+                                title="Cerrar guia"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div
+                            style={{
+                                padding: '16px 18px',
+                                fontSize: '13px',
+                                color: 'var(--text, #555555)',
+                                lineHeight: '1.5',
+                            }}
+                        >
+                            <ul
+                                style={{
+                                    paddingLeft: '18px',
+                                    margin: 0,
+                                }}
+                            >
+                                <li style={{ marginBottom: '6px' }}>
                                     <strong>Estructura:</strong> Comienza con{' '}
                                     <code>Algoritmo Nombre</code> y termina con{' '}
                                     <code>FinAlgoritmo</code>.
                                 </li>
-                                <li style={{ marginBottom: '4px' }}>
+                                <li style={{ marginBottom: '6px' }}>
                                     <strong>Variables:</strong>{' '}
                                     <code>Definir variable Como Real</code>.
                                 </li>
-                                <li style={{ marginBottom: '4px' }}>
+                                <li style={{ marginBottom: '6px' }}>
                                     <strong>Asignacion:</strong> Usa{' '}
                                     <code>&lt;-</code> (Ej:{' '}
                                     <code>a &lt;- b + c</code>).
                                 </li>
-                                <li style={{ marginBottom: '4px' }}>
+                                <li style={{ marginBottom: '6px' }}>
                                     <strong>Entrada:</strong> Usa{' '}
                                     <code>Leer variable</code>.
                                 </li>
@@ -1064,7 +1164,7 @@ const EditingBoard: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };
