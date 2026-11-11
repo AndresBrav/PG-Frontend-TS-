@@ -17,6 +17,8 @@ export interface VariableEstado {
 export interface EstadoEjecucion {
     /** Número de instrucción ejecutada (1-based). */
     paso: number;
+    /** Línea del pseudocódigo que se estaba ejecutando (1-based, opcional). */
+    linea?: number;
     variables: VariableEstado[];
 }
 
@@ -494,7 +496,9 @@ class Compilador {
                     `['${v}', typeof ${v} === 'object' && ${v} !== null ? JSON.stringify(${v}) : ${v}]`
             )
             .join(', ');
-        this.out.push(`try { __debug([${pares}]); } catch (e) {}`);
+        this.out.push(
+            `try { __debug([${pares}], ${this.lineas[this.i]?.numero ?? 0}); } catch (e) {}`
+        );
     }
 
     private clave(): string {
@@ -1240,7 +1244,7 @@ export async function ejecutarPseudocodigo(
     };
     let __debugPaso = 0;
     let __debugUltimo = '';
-    const __debug = (pares) => {
+    const __debug = (pares, numLinea) => {
         if (!callbacks.onEstado) return;
         __debugPaso++;
         // Para programas con cientos de miles de pasos solo se
@@ -1252,10 +1256,11 @@ export async function ejecutarPseudocodigo(
             variables.push({ nombre: par[0], valor: typeof par[1] === 'boolean' ? (par[1] ? 'VERDADERO' : 'FALSO') : String(par[1]) });
         }
         // Sin cambios desde la última captura: no se reenvía al panel
-        const huella = JSON.stringify(variables);
+        // (la línea cuenta como cambio para resaltar la línea en ejecución)
+        const huella = (numLinea ?? 0) + '|' + JSON.stringify(variables);
         if (huella === __debugUltimo) return;
         __debugUltimo = huella;
-        callbacks.onEstado({ paso: __debugPaso, variables });
+        callbacks.onEstado({ paso: __debugPaso, linea: numLinea, variables });
     };
     const __ultimoMensaje = { valor: '' };
     const __leer = async (nombre, tipo) => {

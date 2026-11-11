@@ -172,6 +172,8 @@ const EditingBoard: React.FC = () => {
     const handleCodeChange = (nuevoCodigo: string) => {
         setCode(nuevoCodigo);
         setEstadoGuardado('sin_guardar');
+        // Al editar, ya no corresponde resaltar línea de ejecución
+        setLineaActiva(null);
 
         if (debounceTimerRef.current) {
             clearTimeout(debounceTimerRef.current);
@@ -252,11 +254,16 @@ const EditingBoard: React.FC = () => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const lineNumbersRef = useRef<HTMLDivElement>(null);
 
+    // Modo película: línea de pseudocódigo activa en la vista actual
+    const [lineaActiva, setLineaActiva] = useState<number | null>(null);
+    const [scrollTopEditor, setScrollTopEditor] = useState(0);
+
     // Sincronizar scroll entre textarea y numeros de linea
     const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
         if (lineNumbersRef.current) {
             lineNumbersRef.current.scrollTop = e.currentTarget.scrollTop;
         }
+        setScrollTopEditor(e.currentTarget.scrollTop);
     };
 
     // Interceptar teclado para Tab y Enter
@@ -323,6 +330,7 @@ const EditingBoard: React.FC = () => {
         setConsoleOutput(['[Sistema] Iniciando ejecucion del pseudocodigo...']);
         setEstadoVariables(null);
         setHistorialVariables([]);
+        setLineaActiva(null);
         estadoVariablesRef.current = null;
         historialVariablesRef.current = [];
 
@@ -334,11 +342,13 @@ const EditingBoard: React.FC = () => {
                 onEstado: (estado) => {
                     estadoVariablesRef.current = estado;
                     historialVariablesRef.current = [
-                        ...historialVariablesRef.current.slice(-199),
+                        ...historialVariablesRef.current.slice(-999),
                         estado,
                     ];
                     setEstadoVariables(estado);
-                    setHistorialVariables((prev) => [...prev.slice(-199), estado]);
+                    setHistorialVariables(
+                        (prev) => [...prev.slice(-999), estado]
+                    );
                 },
                 pedirEntrada: async (nombre, _tipo, mensajePrevio) => {
                     const aviso = mensajePrevio
@@ -773,7 +783,7 @@ const EditingBoard: React.FC = () => {
                     {/* Panel Izquierdo: Editor con Sidebar de Numeros Integrado */}
                     <div
                         style={{
-                            flex: 2,
+                            flex: 1,
                             display: 'flex',
                             flexDirection: 'column',
                             backgroundColor: 'var(--code-bg)',
@@ -823,6 +833,29 @@ const EditingBoard: React.FC = () => {
                                 minHeight: 0,
                             }}
                         >
+                            {/* Banda resaltada de la línea en ejecución (modo película) */}
+                            {lineaActiva !== null && (
+                                <div
+                                    aria-hidden="true"
+                                    style={{
+                                        position: 'absolute',
+                                        left: 55,
+                                        right: 0,
+                                        top:
+                                            12 +
+                                            (lineaActiva - 1) * 24 -
+                                            scrollTopEditor,
+                                        height: 24,
+                                        backgroundColor:
+                                            'rgba(59, 130, 246, 0.13)',
+                                        borderLeft:
+                                            '3px solid rgba(59, 130, 246, 0.55)',
+                                        pointerEvents: 'none',
+                                        zIndex: 0,
+                                    }}
+                                />
+                            )}
+
                             {/* Panel/Sidebar de Numeros de linea */}
                             <div
                                 ref={lineNumbersRef}
@@ -841,6 +874,8 @@ const EditingBoard: React.FC = () => {
                                     overflow: 'hidden',
                                     userSelect: 'none',
                                     boxSizing: 'border-box',
+                                    position: 'relative',
+                                    zIndex: 1,
                                 }}
                             >
                                 {lines.map((_, i) => (
@@ -880,6 +915,8 @@ const EditingBoard: React.FC = () => {
                                     whiteSpace: 'pre',
                                     overflow: 'auto',
                                     boxSizing: 'border-box',
+                                    position: 'relative',
+                                    zIndex: 1,
                                 }}
                                 placeholder="// Escribe tu pseudocodigo aqui..."
                             />
@@ -968,11 +1005,12 @@ const EditingBoard: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Panel de variables en ejecución (debug) */}
+                        {/* Panel de variables en ejecución (debug + película) */}
                         <PanelVariablesEjecucion
                             estado={estadoVariables}
                             historial={historialVariables}
                             enEjecucion={isRunning}
+                            onLineaActiva={setLineaActiva}
                         />
 
                         {/* Guia Rapida */}
