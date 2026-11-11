@@ -23,11 +23,11 @@ interface ReproductorEjecucionProps {
     onIrVivo: () => void;
     /** Alterna ▶/⏸ del modo película. */
     onTogglePlay: () => void;
-    /** Cambia la velocidad (1, 2, 4, 8). */
+    /** Cambia la velocidad (0.5, 1, 2, 4). */
     onVelocidad: (velocidad: number) => void;
 }
 
-const VELOCIDADES = [1, 2, 4, 8];
+const VELOCIDADES = [0.5, 1, 2, 4];
 
 const estiloBoton = (activo: boolean): CSSProperties => ({
     border: '1px solid rgba(255,255,255,0.15)',
