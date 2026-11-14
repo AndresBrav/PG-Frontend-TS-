@@ -5,10 +5,14 @@ import { useNodeDelete } from '../FlowEditor';
 function StartEndNode({ data, selected, id }: NodeProps) {
   const { selectedNodeId, deleteNodeById } = useNodeDelete();
   const isSelected = selected || selectedNodeId === id;
+  const activo = (data as { nodoActivo?: boolean }).nodoActivo;
+  const enError = (data as { nodoError?: boolean }).nodoError;
 
   return (
-    <div className={`node-wrapper ${isSelected ? 'selected' : ''}`}>
-      <div className="node-shape start-end">
+    <div
+      className={`node-wrapper ${isSelected ? 'selected' : ''} ${activo ? 'nodo-activo' : ''} ${enError ? 'nodo-error' : ''}`}
+    >
+      <div className={`node-shape start-end ${activo ? 'nodo-activo' : ''} ${enError ? 'nodo-error' : ''}`}>
         {data.label as string}
       </div>
       {isSelected && (

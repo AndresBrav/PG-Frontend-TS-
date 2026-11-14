@@ -16,6 +16,10 @@ interface ToolbarProps {
     estadoGuardado?: 'guardado' | 'guardando' | 'sin_guardar';
     onGuardarManual?: () => void;
     onReiniciar?: () => void;
+    /** Ejecuta el diagrama con el compilador PSeInt local. */
+    onEjecutar?: () => void;
+    /** true mientras corre el diagrama (deshabilita el botón). */
+    ejecutando?: boolean;
 }
 
 function Toolbar({
@@ -27,6 +31,8 @@ function Toolbar({
     estadoGuardado = 'guardado',
     onGuardarManual,
     onReiniciar,
+    onEjecutar,
+    ejecutando = false,
 }: ToolbarProps) {
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
@@ -287,6 +293,29 @@ function Toolbar({
                         Reiniciar
                     </button>
                 )}
+                {onEjecutar && (
+                    <button
+                        className="btn btn-ejecutar"
+                        onClick={onEjecutar}
+                        disabled={ejecutando}
+                        style={{
+                            backgroundColor: '#FF7C02',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            cursor: ejecutando ? 'wait' : 'pointer',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            opacity: ejecutando ? 0.6 : 1,
+                        }}
+                        title="Ejecutar el diagrama con el compilador local"
+                    >
+                        {ejecutando ? '⏳ Ejecutando...' : '▶ Ejecutar'}
+                    </button>
+                )}
                 <button
                     className="btn btn-export"
                     onClick={handleExport}
@@ -294,7 +323,7 @@ function Toolbar({
                         backgroundColor: '#20FB1080',
                         color: 'white',
                         border: 'none',
-                        padding: '12px 30px',
+                        padding: '12px 24px',
                         borderRadius: '8px',
                         fontSize: '16px',
                         fontWeight: 'bold',
@@ -302,8 +331,9 @@ function Toolbar({
                         transition: 'all 0.3s ease',
                         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                     }}
+                    title="Verificar el diagrama con Inteligencia Artificial"
                 >
-                    Ejecutar
+                    Verificar con IA
                 </button>
                 {/* <button className="btn btn-clear" onClick={onClear}>
                     Limpiar

@@ -5,10 +5,12 @@ import { useNodeDelete } from '../FlowEditor';
 function DataNode({ data, selected, id }: NodeProps) {
   const { selectedNodeId, deleteNodeById } = useNodeDelete();
   const isSelected = selected || selectedNodeId === id;
+  const activo = (data as { nodoActivo?: boolean }).nodoActivo;
+  const enError = (data as { nodoError?: boolean }).nodoError;
 
   return (
-    <div className={`node-wrapper ${isSelected ? 'selected' : ''}`}>
-      <div className="node-shape data">
+    <div className={`node-wrapper ${isSelected ? 'selected' : ''} ${activo ? 'nodo-activo' : ''} ${enError ? 'nodo-error' : ''}`}>
+      <div className={`node-shape data ${activo ? 'nodo-activo' : ''} ${enError ? 'nodo-error' : ''}`}>
         <span className="node-label">{data.label as string}</span>
       </div>
       {isSelected && (

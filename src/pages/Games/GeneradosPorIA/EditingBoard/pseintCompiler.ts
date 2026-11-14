@@ -83,7 +83,7 @@ function quitarAcentos(texto: string): string {
     return texto.replace(/[áéíóúÁÉÍÓÚñÑ]/g, (c) => MAPA_ACENTOS[c] ?? c);
 }
 
-function normVar(nombre: string): string {
+export function normVar(nombre: string): string {
     return quitarAcentos(nombre).toLowerCase();
 }
 
@@ -470,8 +470,12 @@ class Compilador {
 
     private compilarSentencia(): void {
         const k = this.clave();
-        // Las declaraciones puras no generan captura de variables
-        const esDeclaracion = k === 'definir' || k === 'dimension';
+        // Las declaraciones puras y Finalizar no generan captura de variables
+        const esDeclaracion =
+            k === 'definir' ||
+            k === 'dimension' ||
+            k === 'finalizar' ||
+            k === 'terminar';
         switch (k) {
             case 'definir':
                 this.compilarDefinir();
@@ -512,6 +516,12 @@ class Compilador {
             case 'devolver':
             case 'regresar':
                 this.compilarRetornar();
+                break;
+            // Instrucción interna del generador diagrama→código: termina el
+            // programa desde una rama (se traduce a return; del proceso).
+            case 'finalizar':
+            case 'terminar':
+                this.compilarFinalizar();
                 break;
             default:
                 this.compilarAsignacion();
@@ -894,6 +904,8 @@ class Compilador {
             );
         }
         this.out.push(`while (${cond}) { __paso();`);
+        // Snapshot al inicio de cada iteración (ilumina el rombo del bucle)
+        this.emitirDebug();
         this.i++;
         this.recorrerHasta(['finmientras'], {
             linea,
@@ -1333,6 +1345,12 @@ class Compilador {
         this.out.push('}');
         this.tipos = tiposAnteriores;
         this.declaradas = declaradasAnteriores;
+    }
+
+    /** Instrucción interna del generador diagrama→código: sale del proceso. */
+    private compilarFinalizar(): void {
+        this.out.push('return;');
+        this.i++;
     }
 
     private compilarRetornar(): void {

@@ -166,6 +166,8 @@ export interface FlowEditorRef {
     addNodeAtCenter: (type: NodeType) => void;
     getFlowState: () => { nodes: Node[]; edges: Edge[]; viewport?: { x: number; y: number; zoom: number } };
     loadFlowState: (state: { nodes?: Node[]; edges?: Edge[]; viewport?: { x: number; y: number; zoom: number } }) => void;
+    /** Resalta el símbolo activo de la ejecución y/o el símbolo con error. */
+    setNodeHighlight: (activoId: string | null, errorId?: string | null) => void;
 }
 
 interface FlowEditorProps {
@@ -452,10 +454,31 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
             [internalNodes, screenToFlowPosition, syncNodes]
         );
 
+        /** Marca `nodoActivo` / `nodoError` en los data de los nodos internos. */
+        const setNodeHighlight = useCallback(
+            (activoId: string | null, errorId: string | null = null) => {
+                setInternalNodes((nds) =>
+                    nds.map((n) => {
+                        const data = n.data as Record<string, unknown>;
+                        return {
+                            ...n,
+                            data: {
+                                ...data,
+                                nodoActivo: n.id === activoId,
+                                nodoError: n.id === errorId,
+                            },
+                        };
+                    })
+                );
+            },
+            [setInternalNodes]
+        );
+
         useImperativeHandle(ref, () => ({
             addNodeAtCenter,
             getFlowState,
             loadFlowState,
+            setNodeHighlight,
         }));
 
         const onNodeDragStop = useCallback(() => {

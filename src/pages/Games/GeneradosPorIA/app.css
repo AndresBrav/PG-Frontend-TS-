@@ -332,6 +332,36 @@
     min-height: 90px;
 }
 
+/* ── Resaltado de ejecución (símbolo activo / con error) ─────────────
+   El brillo va en el wrapper con drop-shadow porque los nodos con
+   clip-path (data y decision) recortan el box-shadow del shape. */
+@keyframes pulsoNodoActivo {
+    from {
+        filter: drop-shadow(0 0 3px rgba(255, 124, 2, 0.9));
+    }
+    to {
+        filter: drop-shadow(0 0 9px rgba(255, 124, 2, 1));
+    }
+}
+
+.node-wrapper.nodo-activo {
+    animation: pulsoNodoActivo 0.7s ease-in-out infinite alternate;
+}
+
+.node-wrapper.nodo-activo .node-shape {
+    border-color: #ff7c02;
+}
+
+.node-wrapper.nodo-error {
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.95));
+}
+
+.node-wrapper.nodo-error .node-shape {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #b91c1c;
+}
+
 .decision-wrapper {
     position: relative;
     display: inline-flex;
