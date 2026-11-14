@@ -87,7 +87,7 @@ function normVar(nombre: string): string {
     return quitarAcentos(nombre).toLowerCase();
 }
 
-function tokenizar(linea: string): Token[] {
+function tokenizar(linea: string, numeroLinea: number): Token[] {
     const toks: Token[] = [];
     let i = 0;
     const dosOp = ['<-', '<>', '<=', '>=', '=='];
@@ -137,6 +137,16 @@ function tokenizar(linea: string): Token[] {
             w += linea[i];
             i++;
         }
+        // Blindaje: si el carácter no encaja en ninguna rama no se avanza la
+        // posición (bucle infinito). Abortar con un mensaje claro.
+        if (w === '') {
+            const pista =
+                c === '!' ? ' (¿quisiste escribir <>?)' : '';
+            throw new Error(
+                `Error de sintaxis en la línea ${numeroLinea}: ` +
+                    `carácter no reconocido '${c}'${pista}.`
+            );
+        }
         toks.push({ tipo: 'word', val: w });
     }
     return toks;
@@ -174,7 +184,7 @@ function preprocesar(codigo: string): Linea[] {
         if (!limpia) {
             return;
         }
-        lineas.push({ numero: idx + 1, toks: tokenizar(limpia) });
+        lineas.push({ numero: idx + 1, toks: tokenizar(limpia, idx + 1) });
     });
     return lineas;
 }
@@ -375,8 +385,19 @@ class Expresion {
         return '';
     }
 
-    private actual(): Token | undefined {
+    /** Token actual (público para mensajes de error del Compilador). */
+    actual(): Token | undefined {
         return this.toks[this.pos];
+    }
+
+    /** Avanza una posición (para palabras clave estructurales). */
+    consumir(): void {
+        this.pos++;
+    }
+
+    /** true si ya se consumieron todos los tokens de la expresión. */
+    esFinal(): boolean {
+        return this.pos >= this.toks.length;
     }
 
     private indizado(palabra: string): string {
@@ -398,6 +419,16 @@ class Expresion {
     }
 }
 
+/** Tipos de datos válidos en PSeInt para 'Definir ... Como ...'. */
+const TIPOS_PSEINT = new Set([
+    'entero',
+    'real',
+    'caracter',
+    'cadena',
+    'logico',
+    'numerico',
+]);
+
 class Compilador {
     private lineas: Linea[];
     private tipos = new Map<string, string>();
@@ -416,6 +447,15 @@ class Compilador {
         while (this.i < this.lineas.length) {
             const k = this.clave();
             if (k === 'algoritmo' || k === 'proceso') {
+                const nombreTok = this.lineas[this.i].toks[1];
+                if (!nombreTok || nombreTok.tipo !== 'word') {
+                    this.errorSintaxis(
+                        this.lineas[this.i],
+                        `se esperaba el nombre después de '${
+                            k === 'algoritmo' ? 'Algoritmo' : 'Proceso'
+                        }' (Ej: Algoritmo SolucionIA).`
+                    );
+                }
                 this.i++;
                 continue;
             }
@@ -533,32 +573,65 @@ class Compilador {
         if (this.declaradas.has(v)) {
             return;
         }
-        this.out.push(`let ${v};`);
+        // PSeInt inicializa al declarar: Entero/Real en 0, Logico en FALSO,
+        // Caracter/Cadena en vacío.
+        const tipo = this.tipos.get(v) ?? '';
+        let inicial = '';
+        if (tipo === 'entero' || tipo === 'real' || tipo === 'numerico') {
+            inicial = ' = 0';
+        } else if (tipo === 'logico') {
+            inicial = ' = false';
+        } else if (tipo === 'caracter' || tipo === 'cadena') {
+            inicial = " = ''";
+        }
+        this.out.push(`let ${v}${inicial};`);
         this.declaradas.add(v);
     }
 
     private compilarDefinir(): void {
         const linea = this.lineas[this.i];
         const idxComo = this.indicePalabra(linea, 1, 'como');
-        const varsAux: string[] = [];
         if (idxComo === -1) {
-            for (let j = 1; j < linea.toks.length; j++) {
-                if (linea.toks[j].tipo === 'word') {
-                    varsAux.push(normVar(linea.toks[j].val));
-                }
+            this.errorSintaxis(
+                linea,
+                "se esperaba 'Como' en el Definir (Ej: Definir x Como Entero)."
+            );
+        }
+        const varsAux: string[] = [];
+        for (let j = 1; j < idxComo; j++) {
+            if (linea.toks[j].tipo === 'word') {
+                varsAux.push(normVar(linea.toks[j].val));
             }
-        } else {
-            for (let j = 1; j < idxComo; j++) {
-                if (linea.toks[j].tipo === 'word') {
-                    varsAux.push(normVar(linea.toks[j].val));
-                }
-            }
-            const tipoVal = linea.toks[idxComo + 1];
-            if (tipoVal && tipoVal.tipo === 'word') {
-                for (const v of varsAux) {
-                    this.tipos.set(v, normVar(tipoVal.val));
-                }
-            }
+        }
+        if (varsAux.length === 0) {
+            this.errorSintaxis(
+                linea,
+                "se esperaba al menos una variable en el Definir (Ej: Definir x Como Entero)."
+            );
+        }
+        const tipoVal = linea.toks[idxComo + 1];
+        if (
+            !tipoVal ||
+            tipoVal.tipo !== 'word' ||
+            !TIPOS_PSEINT.has(normVar(tipoVal.val))
+        ) {
+            const recibido = tipoVal?.val ?? '';
+            this.errorSintaxis(
+                linea,
+                recibido
+                    ? `tipo desconocido '${recibido}' en el Definir (tipos válidos: Entero, Real, Caracter, Cadena, Logico, Numerico).`
+                    : "se esperaba el tipo en el Definir (Ej: Definir x Como Entero)."
+            );
+        }
+        const sobrante = linea.toks[idxComo + 2];
+        if (sobrante) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${sobrante.val}' en el Definir.`
+            );
+        }
+        for (const v of varsAux) {
+            this.tipos.set(v, normVar(tipoVal.val));
         }
         for (const v of varsAux) {
             this.declararVariable(v);
@@ -657,22 +730,39 @@ class Compilador {
             const tieneIndice = seg.some(
                 (t) => t.tipo === 'punt' && t.val === '['
             );
-            const nombre = normVar(
-                seg.find((t) => t.tipo === 'word')?.val ?? ''
-            );
-            if (!nombre) {
-                continue;
-            }
-            const tipo = this.tipos.get(nombre) ?? '';
             if (tieneIndice) {
-                const destino = new Expresion(seg).parse();
+                const expDest = new Expresion(seg);
+                const destino = expDest.parse();
+                if (!expDest.esFinal()) {
+                    this.errorSintaxis(
+                        linea,
+                        `no se esperaba '${expDest.actual()?.val}' en el Leer.`
+                    );
+                }
+                const nombre = normVar(
+                    seg.find((t) => t.tipo === 'word')?.val ?? ''
+                );
+                if (!nombre) {
+                    continue;
+                }
+                const tipoSeg = this.tipos.get(nombre) ?? '';
                 this.out.push(
-                    `${destino} = await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipo)});`
+                    `${destino} = await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipoSeg)});`
                 );
             } else {
+                if (seg.length !== 1 || seg[0].tipo !== 'word') {
+                    this.errorSintaxis(
+                        linea,
+                        `se esperaba una variable en el Leer (recibí '${seg
+                            .map((t) => t.val)
+                            .join(' ')}').`
+                    );
+                }
+                const nombre = normVar(seg[0].val);
+                const tipoSeg = this.tipos.get(nombre) ?? '';
                 this.declararVariable(nombre);
                 this.out.push(
-                    `${nombre} = await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipo)});`
+                    `${nombre} = await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipoSeg)});`
                 );
             }
         }
@@ -690,13 +780,34 @@ class Compilador {
         ) {
             inicio = 3;
         }
-        const resto = linea.toks.slice(inicio);
+        let resto = linea.toks.slice(inicio);
         if (resto.length === 0) {
             this.i++;
             return;
         }
+        // 'Sin Saltar' al final (sintaxis habitual de PSeInt)
+        const n = resto.length;
+        if (
+            n >= 2 &&
+            resto[n - 2]?.tipo === 'word' &&
+            normVar(resto[n - 2].val) === 'sin' &&
+            resto[n - 1]?.tipo === 'word' &&
+            normVar(resto[n - 1].val) === 'saltar'
+        ) {
+            resto = resto.slice(0, n - 2);
+            if (resto.length === 0) {
+                this.i++;
+                return;
+            }
+        }
         const exp = new Expresion(resto);
         const args = exp.argumentos();
+        if (!exp.esFinal()) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${exp.actual()?.val}' en el Escribir.`
+            );
+        }
         this.out.push(`__escribir(${args.join(', ')});`);
         this.i++;
     }
@@ -704,18 +815,56 @@ class Compilador {
     private compilarSi(): void {
         const linea = this.lineas[this.i];
         const idxEntonces = this.indicePalabra(linea, 1, 'entonces');
-        const condToks =
-            idxEntonces === -1
-                ? linea.toks.slice(1)
-                : linea.toks.slice(1, idxEntonces);
-        const cond = new Expresion(condToks).parse();
+        if (idxEntonces === -1) {
+            if (this.indicePalabra(linea, 1, 'hacer') !== -1) {
+                this.errorSintaxis(
+                    linea,
+                    "en el 'Si' se usa 'Entonces', no 'Hacer'."
+                );
+            }
+            this.errorSintaxis(linea, "se esperaba 'Entonces' en el Si.");
+        }
+        const condToks = linea.toks.slice(1, idxEntonces);
+        const expCond = new Expresion(condToks);
+        const cond = expCond.parse();
+        if (cond === '') {
+            this.errorSintaxis(linea, 'se esperaba la condición en el Si.');
+        }
+        if (!expCond.esFinal()) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${expCond.actual()?.val}' en la condición del Si.`
+            );
+        }
+        const extra = linea.toks[idxEntonces + 1];
+        if (extra) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${extra.val}' después de 'Entonces' (las instrucciones del Si van en las líneas siguientes).`
+            );
+        }
         this.out.push(`if (${cond}) {`);
         this.i++;
-        this.recorrerHasta(['finsi', 'sino']);
+        this.recorrerHasta(['finsi', 'sino'], {
+            linea,
+            nombre: 'Si',
+            cierre: 'FinSi',
+        });
         if (this.clave() === 'sino') {
+            const lineaSino = this.lineas[this.i];
+            if (lineaSino.toks.length > 1) {
+                this.errorSintaxis(
+                    lineaSino,
+                    `no se esperaba '${lineaSino.toks[1].val}' después de 'Sino' (las instrucciones del Sino van en las líneas siguientes).`
+                );
+            }
             this.i++;
             this.out.push('} else {');
-            this.recorrerHasta(['finsi']);
+            this.recorrerHasta(['finsi'], {
+                linea,
+                nombre: 'Si',
+                cierre: 'FinSi',
+            });
         }
         if (this.clave() === 'finsi') {
             this.i++;
@@ -726,17 +875,32 @@ class Compilador {
     private compilarMientras(): void {
         const linea = this.lineas[this.i];
         const idxHacer = this.indicePalabra(linea, 1, 'hacer');
-        const condToks =
-            idxHacer === -1
-                ? linea.toks.slice(1)
-                : linea.toks.slice(1, idxHacer);
-        const cond = new Expresion(condToks).parse();
+        if (idxHacer === -1) {
+            this.errorSintaxis(linea, "se esperaba 'Hacer' en el Mientras.");
+        }
+        const condToks = linea.toks.slice(1, idxHacer);
+        const expCond = new Expresion(condToks);
+        const cond = expCond.parse();
+        if (cond === '') {
+            this.errorSintaxis(
+                linea,
+                'se esperaba la condición en el Mientras.'
+            );
+        }
+        if (!expCond.esFinal()) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${expCond.actual()?.val}' en la condición del Mientras.`
+            );
+        }
         this.out.push(`while (${cond}) { __paso();`);
         this.i++;
-        this.recorrerHasta(['finmientras']);
-        if (this.clave() === 'finmientras') {
-            this.i++;
-        }
+        this.recorrerHasta(['finmientras'], {
+            linea,
+            nombre: 'Mientras',
+            cierre: 'FinMientras',
+        });
+        this.i++;
         this.out.push('}');
     }
 
@@ -744,7 +908,10 @@ class Compilador {
         const linea = this.lineas[this.i];
         const vNombre = normVar(linea.toks[1]?.val ?? '');
         if (!vNombre) {
-            this.erro(linea);
+            this.errorSintaxis(
+                linea,
+                "se esperaba la variable en el Para (Ej: Para i <- 1 Hasta 10 Hacer)."
+            );
         }
         let opIdx = -1;
         for (let j = 2; j < linea.toks.length; j++) {
@@ -757,35 +924,88 @@ class Compilador {
             }
         }
         if (opIdx === -1) {
-            this.throwErro(linea);
+            this.errorSintaxis(
+                linea,
+                "se esperaba '<-' en el Para (Ej: Para i <- 1 Hasta 10 Hacer)."
+            );
         }
         const idxHasta = this.indicePalabra(linea, opIdx + 1, 'hasta');
         if (idxHasta === -1) {
-            this.erro(linea);
+            this.errorSintaxis(
+                linea,
+                "se esperaba 'Hasta' en el Para (Ej: Para i <- 1 Hasta 10 Hacer)."
+            );
         }
         const iniToks = linea.toks.slice(opIdx + 1, idxHasta);
         const resto = linea.toks.slice(idxHasta + 1);
-        const iHacer = this.indicePalabraEn(resto, 'hacer');
-        const finToks = iHacer === -1 ? resto : resto.slice(0, iHacer);
-        const idxPasoWord = this.indicePalabraEn(finToks, 'paso');
-        let finTok = finToks;
-        let pasoToks: Token[] = [];
-        if (idxPasoWord !== -1) {
-            const restoPaso = finToks.slice(idxPasoWord + 1);
-            let completo = 0;
-            if (
-                restoPaso[0]?.tipo === 'word' &&
-                normVar(restoPaso[0].val) === 'paso'
-            ) {
-                pasoToks = restoPaso.slice(1);
-            } else {
-                pasoToks = restoPaso;
-            }
-            finTok = finToks.slice(0, idxPasoWord);
+        const expIni = new Expresion(iniToks);
+        const ini = expIni.parse();
+        if (ini === '') {
+            this.errorSintaxis(
+                linea,
+                "se esperaba el valor inicial en el Para (Ej: Para i <- 1 Hasta 10 Hacer)."
+            );
         }
-        const ini = new Expresion(iniToks).parse();
-        const fin = new Expresion(finTok).parse();
-        const pasoVal = pasoToks.length ? new Expresion(pasoToks).parse() : '1';
+        if (!expIni.esFinal()) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${expIni.actual()?.val}' entre '<-' y 'Hasta' en el Para.`
+            );
+        }
+        const expFin = new Expresion(resto);
+        const fin = expFin.parse();
+        if (fin === '') {
+            this.errorSintaxis(
+                linea,
+                "se esperaba el límite después de 'Hasta' en el Para (Ej: Para i <- 1 Hasta 10 Hacer)."
+            );
+        }
+        // 'Con Paso <expr>' opcional antes del 'Hacer'
+        let pasoVal = '1';
+        const tCon = expFin.actual();
+        if (tCon?.tipo === 'word' && normVar(tCon.val) === 'con') {
+            expFin.consumir();
+            const tPaso = expFin.actual();
+            if (!tPaso || tPaso.tipo !== 'word' || normVar(tPaso.val) !== 'paso') {
+                this.errorSintaxis(
+                    linea,
+                    "se esperaba 'Paso' después de 'Con' en el Para."
+                );
+            }
+            expFin.consumir();
+            pasoVal = expFin.parse();
+            if (pasoVal === '') {
+                this.errorSintaxis(
+                    linea,
+                    "se esperaba una expresión después de 'Con Paso' en el Para."
+                );
+            }
+        }
+        const tHacer = expFin.actual();
+        if (!tHacer || tHacer.tipo !== 'word' || normVar(tHacer.val) !== 'hacer') {
+            // Pista para límites escritos como 'H' o palabra suelta no declarada
+            let pista = '';
+            if (
+                expFin.esFinal() &&
+                resto.length === 1 &&
+                resto[0].tipo === 'word' &&
+                !this.declaradas.has(normVar(resto[0].val))
+            ) {
+                pista = ` ¿Quisiste escribir 'Hacer' en lugar de '${resto[0].val}'?`;
+            }
+            this.errorSintaxis(
+                linea,
+                `se esperaba 'Hacer' al final del Para (Ej: Para i <- 1 Hasta 10 Hacer).${pista}`
+            );
+        }
+        expFin.consumir();
+        const sobranteHacer = expFin.actual();
+        if (sobranteHacer) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${sobranteHacer.val}' después de 'Hacer' en el Para (las instrucciones van en las líneas siguientes).`
+            );
+        }
         const pasoVar = `__pi${this.contador++}`;
         this.declararVariable(vNombre);
         this.out.push(`{ const ${pasoVar} = ${pasoVal};`);
@@ -795,7 +1015,11 @@ class Compilador {
         // Snapshot al inicio de cada iteración (ve el iterador cambiar)
         this.emitirDebug();
         this.i++;
-        this.recorrerHasta(['finpara']);
+        this.recorrerHasta(['finpara'], {
+            linea,
+            nombre: 'Para',
+            cierre: 'FinPara',
+        });
         if (this.clave() === 'finpara') {
             this.i++;
         }
@@ -803,31 +1027,39 @@ class Compilador {
         this.out.push('}');
     }
 
-    private indicePalabraEn(resto: Token[], palabra: string): number {
-        for (let j = 0; j < resto.length; j++) {
-            if (resto[j].tipo === 'word' && normVar(resto[j].val) === palabra) {
-                return j;
-            }
-        }
-        return -1;
-    }
-
     private compilarRepetir(): void {
+        const linea = this.lineas[this.i];
         this.out.push('do { __paso();');
         this.i++;
-        this.recorrerHasta(['hasta']);
+        this.recorrerHasta(['hasta'], {
+            linea,
+            nombre: 'Repetir',
+            cierre: 'Hasta',
+        });
         let cond = 'false';
-        const linea = this.lineas[this.i];
         if (this.clave() === 'hasta') {
+            const lineaHasta = this.lineas[this.i];
             let inicioHasta = 1;
             if (
-                linea &&
-                linea.toks[1]?.tipo === 'word' &&
-                normVar(linea.toks[1].val) === 'que'
+                lineaHasta.toks[1]?.tipo === 'word' &&
+                normVar(lineaHasta.toks[1].val) === 'que'
             ) {
                 inicioHasta = 2;
             }
-            cond = new Expresion(linea.toks.slice(inicioHasta)).parse();
+            const expCond = new Expresion(lineaHasta.toks.slice(inicioHasta));
+            cond = expCond.parse();
+            if (cond === '') {
+                this.errorSintaxis(
+                    lineaHasta,
+                    "se esperaba la condición después de 'Hasta' en el Repetir."
+                );
+            }
+            if (!expCond.esFinal()) {
+                this.errorSintaxis(
+                    lineaHasta,
+                    `no se esperaba '${expCond.actual()?.val}' en la condición del Repetir.`
+                );
+            }
             this.i++;
         }
         this.out.push(`} while (!(${cond}));`);
@@ -836,24 +1068,45 @@ class Compilador {
     private compilarSegun(): void {
         const linea = this.lineas[this.i];
         const idxHacer = this.indicePalabra(linea, 1, 'hacer');
-        const exprToks =
-            idxHacer === -1
-                ? linea.toks.slice(1)
-                : linea.toks.slice(1, idxHacer);
-        const expr = new Expresion(exprToks).parse();
+        if (idxHacer === -1) {
+            this.errorSintaxis(linea, "se esperaba 'Hacer' en el Según.");
+        }
+        const exprToks = linea.toks.slice(1, idxHacer);
+        const expExpr = new Expresion(exprToks);
+        const expr = expExpr.parse();
+        if (expr === '') {
+            this.errorSintaxis(
+                linea,
+                'se esperaba la expresión en el Según.'
+            );
+        }
+        if (!expExpr.esFinal()) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${expExpr.actual()?.val}' en la expresión del Según.`
+            );
+        }
         this.out.push(`switch (${expr}) {`);
         this.i++;
-        this.compilarCasos();
+        this.compilarCasos(linea);
         if (this.clave() === 'finsegun') {
             this.i++;
+        } else {
+            this.errorSintaxis(
+                linea,
+                "el 'Segun' no se cerró (falta 'FinSegun')."
+            );
         }
         this.out.push('}');
     }
 
-    private compilarCasos(): void {
+    private compilarCasos(apertura: Linea): void {
         while (this.i < this.lineas.length) {
             const k = this.clave();
             if (k === 'finsegun') {
+                return;
+            }
+            if (k === 'finalgoritmo' || k === 'finproceso') {
                 return;
             }
             const linea = this.lineas[this.i];
@@ -861,9 +1114,16 @@ class Compilador {
                 const idxPuntos = linea.toks.findIndex(
                     (t) => t.tipo === 'punt' && t.val === ':'
                 );
+                // Saltar la palabra 'Caso' para que no quede como etiqueta
+                const inicioLabels =
+                    linea.toks[0]?.tipo === 'word' &&
+                    normVar(linea.toks[0].val) === 'caso'
+                        ? 1
+                        : 0;
                 const labelsToks =
                     idxPuntos <= 0
                         ? linea.toks
+                              .slice(inicioLabels)
                               .filter(
                                   (t) =>
                                       !(
@@ -871,7 +1131,7 @@ class Compilador {
                                           (t.val === ':' || t.val === '-')
                                       )
                               )
-                        : linea.toks.slice(0, idxPuntos);
+                        : linea.toks.slice(inicioLabels, idxPuntos);
                 const labels = new Expresion(labelsToks).argumentos();
                 for (const lbl of labels) {
                     this.out.push(`case ${lbl}:`);
@@ -881,7 +1141,7 @@ class Compilador {
                 this.i++;
                 if (restoLinea.length > 0) {
                     this.out.push(
-                        ...this.compilarToksInLinea(restoLinea)
+                        ...this.compilarToksInLinea(restoLinea, linea.numero)
                     );
                 }
                 while (this.i < this.lineas.length) {
@@ -889,6 +1149,8 @@ class Compilador {
                     if (
                         k2 === 'caso' ||
                         k2 === 'finsegun' ||
+                        k2 === 'finalgoritmo' ||
+                        k2 === 'finproceso' ||
                         this.esLineaCaso(this.lineas[this.i])
                     ) {
                         break;
@@ -915,7 +1177,9 @@ class Compilador {
                 while (this.i < this.lineas.length) {
                     if (
                         this.clave() === 'finsegun' ||
-                        this.clave() === 'caso'
+                        this.clave() === 'caso' ||
+                        this.clave() === 'finalgoritmo' ||
+                        this.clave() === 'finproceso'
                     ) {
                         break;
                     }
@@ -940,7 +1204,10 @@ class Compilador {
         );
     }
 
-    private compilarToksInLinea(toks: Token[]): string[] {
+    private compilarToksInLinea(
+        toks: Token[],
+        numeroLinea?: number
+    ): string[] {
         const salida: string[] = [];
         const k = normVar(toks[0]?.val ?? '');
         if (k === 'escribir') {
@@ -956,8 +1223,25 @@ class Compilador {
                 [],
                 { cadenas: [], lineas: [{ toks }] } as unknown as Algoritmo
             );
-            aux.lineas = [{ toks }];
+            aux.lineas = [{ numero: numeroLinea ?? 0, toks }];
             aux.compilarLeer();
+            salida.push(...aux.out);
+        } else if (
+            toks.some(
+                (t) =>
+                    t.tipo === 'punt' && (t.val === '<-' || t.val === '=')
+            )
+        ) {
+            // Asignación inline (Ej: Caso 1: suma <- 10): reutilizar el
+            // compilador de asignaciones para que respete destino/arreglos.
+            const aux = new Compilador(
+                [],
+                { cadenas: [], lineas: [{ toks }] } as unknown as Algoritmo
+            );
+            aux.lineas = [{ numero: numeroLinea ?? 0, toks }];
+            aux.declaradas = this.declaradas;
+            aux.tipos = this.tipos;
+            aux.compilarAsignacion();
             salida.push(...aux.out);
         } else {
             const exp = new Expresion(toks);
@@ -996,7 +1280,10 @@ class Compilador {
             }
         }
         if (!nombre) {
-            this.erro(linea);
+            this.errorSintaxis(
+                linea,
+                `se esperaba el nombre del ${k === 'funcion' ? 'Funcion' : 'SubProceso'}.`
+            );
         }
         if (NOMBRES_INCORPORADOS.has(nombre)) {
             throw new Error(
@@ -1032,7 +1319,11 @@ class Compilador {
         }
         this.i++;
         const finNombre = k === 'funcion' ? 'finfuncion' : 'finsubproceso';
-        this.recorrerHasta([finNombre]);
+        this.recorrerHasta([finNombre], {
+            linea,
+            nombre: k === 'funcion' ? 'Funcion' : 'SubProceso',
+            cierre: k === 'funcion' ? 'FinFuncion' : 'FinSubProceso',
+        });
         if (this.clave() === finNombre) {
             this.i++;
         }
@@ -1050,7 +1341,20 @@ class Compilador {
         if (resto.length === 0) {
             this.out.push('return;');
         } else {
-            const expr = new Expresion(resto).parse();
+            const expRet = new Expresion(resto);
+            const expr = expRet.parse();
+            if (expr === '') {
+                this.errorSintaxis(
+                    linea,
+                    'se esperaba una expresión después de Retornar.'
+                );
+            }
+            if (!expRet.esFinal()) {
+                this.errorSintaxis(
+                    linea,
+                    `no se esperaba '${expRet.actual()?.val}' después de Retornar.`
+                );
+            }
             this.out.push(`return ${expr};`);
         }
         this.i++;
@@ -1083,10 +1387,45 @@ class Compilador {
                 this.i++;
                 return;
             }
+            // Cierres de bloque sueltos: dar un mensaje claro en vez del
+            // genérico "No pude reconocer la instrucción".
+            const CIERRES_HUERFANOS: Record<string, string> = {
+                finsi: 'Si',
+                sino: 'Si',
+                entonces: 'Si',
+                finpara: 'Para',
+                finmientras: 'Mientras',
+                finsegun: 'Segun',
+                finfuncion: 'Funcion',
+                finsubproceso: 'SubProceso',
+                finsubalgoritmo: 'SubProceso',
+                hasta: 'Repetir',
+                caso: 'Segun',
+            };
+            const bloque = CIERRES_HUERFANOS[normVar(prim.val)];
+            if (bloque) {
+                this.errorSintaxis(
+                    linea,
+                    `'${prim.val}' no cierra ningún ${bloque} abierto.`
+                );
+            }
             this.erro(linea);
         }
         const exprToks = linea.toks.slice(opIdx + 1);
-        const expr = new Expresion(exprToks).parse();
+        const expAsg = new Expresion(exprToks);
+        const expr = expAsg.parse();
+        if (expr === '') {
+            this.errorSintaxis(
+                linea,
+                "se esperaba una expresión después de '<-'."
+            );
+        }
+        if (!expAsg.esFinal()) {
+            this.errorSintaxis(
+                linea,
+                `no se esperaba '${expAsg.actual()?.val}' en la asignación.`
+            );
+        }
         const { esArreglo, destino } = this.analizarDestino(
             linea.toks.slice(0, opIdx)
         );
@@ -1116,28 +1455,43 @@ class Compilador {
         return { esArreglo: false, destino: '' };
     }
 
-    private recorrerHasta(finales: string[]): void {
+    private recorrerHasta(
+        finales: string[],
+        bloque?: { linea: Linea; nombre: string; cierre: string }
+    ): void {
         while (this.i < this.lineas.length) {
             const k = this.clave();
             if (finales.includes(k)) {
                 return;
             }
             if (k === 'finalgoritmo' || k === 'finproceso') {
+                if (bloque) {
+                    this.errorSintaxis(
+                        bloque.linea,
+                        `el '${bloque.nombre}' no se cerró (falta '${bloque.cierre}').`
+                    );
+                }
                 return;
             }
             this.compilarSentencia();
         }
+        if (bloque) {
+            this.errorSintaxis(
+                bloque.linea,
+                `el '${bloque.nombre}' no se cerró (falta '${bloque.cierre}').`
+            );
+        }
+    }
+
+    private errorSintaxis(linea: Linea, mensaje: string): never {
+        throw new Error(
+            `Error de sintaxis en la línea ${linea.numero}: ${mensaje}`
+        );
     }
 
     private erro(linea: Linea): never {
         throw new Error(
             `Error de sintaxis en la línea ${linea.numero}. No pude reconocer la instrucción.`
-        );
-    }
-
-    private throwErro(linea: Linea): never {
-        throw new Error(
-            `Error de sintaxis en la línea ${linea.numero}. Revisa la estructura del 'Para'.`
         );
     }
 }
