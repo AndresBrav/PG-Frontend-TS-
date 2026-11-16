@@ -506,16 +506,12 @@ const COLORES_FICHA = [
     '#f87171',
 ];
 
-const FILAS_MINI_TRAZA = 5;
-
 /**
  * HTML del bloque de variables para incrustar en el modal de
- * "Entrada requerida (Leer)": chips con el valor actual de cada
- * variable + mini traza de las últimas capturas.
+ * "Entrada requerida (Leer)": chips con el valor actual de cada variable.
  */
 export const construirHtmlVariablesEnModal = (
     estado: EstadoEjecucion | null,
-    historial: EstadoEjecucion[],
     nombreSolicitado: string
 ): string => {
     const variables = estado?.variables ?? [];
@@ -533,60 +529,8 @@ export const construirHtmlVariablesEnModal = (
         })
         .join('');
 
-    const bloques = `<div style="margin-top:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
+    return `<div style="margin-top:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
 <div style="font-size:12px;font-weight:bold;color:#4b5563;margin-bottom:6px;">🔍 Variables en Ejecución <span style="color:#9ca3af;font-weight:500;font-size:11px;">(paso ${estado?.paso ?? 0})</span></div>
 <div style="line-height:1.6;">${chips}</div>
 </div>`;
-
-    // Mini traza: últimas 5 filas
-    const filas = historial.slice(-FILAS_MINI_TRAZA);
-    if (filas.length === 0) {
-        return bloques;
-    }
-
-    const nombres: string[] = [];
-    const presentes = new Set<string>();
-    for (const captura of [...historial.slice(-FILAS_MINI_TRAZA)]) {
-        for (const v of captura.variables) {
-            if (!presentes.has(v.nombre)) {
-                presentes.add(v.nombre);
-                nombres.push(v.nombre);
-            }
-        }
-    }
-
-    const celdas = (valores: Record<string, string>) =>
-        nombres
-            .map(
-                (nombre) =>
-                    `<td style="padding:2px 10px;font-family:monospace;font-size:12px;white-space:nowrap;color:${valores[nombre] === undefined ? '#cbd5e1' : '#1f2937'};">${valores[nombre] ?? '—'}</td>`
-            )
-            .join('');
-
-    const filasHtml = filas
-        .map((captura) => {
-            const valores: Record<string, string> = {};
-            for (const v of captura.variables) {
-                valores[v.nombre] = v.valor;
-            }
-            return `<tr>${celdas(valores)}</tr>`;
-        })
-        .join('');
-
-    const encabezados = nombres
-        .map(
-            (nombre, indice) =>
-                `<th style="padding:2px 10px;font-family:monospace;font-size:12px;text-align:left;color:${COLORES_FICHA[indice % COLORES_FICHA.length]};">${nombre}</th>`
-        )
-        .join('');
-
-    const tabla = `<div style="margin-top:8px;max-height:150px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;">
-<table style="border-collapse:collapse;min-width:100%;">
-<thead><tr style="background:#f3f4f6;">${encabezados}</tr></thead>
-<tbody>${filasHtml}</tbody>
-</table>
-</div>
-<div style="margin-top:4px;font-size:11px;color:#9ca3af;">Últimas ${filas.length} filas de la traza</div>`;
-
-    return bloques + tabla;
 };

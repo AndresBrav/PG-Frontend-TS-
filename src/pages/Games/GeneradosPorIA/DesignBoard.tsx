@@ -241,7 +241,6 @@ function DesignBoard() {
                         : '';
                     const fichaVariables = construirHtmlVariablesEnModal(
                         estadoVariablesRef.current,
-                        historialVariablesRef.current,
                         nombre,
                     );
                     const { value, isConfirmed } = await Swal.fire({
