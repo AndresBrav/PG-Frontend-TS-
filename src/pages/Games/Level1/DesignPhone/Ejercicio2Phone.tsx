@@ -92,7 +92,7 @@ const Ejercicio2Phone: React.FC = () => {
       display: grid; 
       grid-template-columns: repeat(3, 100px); 
       gap: 15px; 
-      margin: 10px 0;
+      margin: 10px auto;
       justify-content: center;
   ">
     ${pasos

@@ -98,7 +98,8 @@ const Ejercicio5Laptop: React.FC = () => {
       display: grid; 
       grid-template-columns: repeat(3, 150px); 
       gap: 50px; 
-      margin: 10px 0;
+      margin: 10px auto;
+      justify-content: center;
   ">
     ${pasos
         .map((paso, index) => {
