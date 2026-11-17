@@ -1,5 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
-import { normVar } from './EditingBoard/pseintCompiler';
+import { normVar } from './index';
 
 /**
  * Generador de pseudocódigo PSeInt a partir del diagrama de flujo del

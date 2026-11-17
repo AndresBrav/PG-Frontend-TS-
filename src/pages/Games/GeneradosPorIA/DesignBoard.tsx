@@ -16,14 +16,14 @@ import {
     ejecutarPseudocodigo,
     esCanceladoPorUsuario,
     type EstadoEjecucion,
-} from './EditingBoard/pseintCompiler';
+} from './compilador';
 import PanelVariablesEjecucion, {
     construirHtmlVariablesEnModal,
 } from './EditingBoard/PanelVariablesEjecucion';
 import {
     generarCodigoDeDiagrama,
     ErrorDiagrama,
-} from './diagramaACodigo';
+} from './compilador';
 import Swal from 'sweetalert2';
 import './app.css';
 

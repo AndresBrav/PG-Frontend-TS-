@@ -4,7 +4,7 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import type { EstadoEjecucion, VariableEstado } from './pseintCompiler';
+import type { EstadoEjecucion, VariableEstado } from '../compilador';
 import { perfilesDe } from './visualUtils';
 import { colorDeVariable } from './visualUtils';
 import GraficaEvolucion from './GraficaEvolucion';

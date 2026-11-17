@@ -15,7 +15,7 @@ import {
     ejecutarPseudocodigo,
     esCanceladoPorUsuario,
     type EstadoEjecucion,
-} from './pseintCompiler';
+} from '../compilador';
 import PanelVariablesEjecucion, {
     construirHtmlVariablesEnModal,
 } from './PanelVariablesEjecucion';

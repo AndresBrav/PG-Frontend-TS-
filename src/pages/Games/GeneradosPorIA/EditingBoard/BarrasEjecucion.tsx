@@ -1,4 +1,4 @@
-import type { EstadoEjecucion } from './pseintCompiler';
+import type { EstadoEjecucion } from '../compilador';
 import type { PerfilVariable } from './visualUtils';
 import { colorDeVariable } from './visualUtils';
 

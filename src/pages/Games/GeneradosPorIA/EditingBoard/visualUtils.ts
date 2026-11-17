@@ -1,4 +1,4 @@
-import type { EstadoEjecucion } from './pseintCompiler';
+import type { EstadoEjecucion } from '../compilador';
 
 /** Paleta compartida de colores por variable (orden de aparición). */
 export const COLORES_VARIABLE = [
