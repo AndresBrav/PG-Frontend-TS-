@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import AppShell from '../../../components/layout/AppShell';
 import { TokenContext } from '../../../Context/TokenContext';
 import {
+    obtenerCuotaGeneracionIA,
     traerJuegosIA,
     traerJuegosIAPseudo,
     traerTemariosIA,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
+import type { CuotaGeneracionIA } from '../../../api/ejerciciosIA/ejercicioIAapi';
 import { generarEjercicioHandler } from './generarEjercicioHandler';
 import { generarEjercicioHandlerPseudo } from './generarEjercicioHandlerPseudo';
 import ModalInf1 from '../Presentation/ModalInf1';
@@ -36,6 +38,8 @@ const DashboardIA = () => {
     const [juegosIA, setJuegosIA] = useState<JuegoIA[]>([]);
     const [juegosIAPseudo, setJuegosIAPseudo] = useState<JuegoIA[]>([]);
     const [temarios, setTemarios] = useState<TemarioIA[]>([]);
+    const [cuotaGeneracion, setCuotaGeneracion] =
+        useState<CuotaGeneracionIA | null>(null);
     const [temarioFiltroDiagrama, setTemarioFiltroDiagrama] = useState<
         number | null
     >(null);
@@ -57,6 +61,7 @@ const DashboardIA = () => {
         if (!claveAcceso) return;
 
         let activo = true;
+        setCuotaGeneracion(null);
 
         const cargarDatos = async () => {
             const [dataIA, dataIAPseudo, dataTemarios] = await Promise.all([
@@ -79,11 +84,33 @@ const DashboardIA = () => {
         };
 
         void cargarDatos();
+        void obtenerCuotaGeneracionIA(claveAcceso)
+            .then((cuota) => {
+                if (activo) setCuotaGeneracion(cuota);
+            })
+            .catch((error) => {
+                console.error('Error al consultar el límite diario de IA:', error);
+            });
 
         return () => {
             activo = false;
         };
     }, [claveAcceso]);
+
+    const actualizarCuotaGeneracion = async () => {
+        if (!claveAcceso) return;
+
+        try {
+            setCuotaGeneracion(
+                await obtenerCuotaGeneracionIA(claveAcceso)
+            );
+        } catch (error) {
+            console.error('Error al actualizar el límite diario de IA:', error);
+        }
+    };
+
+    const limiteGeneracionAlcanzado =
+        cuotaGeneracion?.restantes === 0;
 
     const handleGenerarEjercicio = async () => {
         const temario = temariosDiagrama.find(
@@ -94,6 +121,7 @@ const DashboardIA = () => {
             setJuegosIA,
             temario ?? null
         );
+        await actualizarCuotaGeneracion();
     };
 
     const handleGenerarEjercicioPseudo = async () => {
@@ -112,6 +140,7 @@ const DashboardIA = () => {
             setJuegosIAPseudo,
             temario && temario.nombre ? temario : null
         );
+        await actualizarCuotaGeneracion();
     };
 
     // Ejercicios pseudo filtrados por el temario seleccionado
@@ -164,6 +193,18 @@ const DashboardIA = () => {
                         de:" para filtrar el tema con el que quieres
                         practicar.
                     </p>
+                    {cuotaGeneracion && (
+                        <p
+                            className="mx-auto mt-3 max-w-xl text-sm font-medium text-emerald-200"
+                            role="status"
+                        >
+                            Generaciones de hoy: {cuotaGeneracion.usados}/
+                            {cuotaGeneracion.limite}
+                            {limiteGeneracionAlcanzado
+                                ? ' · Límite alcanzado; se renueva a medianoche (hora de Bolivia).'
+                                : ` · Te quedan ${cuotaGeneracion.restantes}.`}
+                        </p>
+                    )}
                 </div>
             </div>
             <div className="information-design-level-style-container-grid">
@@ -239,28 +280,38 @@ const DashboardIA = () => {
             >
                 <button
                     onClick={handleGenerarEjercicio}
+                    disabled={limiteGeneracionAlcanzado}
                     style={{
-                        backgroundColor: '#22C55E',
+                        backgroundColor: limiteGeneracionAlcanzado
+                            ? '#6B7280'
+                            : '#22C55E',
                         color: 'white',
                         border: 'none',
                         padding: '12px 30px',
                         borderRadius: '8px',
                         fontSize: '16px',
                         fontWeight: 'bold',
-                        cursor: 'pointer',
+                        cursor: limiteGeneracionAlcanzado
+                            ? 'not-allowed'
+                            : 'pointer',
+                        opacity: limiteGeneracionAlcanzado ? 0.7 : 1,
                         transition: 'all 0.3s ease',
                         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                     }}
                     onMouseEnter={(e) => {
+                        if (limiteGeneracionAlcanzado) return;
                         e.currentTarget.style.backgroundColor = '#16A34A';
                         e.currentTarget.style.transform = 'scale(1.05)';
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#22C55E';
+                        e.currentTarget.style.backgroundColor =
+                            limiteGeneracionAlcanzado ? '#6B7280' : '#22C55E';
                         e.currentTarget.style.transform = 'scale(1)';
                     }}
                 >
-                    Generar Ejercicio
+                    {limiteGeneracionAlcanzado
+                        ? 'Límite diario alcanzado'
+                        : 'Generar Ejercicio'}
                 </button>
             </div>
 
@@ -426,28 +477,38 @@ const DashboardIA = () => {
             >
                 <button
                     onClick={handleGenerarEjercicioPseudo}
+                    disabled={limiteGeneracionAlcanzado}
                     style={{
-                        backgroundColor: '#22C55E',
+                        backgroundColor: limiteGeneracionAlcanzado
+                            ? '#6B7280'
+                            : '#22C55E',
                         color: 'white',
                         border: 'none',
                         padding: '12px 30px',
                         borderRadius: '8px',
                         fontSize: '16px',
                         fontWeight: 'bold',
-                        cursor: 'pointer',
+                        cursor: limiteGeneracionAlcanzado
+                            ? 'not-allowed'
+                            : 'pointer',
+                        opacity: limiteGeneracionAlcanzado ? 0.7 : 1,
                         transition: 'all 0.3s ease',
                         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                     }}
                     onMouseEnter={(e) => {
+                        if (limiteGeneracionAlcanzado) return;
                         e.currentTarget.style.backgroundColor = '#16A34A';
                         e.currentTarget.style.transform = 'scale(1.05)';
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#22C55E';
+                        e.currentTarget.style.backgroundColor =
+                            limiteGeneracionAlcanzado ? '#6B7280' : '#22C55E';
                         e.currentTarget.style.transform = 'scale(1)';
                     }}
                 >
-                    Generar Ejercicio Pseudocodigo
+                    {limiteGeneracionAlcanzado
+                        ? 'Límite diario alcanzado'
+                        : 'Generar Ejercicio Pseudocodigo'}
                 </button>
             </div>
 

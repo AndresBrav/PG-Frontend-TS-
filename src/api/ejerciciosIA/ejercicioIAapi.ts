@@ -61,6 +61,53 @@ interface DatosJuegoIA {
     temario_id?: number;
 }
 
+export interface CuotaGeneracionIA {
+    limite: number;
+    usados: number;
+    restantes: number;
+    fecha: string;
+}
+
+interface RespuestaGeneracionIA {
+    ejercicio: string;
+    cuota: CuotaGeneracionIA | null;
+}
+
+export const obtenerCuotaGeneracionIA = async (
+    clave: string
+): Promise<CuotaGeneracionIA | null> => {
+    const response = await axios.get(`${API}/juegos/cuota-generacion-ia`, {
+        headers: {
+            Authorization: clave,
+            'ngrok-skip-browser-warning': 'true',
+        },
+    });
+
+    return response.data?.cuota ?? null;
+};
+
+export const generarEjercicioIA = async (
+    clave: string,
+    tipoJuego: 'ia' | 'iapseudo',
+    temarioId?: number
+): Promise<RespuestaGeneracionIA> => {
+    const response = await axios.post<RespuestaGeneracionIA>(
+        `${API}/juegos/generar-ejercicio-ia`,
+        {
+            tipo_juego: tipoJuego,
+            ...(temarioId !== undefined ? { temario_id: temarioId } : {}),
+        },
+        {
+            headers: {
+                Authorization: clave,
+                'ngrok-skip-browser-warning': 'true',
+            },
+        }
+    );
+
+    return response.data;
+};
+
 /** Temarios globales de IA (clasificación de ejercicios de pseudocódigo). */
 export const traerTemariosIA = async (clave: string): Promise<any> => {
     try {

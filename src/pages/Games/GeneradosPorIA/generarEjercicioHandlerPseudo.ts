@@ -5,6 +5,7 @@ import {
     traerJuegosIAPseudo,
     traerTemariosIA,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
+import { obtenerMensajeError } from '../../../api/http';
 
 // Handler para generar y guardar un ejercicio de pseudocódigo IA.
 // Si temarioElegido viene dado (chip activo del Dashboard), el prompt
@@ -40,7 +41,7 @@ export async function generarEjercicioHandlerPseudo(
         // Consultar el ejercicio a la IA (con foco en el temario elegido)
         const ejercicioGenerado = await consultarEjercicioPseudo(
             claveAcceso,
-            temarioElegido?.nombre ?? undefined,
+            temarioElegido?.id,
         );
 
         // Mostrar el ejercicio generado
@@ -138,9 +139,12 @@ export async function generarEjercicioHandlerPseudo(
         }
     } catch (error) {
         console.error('Error al generar ejercicio:', error);
-        Swal.fire({
+        await Swal.fire({
             title: 'Error',
-            text: 'No se pudo generar el ejercicio. Intenta de nuevo.',
+            text: obtenerMensajeError(
+                error,
+                'No se pudo generar el ejercicio. Intenta de nuevo.'
+            ),
             icon: 'error',
             confirmButtonText: 'Cerrar',
             customClass: {

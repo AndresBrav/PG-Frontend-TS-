@@ -4,6 +4,7 @@ import {
     guardarJuegoIA,
     traerJuegosIA,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
+import { obtenerMensajeError } from '../../../api/http';
 
 // Handler para generar y guardar un ejercicio IA
 export async function generarEjercicioHandler(
@@ -28,7 +29,7 @@ export async function generarEjercicioHandler(
         // Consultar el ejercicio a la IA
         const ejercicioGenerado = await consultarEjercicio(
             claveAcceso,
-            temarioElegido?.nombre
+            temarioElegido?.id
         );
 
         // Mostrar el ejercicio generado
@@ -110,9 +111,12 @@ export async function generarEjercicioHandler(
         }
     } catch (error) {
         console.error('Error al generar ejercicio:', error);
-        Swal.fire({
+        await Swal.fire({
             title: 'Error',
-            text: 'No se pudo generar el ejercicio. Intenta de nuevo.',
+            text: obtenerMensajeError(
+                error,
+                'No se pudo generar el ejercicio. Intenta de nuevo.'
+            ),
             icon: 'error',
             confirmButtonText: 'Cerrar',
             customClass: {
