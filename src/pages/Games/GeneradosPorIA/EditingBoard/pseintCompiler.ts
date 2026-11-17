@@ -101,11 +101,21 @@ function tokenizar(linea: string, numeroLinea: number): Token[] {
             const comilla = c;
             i++;
             let str = '';
+            let cerrada = false;
             while (i < linea.length && linea[i] !== comilla) {
                 str += linea[i];
                 i++;
             }
-            i++;
+            if (i < linea.length) {
+                cerrada = true;
+                i++;
+            }
+            if (!cerrada) {
+                throw new Error(
+                    `Error de sintaxis en la línea ${numeroLinea}: ` +
+                        'falta cerrar las comillas de la cadena.'
+                );
+            }
             toks.push({ tipo: 'str', val: str });
             continue;
         }
@@ -115,7 +125,7 @@ function tokenizar(linea: string, numeroLinea: number): Token[] {
             i += 2;
             continue;
         }
-        if ('+-*/%^<>=(),:[];'.includes(c)) {
+        if ('+-*/^<>=(),:[];'.includes(c)) {
             toks.push({ tipo: 'punt', val: c });
             i++;
             continue;
@@ -125,6 +135,12 @@ function tokenizar(linea: string, numeroLinea: number): Token[] {
             while (i < linea.length && /[\d.]/.test(linea[i])) {
                 n += linea[i];
                 i++;
+            }
+            if ((n.match(/\./g) ?? []).length > 1) {
+                throw new Error(
+                    `Error de sintaxis en la línea ${numeroLinea}: ` +
+                        `número inválido '${n}' (revisa los puntos decimales).`
+                );
             }
             toks.push({ tipo: 'num', val: n });
             continue;
@@ -140,8 +156,12 @@ function tokenizar(linea: string, numeroLinea: number): Token[] {
         // Blindaje: si el carácter no encaja en ninguna rama no se avanza la
         // posición (bucle infinito). Abortar con un mensaje claro.
         if (w === '') {
-            const pista =
-                c === '!' ? ' (¿quisiste escribir <>?)' : '';
+            let pista = '';
+            if (c === '!') {
+                pista = ' (¿quisiste escribir <>?)';
+            } else if (c === '%') {
+                pista = " (¿quisiste escribir 'MOD'?)";
+            }
             throw new Error(
                 `Error de sintaxis en la línea ${numeroLinea}: ` +
                     `carácter no reconocido '${c}'${pista}.`
@@ -192,9 +212,22 @@ function preprocesar(codigo: string): Linea[] {
 class Expresion {
     private toks: Token[];
     private pos = 0;
+    // Línea de origen para mensajes de error precisos (opcional).
+    private linea?: Linea;
 
-    constructor(toks: Token[]) {
+    constructor(toks: Token[], linea?: Linea) {
         this.toks = toks;
+        this.linea = linea;
+    }
+
+    /** Error de sintaxis con número de línea (si se conoce la línea). */
+    private error(mensaje: string): never {
+        if (this.linea) {
+            throw new Error(
+                `Error de sintaxis en la línea ${this.linea.numero}: ${mensaje}`
+            );
+        }
+        throw new Error(`Error de sintaxis: ${mensaje}`);
     }
 
     parse(): string {
@@ -357,6 +390,8 @@ class Expresion {
             const exp = this.parse();
             if (this.actual()?.val === ')') {
                 this.pos++;
+            } else {
+                this.error('falta cerrar el paréntesis en la expresión.');
             }
             return `(${exp})`;
         }
@@ -374,6 +409,10 @@ class Expresion {
                 const args = this.argumentos();
                 if (this.actual()?.val === ')') {
                     this.pos++;
+                } else {
+                    this.error(
+                        "falta cerrar el paréntesis después de los argumentos."
+                    );
                 }
                 return `await ${palabra}(${args.join(', ')})`;
             }
@@ -412,6 +451,8 @@ class Expresion {
         }
         if (this.actual()?.val === ']') {
             this.pos++;
+        } else {
+            this.error('falta cerrar el corchete del arreglo.');
         }
         return indices
             .map((i) => `[(${i}) - 1]`)
@@ -681,7 +722,7 @@ class Compilador {
                     p++;
                 }
                 for (const parte of partes) {
-                    dims.push(new Expresion(parte).parse());
+                    dims.push(new Expresion(parte, linea).parse());
                 }
                 this.declararArreglo(nombre, dims);
                 continue;
@@ -741,7 +782,7 @@ class Compilador {
                 (t) => t.tipo === 'punt' && t.val === '['
             );
             if (tieneIndice) {
-                const expDest = new Expresion(seg);
+                const expDest = new Expresion(seg, linea);
                 const destino = expDest.parse();
                 if (!expDest.esFinal()) {
                     this.errorSintaxis(
@@ -810,7 +851,7 @@ class Compilador {
                 return;
             }
         }
-        const exp = new Expresion(resto);
+        const exp = new Expresion(resto, linea);
         const args = exp.argumentos();
         if (!exp.esFinal()) {
             this.errorSintaxis(
@@ -835,7 +876,7 @@ class Compilador {
             this.errorSintaxis(linea, "se esperaba 'Entonces' en el Si.");
         }
         const condToks = linea.toks.slice(1, idxEntonces);
-        const expCond = new Expresion(condToks);
+        const expCond = new Expresion(condToks, linea);
         const cond = expCond.parse();
         if (cond === '') {
             this.errorSintaxis(linea, 'se esperaba la condición en el Si.');
@@ -886,10 +927,16 @@ class Compilador {
         const linea = this.lineas[this.i];
         const idxHacer = this.indicePalabra(linea, 1, 'hacer');
         if (idxHacer === -1) {
+            if (this.indicePalabra(linea, 1, 'entonces') !== -1) {
+                this.errorSintaxis(
+                    linea,
+                    "en el 'Mientras' se usa 'Hacer', no 'Entonces'."
+                );
+            }
             this.errorSintaxis(linea, "se esperaba 'Hacer' en el Mientras.");
         }
         const condToks = linea.toks.slice(1, idxHacer);
-        const expCond = new Expresion(condToks);
+        const expCond = new Expresion(condToks, linea);
         const cond = expCond.parse();
         if (cond === '') {
             this.errorSintaxis(
@@ -931,6 +978,12 @@ class Compilador {
                 linea.toks[j].tipo === 'punt' &&
                 (linea.toks[j].val === '<-' || linea.toks[j].val === '=')
             ) {
+                if (linea.toks[j].val === '=') {
+                    this.errorSintaxis(
+                        linea,
+                        "en el 'Para' la asignación se escribe con '<-', no con '='."
+                    );
+                }
                 opIdx = j;
                 break;
             }
@@ -950,7 +1003,7 @@ class Compilador {
         }
         const iniToks = linea.toks.slice(opIdx + 1, idxHasta);
         const resto = linea.toks.slice(idxHasta + 1);
-        const expIni = new Expresion(iniToks);
+        const expIni = new Expresion(iniToks, linea);
         const ini = expIni.parse();
         if (ini === '') {
             this.errorSintaxis(
@@ -964,7 +1017,7 @@ class Compilador {
                 `no se esperaba '${expIni.actual()?.val}' entre '<-' y 'Hasta' en el Para.`
             );
         }
-        const expFin = new Expresion(resto);
+        const expFin = new Expresion(resto, linea);
         const fin = expFin.parse();
         if (fin === '') {
             this.errorSintaxis(
@@ -1058,7 +1111,10 @@ class Compilador {
             ) {
                 inicioHasta = 2;
             }
-            const expCond = new Expresion(lineaHasta.toks.slice(inicioHasta));
+            const expCond = new Expresion(
+                lineaHasta.toks.slice(inicioHasta),
+                lineaHasta
+            );
             cond = expCond.parse();
             if (cond === '') {
                 this.errorSintaxis(
@@ -1081,10 +1137,16 @@ class Compilador {
         const linea = this.lineas[this.i];
         const idxHacer = this.indicePalabra(linea, 1, 'hacer');
         if (idxHacer === -1) {
+            if (this.indicePalabra(linea, 1, 'entonces') !== -1) {
+                this.errorSintaxis(
+                    linea,
+                    "en el 'Según' se usa 'Hacer', no 'Entonces'."
+                );
+            }
             this.errorSintaxis(linea, "se esperaba 'Hacer' en el Según.");
         }
         const exprToks = linea.toks.slice(1, idxHacer);
-        const expExpr = new Expresion(exprToks);
+        const expExpr = new Expresion(exprToks, linea);
         const expr = expExpr.parse();
         if (expr === '') {
             this.errorSintaxis(
@@ -1122,10 +1184,23 @@ class Compilador {
                 return;
             }
             const linea = this.lineas[this.i];
-            if (k === 'caso' || this.esLineaCaso(linea)) {
+            // 'De Otro Modo:' (con o sin ':') NO es un Caso: es el default.
+            // Antes el ':' de 'De Otro Modo:' activaba esLineaCaso y
+            // generaba 'case de:' (variable inexistente).
+            const esDeOtroModo =
+                k === 'de' &&
+                linea.toks[1]?.tipo === 'word' &&
+                normVar(linea.toks[1].val) === 'otro';
+            if (!esDeOtroModo && (k === 'caso' || this.esLineaCaso(linea))) {
                 const idxPuntos = linea.toks.findIndex(
                     (t) => t.tipo === 'punt' && t.val === ':'
                 );
+                if (k === 'caso' && idxPuntos === -1) {
+                    this.errorSintaxis(
+                        linea,
+                        "faltan los ':' en el Caso (Ej: Caso 1:)."
+                    );
+                }
                 // Saltar la palabra 'Caso' para que no quede como etiqueta
                 const inicioLabels =
                     linea.toks[0]?.tipo === 'word' &&
@@ -1144,7 +1219,7 @@ class Compilador {
                                       )
                               )
                         : linea.toks.slice(inicioLabels, idxPuntos);
-                const labels = new Expresion(labelsToks).argumentos();
+                const labels = new Expresion(labelsToks, linea).argumentos();
                 for (const lbl of labels) {
                     this.out.push(`case ${lbl}:`);
                 }
@@ -1223,7 +1298,12 @@ class Compilador {
         const salida: string[] = [];
         const k = normVar(toks[0]?.val ?? '');
         if (k === 'escribir') {
-            const exp = new Expresion(toks.slice(1));
+            const exp = new Expresion(
+                toks.slice(1),
+                numeroLinea
+                    ? { numero: numeroLinea, toks }
+                    : undefined
+            );
             const args = exp.argumentos();
             if (args.length === 0) {
                 salida.push('__escribir();');
@@ -1256,7 +1336,10 @@ class Compilador {
             aux.compilarAsignacion();
             salida.push(...aux.out);
         } else {
-            const exp = new Expresion(toks);
+            const exp = new Expresion(
+                toks,
+                numeroLinea ? { numero: numeroLinea, toks } : undefined
+            );
             salida.push(`${exp.parse()};`);
         }
         return salida;
@@ -1359,7 +1442,7 @@ class Compilador {
         if (resto.length === 0) {
             this.out.push('return;');
         } else {
-            const expRet = new Expresion(resto);
+            const expRet = new Expresion(resto, linea);
             const expr = expRet.parse();
             if (expr === '') {
                 this.errorSintaxis(
@@ -1391,16 +1474,50 @@ class Compilador {
                 linea.toks[j].tipo === 'punt' &&
                 (linea.toks[j].val === '<-' || linea.toks[j].val === '=')
             ) {
+                // PSeInt no asigna con '=': dar una pista en vez de aceptarlo
+                const previo = linea.toks[j - 1];
+                if (linea.toks[j].val === '=') {
+                    const pistaOperador =
+                        previo?.tipo === 'punt' &&
+                        ['+', '-', '*', '/'].includes(previo.val)
+                            ? `no existe el operador '${previo.val}=' en PSeInt; usa '${prim.val} <- <expresión>' (Ej: ${prim.val} <- ${prim.val} + 1).`
+                            : "la asignación se escribe con '<-', no con '='.";
+                    this.errorSintaxis(linea, pistaOperador);
+                }
                 opIdx = j;
                 break;
             }
         }
         if (opIdx === -1) {
+            // Pistas para operadores de C/JS que PSeInt no tiene
+            const igualIgual = linea.toks.find(
+                (t) => t.tipo === 'punt' && t.val === '=='
+            );
+            if (igualIgual) {
+                this.errorSintaxis(
+                    linea,
+                    "la asignación se escribe con '<-', no con '=='."
+                );
+            }
+            const dobleOperador = linea.toks.some(
+                (t, idx) =>
+                    idx > 0 &&
+                    t.tipo === 'punt' &&
+                    ['+', '-'].includes(t.val) &&
+                    linea.toks[idx - 1].tipo === 'punt' &&
+                    linea.toks[idx - 1].val === t.val
+            );
+            if (dobleOperador) {
+                this.errorSintaxis(
+                    linea,
+                    `no existen '++' ni '--' en PSeInt; usa '${prim.val} <- ${prim.val} + 1'.`
+                );
+            }
             const tieneParentesis = linea.toks.some(
                 (t, idx) => idx > 0 && t.tipo === 'punt' && t.val === '('
             );
             if (tieneParentesis) {
-                const call = new Expresion(linea.toks).parse();
+                const call = new Expresion(linea.toks, linea).parse();
                 this.out.push(`${call};`);
                 this.i++;
                 return;
@@ -1430,7 +1547,7 @@ class Compilador {
             this.erro(linea);
         }
         const exprToks = linea.toks.slice(opIdx + 1);
-        const expAsg = new Expresion(exprToks);
+        const expAsg = new Expresion(exprToks, linea);
         const expr = expAsg.parse();
         if (expr === '') {
             this.errorSintaxis(
@@ -1445,7 +1562,8 @@ class Compilador {
             );
         }
         const { esArreglo, destino } = this.analizarDestino(
-            linea.toks.slice(0, opIdx)
+            linea.toks.slice(0, opIdx),
+            linea
         );
         if (!esArreglo) {
             this.declararVariable(nombre);
@@ -1454,7 +1572,10 @@ class Compilador {
         this.i++;
     }
 
-    private analizarDestino(toks: Token[]): {
+    private analizarDestino(
+        toks: Token[],
+        linea?: Linea
+    ): {
         esArreglo: boolean;
         destino: string;
     } {
@@ -1464,7 +1585,7 @@ class Compilador {
         if (tieneCorchete) {
             return {
                 esArreglo: true,
-                destino: new Expresion(toks).parse(),
+                destino: new Expresion(toks, linea).parse(),
             };
         }
         if (toks.length > 0 && toks[0].tipo === 'word') {
