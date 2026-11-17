@@ -1,4 +1,5 @@
 import { api, obtenerMensajeError } from '../api/http';
+import type { Rol } from '../types/dominio';
 
 export interface LoginResponse {
     token: string;
@@ -9,6 +10,8 @@ export interface DatosRegistro {
     username: string;
     edad: number;
     password: string;
+    /** Rol elegido en el registro (estudiante o profesor). */
+    rol: Rol;
 }
 
 interface RespuestaAuth {

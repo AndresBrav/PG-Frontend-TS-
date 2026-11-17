@@ -20,6 +20,10 @@ interface ToolbarProps {
     onEjecutar?: () => void;
     /** true mientras corre el diagrama (deshabilita el botón). */
     ejecutando?: boolean;
+    /** Ruta del botón ← (por defecto /ejercicios-ia). */
+    rutaVolver?: string;
+    /** Oculta "Verificar con IA" (modo grupo: los puntos vienen de la entrega). */
+    ocultarVerificarIA?: boolean;
 }
 
 function Toolbar({
@@ -33,6 +37,8 @@ function Toolbar({
     onReiniciar,
     onEjecutar,
     ejecutando = false,
+    rutaVolver,
+    ocultarVerificarIA = false,
 }: ToolbarProps) {
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
@@ -168,7 +174,7 @@ function Toolbar({
                 }}
             >
                 <button
-                    onClick={() => navigate('/ejercicios-ia')}
+                    onClick={() => navigate(rutaVolver ?? '/ejercicios-ia')}
                     style={{
                         background: 'transparent',
                         border: 'none',
@@ -316,25 +322,27 @@ function Toolbar({
                         {ejecutando ? '⏳ Ejecutando...' : '▶ Ejecutar'}
                     </button>
                 )}
-                <button
-                    className="btn btn-export"
-                    onClick={handleExport}
-                    style={{
-                        backgroundColor: '#20FB1080',
-                        color: 'white',
-                        border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    }}
-                    title="Verificar el diagrama con Inteligencia Artificial"
-                >
-                    Verificar con IA
-                </button>
+                {!ocultarVerificarIA && (
+                    <button
+                        className="btn btn-export"
+                        onClick={handleExport}
+                        style={{
+                            backgroundColor: '#20FB1080',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        }}
+                        title="Verificar el diagrama con Inteligencia Artificial"
+                    >
+                        Verificar con IA
+                    </button>
+                )}
                 {/* <button className="btn btn-clear" onClick={onClear}>
                     Limpiar
                 </button> */}

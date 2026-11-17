@@ -32,6 +32,11 @@ import EjercicioP10 from './pages/Games/Nivel2/EjercicioP10';
 import DesignBoard from './pages/Games/GeneradosPorIA/DesignBoard';
 import DashboardIA from './pages/Games/GeneradosPorIA/DashboardIA';
 import EditingBoard from './pages/Games/GeneradosPorIA/EditingBoard/EditingBoard';
+import GruposInicio from './pages/Grupos/GruposInicio';
+import GrupoDetalle from './pages/Grupos/GrupoDetalle';
+import CrearEjercicioPage from './pages/Grupos/CrearEjercicioPage';
+import RevisarEntregas from './pages/Grupos/RevisarEntregas';
+import TableroGrupo from './pages/Grupos/tableros/TableroGrupo';
 
 function App() {
     return (
@@ -146,6 +151,39 @@ function App() {
                                 <Route
                                     path="/editingboard"
                                     element={<EditingBoard />}
+                                />
+
+                                {/* Grupos (profesor + estudiante) */}
+                                <Route
+                                    path="/grupos"
+                                    element={<GruposInicio />}
+                                />
+                                <Route
+                                    path="/grupos/:id"
+                                    element={<GrupoDetalle />}
+                                />
+
+                                <Route
+                                    element={
+                                        <RutaPorRol
+                                            roles={['profesor', 'admin']}
+                                        />
+                                    }
+                                >
+                                    <Route
+                                        path="/profesor/grupos/:id/ejercicios/nuevo"
+                                        element={<CrearEjercicioPage />}
+                                    />
+                                    <Route
+                                        path="/profesor/grupos/:id/ejercicios/:ejercicioId/revisar"
+                                        element={<RevisarEntregas />}
+                                    />
+                                </Route>
+
+                                {/* Tableros de resolución de ejercicios de grupo */}
+                                <Route
+                                    path="/grupos/:id/ejercicios/:ejercicioId/:tipo"
+                                    element={<TableroGrupo />}
                                 />
 
                                 <Route

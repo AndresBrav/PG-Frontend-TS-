@@ -189,10 +189,22 @@ interface FlowEditorProps {
     onNodesChange: (nodes: Node[]) => void;
     onEdgesChange: (edges: Edge[]) => void;
     onFlowChange?: () => void;
+    /** Modo revisión (profesor): no se puede editar, borrar ni conectar. */
+    soloLectura?: boolean;
 }
 
 const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
-    ({ nodes, edges, onNodesChange, onEdgesChange, onFlowChange }, ref) => {
+    (
+        {
+            nodes,
+            edges,
+            onNodesChange,
+            onEdgesChange,
+            onFlowChange,
+            soloLectura = false,
+        },
+        ref
+    ) => {
         const [internalNodes, setInternalNodes, onNodesChangeInternal] =
             useNodesState(nodes);
         const [internalEdges, setInternalEdges, onEdgesChangeInternal] =
@@ -208,6 +220,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
 
         const deleteEdgeById = useCallback(
             (edgeId: string) => {
+                if (soloLectura) return;
                 const remainingEdges = internalEdges.filter(
                     (e) => e.id !== edgeId
                 );
@@ -216,7 +229,13 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 setSelectedEdgeId(null);
                 onFlowChange?.();
             },
-            [internalEdges, setInternalEdges, onEdgesChange, onFlowChange]
+            [
+                internalEdges,
+                setInternalEdges,
+                onEdgesChange,
+                onFlowChange,
+                soloLectura,
+            ]
         );
 
         const syncNodes = useCallback(
@@ -232,17 +251,24 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
             (newEdges: Edge[]) => {
                 const edgesWithDelete = newEdges.map((edge) => ({
                     ...edge,
-                    data: { ...edge.data, onDeleteEdge: deleteEdgeById },
+                    data: {
+                        ...edge.data,
+                        // En solo lectura no hay botón de borrar flecha.
+                        onDeleteEdge: soloLectura
+                            ? undefined
+                            : deleteEdgeById,
+                    },
                 }));
                 setInternalEdges(edgesWithDelete);
                 onEdgesChange(edgesWithDelete);
                 onFlowChange?.();
             },
-            [setInternalEdges, onEdgesChange, deleteEdgeById, onFlowChange]
+            [setInternalEdges, onEdgesChange, deleteEdgeById, onFlowChange, soloLectura]
         );
 
         const deleteNodeById = useCallback(
             (nodeId: string) => {
+                if (soloLectura) return;
                 const remainingNodes = internalNodes.filter(
                     (n) => n.id !== nodeId
                 );
@@ -253,7 +279,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 syncEdges(remainingEdges);
                 setSelectedNodeId(null);
             },
-            [internalNodes, internalEdges, syncNodes, syncEdges]
+            [internalNodes, internalEdges, syncNodes, syncEdges, soloLectura]
         );
 
         const loadFlowState = useCallback(
@@ -298,7 +324,12 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                         // Blindaje: flechas guardadas antes del fix pueden
                         // llegar sin id; sin él el borrador las confunde.
                         id: edge.id ?? generarIdEdge(),
-                        data: { ...edge.data, onDeleteEdge: deleteEdgeById },
+                        data: {
+                            ...edge.data,
+                            onDeleteEdge: soloLectura
+                                ? undefined
+                                : deleteEdgeById,
+                        },
                     }));
                     setInternalEdges(edgesWithDelete);
                     onEdgesChange(edgesWithDelete);
@@ -323,6 +354,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
 
         const onConnect: OnConnect = useCallback(
             (params) => {
+                if (soloLectura) return;
                 const sourceNode = internalNodes.find(
                     (n) => n.id === params.source
                 );
@@ -349,6 +381,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
 
         const onNodeDoubleClick = useCallback(
             async (_event: React.MouseEvent, node: Node) => {
+                if (soloLectura) return;
                 const { value: newLabel, isConfirmed } = await Swal.fire({
                     title: 'Editar Texto del Símbolo',
                     input: 'text',
@@ -444,6 +477,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
 
         const onDrop = useCallback(
             (event: React.DragEvent) => {
+                if (soloLectura) return;
                 event.preventDefault();
 
                 const type = event.dataTransfer.getData(
@@ -563,7 +597,11 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                         edgeTypes={edgeTypes}
                         defaultEdgeOptions={edgeOptions}
                         fitView
-                        deleteKeyCode={['Delete', 'Backspace']}
+                        deleteKeyCode={
+                            soloLectura ? null : ['Delete', 'Backspace']
+                        }
+                        nodesDraggable={!soloLectura}
+                        elementsSelectable={!soloLectura}
                         snapToGrid={!isTouchDevice}
                         snapGrid={[15, 15]}
                         proOptions={proOptions}

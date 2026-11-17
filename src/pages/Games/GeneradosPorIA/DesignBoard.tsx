@@ -1,6 +1,11 @@
 import { useCallback, useState, useRef, useEffect, useContext } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import {
+    useLocation,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from 'react-router-dom';
 import type { Node, Edge } from '@xyflow/react';
 import type { NodeType } from './types/flow';
 import Sidebar from './components/Sidebar';
@@ -12,6 +17,13 @@ import {
     guardarEstadoTablero,
     reiniciarEstadoTableroApi,
 } from '../../../api/ejerciciosIA/ejercicioIAapi';
+import {
+    abrirEjercicioGrupo,
+    completarEjercicioGrupo,
+    guardarEstadoEjercicioGrupo,
+    listarSolucionesEjercicio,
+} from '../../../api/gruposApi';
+import { obtenerMensajeError } from '../../../api/http';
 import {
     ejecutarPseudocodigo,
     esCanceladoPorUsuario,
@@ -34,15 +46,47 @@ interface LocationState {
     juegoDescripcion?: string;
 }
 
+/** Información del ejercicio de grupo para el banner del tablero. */
+interface InfoEjercicioGrupo {
+    titulo: string;
+    enunciado: string;
+    fechaLimite: string | null;
+    vencido: boolean;
+    completado: boolean;
+    puntos: number;
+    calificado: boolean;
+    puntosProfesor: number | null;
+    comentario: string | null;
+    estudiante?: string;
+}
+
 function DesignBoard() {
     const location = useLocation();
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const routeParams = useParams<{ id?: string; ejercicioId?: string }>();
     const { claveAcceso } = useContext(TokenContext);
 
     const locationState = location.state as LocationState | null;
     const queryId = searchParams.get('id');
     const juegoId =
         locationState?.juegoId ?? (queryId ? Number(queryId) : undefined);
+
+    // ── Modo grupo: ejercicio de grupo cargado desde la BD del módulo ──
+    const esModoGrupo = Boolean(routeParams.ejercicioId);
+    const grupoId = routeParams.id ?? null;
+    const ejercicioId = routeParams.ejercicioId ?? null;
+    const revisarEstudianteId = searchParams.get('revisarEstudiante')
+        ? Number(searchParams.get('revisarEstudiante'))
+        : null;
+    const esRevision = esModoGrupo && revisarEstudianteId !== null;
+    const [infoGrupo, setInfoGrupo] = useState<InfoEjercicioGrupo | null>(
+        null
+    );
+    const [entregando, setEntregando] = useState(false);
+    // Solo lectura: revisión del profesor o ejercicio vencido.
+    const soloLectura =
+        esModoGrupo && (esRevision || infoGrupo?.vencido === true);
 
     const [juegoDescripcion, setJuegoDescripcion] = useState<string>(
         locationState?.juegoDescripcion || ''
@@ -72,7 +116,7 @@ function DesignBoard() {
 
     // Cargar progreso previo guardado al montar el componente
     useEffect(() => {
-        if (!juegoId || !claveAcceso) return;
+        if (!juegoId || !claveAcceso || esModoGrupo) return;
 
         let activo = true;
 
@@ -104,28 +148,141 @@ function DesignBoard() {
         return () => {
             activo = false;
         };
-    }, [juegoId, claveAcceso]);
+    }, [juegoId, claveAcceso, esModoGrupo]);
+
+    // Carga del ejercicio de grupo (estudiante o revisión del profesor)
+    useEffect(() => {
+        if (!esModoGrupo || !claveAcceso || !grupoId || !ejercicioId) return;
+
+        let activo = true;
+
+        const aplicarEstado = (estadoTablero: string | null) => {
+            if (!estadoTablero) return;
+            try {
+                const parsed = JSON.parse(estadoTablero);
+                if (parsed && (parsed.nodes || parsed.edges)) {
+                    flowEditorRef.current?.loadFlowState(parsed);
+                    if (parsed.nodes) setNodes(parsed.nodes);
+                    if (parsed.edges) setEdges(parsed.edges);
+                    setEstadoGuardado('guardado');
+                }
+            } catch (e) {
+                console.error('Error parseando estado del tablero:', e);
+            }
+        };
+
+        const cargarGrupo = async () => {
+            try {
+                if (esRevision && revisarEstudianteId !== null) {
+                    // Profesor: la entrega vive en las soluciones del ejercicio
+                    const soluciones = await listarSolucionesEjercicio(
+                        claveAcceso,
+                        ejercicioId
+                    );
+                    const entrega = soluciones.find(
+                        (s) => s.usuario_id === revisarEstudianteId
+                    );
+                    if (!activo) return;
+                    if (!entrega) {
+                        await Swal.fire({
+                            icon: 'warning',
+                            title: 'Sin entrega',
+                            text: 'Ese estudiante todavía no abrió este ejercicio.',
+                        });
+                        navigate(`/grupos/${grupoId}`);
+                        return;
+                    }
+                    setInfoGrupo({
+                        titulo: 'Revisión de entrega',
+                        enunciado: `Solución de ${entrega.estudiante.username} (${entrega.estudiante.codigo}).`,
+                        fechaLimite: null,
+                        vencido: false,
+                        completado: entrega.completado,
+                        puntos: entrega.puntos,
+                        calificado: entrega.calificado,
+                        puntosProfesor: entrega.puntos_profesor,
+                        comentario: entrega.comentario_profesor,
+                        estudiante: entrega.estudiante.username,
+                    });
+                    aplicarEstado(entrega.estado_tablero);
+                } else {
+                    // Estudiante: abre su propia entrega
+                    const abierto = await abrirEjercicioGrupo(
+                        claveAcceso,
+                        grupoId,
+                        ejercicioId
+                    );
+                    if (!activo) return;
+                    setInfoGrupo({
+                        titulo: abierto.ejercicio.titulo,
+                        enunciado: abierto.ejercicio.enunciado,
+                        fechaLimite: abierto.ejercicio.fecha_limite,
+                        vencido: abierto.vencido,
+                        completado: abierto.entrega.completado,
+                        puntos: abierto.entrega.puntos,
+                        calificado: abierto.entrega.calificado,
+                        puntosProfesor: abierto.entrega.puntos_profesor,
+                        comentario: abierto.entrega.comentario_profesor,
+                    });
+                    aplicarEstado(abierto.entrega.estado_tablero);
+                }
+            } catch (error) {
+                if (!activo) return;
+                const mensaje = obtenerMensajeError(
+                    error,
+                    'No se pudo cargar el ejercicio'
+                );
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: mensaje,
+                });
+                navigate(`/grupos/${grupoId}`);
+            }
+        };
+
+        void cargarGrupo();
+
+        return () => {
+            activo = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [esModoGrupo, claveAcceso, grupoId, ejercicioId, esRevision, revisarEstudianteId]);
 
     // Funcion de guardado (manual o automatica)
     const guardarProgresoEnBD = useCallback(
         async (mostrarToast = false) => {
-            if (!juegoId || !claveAcceso || !flowEditorRef.current) return;
+            if (!claveAcceso || !flowEditorRef.current) return;
+            // En modo grupo sin ids, en solo lectura o vencido no se guarda.
+            if (esModoGrupo && (!grupoId || !ejercicioId || soloLectura))
+                return;
+            if (!esModoGrupo && !juegoId) return;
 
             const flowData = flowEditorRef.current.getFlowState();
             setEstadoGuardado('guardando');
 
             try {
-                await guardarEstadoTablero(claveAcceso, juegoId, flowData);
-                setEstadoGuardado('guardado');
-
-                try {
-                    localStorage.setItem(
-                        `flow_draft_${juegoId}`,
+                if (esModoGrupo && grupoId && ejercicioId) {
+                    // El estado del tablero de grupo es texto plano
+                    await guardarEstadoEjercicioGrupo(
+                        claveAcceso,
+                        grupoId,
+                        ejercicioId,
                         JSON.stringify(flowData)
                     );
-                } catch {
-                    // ignorar li­mites de storage
+                } else if (juegoId) {
+                    await guardarEstadoTablero(claveAcceso, juegoId, flowData);
+
+                    try {
+                        localStorage.setItem(
+                            `flow_draft_${juegoId}`,
+                            JSON.stringify(flowData)
+                        );
+                    } catch {
+                        // ignorar li­mites de storage
+                    }
                 }
+                setEstadoGuardado('guardado');
 
                 if (mostrarToast) {
                     Swal.fire({
@@ -143,7 +300,7 @@ function DesignBoard() {
                 setEstadoGuardado('sin_guardar');
             }
         },
-        [juegoId, claveAcceso]
+        [juegoId, claveAcceso, esModoGrupo, grupoId, ejercicioId, soloLectura]
     );
 
     // Auto-guardado con debounce de 1.5s ante cualquier cambio en el tablero
@@ -334,6 +491,61 @@ function DesignBoard() {
         };
     }, []);
 
+    /** Entrega el ejercicio de grupo (puntos solo la primera vez). */
+    const handleEntregar = async () => {
+        if (!claveAcceso || !grupoId || !ejercicioId) return;
+
+        // Cierra cualquier autoguardado pendiente antes de entregar
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+            debounceTimerRef.current = null;
+        }
+        await guardarProgresoEnBD(false);
+
+        const confirmar = await Swal.fire({
+            title: '¿Entregar ejercicio?',
+            text: 'Se marcará como completado y tu profesor podrá revisarlo. Los puntos solo se otorgan la primera vez.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Entregar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#FF7C02',
+        });
+        if (!confirmar.isConfirmed) return;
+
+        setEntregando(true);
+        try {
+            const flowData = flowEditorRef.current?.getFlowState();
+            const resultado = await completarEjercicioGrupo(
+                claveAcceso,
+                grupoId,
+                ejercicioId,
+                JSON.stringify(flowData)
+            );
+            setInfoGrupo((prev) =>
+                prev
+                    ? { ...prev, completado: true, puntos: resultado.puntos }
+                    : prev
+            );
+            await Swal.fire({
+                icon: 'success',
+                title: 'Ejercicio entregado',
+                text: 'Esperando la calificación de tu profesor.',
+                timer: 2000,
+                showConfirmButton: false,
+            });
+            navigate(`/grupos/${grupoId}`);
+        } catch (error) {
+            const mensaje = obtenerMensajeError(
+                error,
+                'No se pudo entregar el ejercicio'
+            );
+            await Swal.fire({ icon: 'error', title: 'Error', text: mensaje });
+        } finally {
+            setEntregando(false);
+        }
+    };
+
     const onDragStart = (event: React.DragEvent, nodeType: NodeType) => {
         event.dataTransfer.setData('application/reactflow', nodeType);
         event.dataTransfer.effectAllowed = 'move';
@@ -377,16 +589,26 @@ function DesignBoard() {
             setNodes([]);
             setEdges([]);
 
-            if (juegoId) {
+            if (esModoGrupo && grupoId && ejercicioId && !soloLectura) {
+                // Reiniciar en grupo = canvas vacío guardado en su BD
+                try {
+                    await guardarEstadoEjercicioGrupo(
+                        claveAcceso!,
+                        grupoId,
+                        ejercicioId,
+                        JSON.stringify({ nodes: [], edges: [] })
+                    );
+                } catch (error) {
+                    console.error('Error reiniciando entrega:', error);
+                }
+            } else if (juegoId && claveAcceso) {
                 try {
                     localStorage.removeItem(`flow_draft_${juegoId}`);
                 } catch {
                     // ignorar
                 }
 
-                if (claveAcceso) {
-                    await reiniciarEstadoTableroApi(claveAcceso, juegoId);
-                }
+                await reiniciarEstadoTableroApi(claveAcceso, juegoId);
             }
 
             setEstadoGuardado('guardado');
@@ -411,35 +633,196 @@ function DesignBoard() {
                     juegoId={juegoId}
                     juegoDescripcion={juegoDescripcion}
                     estadoGuardado={estadoGuardado}
-                    onGuardarManual={() => void guardarProgresoEnBD(true)}
-                    onReiniciar={handleReiniciar}
+                    onGuardarManual={
+                        soloLectura
+                            ? undefined
+                            : () => void guardarProgresoEnBD(true)
+                    }
+                    onReiniciar={
+                        soloLectura ? undefined : handleReiniciar
+                    }
                     onEjecutar={() => void handleEjecutar()}
                     ejecutando={ejecutando}
+                    rutaVolver={
+                        esModoGrupo && grupoId ? `/grupos/${grupoId}` : undefined
+                    }
+                    ocultarVerificarIA={esModoGrupo}
                 />
-                <div
-                    style={{
-                        padding: '0px',
-                        margin: '10px',
-                        backgroundColor: 'rgba(217, 217, 217, 0.3)',
-                        borderRadius: '10px',
-                        borderLeft: '4px solid #FF7C02',
-                    }}
-                >
-                    <p
+                {esModoGrupo && infoGrupo && (
+                    <div
                         style={{
-                            margin: '0',
-                            color: '#ffffff',
-                            lineHeight: '1.6',
-                            fontSize: '16px',
+                            margin: '10px',
+                            padding: '12px 16px',
+                            backgroundColor: 'rgba(217, 217, 217, 0.3)',
+                            borderRadius: '10px',
+                            borderLeft: '4px solid #FF7C02',
                         }}
                     >
-                        {juegoDescripcion || 'No hay descripcion disponible'}
-                    </p>
-                </div>
-                <Sidebar
-                    onDragStart={onDragStart}
-                    onAddNode={isTouchDevice ? onAddNode : undefined}
-                />
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                alignItems: 'flex-start',
+                                justifyContent: 'space-between',
+                                gap: '12px',
+                            }}
+                        >
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                                <h3
+                                    style={{
+                                        margin: 0,
+                                        color: '#FF7C02',
+                                        fontSize: '18px',
+                                    }}
+                                >
+                                    {infoGrupo.titulo}
+                                </h3>
+                                <p
+                                    style={{
+                                        margin: '6px 0 0',
+                                        color: '#ffffff',
+                                        lineHeight: '1.5',
+                                        whiteSpace: 'pre-line',
+                                    }}
+                                >
+                                    {infoGrupo.enunciado}
+                                </p>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '8px',
+                                        marginTop: '8px',
+                                        fontSize: '12px',
+                                    }}
+                                >
+                                    <span
+                                        style={{
+                                            background: 'rgba(0,0,0,0.25)',
+                                            borderRadius: '999px',
+                                            padding: '3px 10px',
+                                            color: '#ddd',
+                                        }}
+                                    >
+                                        {infoGrupo.fechaLimite
+                                            ? infoGrupo.vencido
+                                                ? `⏰ Venció el ${infoGrupo.fechaLimite}`
+                                                : `⏰ Fecha límite: ${infoGrupo.fechaLimite}`
+                                            : 'Sin fecha límite'}
+                                    </span>
+                                    {infoGrupo.calificado && (
+                                        <span
+                                            style={{
+                                                background:
+                                                    'rgba(255,124,2,0.18)',
+                                                borderRadius: '999px',
+                                                padding: '3px 10px',
+                                                color: '#FFB86C',
+                                            }}
+                                        >
+                                            ⭐ Profesor:{' '}
+                                            {infoGrupo.puntosProfesor ?? 0} pts
+                                            {infoGrupo.comentario
+                                                ? ` — "${infoGrupo.comentario}"`
+                                                : ''}
+                                        </span>
+                                    )}
+                                    {infoGrupo.completado &&
+                                        !infoGrupo.calificado && (
+                                            <span
+                                                style={{
+                                                    background:
+                                                        'rgba(39,167,69,0.18)',
+                                                    borderRadius: '999px',
+                                                    padding: '3px 10px',
+                                                    color: '#7DE08A',
+                                                }}
+                                            >
+                                                ✅ Entregado — pendiente de
+                                                calificación
+                                            </span>
+                                        )}
+                                    {esRevision && (
+                                        <span
+                                            style={{
+                                                background:
+                                                    'rgba(59,130,246,0.18)',
+                                                borderRadius: '999px',
+                                                padding: '3px 10px',
+                                                color: '#93C5FD',
+                                            }}
+                                        >
+                                            👁 Modo revisión (solo lectura)
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            {!esRevision &&
+                                !infoGrupo.completado &&
+                                (infoGrupo.vencido ? (
+                                    <span
+                                        style={{
+                                            color: '#fca5a5',
+                                            alignSelf: 'center',
+                                            fontSize: '13px',
+                                        }}
+                                    >
+                                        ⏰ Vencido: no puedes entregar
+                                    </span>
+                                ) : (
+                                    <button
+                                        onClick={() => void handleEntregar()}
+                                        disabled={entregando}
+                                        style={{
+                                            backgroundColor: '#FF7C02',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '10px 20px',
+                                            borderRadius: '8px',
+                                            fontWeight: 'bold',
+                                            cursor: entregando
+                                                ? 'wait'
+                                                : 'pointer',
+                                            opacity: entregando ? 0.6 : 1,
+                                        }}
+                                    >
+                                        {entregando
+                                            ? '⏳ Entregando...'
+                                            : '✅ Entregar ejercicio'}
+                                    </button>
+                                ))}
+                        </div>
+                    </div>
+                )}
+                {!esModoGrupo && (
+                    <div
+                        style={{
+                            padding: '0px',
+                            margin: '10px',
+                            backgroundColor: 'rgba(217, 217, 217, 0.3)',
+                            borderRadius: '10px',
+                            borderLeft: '4px solid #FF7C02',
+                        }}
+                    >
+                        <p
+                            style={{
+                                margin: '0',
+                                color: '#ffffff',
+                                lineHeight: '1.6',
+                                fontSize: '16px',
+                            }}
+                        >
+                            {juegoDescripcion ||
+                                'No hay descripcion disponible'}
+                        </p>
+                    </div>
+                )}
+                {!soloLectura && (
+                    <Sidebar
+                        onDragStart={onDragStart}
+                        onAddNode={isTouchDevice ? onAddNode : undefined}
+                    />
+                )}
                 <FlowEditor
                     ref={flowEditorRef}
                     nodes={nodes}
@@ -447,6 +830,7 @@ function DesignBoard() {
                     onNodesChange={handleNodesChange}
                     onEdgesChange={handleEdgesChange}
                     onFlowChange={handleFlowChange}
+                    soloLectura={soloLectura}
                 />
                 {panelVisible && (
                     <div

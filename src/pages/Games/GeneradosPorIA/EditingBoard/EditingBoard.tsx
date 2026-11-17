@@ -5,7 +5,12 @@ import React, {
     useEffect,
     useCallback,
 } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+    useLocation,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { completarJuego } from '../../../../api/ejerciciosIA/ejercicios';
@@ -24,11 +29,29 @@ import {
     guardarEstadoTablero,
     reiniciarEstadoTableroApi,
 } from '../../../../api/ejerciciosIA/ejercicioIAapi';
+import {
+    abrirEjercicioGrupo,
+    completarEjercicioGrupo,
+    guardarEstadoEjercicioGrupo,
+    listarSolucionesEjercicio,
+} from '../../../../api/gruposApi';
+import { obtenerMensajeError } from '../../../../api/http';
 import '../app.css';
 
 interface LocationState {
     juegoId?: number;
     juegoDescripcion?: string;
+}
+
+/** Información del ejercicio de grupo para la franja de estado. */
+interface InfoEjercicioGrupo {
+    fechaLimite: string | null;
+    vencido: boolean;
+    completado: boolean;
+    puntos: number;
+    calificado: boolean;
+    puntosProfesor: number | null;
+    comentario: string | null;
 }
 
 const DEFAULT_INSTRUCCIONES = 'Diseña un programa ';
@@ -66,6 +89,25 @@ const EditingBoard: React.FC = () => {
     const juegoId =
         locationState?.juegoId ?? (queryId ? Number(queryId) : undefined);
 
+    // ── Modo grupo: ejercicio de grupo cargado desde la BD del módulo ──
+    const routeParams = useParams<{ id?: string; ejercicioId?: string }>();
+    const esModoGrupo = Boolean(routeParams.ejercicioId);
+    const grupoId = routeParams.id ?? null;
+    const ejercicioId = routeParams.ejercicioId ?? null;
+    const revisarEstudianteId = searchParams.get('revisarEstudiante')
+        ? Number(searchParams.get('revisarEstudiante'))
+        : null;
+    const esRevision = esModoGrupo && revisarEstudianteId !== null;
+    const [infoGrupo, setInfoGrupo] = useState<InfoEjercicioGrupo | null>(
+        null
+    );
+    const [entregando, setEntregando] = useState(false);
+    // Solo lectura: revisión del profesor o ejercicio vencido.
+    const soloLectura =
+        esModoGrupo && (esRevision || infoGrupo?.vencido === true);
+    const rutaVolver =
+        esModoGrupo && grupoId ? `/grupos/${grupoId}` : '/ejercicios-ia';
+
     const [enunciado, setEnunciado] = useState<string>(
         locationState?.juegoDescripcion || DEFAULT_INSTRUCCIONES
     );
@@ -84,7 +126,7 @@ const EditingBoard: React.FC = () => {
 
     // Cargar progreso previo guardado al montar el componente
     useEffect(() => {
-        if (!juegoId || !claveAcceso) return;
+        if (!juegoId || !claveAcceso || esModoGrupo) return;
 
         let activo = true;
 
@@ -123,29 +165,143 @@ const EditingBoard: React.FC = () => {
         return () => {
             activo = false;
         };
-    }, [juegoId, claveAcceso]);
+    }, [juegoId, claveAcceso, esModoGrupo]);
+
+    // Carga del ejercicio de grupo (estudiante o revisión del profesor)
+    useEffect(() => {
+        if (!esModoGrupo || !claveAcceso || !grupoId || !ejercicioId) return;
+
+        let activo = true;
+
+        const aplicarEstado = (estadoTablero: string | null) => {
+            if (!estadoTablero) return;
+            try {
+                const parsed = JSON.parse(estadoTablero);
+                if (parsed && typeof parsed.code === 'string') {
+                    setCode(parsed.code);
+                    setEstadoGuardado('guardado');
+                    return;
+                }
+            } catch {
+                // no era JSON: puede ser código plano
+            }
+            if (estadoTablero.trim()) {
+                setCode(estadoTablero);
+                setEstadoGuardado('guardado');
+            }
+        };
+
+        const cargarGrupo = async () => {
+            try {
+                if (esRevision && revisarEstudianteId !== null) {
+                    // Profesor: la entrega vive en las soluciones del ejercicio
+                    const soluciones = await listarSolucionesEjercicio(
+                        claveAcceso,
+                        ejercicioId
+                    );
+                    const entrega = soluciones.find(
+                        (s) => s.usuario_id === revisarEstudianteId
+                    );
+                    if (!activo) return;
+                    if (!entrega) {
+                        await Swal.fire({
+                            icon: 'warning',
+                            title: 'Sin entrega',
+                            text: 'Ese estudiante todavía no abrió este ejercicio.',
+                        });
+                        navigate(`/grupos/${grupoId}`);
+                        return;
+                    }
+                    setInfoGrupo({
+                        fechaLimite: null,
+                        vencido: false,
+                        completado: entrega.completado,
+                        puntos: entrega.puntos,
+                        calificado: entrega.calificado,
+                        puntosProfesor: entrega.puntos_profesor,
+                        comentario: entrega.comentario_profesor,
+                    });
+                    aplicarEstado(entrega.estado_tablero);
+                } else {
+                    // Estudiante: abre su propia entrega
+                    const abierto = await abrirEjercicioGrupo(
+                        claveAcceso,
+                        grupoId,
+                        ejercicioId
+                    );
+                    if (!activo) return;
+                    setInfoGrupo({
+                        fechaLimite: abierto.ejercicio.fecha_limite,
+                        vencido: abierto.vencido,
+                        completado: abierto.entrega.completado,
+                        puntos: abierto.entrega.puntos,
+                        calificado: abierto.entrega.calificado,
+                        puntosProfesor: abierto.entrega.puntos_profesor,
+                        comentario: abierto.entrega.comentario_profesor,
+                    });
+                    if (abierto.ejercicio.enunciado) {
+                        setEnunciado(abierto.ejercicio.enunciado);
+                    }
+                    aplicarEstado(abierto.entrega.estado_tablero);
+                }
+            } catch (error) {
+                if (!activo) return;
+                const mensaje = obtenerMensajeError(
+                    error,
+                    'No se pudo cargar el ejercicio'
+                );
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: mensaje,
+                });
+                navigate(`/grupos/${grupoId}`);
+            }
+        };
+
+        void cargarGrupo();
+
+        return () => {
+            activo = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [esModoGrupo, claveAcceso, grupoId, ejercicioId, esRevision, revisarEstudianteId]);
 
     // Funcion de guardado en la base de datos
     const guardarProgresoEnBD = useCallback(
         async (codigoAGuardar: string, mostrarToast = false) => {
-            if (!juegoId || !claveAcceso) return;
+            if (!claveAcceso) return;
+            if (esModoGrupo) {
+                if (!grupoId || !ejercicioId || soloLectura) return;
+            } else if (!juegoId) {
+                return;
+            }
 
             setEstadoGuardado('guardando');
 
             try {
-                await guardarEstadoTablero(claveAcceso, juegoId, {
-                    code: codigoAGuardar,
-                });
-                setEstadoGuardado('guardado');
-
-                try {
-                    localStorage.setItem(
-                        `editing_draft_${juegoId}`,
-                        codigoAGuardar
+                if (esModoGrupo && grupoId && ejercicioId) {
+                    await guardarEstadoEjercicioGrupo(
+                        claveAcceso,
+                        grupoId,
+                        ejercicioId,
+                        JSON.stringify({ code: codigoAGuardar })
                     );
-                } catch {
-                    // ignorar li­mites de storage
+                } else if (juegoId) {
+                    await guardarEstadoTablero(claveAcceso, juegoId, {
+                        code: codigoAGuardar,
+                    });
+
+                    try {
+                        localStorage.setItem(
+                            `editing_draft_${juegoId}`,
+                            codigoAGuardar
+                        );
+                    } catch {
+                        // ignorar li­mites de storage
+                    }
                 }
+                setEstadoGuardado('guardado');
 
                 if (mostrarToast) {
                     Swal.fire({
@@ -166,10 +322,18 @@ const EditingBoard: React.FC = () => {
                 setEstadoGuardado('sin_guardar');
             }
         },
-        [juegoId, claveAcceso]
+        [
+            juegoId,
+            claveAcceso,
+            esModoGrupo,
+            grupoId,
+            ejercicioId,
+            soloLectura,
+        ]
     );
 
     const handleCodeChange = (nuevoCodigo: string) => {
+        if (soloLectura) return;
         setCode(nuevoCodigo);
         setEstadoGuardado('sin_guardar');
         // Al editar, ya no corresponde resaltar línea de ejecución
@@ -204,16 +368,26 @@ const EditingBoard: React.FC = () => {
             setCode(plantilla);
             setConsoleOutput([]);
 
-            if (juegoId) {
+            if (esModoGrupo && grupoId && ejercicioId && !soloLectura) {
+                // Reiniciar en grupo = plantilla guardada en su BD
+                try {
+                    await guardarEstadoEjercicioGrupo(
+                        claveAcceso!,
+                        grupoId,
+                        ejercicioId,
+                        JSON.stringify({ code: plantilla })
+                    );
+                } catch (error) {
+                    console.error('Error reiniciando entrega:', error);
+                }
+            } else if (juegoId && claveAcceso) {
                 try {
                     localStorage.removeItem(`editing_draft_${juegoId}`);
                 } catch {
                     // ignorar
                 }
 
-                if (claveAcceso) {
-                    await reiniciarEstadoTableroApi(claveAcceso, juegoId);
-                }
+                await reiniciarEstadoTableroApi(claveAcceso, juegoId);
             }
 
             setEstadoGuardado('guardado');
@@ -454,8 +628,69 @@ const EditingBoard: React.FC = () => {
         }
     };
 
+    /** Entrega el ejercicio de grupo (puntos solo la primera vez). */
+    const handleEntregarGrupo = async () => {
+        if (!claveAcceso || !grupoId || !ejercicioId) return;
+
+        // Cierra cualquier autoguardado pendiente antes de entregar
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+            debounceTimerRef.current = null;
+        }
+        await guardarProgresoEnBD(code, false);
+
+        const confirmar = await Swal.fire({
+            title: '¿Entregar ejercicio?',
+            text: 'Se marcará como completado y tu profesor podrá revisarlo. Los puntos solo se otorgan la primera vez.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Entregar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#FF7C02',
+        });
+        if (!confirmar.isConfirmed) return;
+
+        setEntregando(true);
+        try {
+            const resultado = await completarEjercicioGrupo(
+                claveAcceso,
+                grupoId,
+                ejercicioId,
+                code
+            );
+            setInfoGrupo((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          completado: true,
+                          puntos: resultado.puntos,
+                      }
+                    : prev
+            );
+            await Swal.fire({
+                icon: 'success',
+                title:
+                    resultado.puntosGanados > 0
+                        ? `Ejercicio entregado (+${resultado.puntosGanados} pts)`
+                        : 'Ejercicio entregado',
+                timer: 1800,
+                showConfirmButton: false,
+            });
+            navigate(`/grupos/${grupoId}`);
+        } catch (error) {
+            const mensaje = obtenerMensajeError(
+                error,
+                'No se pudo entregar el ejercicio'
+            );
+            await Swal.fire({ icon: 'error', title: 'Error', text: mensaje });
+        } finally {
+            setEntregando(false);
+        }
+    };
+
     // Validar con Inteligencia Artificial (Mistral)
     const handleVerificarIA = async () => {
+        if (esModoGrupo) return; // el pseudocódigo de grupo NO se verifica con IA
         if (!code.trim()) {
             Swal.fire({
                 title: 'Codigo vaci­o',
@@ -555,7 +790,7 @@ const EditingBoard: React.FC = () => {
                     }}
                 >
                     <button
-                        onClick={() => navigate('/ejercicios-ia')}
+                        onClick={() => navigate(rutaVolver)}
                         style={{
                             background: 'transparent',
                             border: 'none',
@@ -589,7 +824,7 @@ const EditingBoard: React.FC = () => {
                         gap: '10px',
                     }}
                 >
-                    {juegoId && (
+                    {(juegoId || esModoGrupo) && (
                         <div
                             style={{
                                 display: 'flex',
@@ -628,7 +863,7 @@ const EditingBoard: React.FC = () => {
                             </span>
                         </div>
                     )}
-                    {juegoId && (
+                    {(juegoId || (esModoGrupo && !soloLectura)) && (
                         <button
                             type="button"
                             onClick={handleReiniciar}
@@ -706,6 +941,7 @@ const EditingBoard: React.FC = () => {
                     >
                         {isRunning ? '⏳ Ejecutando...' : '▶ Ejecutar'}
                     </button>
+                    {!esModoGrupo && (
                     <button
                         className="btn"
                         onClick={handleVerificarIA}
@@ -732,6 +968,7 @@ const EditingBoard: React.FC = () => {
                     >
                         ✨ Verificar con IA
                     </button>
+                    )}
                     <button
                         type="button"
                         className="btn"
@@ -804,6 +1041,124 @@ const EditingBoard: React.FC = () => {
                     >
                         {enunciado}
                     </p>
+
+                    {/* Estado del ejercicio de grupo + botón de entrega */}
+                    {esModoGrupo && infoGrupo && (
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: '10px',
+                                marginTop: '10px',
+                                paddingTop: '10px',
+                                borderTop: '1px solid rgba(255,255,255,0.08)',
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: '8px',
+                                    fontSize: '12px',
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        background: 'rgba(0,0,0,0.25)',
+                                        borderRadius: '999px',
+                                        padding: '3px 10px',
+                                        color: '#ddd',
+                                    }}
+                                >
+                                    {infoGrupo.fechaLimite
+                                        ? infoGrupo.vencido
+                                            ? `⏰ Venció el ${infoGrupo.fechaLimite}`
+                                            : `⏰ Fecha límite: ${infoGrupo.fechaLimite}`
+                                        : 'Sin fecha límite'}
+                                </span>
+                                {infoGrupo.calificado && (
+                                    <span
+                                        style={{
+                                            background: 'rgba(255,124,2,0.18)',
+                                            borderRadius: '999px',
+                                            padding: '3px 10px',
+                                            color: '#FFB86C',
+                                        }}
+                                    >
+                                        ⭐ Profesor:{' '}
+                                        {infoGrupo.puntosProfesor ?? 0} pts
+                                        {infoGrupo.comentario
+                                            ? ` — "${infoGrupo.comentario}"`
+                                            : ''}
+                                    </span>
+                                )}
+                                {infoGrupo.completado &&
+                                    !infoGrupo.calificado && (
+                                        <span
+                                            style={{
+                                                background:
+                                                    'rgba(39,167,69,0.18)',
+                                                borderRadius: '999px',
+                                                padding: '3px 10px',
+                                                color: '#7DE08A',
+                                            }}
+                                        >
+                                            ✅ Entregado (+{infoGrupo.puntos}{' '}
+                                            pts)
+                                        </span>
+                                    )}
+                                {esRevision && (
+                                    <span
+                                        style={{
+                                            background:
+                                                'rgba(59,130,246,0.18)',
+                                            borderRadius: '999px',
+                                            padding: '3px 10px',
+                                            color: '#93C5FD',
+                                        }}
+                                    >
+                                        👁 Modo revisión (solo lectura)
+                                    </span>
+                                )}
+                            </div>
+                            {!esRevision &&
+                                !infoGrupo.completado &&
+                                (infoGrupo.vencido ? (
+                                    <span
+                                        style={{
+                                            color: '#fca5a5',
+                                            fontSize: '13px',
+                                        }}
+                                    >
+                                        ⏰ Vencido: no puedes entregar
+                                    </span>
+                                ) : (
+                                    <button
+                                        onClick={() => void handleEntregarGrupo()}
+                                        disabled={entregando}
+                                        style={{
+                                            backgroundColor: '#FF7C02',
+                                            color: 'white',
+                                            border: 'none',
+                                            padding: '8px 16px',
+                                            borderRadius: '8px',
+                                            fontWeight: 'bold',
+                                            fontSize: '13px',
+                                            cursor: entregando
+                                                ? 'wait'
+                                                : 'pointer',
+                                            opacity: entregando ? 0.6 : 1,
+                                        }}
+                                    >
+                                        {entregando
+                                            ? '⏳ Entregando...'
+                                            : '✅ Entregar ejercicio'}
+                                    </button>
+                                ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Editor y Consola */}
@@ -940,6 +1295,7 @@ const EditingBoard: React.FC = () => {
                                 onKeyDown={handleKeyDown}
                                 onScroll={handleScroll}
                                 wrap="off"
+                                readOnly={soloLectura}
                                 style={{
                                     flex: 1,
                                     backgroundColor: 'transparent',

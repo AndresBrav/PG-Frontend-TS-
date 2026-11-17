@@ -4,6 +4,29 @@ import { Link } from 'react-router-dom';
 import { TokenContext } from '../../Context/TokenContext';
 import { registerUser } from '../../Services/authService';
 import BotonMostrarPassword from '../../components/auth/BotonMostrarPassword';
+import type { Rol } from '../../types/dominio';
+
+interface OpcionRol {
+    valor: Rol;
+    nombre: string;
+    descripcion: string;
+    icono: string;
+}
+
+const OPCIONES_ROL: OpcionRol[] = [
+    {
+        valor: 'estudiante',
+        nombre: 'Estudiante',
+        descripcion: 'Aprende y únete a grupos',
+        icono: '🎓',
+    },
+    {
+        valor: 'profesor',
+        nombre: 'Profesor',
+        descripcion: 'Crea grupos y revisa reportes',
+        icono: '📚',
+    },
+];
 
 const SignUp = () => {
     const [codigo, setCodigo] = useState<string>('');
@@ -11,6 +34,7 @@ const SignUp = () => {
     const [edad, setEdad] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [confirmarPassword, setConfirmarPassword] = useState<string>('');
+    const [rol, setRol] = useState<Rol>('estudiante');
     const [mostrarPassword, setMostrarPassword] = useState<boolean>(false);
     const [cargando, setCargando] = useState<boolean>(false);
     const [mensajeError, setMensajeError] = useState<string | null>(null);
@@ -66,6 +90,7 @@ const SignUp = () => {
                 username: username.trim(),
                 edad: Number(edad),
                 password,
+                rol,
             });
 
             setClaveAcceso(data.token);
@@ -154,6 +179,72 @@ const SignUp = () => {
                         inputMode="numeric"
                         required
                     />
+                </div>
+
+                <div className="auth-field">
+                    <span className="auth-label">Tipo de cuenta</span>
+                    <div
+                        className="auth-role-group"
+                        role="radiogroup"
+                        aria-label="Tipo de cuenta"
+                        style={{
+                            display: 'flex',
+                            gap: '10px',
+                            flexWrap: 'wrap',
+                        }}
+                    >
+                        {OPCIONES_ROL.map((opcion) => (
+                            <label
+                                key={opcion.valor}
+                                className="auth-role-option"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 12px',
+                                    borderRadius: '12px',
+                                    border:
+                                        rol === opcion.valor
+                                            ? '2px solid #7c5cff'
+                                            : '2px solid rgba(255,255,255,0.15)',
+                                    background:
+                                        rol === opcion.valor
+                                            ? 'rgba(124,92,255,0.12)'
+                                            : 'transparent',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                <input
+                                    type="radio"
+                                    name="rol"
+                                    value={opcion.valor}
+                                    checked={rol === opcion.valor}
+                                    onChange={() => setRol(opcion.valor)}
+                                />
+                                <span aria-hidden="true">
+                                    {opcion.icono}
+                                </span>
+                                <span
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                    }}
+                                >
+                                    <span style={{ fontWeight: 600 }}>
+                                        {opcion.nombre}
+                                    </span>
+                                    <span
+                                        style={{
+                                            fontSize: '0.75rem',
+                                            opacity: 0.8,
+                                        }}
+                                    >
+                                        {opcion.descripcion}
+                                    </span>
+                                </span>
+                            </label>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="auth-field">
