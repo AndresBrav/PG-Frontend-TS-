@@ -28,6 +28,8 @@ import {
     obtenerJuegoIAPorId,
     guardarEstadoTablero,
     reiniciarEstadoTableroApi,
+    obtenerCuotaRevisionIA,
+    type CuotaRevisionIA,
 } from '../../../../api/ejerciciosIA/ejercicioIAapi';
 import {
     abrirEjercicioGrupo,
@@ -418,8 +420,45 @@ const EditingBoard: React.FC = () => {
 
     const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
     const [isVerifying, setIsVerifying] = useState<boolean>(false);
+    const [cuotaRevision, setCuotaRevision] =
+        useState<CuotaRevisionIA | null>(null);
     const [isRunning, setIsRunning] = useState<boolean>(false);
     const [counterRate, setCounterRate] = useState<number>(1);
+
+    const actualizarCuotaRevision = useCallback(async () => {
+        if (!juegoId || !claveAcceso) return;
+
+        try {
+            setCuotaRevision(
+                await obtenerCuotaRevisionIA(claveAcceso, juegoId)
+            );
+        } catch (error) {
+            console.error('Error al actualizar intentos de revisión:', error);
+        }
+    }, [juegoId, claveAcceso]);
+
+    useEffect(() => {
+        if (esModoGrupo || !juegoId || !claveAcceso) {
+            setCuotaRevision(null);
+            return;
+        }
+
+        setCuotaRevision(null);
+        let activo = true;
+        void obtenerCuotaRevisionIA(claveAcceso, juegoId)
+            .then((cuota) => {
+                if (activo) setCuotaRevision(cuota);
+            })
+            .catch((error) => {
+                console.error('Error al consultar intentos de revisión:', error);
+            });
+
+        return () => {
+            activo = false;
+        };
+    }, [juegoId, claveAcceso, esModoGrupo]);
+
+    const limiteRevisionAlcanzado = cuotaRevision?.restantes === 0;
 
     // Modo debug: variables declaradas y su evolución por paso
     const [estadoVariables, setEstadoVariables] =
@@ -694,9 +733,27 @@ const EditingBoard: React.FC = () => {
         }
     };
 
-    // Validar con Inteligencia Artificial (Mistral)
+    // Validar con Inteligencia Artificial
     const handleVerificarIA = async () => {
         if (esModoGrupo) return; // el pseudocódigo de grupo NO se verifica con IA
+        if (!juegoId || !claveAcceso) {
+            await Swal.fire({
+                title: 'No se pudo identificar el ejercicio',
+                text: 'Abre un ejercicio guardado para poder verificarlo.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+            });
+            return;
+        }
+        if (limiteRevisionAlcanzado) {
+            await Swal.fire({
+                title: 'Límite diario alcanzado',
+                text: 'Ya utilizaste los 5 intentos de revisión de este ejercicio por hoy.',
+                icon: 'info',
+                confirmButtonText: 'Entendido',
+            });
+            return;
+        }
         if (!code.trim()) {
             Swal.fire({
                 title: 'Codigo vaci­o',
@@ -722,7 +779,12 @@ const EditingBoard: React.FC = () => {
         });
 
         try {
-            const resultado = await verificarPseudocodigo(code, enunciado);
+            const resultado = await verificarPseudocodigo(
+                code,
+                juegoId,
+                claveAcceso
+            );
+            await actualizarCuotaRevision();
             setIsVerifying(false);
 
             const esValido =
@@ -766,10 +828,14 @@ const EditingBoard: React.FC = () => {
             }
         } catch (error) {
             setIsVerifying(false);
+            await actualizarCuotaRevision();
             console.error('Error al verificar:', error);
-            Swal.fire({
+            await Swal.fire({
                 title: 'Error de verificacion',
-                text: 'No se pudo comunicar con el servidor de IA. Intente de nuevo.',
+                text: obtenerMensajeError(
+                    error,
+                    'No se pudo comunicar con el servidor de IA. Intente de nuevo.'
+                ),
                 icon: 'error',
                 confirmButtonText: 'Cerrar',
             });
@@ -948,32 +1014,62 @@ const EditingBoard: React.FC = () => {
                         {isRunning ? '⏳ Ejecutando...' : '▶ Ejecutar'}
                     </button>
                     {!esModoGrupo && (
-                    <button
-                        className="btn"
-                        onClick={handleVerificarIA}
-                        disabled={isVerifying}
-                        style={{
-                            backgroundColor: '#22C55E',
-                            color: 'white',
-                            border: 'none',
-                            padding: '10px 20px',
-                            borderRadius: '8px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            opacity: isVerifying ? 0.7 : 1,
-                            transition: 'transform 0.2s',
-                        }}
-                        onMouseEnter={(e) =>
-                            !isVerifying &&
-                            (e.currentTarget.style.transform = 'scale(1.03)')
-                        }
-                        onMouseLeave={(e) =>
-                            !isVerifying &&
-                            (e.currentTarget.style.transform = 'scale(1)')
-                        }
-                    >
-                        ✨ Verificar con IA
-                    </button>
+                        <>
+                            {cuotaRevision && (
+                                <span
+                                    aria-live="polite"
+                                    style={{
+                                        color: 'var(--text-h)',
+                                        fontSize: '12px',
+                                    }}
+                                >
+                                    Revisiones restantes:{' '}
+                                    {cuotaRevision.restantes}/
+                                    {cuotaRevision.limite}
+                                </span>
+                            )}
+                            <button
+                                className="btn"
+                                onClick={handleVerificarIA}
+                                disabled={
+                                    isVerifying || limiteRevisionAlcanzado
+                                }
+                                style={{
+                                    backgroundColor: '#22C55E',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '10px 20px',
+                                    borderRadius: '8px',
+                                    fontWeight: 'bold',
+                                    cursor:
+                                        isVerifying || limiteRevisionAlcanzado
+                                            ? 'not-allowed'
+                                            : 'pointer',
+                                    opacity:
+                                        isVerifying || limiteRevisionAlcanzado
+                                            ? 0.7
+                                            : 1,
+                                    transition: 'transform 0.2s',
+                                }}
+                                onMouseEnter={(e) =>
+                                    !isVerifying &&
+                                    !limiteRevisionAlcanzado &&
+                                    (e.currentTarget.style.transform =
+                                        'scale(1.03)')
+                                }
+                                onMouseLeave={(e) =>
+                                    !isVerifying &&
+                                    (e.currentTarget.style.transform =
+                                        'scale(1)')
+                                }
+                            >
+                                {limiteRevisionAlcanzado
+                                    ? 'Límite diario alcanzado'
+                                    : isVerifying
+                                      ? 'Verificando...'
+                                      : '✨ Verificar con IA'}
+                            </button>
+                        </>
                     )}
                     <button
                         type="button"

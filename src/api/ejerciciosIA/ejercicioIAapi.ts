@@ -68,10 +68,77 @@ export interface CuotaGeneracionIA {
     fecha: string;
 }
 
+export interface CuotaRevisionIA {
+    limite: number;
+    usados: number;
+    restantes: number;
+    fecha: string;
+}
+
 interface RespuestaGeneracionIA {
     ejercicio: string;
     cuota: CuotaGeneracionIA | null;
 }
+
+interface RespuestaRevisionIA {
+    resultado: string;
+    cuota: CuotaRevisionIA;
+}
+
+export const obtenerCuotaRevisionIA = async (
+    clave: string,
+    juegoId: number
+): Promise<CuotaRevisionIA> => {
+    const response = await axios.get(
+        `${API}/juegos/ia/${juegoId}/cuota-revision`,
+        {
+            headers: {
+                Authorization: clave,
+                'ngrok-skip-browser-warning': 'true',
+            },
+        }
+    );
+
+    return response.data.cuota;
+};
+
+export const revisarDiagramaIA = async (
+    clave: string,
+    juegoId: number,
+    diagrama: unknown
+): Promise<RespuestaRevisionIA> => {
+    const response = await axios.post<RespuestaRevisionIA>(
+        `${API}/juegos/ia/${juegoId}/revisar-diagrama`,
+        { diagrama },
+        {
+            headers: {
+                Authorization: clave,
+                'ngrok-skip-browser-warning': 'true',
+            },
+        }
+    );
+
+    return response.data;
+};
+
+export const revisarPseudocodigoIA = async (
+    clave: string,
+    juegoId: number,
+    pseudocodigo: string
+): Promise<RespuestaRevisionIA> => {
+    const response = await axios.post<RespuestaRevisionIA>(
+        `${API}/juegos/ia/${juegoId}/revisar-pseudocodigo`,
+        { pseudocodigo },
+        {
+            headers: {
+                Authorization: clave,
+                'ngrok-skip-browser-warning': 'true',
+            },
+        }
+    );
+
+    return response.data;
+};
 
 export const obtenerCuotaGeneracionIA = async (
     clave: string

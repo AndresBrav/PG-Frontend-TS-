@@ -12,7 +12,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@google/genai": "^2.7.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@tailwindcss/vite": "^4.2.2",
     "@xyflow/react": "^12.10.2",

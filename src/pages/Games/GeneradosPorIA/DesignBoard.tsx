@@ -631,7 +631,6 @@ function DesignBoard() {
                     edges={edges}
                     onClear={handleClear}
                     juegoId={juegoId}
-                    juegoDescripcion={juegoDescripcion}
                     estadoGuardado={estadoGuardado}
                     onGuardarManual={
                         soloLectura

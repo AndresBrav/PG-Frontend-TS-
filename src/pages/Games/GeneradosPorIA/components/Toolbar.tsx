@@ -1,18 +1,22 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Node, Edge } from '@xyflow/react';
 import type { FlowExport } from '../types/flow';
 import Swal from 'sweetalert2';
 import { verificarDiagrama } from '../../../../api/ejerciciosIA/verificarDiagrama';
+import {
+    obtenerCuotaRevisionIA,
+    type CuotaRevisionIA,
+} from '../../../../api/ejerciciosIA/ejercicioIAapi';
 import { TokenContext } from '../../../../Context/TokenContext';
 import { completarJuego } from '../../../../api/ejerciciosIA/ejercicios';
+import { obtenerMensajeError } from '../../../../api/http';
 
 interface ToolbarProps {
     nodes: Node[];
     edges: Edge[];
     onClear: () => void;
     juegoId?: number;
-    juegoDescripcion?: string;
     estadoGuardado?: 'guardado' | 'guardando' | 'sin_guardar';
     onGuardarManual?: () => void;
     onReiniciar?: () => void;
@@ -31,7 +35,6 @@ function Toolbar({
     edges,
     onClear,
     juegoId,
-    juegoDescripcion,
     estadoGuardado = 'guardado',
     onGuardarManual,
     onReiniciar,
@@ -43,6 +46,44 @@ function Toolbar({
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
     const [counterRate, setCounterRate] = useState<number>(1);
+    const [cuotaRevision, setCuotaRevision] =
+        useState<CuotaRevisionIA | null>(null);
+    const [verificando, setVerificando] = useState(false);
+
+    useEffect(() => {
+        if (!juegoId || !claveAcceso || ocultarVerificarIA) {
+            setCuotaRevision(null);
+            return;
+        }
+
+        setCuotaRevision(null);
+        let activo = true;
+        void obtenerCuotaRevisionIA(claveAcceso, juegoId)
+            .then((cuota) => {
+                if (activo) setCuotaRevision(cuota);
+            })
+            .catch((error) => {
+                console.error('Error al consultar intentos de revisión:', error);
+            });
+
+        return () => {
+            activo = false;
+        };
+    }, [juegoId, claveAcceso, ocultarVerificarIA]);
+
+    const actualizarCuotaRevision = async () => {
+        if (!juegoId || !claveAcceso) return;
+
+        try {
+            setCuotaRevision(
+                await obtenerCuotaRevisionIA(claveAcceso, juegoId)
+            );
+        } catch (error) {
+            console.error('Error al actualizar intentos de revisión:', error);
+        }
+    };
+
+    const limiteRevisionAlcanzado = cuotaRevision?.restantes === 0;
 
     const handleExport = async () => {
         const exportData: FlowExport = {
@@ -79,6 +120,27 @@ function Toolbar({
             return;
         }
 
+        if (!juegoId || !claveAcceso) {
+            await Swal.fire({
+                title: 'No se pudo identificar el ejercicio',
+                text: 'Abre un ejercicio guardado para poder verificarlo.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+            });
+            return;
+        }
+
+        if (limiteRevisionAlcanzado) {
+            await Swal.fire({
+                title: 'Límite diario alcanzado',
+                text: 'Ya utilizaste los 5 intentos de revisión de este ejercicio por hoy.',
+                icon: 'info',
+                confirmButtonText: 'Entendido',
+            });
+            return;
+        }
+
+        setVerificando(true);
         // Mostrar loading
         Swal.fire({
             title: 'Verificando diagrama...',
@@ -97,8 +159,11 @@ function Toolbar({
             console.log('Datos enviados a verificarDiagrama:', exportData);
             const resultado = await verificarDiagrama(
                 exportData,
-                juegoDescripcion || ''
+                juegoId,
+                claveAcceso
             );
+            await actualizarCuotaRevision();
+            setVerificando(false);
 
             // Verificar si el resultado indica correccion
             const esValido =
@@ -148,10 +213,15 @@ function Toolbar({
                 }
             }
         } catch (error) {
+            await actualizarCuotaRevision();
+            setVerificando(false);
             console.error('Error al verificar diagrama:', error);
-            Swal.fire({
+            await Swal.fire({
                 title: 'Error',
-                text: 'No se pudo verificar el diagrama. Intenta de nuevo.',
+                text: obtenerMensajeError(
+                    error,
+                    'No se pudo verificar el diagrama. Intenta de nuevo.'
+                ),
                 icon: 'error',
                 confirmButtonText: 'Cerrar',
                 customClass: {
@@ -323,25 +393,50 @@ function Toolbar({
                     </button>
                 )}
                 {!ocultarVerificarIA && (
-                    <button
-                        className="btn btn-export"
-                        onClick={handleExport}
-                        style={{
-                            backgroundColor: '#20FB1080',
-                            color: 'white',
-                            border: 'none',
-                            padding: '12px 24px',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                        }}
-                        title="Verificar el diagrama con Inteligencia Artificial"
-                    >
-                        Verificar con IA
-                    </button>
+                    <>
+                        {cuotaRevision && (
+                            <span
+                                style={{
+                                    color: 'var(--text-h)',
+                                    fontSize: '12px',
+                                }}
+                            >
+                                Revisiones restantes: {cuotaRevision.restantes}/
+                                {cuotaRevision.limite}
+                            </span>
+                        )}
+                        <button
+                            className="btn btn-export"
+                            onClick={handleExport}
+                            disabled={verificando || limiteRevisionAlcanzado}
+                            style={{
+                                backgroundColor: '#20FB1080',
+                                color: 'white',
+                                border: 'none',
+                                padding: '12px 24px',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                cursor:
+                                    verificando || limiteRevisionAlcanzado
+                                        ? 'not-allowed'
+                                        : 'pointer',
+                                opacity:
+                                    verificando || limiteRevisionAlcanzado
+                                        ? 0.6
+                                        : 1,
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                            }}
+                            title="Verificar el diagrama con Inteligencia Artificial"
+                        >
+                            {limiteRevisionAlcanzado
+                                ? 'Límite diario alcanzado'
+                                : verificando
+                                  ? 'Verificando...'
+                                  : 'Verificar con IA'}
+                        </button>
+                    </>
                 )}
                 {/* <button className="btn btn-clear" onClick={onClear}>
                     Limpiar
