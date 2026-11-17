@@ -4,6 +4,7 @@ import { TokenContext } from '../../Context/TokenContext';
 import { UsuarioContext } from '../../Context/UsuarioContext';
 import SeccionAdmin from './SeccionAdmin';
 import SeccionEstudiante from './SeccionEstudiante';
+import SeccionProfesor from './SeccionProfesor';
 
 const DashboardInicio = () => {
     const { claveAcceso } = useContext(TokenContext);
@@ -28,6 +29,12 @@ const DashboardInicio = () => {
                 )}
                 {usuario.rol === 'admin' && (
                     <SeccionAdmin
+                        claveAcceso={claveAcceso}
+                        usuario={usuario}
+                    />
+                )}
+                {usuario.rol === 'profesor' && (
+                    <SeccionProfesor
                         claveAcceso={claveAcceso}
                         usuario={usuario}
                     />
