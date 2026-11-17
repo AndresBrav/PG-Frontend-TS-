@@ -7,6 +7,7 @@ import { TokenContext } from '../../Context/TokenContext';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import {
     calificarEntregaGrupo,
+    listarEjerciciosGrupoProfesor,
     listarSolucionesEjercicio,
 } from '../../api/gruposApi';
 import type { EntregaGrupo } from '../../types/dominio';
@@ -15,7 +16,8 @@ import { formatearFechaHora } from '../../utils/fechas';
 /**
  * /profesor/grupos/:id/ejercicios/:ejercicioId/revisar — PÁGINA de
  * revisión (no modal): lista las entregas de ese ejercicio y permite
- * calificar (puntos 0-100) y comentar SOLO esa entrega del par
+ * calificar hasta los puntos máximos del ejercicio y comentar SOLO esa
+ * entrega del par
  * (ejercicio, estudiante). La solución del estudiante se abre en el
  * tablero en modo solo lectura.
  */
@@ -31,16 +33,25 @@ const RevisarEntregas = () => {
 
     const [cargando, setCargando] = useState(true);
     const [entregas, setEntregas] = useState<EntregaGrupo[]>([]);
+    const [puntosMaximos, setPuntosMaximos] = useState<number | null>(null);
 
     const cargar = async () => {
-        if (!claveAcceso || !ejercicioId) return;
+        if (!claveAcceso || !id || !ejercicioId) return;
         setCargando(true);
+        setPuntosMaximos(null);
         try {
-            const lista = await listarSolucionesEjercicio(
-                claveAcceso,
-                ejercicioId,
+            const [lista, ejercicios] = await Promise.all([
+                listarSolucionesEjercicio(claveAcceso, ejercicioId),
+                listarEjerciciosGrupoProfesor(claveAcceso, id),
+            ]);
+            const ejercicio = ejercicios.find(
+                (item) => item.id === Number(ejercicioId),
             );
+            if (!ejercicio) {
+                throw new Error('No se encontró el ejercicio de este grupo');
+            }
             setEntregas(lista);
+            setPuntosMaximos(ejercicio.puntos);
         } catch (error) {
             if (esErrorDeSesion(error)) return;
             const mensaje = obtenerMensajeError(
@@ -56,17 +67,26 @@ const RevisarEntregas = () => {
     useEffect(() => {
         void cargar();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [claveAcceso, ejercicioId]);
+    }, [claveAcceso, id, ejercicioId]);
 
     const calificar = async (entrega: EntregaGrupo) => {
-        if (!claveAcceso) return;
+        if (!claveAcceso || puntosMaximos === null) return;
 
-        const { value } = await Swal.fire({
+        const resultado = await Swal.fire<{
+            puntos: number;
+            comentario: string;
+        }>({
             title: `Calificar a ${entrega.estudiante.username}`,
             html: `
-                <input id="puntos" type="number" min="0" max="100"
+                <input
+                    id="puntos"
+                    type="number"
+                    min="0"
+                    max="${puntosMaximos}"
                     value="${entrega.puntos_profesor ?? 0}"
-                    class="swal2-input" placeholder="Puntos (0-100)">
+                    class="swal2-input"
+                    placeholder="Puntos (máximo ${puntosMaximos})"
+                >
                 <textarea id="comentario" class="swal2-textarea"
                     placeholder="Comentario (opcional)">${
                     entrega.comentario_profesor ?? ''
@@ -76,18 +96,26 @@ const RevisarEntregas = () => {
             confirmButtonText: 'Calificar',
             cancelButtonText: 'Cancelar',
             preConfirm: () => {
-                const puntos = Number(
-                    (document.getElementById('puntos') as HTMLInputElement)
-                        ?.value,
-                );
+                const inputPuntos = document.getElementById(
+                    'puntos',
+                ) as HTMLInputElement | null;
+                if (!inputPuntos?.value.trim()) {
+                    Swal.showValidationMessage('Ingresa una puntuación');
+                    return null;
+                }
+                const puntos = Number(inputPuntos.value);
                 const comentario = (
                     document.getElementById(
                         'comentario',
                     ) as HTMLTextAreaElement
                 )?.value;
-                if (!Number.isInteger(puntos) || puntos < 0 || puntos > 100) {
+                if (
+                    !Number.isInteger(puntos) ||
+                    puntos < 0 ||
+                    puntos > puntosMaximos
+                ) {
                     Swal.showValidationMessage(
-                        'Los puntos deben ser un entero entre 0 y 100',
+                        `Los puntos deben ser un entero entre 0 y ${puntosMaximos}`,
                     );
                     return null;
                 }
@@ -95,15 +123,16 @@ const RevisarEntregas = () => {
             },
         });
 
-        if (value === null) return;
+        if (!resultado.isConfirmed || !resultado.value) return;
+        const { puntos, comentario } = resultado.value;
 
         try {
             await calificarEntregaGrupo(
                 claveAcceso,
                 ejercicioId ?? '',
                 entrega.usuario_id,
-                value.puntos,
-                value.comentario.trim() || null,
+                puntos,
+                comentario.trim() || null,
             );
             await Swal.fire({
                 icon: 'success',
@@ -147,7 +176,7 @@ const RevisarEntregas = () => {
                 <p className="mb-6 text-sm text-gray-500">
                     Cada fila es la entrega de UN estudiante en ESTE
                     ejercicio (calificar aquí no afecta a otros
-                    ejercicios).
+                    ejercicios). Puntaje máximo: {puntosMaximos ?? '—'} pts.
                 </p>
 
                 <div className="grid gap-3">
