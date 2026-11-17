@@ -63,8 +63,14 @@ const defaultLabels: Record<NodeType, string> = {
     decision: 'Condicion?',
 };
 
-let id = 0;
-const getId = () => `node_${id++}`;
+// CRÍTICO: los ids de símbolos DEBEN ser únicos para siempre. El antiguo
+// contador (`let id = 0; getId()`) se reseteaba en cada recarga, así que
+// un símbolo nuevo heredaba el id de uno ya guardado en la BD y borrar
+// uno eliminaba ambos (filter n.id !== id). El sello temporal con guion
+// nunca colisiona con los `node_N` históricos ni consigo mismo.
+let contadorNodos = 0;
+const generarIdNodo = (): string =>
+    `node-${Date.now().toString(36)}-${(contadorNodos++).toString(36)}`;
 
 function CustomEdge({
     id,
@@ -162,6 +168,13 @@ const edgeOptions = {
     },
 };
 
+// Contador para ids únicos de flechas. CRÍTICO: toda flecha DEBE tener
+// id propio; sin él, todas comparten `id: undefined` y borrar una con
+// el botón ✕ (filter e.id !== id) elimina TODAS de golpe.
+let contadorEdges = 0;
+const generarIdEdge = (): string =>
+    `edge-${Date.now().toString(36)}-${(contadorEdges++).toString(36)}`;
+
 export interface FlowEditorRef {
     addNodeAtCenter: (type: NodeType) => void;
     getFlowState: () => { nodes: Node[]; edges: Edge[]; viewport?: { x: number; y: number; zoom: number } };
@@ -249,13 +262,42 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 edges?: Edge[];
                 viewport?: { x: number; y: number; zoom: number };
             }) => {
+                let edgesSanos: Edge[] = Array.isArray(state.edges)
+                    ? state.edges
+                    : [];
                 if (state.nodes && Array.isArray(state.nodes)) {
-                    setInternalNodes(state.nodes);
-                    onNodesChange(state.nodes);
+                    // Blindaje: diagramas antiguos pueden tener ids
+                    // DUPLICADOS (el contador node_N se reseteaba en cada
+                    // recarga). Al borrar uno morían ambos. Se renombra
+                    // cada duplicado y se re-apuntan sus flechas; así el
+                    // diagrama existente se repara con la primera carga.
+                    const vistos = new Set<string>();
+                    const remapeo = new Map<string, string>();
+                    const nodosSanos = state.nodes.map((nodo) => {
+                        if (!vistos.has(nodo.id)) {
+                            vistos.add(nodo.id);
+                            return nodo;
+                        }
+                        const nuevoId = generarIdNodo();
+                        remapeo.set(nodo.id, nuevoId);
+                        return { ...nodo, id: nuevoId };
+                    });
+                    if (remapeo.size > 0) {
+                        edgesSanos = edgesSanos.map((a) => ({
+                            ...a,
+                            source: remapeo.get(a.source) ?? a.source,
+                            target: remapeo.get(a.target) ?? a.target,
+                        }));
+                    }
+                    setInternalNodes(nodosSanos);
+                    onNodesChange(nodosSanos);
                 }
-                if (state.edges && Array.isArray(state.edges)) {
-                    const edgesWithDelete = state.edges.map((edge) => ({
+                if (Array.isArray(state.edges)) {
+                    const edgesWithDelete = edgesSanos.map((edge) => ({
                         ...edge,
+                        // Blindaje: flechas guardadas antes del fix pueden
+                        // llegar sin id; sin él el borrador las confunde.
+                        id: edge.id ?? generarIdEdge(),
                         data: { ...edge.data, onDeleteEdge: deleteEdgeById },
                     }));
                     setInternalEdges(edgesWithDelete);
@@ -292,6 +334,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 }
 
                 const newEdge = {
+                    id: generarIdEdge(),
                     ...params,
                     ...edgeOptions,
                     label,
@@ -416,7 +459,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 };
 
                 const newNode: Node = {
-                    id: getId(),
+                    id: generarIdNodo(),
                     type,
                     position,
                     data: { label: defaultLabels[type], type },
@@ -440,7 +483,7 @@ const FlowEditor = forwardRef<FlowEditorRef, FlowEditorProps>(
                 const offset = (Math.random() - 0.5) * 60;
 
                 const newNode: Node = {
-                    id: getId(),
+                    id: generarIdNodo(),
                     type,
                     position: {
                         x: centerPosition.x + offset,
