@@ -1,5 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
-import { normVar } from './index';
+import { ejecutarPseudo, normVar } from './index';
 
 /**
  * Generador de pseudocódigo PSeInt a partir del diagrama de flujo del
@@ -254,6 +254,77 @@ export function generarCodigoDeDiagrama(
             idRombo
         );
     };
+
+    // ── Pre-validación del CONTENIDO de cada símbolo ────────────────────
+    // Se valida el texto de TODOS los símbolos ANTES del DFS de
+    // conexiones, para que un error de contenido (ej. una comilla sin
+    // cerrar en un Datos) no quede oculto detrás de un error de flechas
+    // ("no tiene flecha de salida"). Se reutiliza el compilador PSeInt
+    // real: cada línea se compila sola y los errores pedagógicos con
+    // "línea N" se limpian del envoltorio de prueba.
+    const NOMBRE_SIMBOLO: Record<string, string> = {
+        data: 'de entrada/salida',
+        process: 'de proceso',
+        decision: 'de decisión (rombo)',
+    };
+
+    /** Compila `linea` sola y convierte cualquier error en ErrorDiagrama. */
+    const validarContenido = (linea: string, nodo: NodoG): void => {
+        try {
+            ejecutarPseudo(`Algoritmo A\n${linea}\nFinAlgoritmo`);
+        } catch (err) {
+            const bruto = err instanceof Error ? err.message : String(err);
+            // El envoltorio de prueba altera los números de línea y puede
+            // decir "línea 2": quitar ese prefijo, dejar solo la causa.
+            const causa = bruto
+                .replace(
+                    /^Error de sintaxis en la línea \d+:\s*/,
+                    'Error de sintaxis: '
+                )
+                .replace(
+                    /^Error de sintaxis en la línea \d+\.\s*/,
+                    'Error de sintaxis: no pude reconocer la instrucción.'
+                )
+                .replace(/^Error de sintaxis:\s*/, 'Error de sintaxis: ');
+            const nombre =
+                NOMBRE_SIMBOLO[nodo.tipo] ?? `de tipo ${nodo.tipo}`;
+            throw new ErrorDiagrama(
+                `En el símbolo ${nombre} "${nodo.etiqueta}": ${causa}`,
+                nodo.id
+            );
+        }
+    };
+
+    for (const n of nodes) {
+        const nodo = nodos.get(n.id);
+        if (!nodo) continue;
+        switch (nodo.tipo) {
+            case 'data':
+                // instruccionDatos ya lanza ErrorDiagrama con nodeId si el
+                // texto no empieza con Leer/Escribir (surfece aquí, antes
+                // de las flechas).
+                validarContenido(instruccionDatos(nodo), nodo);
+                break;
+            case 'process':
+                // El DFS avisa por separado si el Proceso está vacío.
+                if (nodo.etiqueta) {
+                    validarContenido(nodo.etiqueta, nodo);
+                }
+                break;
+            case 'decision':
+                // La condición se valida envolviéndola en un Si/FinSi
+                // (los errores de la condición llegan con "línea 2").
+                if (nodo.etiqueta) {
+                    validarContenido(
+                        `Si ${nodo.etiqueta} Entonces\nFinSi`,
+                        nodo
+                    );
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
     // ── Caminante lineal ────────────────────────────────────────────────
     // Emite las instrucciones del camino hasta topar con un nodo de

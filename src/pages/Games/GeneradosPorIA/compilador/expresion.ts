@@ -66,6 +66,11 @@ class Expresion {
             const esO = normVar(this.actual()?.val ?? '') === 'o';
             this.pos++;
             const der = this.and();
+            if (der === '') {
+                this.error(
+                    `falta una expresión después de '${esO ? 'O' : 'Y'}'.`
+                );
+            }
             izq = `(${izq} ${esO ? '||' : '&&'} ${der})`;
         }
         return izq;
@@ -77,6 +82,11 @@ class Expresion {
             const esY = normVar(this.actual()?.val ?? '') === 'y';
             this.pos++;
             const der = this.comparacion();
+            if (der === '') {
+                this.error(
+                    `falta una expresión después de '${esY ? 'Y' : 'O'}'.`
+                );
+            }
             izq = `(${izq} ${esY ? '&&' : '||'} ${der})`;
         }
         return izq;
@@ -103,6 +113,9 @@ class Expresion {
             const op = this.actual()?.val ?? '';
             this.pos++;
             const der = this.suma();
+            if (der === '') {
+                this.error(`falta una expresión después de '${op}'.`);
+            }
             let jsOp: string;
             if (op === '<>') {
                 jsOp = '!==';
@@ -128,6 +141,9 @@ class Expresion {
             const op = this.actual()?.val ?? '';
             this.pos++;
             const der = this.termino();
+            if (der === '') {
+                this.error(`falta una expresión después de '${op}'.`);
+            }
             izq = `(${izq} ${op} ${der})`;
         }
         return izq;
@@ -149,6 +165,11 @@ class Expresion {
             }
             this.pos++;
             const der = this.potencia();
+            if (der === '') {
+                this.error(
+                    `falta una expresión después de '${t.val}'.`
+                );
+            }
             if (t.tipo === 'word' && normVar(t.val) === 'div') {
                 izq = `Math.floor(${izq} / ${der})`;
             } else if (t.tipo === 'word' && normVar(t.val) === 'mod') {
@@ -165,6 +186,9 @@ class Expresion {
         if (this.actual()?.val === '^') {
             this.pos++;
             const der = this.potencia();
+            if (der === '') {
+                this.error("falta una expresión después de '^'.");
+            }
             return `(${izq} ** ${der})`;
         }
         return izq;
@@ -177,11 +201,19 @@ class Expresion {
         }
         if (t.tipo === 'word' && normVar(t.val) === 'no') {
             this.pos++;
-            return `!(${this.unario()})`;
+            const r = this.unario();
+            if (r === '') {
+                this.error("falta una expresión después de 'NO'.");
+            }
+            return `!(${r})`;
         }
         if (t.tipo === 'punt' && (t.val === '-' || t.val === '+')) {
             this.pos++;
-            return `(${t.val}(${this.unario()}))`;
+            const r = this.unario();
+            if (r === '') {
+                this.error(`falta una expresión después de '${t.val}'.`);
+            }
+            return `(${t.val}(${r}))`;
         }
         return this.primario();
     }
