@@ -52,6 +52,7 @@ interface InfoEjercicioGrupo {
     calificado: boolean;
     puntosProfesor: number | null;
     comentario: string | null;
+    estudiante?: string;
 }
 
 const DEFAULT_INSTRUCCIONES = 'Diseña un programa ';
@@ -106,7 +107,11 @@ const EditingBoard: React.FC = () => {
     const soloLectura =
         esModoGrupo && (esRevision || infoGrupo?.vencido === true);
     const rutaVolver =
-        esModoGrupo && grupoId ? `/grupos/${grupoId}` : '/ejercicios-ia';
+        esRevision && grupoId && ejercicioId
+            ? `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=pseudocodigo`
+            : esModoGrupo && grupoId
+              ? `/grupos/${grupoId}`
+              : '/ejercicios-ia';
 
     const [enunciado, setEnunciado] = useState<string>(
         locationState?.juegoDescripcion || DEFAULT_INSTRUCCIONES
@@ -220,6 +225,7 @@ const EditingBoard: React.FC = () => {
                         calificado: entrega.calificado,
                         puntosProfesor: entrega.puntos_profesor,
                         comentario: entrega.comentario_profesor,
+                        estudiante: entrega.estudiante.username,
                     });
                     aplicarEstado(entrega.estado_tablero);
                 } else {
@@ -1119,7 +1125,8 @@ const EditingBoard: React.FC = () => {
                                             color: '#93C5FD',
                                         }}
                                     >
-                                        👁 Modo revisión (solo lectura)
+                                        👁 Solución de{' '}
+                                        {infoGrupo.estudiante} (solo lectura)
                                     </span>
                                 )}
                             </div>

@@ -644,7 +644,11 @@ function DesignBoard() {
                     onEjecutar={() => void handleEjecutar()}
                     ejecutando={ejecutando}
                     rutaVolver={
-                        esModoGrupo && grupoId ? `/grupos/${grupoId}` : undefined
+                        esRevision && grupoId && ejercicioId
+                            ? `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=diagrama`
+                            : esModoGrupo && grupoId
+                              ? `/grupos/${grupoId}`
+                              : undefined
                     }
                     ocultarVerificarIA={esModoGrupo}
                 />

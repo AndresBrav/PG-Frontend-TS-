@@ -502,17 +502,27 @@ const GrupoDetalle = () => {
 /** Lista simple de inscritos (el profesor la ve al final). */
 const EstudiantesListado = ({ grupoId }: { grupoId: string }) => {
     const { claveAcceso } = useContext(TokenContext);
-    const [estudiantes, setEstudiantes] = useState<EstudianteGrupo[]>([]);
+    const [grupo, setGrupo] = useState<{
+        codigo: string;
+        estudiantes: EstudianteGrupo[];
+    } | null>(null);
     const [cargando, setCargando] = useState(true);
 
     useEffect(() => {
         const cargar = async () => {
             if (!claveAcceso) return;
             try {
-                const grupo = await obtenerGrupoProfesor(claveAcceso, grupoId);
-                setEstudiantes(grupo?.estudiantes ?? []);
-            } catch {
-                // silencioso: no es crítico
+                setGrupo(await obtenerGrupoProfesor(claveAcceso, grupoId));
+            } catch (error) {
+                if (esErrorDeSesion(error)) return;
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: obtenerMensajeError(
+                        error,
+                        'No se pudo cargar la información del grupo',
+                    ),
+                });
             } finally {
                 setCargando(false);
             }
@@ -520,26 +530,44 @@ const EstudiantesListado = ({ grupoId }: { grupoId: string }) => {
         void cargar();
     }, [claveAcceso, grupoId]);
 
-    if (cargando || estudiantes.length === 0) return null;
+    if (cargando || !grupo) return null;
 
     return (
         <div className="mt-8">
-            <h2 className="mb-3 text-xl font-bold text-white">
-                👥 Estudiantes inscritos ({estudiantes.length})
-            </h2>
-            <div className="flex flex-wrap gap-2">
-                {estudiantes.map((est) => (
-                    <span
-                        key={est.id}
-                        className="rounded-full bg-white/5 px-4 py-1.5 text-sm text-gray-300"
-                    >
-                        {est.username}{' '}
-                        <span className="text-xs text-gray-500">
-                            · {est.codigo}
-                        </span>
-                    </span>
-                ))}
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#FF7C02]/30 bg-[#FF7C02]/10 p-5">
+                <div>
+                    <h2 className="text-lg font-bold text-white">
+                        Código para unirse al grupo
+                    </h2>
+                    <p className="mt-1 text-sm text-gray-300">
+                        Comparte este código con tus estudiantes.
+                    </p>
+                </div>
+                <span className="rounded-xl bg-black/30 px-5 py-2 font-mono text-2xl font-bold tracking-[0.3em] text-[#FF7C02]">
+                    {grupo.codigo}
+                </span>
             </div>
+
+            {grupo.estudiantes.length > 0 && (
+                <>
+                    <h2 className="mb-3 text-xl font-bold text-white">
+                        👥 Estudiantes inscritos ({grupo.estudiantes.length})
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                        {grupo.estudiantes.map((est) => (
+                            <span
+                                key={est.id}
+                                className="rounded-full bg-white/5 px-4 py-1.5 text-sm text-gray-300"
+                            >
+                                {est.username}{' '}
+                                <span className="text-xs text-gray-500">
+                                    · {est.codigo}
+                                </span>
+                            </span>
+                        ))}
+                    </div>
+                </>
+            )}
         </div>
     );
 };
