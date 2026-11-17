@@ -1,11 +1,12 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell';
 import TarjetaResumen from '../../components/ui/TarjetaResumen';
 import { TokenContext } from '../../Context/TokenContext';
 import { UsuarioContext } from '../../Context/UsuarioContext';
 import {
     listarEstudiantesAdmin,
+    listarGruposAdmin,
     obtenerEstadisticasAdmin,
 } from '../../api/adminApi';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
@@ -13,14 +14,16 @@ import useCerrarSesion from '../../hooks/useCerrarSesion';
 import type {
     EstadisticasAdmin,
     EstudianteAdmin,
+    GrupoAdmin,
 } from '../../types/dominio';
 import { formatearFechaHora, formatearNumero } from '../../utils/fechas';
 
-type TabAdmin = 'resumen' | 'estudiantes';
+type TabAdmin = 'resumen' | 'estudiantes' | 'grupos';
 
 const TABS: { id: TabAdmin; nombre: string }[] = [
     { id: 'resumen', nombre: 'Resumen' },
     { id: 'estudiantes', nombre: 'Estudiantes' },
+    { id: 'grupos', nombre: 'Grupos' },
 ];
 
 const PanelAdmin = () => {
@@ -38,6 +41,7 @@ const PanelAdmin = () => {
     const [estadisticas, setEstadisticas] =
         useState<EstadisticasAdmin | null>(null);
     const [estudiantes, setEstudiantes] = useState<EstudianteAdmin[]>([]);
+    const [grupos, setGrupos] = useState<GrupoAdmin[]>([]);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -61,13 +65,16 @@ const PanelAdmin = () => {
         setError(null);
 
         try {
-            const [datosEstadisticas, datosEstudiantes] = await Promise.all([
-                obtenerEstadisticasAdmin(claveAcceso),
-                listarEstudiantesAdmin(claveAcceso),
-            ]);
+            const [datosEstadisticas, datosEstudiantes, datosGrupos] =
+                await Promise.all([
+                    obtenerEstadisticasAdmin(claveAcceso),
+                    listarEstudiantesAdmin(claveAcceso),
+                    listarGruposAdmin(claveAcceso),
+                ]);
 
             setEstadisticas(datosEstadisticas);
             setEstudiantes(datosEstudiantes);
+            setGrupos(datosGrupos);
         } catch (errorDesconocido) {
             if (manejarErrorSesion(errorDesconocido)) return;
 
@@ -146,6 +153,8 @@ const PanelAdmin = () => {
                         {tab === 'estudiantes' && (
                             <TablaEstudiantes estudiantes={estudiantes} />
                         )}
+
+                        {tab === 'grupos' && <TablaGrupos grupos={grupos} />}
                     </div>
                 )}
             </main>
@@ -387,6 +396,68 @@ const TablaEstudiantes = ({
                     ))}
                 </div>
             </>
+        )}
+    </section>
+);
+
+const TablaGrupos = ({ grupos }: { grupos: GrupoAdmin[] }) => (
+    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <h2 className="text-xl font-bold text-white">Grupos</h2>
+                <p className="mt-1 text-sm text-gray-400">
+                    Consulta el avance de los estudiantes de cada grupo.
+                </p>
+            </div>
+            <span className="rounded-full bg-purple-400/15 px-3 py-1 text-xs font-bold text-purple-300">
+                {grupos.length}
+            </span>
+        </div>
+
+        {grupos.length === 0 ? (
+            <p className="mt-6 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
+                Todavía no hay grupos registrados.
+            </p>
+        ) : (
+            <div className="mt-5 overflow-x-auto">
+                <table className="w-full min-w-[680px] border-separate border-spacing-y-2 text-left text-sm">
+                    <thead>
+                        <tr className="text-xs uppercase tracking-wider text-gray-400">
+                            <th className="px-3 py-2">Grupo</th>
+                            <th className="px-3 py-2">Profesor</th>
+                            <th className="px-3 py-2">Estudiantes</th>
+                            <th className="px-3 py-2">Ejercicios</th>
+                            <th className="px-3 py-2">Reporte</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {grupos.map((grupo) => (
+                            <tr key={grupo.id} className="bg-[#181818]">
+                                <td className="rounded-l-xl px-3 py-3 font-semibold text-white">
+                                    {grupo.nombre}
+                                </td>
+                                <td className="px-3 py-3 text-gray-300">
+                                    {grupo.profesor}
+                                </td>
+                                <td className="px-3 py-3 text-gray-300">
+                                    {grupo.estudiantes}
+                                </td>
+                                <td className="px-3 py-3 text-gray-300">
+                                    {grupo.ejercicios}
+                                </td>
+                                <td className="rounded-r-xl px-3 py-3">
+                                    <Link
+                                        to={`/grupos/${grupo.id}/reporte`}
+                                        className="font-semibold text-[#FF7C02] hover:underline"
+                                    >
+                                        Ver reporte →
+                                    </Link>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         )}
     </section>
 );

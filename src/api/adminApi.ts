@@ -2,7 +2,18 @@ import { api, configConToken } from './http';
 import type {
     EstadisticasAdmin,
     EstudianteAdmin,
+    GrupoAdmin,
 } from '../types/dominio';
+
+export const listarGruposAdmin = async (
+    clave: string,
+): Promise<GrupoAdmin[]> => {
+    const { data } = await api.get<GrupoAdmin[]>(
+        '/admin/grupos',
+        configConToken(clave),
+    );
+    return data;
+};
 
 export const obtenerEstadisticasAdmin = async (
     clave: string,

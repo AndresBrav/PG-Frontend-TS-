@@ -246,12 +246,20 @@ const GrupoDetalle = () => {
                         </h1>
                     </div>
                     {esProfesor && (
-                        <Link
-                            to={`/profesor/grupos/${id}/ejercicios/nuevo`}
-                            className="rounded-xl bg-[#FF7C02] px-5 py-2 font-semibold text-black hover:brightness-110"
-                        >
-                            + Nuevo ejercicio
-                        </Link>
+                        <div className="flex flex-wrap gap-2">
+                            <Link
+                                to={`/grupos/${id}/reporte`}
+                                className="rounded-xl border border-white/15 bg-white/5 px-5 py-2 font-semibold text-white hover:bg-white/10"
+                            >
+                                📊 Reporte de avance
+                            </Link>
+                            <Link
+                                to={`/profesor/grupos/${id}/ejercicios/nuevo`}
+                                className="rounded-xl bg-[#FF7C02] px-5 py-2 font-semibold text-black hover:brightness-110"
+                            >
+                                + Nuevo ejercicio
+                            </Link>
+                        </div>
                     )}
                 </div>
 

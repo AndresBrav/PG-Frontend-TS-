@@ -56,7 +56,75 @@ export interface EstudianteAdmin {
     completados: number;
 }
 
+export interface GrupoAdmin {
+    id: number;
+    nombre: string;
+    createdAt: string;
+    profesor: string;
+    estudiantes: number;
+    ejercicios: number;
+}
+
 // ===================== GRUPOS (profesor + estudiante) =====================
+
+export interface MetricasProgresoGrupo {
+    ejerciciosTotales: number;
+    completados: number;
+    enProgreso: number;
+    sinIniciar: number;
+    calificados: number;
+    pendientesCalificar: number;
+    puntosCalificados: number;
+    puntosMaximosCalificados: number;
+    avancePorcentaje: number;
+    ultimaActividad: string | null;
+}
+
+export interface ReporteGrupo {
+    grupo: {
+        id: number;
+        nombre: string;
+        createdAt: string;
+        profesor: { id: number; username: string };
+    };
+    resumen: {
+        estudiantes: number;
+        ejercicios: number;
+        tareasPosibles: number;
+        completados: number;
+        enProgreso: number;
+        sinIniciar: number;
+        calificados: number;
+        pendientesCalificar: number;
+        avancePorcentaje: number;
+    };
+    temarios: Array<{ id: number; nombre: string; orden: number }>;
+    ejercicios: Array<{
+        id: number;
+        titulo: string;
+        temario_id: number;
+        temario: string;
+        puntos: number;
+        fecha_limite: string | null;
+        iniciados: number;
+        completados: number;
+        enProgreso: number;
+        sinIniciar: number;
+        calificados: number;
+        pendientesCalificar: number;
+    }>;
+    estudiantes: Array<
+        {
+            id: number;
+            codigo: string;
+            username: string;
+            fecha_union: string | null;
+            porTemario: Array<
+                MetricasProgresoGrupo & { temario_id: number }
+            >;
+        } & MetricasProgresoGrupo
+    >;
+}
 
 /** Grupo visto por el profesor (con conteo de inscritos). */
 export interface GrupoProfesor {
