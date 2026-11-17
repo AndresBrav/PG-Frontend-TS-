@@ -1,4 +1,10 @@
-import { useCallback, useState, useRef, useEffect, useContext } from 'react';
+import {
+    useCallback,
+    useState,
+    useRef,
+    useEffect,
+    useContext,
+} from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import {
     useLocation,
@@ -38,6 +44,11 @@ import {
 } from './compilador';
 import Swal from 'sweetalert2';
 import './app.css';
+import CasosPruebaPanel from '../../Grupos/CasosPruebaPanel';
+import type {
+    CasoPruebaGrupo,
+    ResultadoCasoPrueba,
+} from '../../../types/dominio';
 
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
@@ -57,6 +68,7 @@ interface InfoEjercicioGrupo {
     calificado: boolean;
     puntosProfesor: number | null;
     comentario: string | null;
+    casosPrueba?: CasoPruebaGrupo[];
     estudiante?: string;
 }
 
@@ -82,6 +94,14 @@ function DesignBoard() {
     const esRevision = esModoGrupo && revisarEstudianteId !== null;
     const [infoGrupo, setInfoGrupo] = useState<InfoEjercicioGrupo | null>(
         null
+    );
+    const [enunciadoVisible, setEnunciadoVisible] = useState(false);
+    const [resultadoCasosPrueba, setResultadoCasosPrueba] =
+        useState<ResultadoCasoPrueba[] | null>(null);
+    const actualizarResultadoCasosPrueba = useCallback(
+        (resultado: ResultadoCasoPrueba[] | null) =>
+            setResultadoCasosPrueba(resultado),
+        [],
     );
     const [entregando, setEntregando] = useState(false);
     // Solo lectura: revisión del profesor o ejercicio vencido.
@@ -154,6 +174,7 @@ function DesignBoard() {
     useEffect(() => {
         if (!esModoGrupo || !claveAcceso || !grupoId || !ejercicioId) return;
 
+        setEnunciadoVisible(false);
         let activo = true;
 
         const aplicarEstado = (estadoTablero: string | null) => {
@@ -223,6 +244,7 @@ function DesignBoard() {
                         calificado: abierto.entrega.calificado,
                         puntosProfesor: abierto.entrega.puntos_profesor,
                         comentario: abierto.entrega.comentario_profesor,
+                        casosPrueba: abierto.ejercicio.casos_prueba ?? [],
                     });
                     aplicarEstado(abierto.entrega.estado_tablero);
                 }
@@ -305,6 +327,7 @@ function DesignBoard() {
 
     // Auto-guardado con debounce de 1.5s ante cualquier cambio en el tablero
     const handleFlowChange = useCallback(() => {
+        setResultadoCasosPrueba(null);
         setEstadoGuardado('sin_guardar');
         // Editar el diagrama invalida cualquier resaltado de ejecución
         flowEditorRef.current?.setNodeHighlight(null, null);
@@ -520,7 +543,8 @@ function DesignBoard() {
                 claveAcceso,
                 grupoId,
                 ejercicioId,
-                JSON.stringify(flowData)
+                JSON.stringify(flowData),
+                resultadoCasosPrueba,
             );
             setInfoGrupo((prev) =>
                 prev
@@ -654,10 +678,10 @@ function DesignBoard() {
                 {esModoGrupo && infoGrupo && (
                     <div
                         style={{
-                            margin: '10px',
-                            padding: '12px 16px',
+                            margin: '5px 10px',
+                            padding: '7px 12px',
                             backgroundColor: 'rgba(217, 217, 217, 0.3)',
-                            borderRadius: '10px',
+                            borderRadius: '8px',
                             borderLeft: '4px solid #FF7C02',
                         }}
                     >
@@ -665,45 +689,81 @@ function DesignBoard() {
                             style={{
                                 display: 'flex',
                                 flexWrap: 'wrap',
-                                alignItems: 'flex-start',
+                                alignItems: 'center',
                                 justifyContent: 'space-between',
-                                gap: '12px',
+                                gap: '8px',
                             }}
                         >
                             <div style={{ minWidth: 0, flex: 1 }}>
-                                <h3
-                                    style={{
-                                        margin: 0,
-                                        color: '#FF7C02',
-                                        fontSize: '18px',
-                                    }}
-                                >
-                                    {infoGrupo.titulo}
-                                </h3>
-                                <p
-                                    style={{
-                                        margin: '6px 0 0',
-                                        color: '#ffffff',
-                                        lineHeight: '1.5',
-                                        whiteSpace: 'pre-line',
-                                    }}
-                                >
-                                    {infoGrupo.enunciado}
-                                </p>
                                 <div
                                     style={{
                                         display: 'flex',
                                         flexWrap: 'wrap',
+                                        alignItems: 'center',
                                         gap: '8px',
-                                        marginTop: '8px',
-                                        fontSize: '12px',
+                                    }}
+                                >
+                                    <h3
+                                        style={{
+                                            margin: 0,
+                                            color: '#FF7C02',
+                                            fontSize: '15px',
+                                        }}
+                                    >
+                                        {infoGrupo.titulo}
+                                    </h3>
+                                    <button
+                                        type="button"
+                                        aria-expanded={enunciadoVisible}
+                                        onClick={() =>
+                                            setEnunciadoVisible(
+                                                (visible) => !visible,
+                                            )
+                                        }
+                                        style={{
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                            borderRadius: '6px',
+                                            padding: '3px 8px',
+                                            background: 'rgba(0,0,0,0.18)',
+                                            color: '#ddd',
+                                            fontSize: '11px',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        {enunciadoVisible
+                                            ? 'Ocultar enunciado'
+                                            : 'Ver enunciado'}
+                                    </button>
+                                </div>
+                                {enunciadoVisible && (
+                                    <p
+                                        style={{
+                                            margin: '5px 0 0',
+                                            maxHeight: '100px',
+                                            overflowY: 'auto',
+                                            color: '#ffffff',
+                                            lineHeight: '1.4',
+                                            fontSize: '13px',
+                                            whiteSpace: 'pre-line',
+                                        }}
+                                    >
+                                        {infoGrupo.enunciado}
+                                    </p>
+                                )}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '6px',
+                                        marginTop: '5px',
+                                        fontSize: '11px',
                                     }}
                                 >
                                     <span
                                         style={{
                                             background: 'rgba(0,0,0,0.25)',
                                             borderRadius: '999px',
-                                            padding: '3px 10px',
+                                            padding: '2px 8px',
                                             color: '#ddd',
                                         }}
                                     >
@@ -719,7 +779,7 @@ function DesignBoard() {
                                                 background:
                                                     'rgba(255,124,2,0.18)',
                                                 borderRadius: '999px',
-                                                padding: '3px 10px',
+                                                padding: '2px 8px',
                                                 color: '#FFB86C',
                                             }}
                                         >
@@ -737,7 +797,7 @@ function DesignBoard() {
                                                     background:
                                                         'rgba(39,167,69,0.18)',
                                                     borderRadius: '999px',
-                                                    padding: '3px 10px',
+                                                    padding: '2px 8px',
                                                     color: '#7DE08A',
                                                 }}
                                             >
@@ -751,7 +811,7 @@ function DesignBoard() {
                                                 background:
                                                     'rgba(59,130,246,0.18)',
                                                 borderRadius: '999px',
-                                                padding: '3px 10px',
+                                                padding: '2px 8px',
                                                 color: '#93C5FD',
                                             }}
                                         >
@@ -965,6 +1025,32 @@ function DesignBoard() {
                         </div>
                     </div>
                 )}
+                {esModoGrupo &&
+                    !esRevision &&
+                    infoGrupo?.casosPrueba &&
+                    infoGrupo.casosPrueba.length > 0 && (
+                        <CasosPruebaPanel
+                            codigo={() => {
+                                const flowData =
+                                    flowEditorRef.current?.getFlowState();
+                                if (!flowData) {
+                                    throw new Error(
+                                        'No se pudo leer el diagrama actual.',
+                                    );
+                                }
+                                return generarCodigoDeDiagrama(
+                                    flowData.nodes,
+                                    flowData.edges,
+                                ).codigo;
+                            }}
+                            codigoVersion={JSON.stringify([nodes, edges])}
+                            casosPrueba={infoGrupo.casosPrueba}
+                            deshabilitado={soloLectura || entregando}
+                            onResultadosChange={
+                                actualizarResultadoCasosPrueba
+                            }
+                        />
+                    )}
             </div>
         </ReactFlowProvider>
     );

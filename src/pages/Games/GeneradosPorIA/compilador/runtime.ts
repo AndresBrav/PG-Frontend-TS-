@@ -186,6 +186,9 @@ function convertir(valor: unknown, tipo: string): unknown {
     if (tipo === 'cadena' || tipo === 'texto' || tipo === 'caracter') {
         return v;
     }
+    if (/^(verdadero|falso|true|false)$/i.test(v.trim())) {
+        return /^(verdadero|true)$/i.test(v.trim());
+    }
     const flexible = parseFloat(v.replace(',', '.'));
     return Number.isNaN(flexible) ? v : flexible;
 }

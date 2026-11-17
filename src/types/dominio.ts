@@ -164,6 +164,19 @@ export interface TemarioGrupo {
 }
 
 /** Ejercicio de grupo creado por el profesor. */
+export interface CasoPruebaGrupo {
+    entradas: string[];
+    salidas_esperadas: string[];
+}
+
+/** Resultado reportado por el navegador al entregar el ejercicio. */
+export interface ResultadoCasoPrueba {
+    indice: number;
+    aprobado: boolean;
+    salida_obtenida: string[];
+    error: string | null;
+}
+
 export interface EjercicioGrupo {
     id: number;
     grupo_id: number;
@@ -173,6 +186,7 @@ export interface EjercicioGrupo {
     tipo: 'diagrama' | 'pseudocodigo';
     puntos: number;
     fecha_limite: string | null;
+    casos_prueba?: CasoPruebaGrupo[] | null;
     createdAt: string;
     /** Vista del profesor: cuántos entregaron / completaron. */
     entregas?: number;
@@ -209,6 +223,7 @@ export interface EntregaGrupo {
     id: number;
     usuario_id: number;
     estado_tablero: string | null;
+    resultado_casos_prueba: ResultadoCasoPrueba[] | null;
     completado: boolean;
     puntos: number;
     calificado: boolean;

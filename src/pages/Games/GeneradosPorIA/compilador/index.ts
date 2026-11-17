@@ -34,5 +34,6 @@ export { normVar, preprocesar, tokenizar } from './tokenizador';
 export { Expresion, TIPOS_PSEINT } from './expresion';
 export { Compilador, ejecutarPseudo } from './compilador';
 export { ejecutarPseudocodigo } from './runtime';
+export { ejecutarCasosPrueba } from './casosPrueba';
 export { generarCodigoDeDiagrama, ErrorDiagrama } from './diagramaACodigo';
 export type { CodigoDeDiagrama } from './diagramaACodigo';

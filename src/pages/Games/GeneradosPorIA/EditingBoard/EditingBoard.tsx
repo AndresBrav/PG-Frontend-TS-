@@ -39,6 +39,11 @@ import {
 } from '../../../../api/gruposApi';
 import { obtenerMensajeError } from '../../../../api/http';
 import '../app.css';
+import CasosPruebaPanel from '../../../Grupos/CasosPruebaPanel';
+import type {
+    CasoPruebaGrupo,
+    ResultadoCasoPrueba,
+} from '../../../../types/dominio';
 
 interface LocationState {
     juegoId?: number;
@@ -54,6 +59,7 @@ interface InfoEjercicioGrupo {
     calificado: boolean;
     puntosProfesor: number | null;
     comentario: string | null;
+    casosPrueba?: CasoPruebaGrupo[];
     estudiante?: string;
 }
 
@@ -103,6 +109,13 @@ const EditingBoard: React.FC = () => {
     const esRevision = esModoGrupo && revisarEstudianteId !== null;
     const [infoGrupo, setInfoGrupo] = useState<InfoEjercicioGrupo | null>(
         null
+    );
+    const [resultadoCasosPrueba, setResultadoCasosPrueba] =
+        useState<ResultadoCasoPrueba[] | null>(null);
+    const actualizarResultadoCasosPrueba = useCallback(
+        (resultado: ResultadoCasoPrueba[] | null) =>
+            setResultadoCasosPrueba(resultado),
+        [],
     );
     const [entregando, setEntregando] = useState(false);
     // Solo lectura: revisión del profesor o ejercicio vencido.
@@ -227,6 +240,7 @@ const EditingBoard: React.FC = () => {
                         calificado: entrega.calificado,
                         puntosProfesor: entrega.puntos_profesor,
                         comentario: entrega.comentario_profesor,
+                        casosPrueba: [],
                         estudiante: entrega.estudiante.username,
                     });
                     aplicarEstado(entrega.estado_tablero);
@@ -246,6 +260,7 @@ const EditingBoard: React.FC = () => {
                         calificado: abierto.entrega.calificado,
                         puntosProfesor: abierto.entrega.puntos_profesor,
                         comentario: abierto.entrega.comentario_profesor,
+                        casosPrueba: abierto.ejercicio.casos_prueba ?? [],
                     });
                     if (abierto.ejercicio.enunciado) {
                         setEnunciado(abierto.ejercicio.enunciado);
@@ -342,6 +357,7 @@ const EditingBoard: React.FC = () => {
 
     const handleCodeChange = (nuevoCodigo: string) => {
         if (soloLectura) return;
+        setResultadoCasosPrueba(null);
         setCode(nuevoCodigo);
         setEstadoGuardado('sin_guardar');
         // Al editar, ya no corresponde resaltar línea de ejecución
@@ -373,6 +389,7 @@ const EditingBoard: React.FC = () => {
             }
 
             const plantilla = obtenerCodigoPlantilla(enunciado);
+            setResultadoCasosPrueba(null);
             setCode(plantilla);
             setConsoleOutput([]);
 
@@ -701,7 +718,8 @@ const EditingBoard: React.FC = () => {
                 claveAcceso,
                 grupoId,
                 ejercicioId,
-                code
+                code,
+                resultadoCasosPrueba,
             );
             setInfoGrupo((prev) =>
                 prev
@@ -1512,6 +1530,20 @@ const EditingBoard: React.FC = () => {
                         />
                     </div>
                 </div>
+                {esModoGrupo &&
+                    !esRevision &&
+                    infoGrupo?.casosPrueba &&
+                    infoGrupo.casosPrueba.length > 0 && (
+                        <CasosPruebaPanel
+                            codigo={code}
+                            codigoVersion={code}
+                            casosPrueba={infoGrupo.casosPrueba}
+                            deshabilitado={soloLectura || entregando}
+                            onResultadosChange={
+                                actualizarResultadoCasosPrueba
+                            }
+                        />
+                    )}
             </div>
 
             {/* Modal de Guia Rapida de Pseudocodigo (PseInt) */}

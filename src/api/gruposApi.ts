@@ -4,6 +4,7 @@ import type {
     EjercicioGrupo,
     EntregaGrupo,
     EstudianteGrupo,
+    CasoPruebaGrupo,
     GrupoEstudiante,
     GrupoProfesor,
     RankingGrupo,
@@ -110,6 +111,7 @@ export interface DatosNuevoEjercicio {
     tipo: 'diagrama' | 'pseudocodigo';
     puntos: number;
     fecha_limite?: string | null;
+    casos_prueba?: CasoPruebaGrupo[];
 }
 
 export const crearEjercicioGrupo = async (
@@ -281,6 +283,7 @@ export const completarEjercicioGrupo = async (
     grupoId: number | string,
     ejercicioId: number | string,
     estadoTablero: string | null,
+    resultadoCasosPrueba: EntregaGrupo['resultado_casos_prueba'] = null,
 ): Promise<{ completado: boolean; puntosGanados: number; puntos: number }> => {
     const { data } = await api.post<{
         completado: boolean;
@@ -288,7 +291,10 @@ export const completarEjercicioGrupo = async (
         puntos: number;
     }>(
         `/estudiante/grupos/${grupoId}/ejercicios/${ejercicioId}/completar`,
-        { estado_tablero: estadoTablero },
+        {
+            estado_tablero: estadoTablero,
+            resultado_casos_prueba: resultadoCasosPrueba,
+        },
         configConToken(clave),
     );
     return data;

@@ -10,7 +10,11 @@ import {
     listarEjerciciosGrupoProfesor,
     listarSolucionesEjercicio,
 } from '../../api/gruposApi';
-import type { EntregaGrupo } from '../../types/dominio';
+import type {
+    CasoPruebaGrupo,
+    EntregaGrupo,
+    ResultadoCasoPrueba,
+} from '../../types/dominio';
 import { formatearFechaHora } from '../../utils/fechas';
 
 /**
@@ -34,6 +38,7 @@ const RevisarEntregas = () => {
     const [cargando, setCargando] = useState(true);
     const [entregas, setEntregas] = useState<EntregaGrupo[]>([]);
     const [puntosMaximos, setPuntosMaximos] = useState<number | null>(null);
+    const [casosPrueba, setCasosPrueba] = useState<CasoPruebaGrupo[]>([]);
 
     const cargar = async () => {
         if (!claveAcceso || !id || !ejercicioId) return;
@@ -52,6 +57,7 @@ const RevisarEntregas = () => {
             }
             setEntregas(lista);
             setPuntosMaximos(ejercicio.puntos);
+            setCasosPrueba(ejercicio.casos_prueba ?? []);
         } catch (error) {
             if (esErrorDeSesion(error)) return;
             const mensaje = obtenerMensajeError(
@@ -246,6 +252,61 @@ const RevisarEntregas = () => {
                                     </button>
                                 </div>
                             </div>
+                            {casosPrueba.length > 0 && (
+                                <section className="mt-4 rounded-xl border border-white/10 bg-black/20 p-4">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <h3 className="font-semibold text-white">
+                                            Resultados de casos de prueba
+                                        </h3>
+                                        <span className="text-xs text-amber-200">
+                                            Reportados por el estudiante; no
+                                            verificados en el servidor
+                                        </span>
+                                    </div>
+                                    {entrega.resultado_casos_prueba ? (
+                                        <>
+                                            <p className="mt-2 text-sm text-gray-300">
+                                                {entrega.resultado_casos_prueba.filter(
+                                                    (resultado) =>
+                                                        resultado.aprobado,
+                                                ).length}
+                                                /
+                                                {casosPrueba.length} casos
+                                                aprobados
+                                            </p>
+                                            <div className="mt-3 grid gap-2">
+                                                {casosPrueba.map(
+                                                    (caso, indice) => {
+                                                        const resultado =
+                                                            entrega.resultado_casos_prueba?.find(
+                                                                (item) =>
+                                                                    item.indice ===
+                                                                    indice,
+                                                            );
+                                                        return (
+                                                            <ResultadoCaso
+                                                                key={indice}
+                                                                indice={
+                                                                    indice
+                                                                }
+                                                                caso={caso}
+                                                                resultado={
+                                                                    resultado
+                                                                }
+                                                            />
+                                                        );
+                                                    },
+                                                )}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <p className="mt-2 text-sm text-gray-400">
+                                            No se adjuntó un resultado de
+                                            ejecución al entregar.
+                                        </p>
+                                    )}
+                                </section>
+                            )}
                         </div>
                     ))}
 
@@ -259,5 +320,49 @@ const RevisarEntregas = () => {
         </AppShell>
     );
 };
+
+const ResultadoCaso = ({
+    indice,
+    caso,
+    resultado,
+}: {
+    indice: number;
+    caso: CasoPruebaGrupo;
+    resultado: ResultadoCasoPrueba | undefined;
+}) => (
+    <article className="rounded-lg border border-white/10 p-3 text-sm">
+        <p className="font-medium text-white">
+            Caso {indice + 1}:{' '}
+            {resultado
+                ? resultado.aprobado
+                    ? '✅ Aprobado'
+                    : '❌ No aprobado'
+                : 'Sin resultado'}
+        </p>
+        <div className="mt-2 grid gap-3 text-gray-300 sm:grid-cols-3">
+            <div>
+                <span className="text-xs text-gray-500">Entradas</span>
+                <pre className="mt-1 whitespace-pre-wrap">
+                    {caso.entradas.join('\n') || '(ninguna)'}
+                </pre>
+            </div>
+            <div>
+                <span className="text-xs text-gray-500">Esperado</span>
+                <pre className="mt-1 whitespace-pre-wrap">
+                    {caso.salidas_esperadas.join('\n')}
+                </pre>
+            </div>
+            <div>
+                <span className="text-xs text-gray-500">Obtenido</span>
+                <pre className="mt-1 whitespace-pre-wrap">
+                    {resultado?.salida_obtenida.join('\n') || '(sin salida)'}
+                </pre>
+            </div>
+        </div>
+        {resultado?.error && (
+            <p className="mt-2 text-sm text-red-300">{resultado.error}</p>
+        )}
+    </article>
+);
 
 export default RevisarEntregas;

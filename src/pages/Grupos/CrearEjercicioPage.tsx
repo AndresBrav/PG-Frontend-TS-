@@ -9,7 +9,15 @@ import {
     crearEjercicioGrupo,
     listarTemariosGrupo,
 } from '../../api/gruposApi';
-import type { TemarioGrupo } from '../../types/dominio';
+import type { CasoPruebaGrupo, TemarioGrupo } from '../../types/dominio';
+
+interface CasoPruebaFormulario {
+    entradas: string;
+    salidasEsperadas: string;
+}
+
+const separarLineas = (texto: string): string[] =>
+    texto === '' ? [] : texto.replace(/\r/g, '').split('\n');
 
 /**
  * /profesor/grupos/:id/ejercicios/nuevo — Creación de ejercicio de
@@ -31,6 +39,9 @@ const CrearEjercicioPage = () => {
     const [puntos, setPuntos] = useState('5');
     const [conLimite, setConLimite] = useState(false);
     const [fechaLimite, setFechaLimite] = useState('');
+    const [casosPrueba, setCasosPrueba] = useState<CasoPruebaFormulario[]>(
+        [],
+    );
     const [guardando, setGuardando] = useState(false);
 
     useEffect(() => {
@@ -62,6 +73,30 @@ const CrearEjercicioPage = () => {
         e.preventDefault();
         if (!claveAcceso || !id) return;
 
+        const casosNormalizados: CasoPruebaGrupo[] = casosPrueba.map(
+            (caso) => ({
+                entradas: separarLineas(caso.entradas),
+                salidas_esperadas: separarLineas(caso.salidasEsperadas),
+            }),
+        );
+        const casoInvalido = casosNormalizados.findIndex(
+            (caso) =>
+                caso.salidas_esperadas.length === 0 ||
+                [...caso.entradas, ...caso.salidas_esperadas].some(
+                    (linea) => linea.length > 500,
+                ) ||
+                caso.entradas.length > 20 ||
+                caso.salidas_esperadas.length > 20,
+        );
+        if (casoInvalido !== -1) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Caso de prueba incompleto',
+                text: `Revisa las entradas y salidas del caso ${casoInvalido + 1}. Cada caso necesita al menos una salida y admite hasta 20 líneas de 500 caracteres.`,
+            });
+            return;
+        }
+
         setGuardando(true);
         try {
             await crearEjercicioGrupo(claveAcceso, id, {
@@ -71,6 +106,10 @@ const CrearEjercicioPage = () => {
                 tipo,
                 puntos: Number(puntos),
                 fecha_limite: conLimite && fechaLimite ? fechaLimite : null,
+                casos_prueba:
+                    casosNormalizados.length > 0
+                        ? casosNormalizados
+                        : undefined,
             });
 
             await Swal.fire({
@@ -193,6 +232,122 @@ const CrearEjercicioPage = () => {
                             />
                         </div>
                     </div>
+
+                    <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <h2 className="font-semibold text-white">
+                                    Casos de prueba (opcional)
+                                </h2>
+                                <p className="mt-1 text-xs text-gray-400">
+                                    Cada línea de entrada se entrega a un
+                                    <code className="mx-1">Leer</code> y cada
+                                    línea esperada corresponde a un
+                                    <code className="mx-1">Escribir</code>.
+                                    Los estudiantes podrán ver estos casos.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                disabled={casosPrueba.length >= 20}
+                                onClick={() =>
+                                    setCasosPrueba((actuales) => [
+                                        ...actuales,
+                                        { entradas: '', salidasEsperadas: '' },
+                                    ])
+                                }
+                                className="rounded-lg border border-[#FF7C02]/50 px-3 py-2 text-sm text-[#FFB86C] disabled:opacity-50"
+                            >
+                                + Añadir caso
+                            </button>
+                        </div>
+
+                        <div className="mt-4 grid gap-4">
+                            {casosPrueba.map((caso, indice) => (
+                                <div
+                                    key={indice}
+                                    className="rounded-xl border border-white/10 bg-black/20 p-4"
+                                >
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <h3 className="font-medium text-white">
+                                            Caso {indice + 1}
+                                        </h3>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setCasosPrueba((actuales) =>
+                                                    actuales.filter(
+                                                        (_, i) => i !== indice,
+                                                    ),
+                                                )
+                                            }
+                                            className="text-sm text-red-300 hover:text-red-200"
+                                        >
+                                            Quitar
+                                        </button>
+                                    </div>
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        <label className="grid gap-1 text-sm text-gray-300">
+                                            Entradas (una por línea)
+                                            <textarea
+                                                value={caso.entradas}
+                                                onChange={(event) =>
+                                                    setCasosPrueba((actuales) =>
+                                                        actuales.map((item, i) =>
+                                                            i === indice
+                                                                ? {
+                                                                      ...item,
+                                                                      entradas:
+                                                                          event
+                                                                              .target
+                                                                              .value,
+                                                                  }
+                                                                : item,
+                                                        ),
+                                                    )
+                                                }
+                                                rows={4}
+                                                maxLength={10000}
+                                                placeholder={'5\n3'}
+                                                className="w-full resize-y rounded-xl border border-white/10 bg-black/30 px-3 py-2 font-mono text-white placeholder:text-gray-500 focus:border-[#FF7C02] focus:outline-none"
+                                            />
+                                        </label>
+                                        <label className="grid gap-1 text-sm text-gray-300">
+                                            Salidas esperadas (una por línea)
+                                            <textarea
+                                                value={caso.salidasEsperadas}
+                                                onChange={(event) =>
+                                                    setCasosPrueba((actuales) =>
+                                                        actuales.map((item, i) =>
+                                                            i === indice
+                                                                ? {
+                                                                      ...item,
+                                                                      salidasEsperadas:
+                                                                          event
+                                                                              .target
+                                                                              .value,
+                                                                  }
+                                                                : item,
+                                                        ),
+                                                    )
+                                                }
+                                                rows={4}
+                                                maxLength={10000}
+                                                placeholder="8"
+                                                className="w-full resize-y rounded-xl border border-white/10 bg-black/30 px-3 py-2 font-mono text-white placeholder:text-gray-500 focus:border-[#FF7C02] focus:outline-none"
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        {casosPrueba.length === 0 && (
+                            <p className="mt-3 text-xs text-gray-500">
+                                Si no agregas casos, el ejercicio conserva su
+                                funcionamiento actual.
+                            </p>
+                        )}
+                    </section>
 
                     <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                         <label className="flex items-center gap-3 text-sm text-white">
