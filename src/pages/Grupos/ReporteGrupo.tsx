@@ -129,9 +129,6 @@ const ReporteGrupoPage = () => {
     const [fechaHasta, setFechaHasta] = useState(
         () => searchParams.get('hasta') ?? '',
     );
-    const [ejercicioSeleccionado, setEjercicioSeleccionado] = useState<
-        number | null
-    >(null);
     const rolReporte =
         usuario?.rol === 'profesor' || usuario?.rol === 'admin'
             ? usuario.rol
@@ -535,7 +532,6 @@ const ReporteGrupoPage = () => {
                                     setCriterioFecha('entrega');
                                     setFechaDesde('');
                                     setFechaHasta('');
-                                    setEjercicioSeleccionado(null);
                                 }}
                                 className="rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:border-[#FF7C02]/50 hover:text-white"
                             >
@@ -851,7 +847,7 @@ const ReporteGrupoPage = () => {
                                 </p>
                             ) : (
                                 <div className="mt-5 overflow-x-auto">
-                                    <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
+                                    <table className="w-full min-w-[900px] border-separate border-spacing-y-2 text-left text-sm">
                                         <thead>
                                             <tr className="text-xs uppercase tracking-wider text-gray-400">
                                                 <th className="px-3 py-2">
@@ -872,6 +868,9 @@ const ReporteGrupoPage = () => {
                                                 <th className="px-3 py-2">
                                                     Por calificar
                                                 </th>
+                                                <th className="px-3 py-2">
+                                                    Detalle
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -882,17 +881,9 @@ const ReporteGrupoPage = () => {
                                                         className="bg-[#181818]"
                                                     >
                                                         <td className="rounded-l-xl px-3 py-3">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    setEjercicioSeleccionado(
-                                                                        ejercicio.id,
-                                                                    )
-                                                                }
-                                                                className="font-semibold text-white hover:text-[#FF7C02]"
-                                                            >
+                                                            <span className="font-semibold text-white">
                                                                 {ejercicio.titulo}
-                                                            </button>
+                                                            </span>
                                                             <span className="mt-1 block text-xs text-gray-500">
                                                                 {ejercicio.temario}
                                                             </span>
@@ -909,8 +900,26 @@ const ReporteGrupoPage = () => {
                                                         <td className="px-3 py-3 text-gray-400">
                                                             {ejercicio.sinIniciar}
                                                         </td>
-                                                        <td className="rounded-r-xl px-3 py-3 text-sky-300">
+                                                        <td className="px-3 py-3 text-sky-300">
                                                             {ejercicio.pendientesCalificar}
+                                                        </td>
+                                                        <td className="rounded-r-xl px-3 py-3">
+                                                            <Link
+                                                                to={`/grupos/${id}/reporte/ejercicios/${ejercicio.id}?${new URLSearchParams(
+                                                                    {
+                                                                        temario: temarioActivo,
+                                                                        tipo: tipoActivo,
+                                                                        estado: estadoActivo,
+                                                                        q: busqueda,
+                                                                        fecha: criterioFecha,
+                                                                        desde: fechaDesde,
+                                                                        hasta: fechaHasta,
+                                                                    },
+                                                                ).toString()}`}
+                                                                className="inline-flex rounded-lg bg-[#FF7C02] px-3 py-1.5 text-xs font-semibold text-black hover:brightness-110"
+                                                            >
+                                                                Ver detalle
+                                                            </Link>
                                                         </td>
                                                     </tr>
                                                 ),
@@ -920,121 +929,6 @@ const ReporteGrupoPage = () => {
                                 </div>
                             )}
                         </section>
-
-                        {ejercicioSeleccionado !== null && (
-                            (() => {
-                                const ejercicio = reporte.ejercicios.find(
-                                    (item) => item.id === ejercicioSeleccionado,
-                                );
-                                if (!ejercicio) return null;
-                                const hoy = new Date();
-                                hoy.setHours(23, 59, 59, 999);
-                                const vencido =
-                                    Boolean(ejercicio.fecha_limite) &&
-                                    new Date(
-                                        `${ejercicio.fecha_limite}T23:59:59`,
-                                    ) < hoy;
-
-                                return (
-                                    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div>
-                                                <h2 className="text-xl font-bold text-white">
-                                                    Estudiantes: {ejercicio.titulo}
-                                                </h2>
-                                                <p className="mt-1 text-sm text-gray-400">
-                                                    {ejercicio.temario} ·{' '}
-                                                    {ejercicio.tipo === 'diagrama'
-                                                        ? 'Diagrama'
-                                                        : 'Pseudocódigo'}{' '}
-                                                    · {ejercicio.puntos} pts
-                                                </p>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    setEjercicioSeleccionado(null)
-                                                }
-                                                className="text-sm text-gray-400 hover:text-white"
-                                            >
-                                                Cerrar
-                                            </button>
-                                        </div>
-                                        <div className="mt-4 grid gap-2 sm:grid-cols-4">
-                                            <span className="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
-                                                Resolvieron: {ejercicio.completados}
-                                            </span>
-                                            <span className="rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
-                                                En progreso: {ejercicio.enProgreso}
-                                            </span>
-                                            <span className="rounded-xl bg-white/5 px-3 py-2 text-sm text-gray-300">
-                                                Sin iniciar: {ejercicio.sinIniciar}
-                                            </span>
-                                            <span className="rounded-xl bg-sky-500/10 px-3 py-2 text-sm text-sky-300">
-                                                Por calificar:{' '}
-                                                {ejercicio.pendientesCalificar}
-                                            </span>
-                                        </div>
-                                        <div className="mt-4 overflow-x-auto">
-                                            <table className="w-full min-w-[700px] border-separate border-spacing-y-2 text-left text-sm">
-                                                <thead>
-                                                    <tr className="text-xs uppercase tracking-wider text-gray-400">
-                                                        <th className="px-3 py-2">Estudiante</th>
-                                                        <th className="px-3 py-2">Estado</th>
-                                                        <th className="px-3 py-2">Entrega</th>
-                                                        <th className="px-3 py-2">Calificación</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {reporte.estudiantes.map((estudiante) => {
-                                                        const entrega = (reporte.entregas ?? []).find(
-                                                            (item) =>
-                                                                item.usuario_id === estudiante.id &&
-                                                                item.ejercicio_id === ejercicio.id,
-                                                        );
-                                                        let estado = 'Sin iniciar';
-                                                        if (entrega?.calificado) estado = 'Calificado';
-                                                        else if (entrega?.completado) estado = 'Entregado';
-                                                        else if (entrega) estado = 'En progreso';
-                                                        else if (vencido) estado = 'Vencido sin entregar';
-
-                                                        return (
-                                                            <tr
-                                                                key={estudiante.id}
-                                                                className="bg-[#181818]"
-                                                            >
-                                                                <td className="rounded-l-xl px-3 py-3">
-                                                                    <span className="font-semibold text-white">
-                                                                        {estudiante.username}
-                                                                    </span>
-                                                                    <span className="mt-1 block font-mono text-xs text-gray-500">
-                                                                        {estudiante.codigo}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-3 py-3 text-gray-300">
-                                                                    {estado}
-                                                                </td>
-                                                                <td className="px-3 py-3 text-xs text-gray-400">
-                                                                    {formatearFechaHora(
-                                                                        entrega?.fecha_completado ??
-                                                                            null,
-                                                                    )}
-                                                                </td>
-                                                                <td className="rounded-r-xl px-3 py-3 text-xs text-gray-300">
-                                                                    {entrega?.calificado
-                                                                        ? `${entrega.puntos_profesor ?? 0}/${ejercicio.puntos} pts`
-                                                                        : 'Pendiente'}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </section>
-                                );
-                            })()
-                        )}
 
                     </>
                 ) : null}

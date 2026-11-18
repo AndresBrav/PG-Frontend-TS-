@@ -96,9 +96,12 @@ function DesignBoard() {
     const rutaVolverDetalle =
         esRevision &&
         grupoId &&
-        locationState?.rutaVolver?.startsWith(
+        (locationState?.rutaVolver?.startsWith(
             `/grupos/${grupoId}/reporte/estudiantes/`,
-        )
+        ) ||
+            locationState?.rutaVolver?.startsWith(
+                `/grupos/${grupoId}/reporte/ejercicios/`,
+            ))
             ? locationState.rutaVolver
             : null;
     const [infoGrupo, setInfoGrupo] = useState<InfoEjercicioGrupo | null>(
