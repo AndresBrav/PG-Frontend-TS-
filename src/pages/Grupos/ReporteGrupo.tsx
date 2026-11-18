@@ -23,6 +23,52 @@ const METRICAS_VACIAS: MetricasProgresoGrupo = {
     ultimaActividad: null,
 };
 
+type EstadoReporte =
+    | 'todos'
+    | 'resueltos'
+    | 'no_resueltos'
+    | 'en_progreso'
+    | 'sin_iniciar'
+    | 'por_calificar'
+    | 'calificados'
+    | 'vencidos';
+
+type CriterioFecha =
+    | 'creacion'
+    | 'limite'
+    | 'entrega'
+    | 'actividad'
+    | 'inscripcion';
+
+const inicioDia = (fecha: string) => {
+    if (!fecha) return null;
+    const valor = new Date(`${fecha}T00:00:00`);
+    return Number.isNaN(valor.getTime()) ? null : valor;
+};
+
+const finDia = (fecha: string) => {
+    if (!fecha) return null;
+    const valor = new Date(`${fecha}T23:59:59`);
+    return Number.isNaN(valor.getTime()) ? null : valor;
+};
+
+const fechaEnRango = (
+    valor: string | null,
+    desde: string,
+    hasta: string,
+) => {
+    if (!valor) return false;
+    if (!desde && !hasta) return true;
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return false;
+    const limiteDesde = inicioDia(desde);
+    const limiteHasta = finDia(hasta);
+    return (
+        (!limiteDesde || fecha >= limiteDesde) &&
+        (!limiteHasta || fecha <= limiteHasta)
+    );
+};
+
 const ReporteGrupoPage = () => {
     const { id } = useParams<{ id: string }>();
     const { claveAcceso } = useContext(TokenContext);
@@ -34,6 +80,22 @@ const ReporteGrupoPage = () => {
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [temarioActivo, setTemarioActivo] = useState('todos');
+    const [tipoActivo, setTipoActivo] = useState<'todos' | 'diagrama' | 'pseudocodigo'>(
+        'todos',
+    );
+    const [estadoActivo, setEstadoActivo] =
+        useState<EstadoReporte>('todos');
+    const [busqueda, setBusqueda] = useState('');
+    const [criterioFecha, setCriterioFecha] =
+        useState<CriterioFecha>('entrega');
+    const [fechaDesde, setFechaDesde] = useState('');
+    const [fechaHasta, setFechaHasta] = useState('');
+    const [ejercicioSeleccionado, setEjercicioSeleccionado] = useState<
+        number | null
+    >(null);
+    const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<
+        number | null
+    >(null);
     const rolReporte =
         usuario?.rol === 'profesor' || usuario?.rol === 'admin'
             ? usuario.rol
@@ -85,32 +147,272 @@ const ReporteGrupoPage = () => {
     }, [claveAcceso, id, rolReporte, cerrarSesion, navigate]);
 
     const ejerciciosVisibles = useMemo(
-        () =>
-            !reporte
-                ? []
-                : temarioActivo === 'todos'
-                  ? reporte.ejercicios
-                  : reporte.ejercicios.filter(
-                        (ejercicio) =>
-                            ejercicio.temario_id === Number(temarioActivo),
-                    ),
-        [reporte, temarioActivo],
+        () => {
+            if (!reporte) return [];
+            const entregas = reporte.entregas ?? [];
+            const estudiantes = reporte.estudiantes;
+            const hoy = new Date();
+            hoy.setHours(23, 59, 59, 999);
+
+            return reporte.ejercicios.filter((ejercicio) => {
+                if (
+                    temarioActivo !== 'todos' &&
+                    ejercicio.temario_id !== Number(temarioActivo)
+                ) {
+                    return false;
+                }
+                if (
+                    tipoActivo !== 'todos' &&
+                    ejercicio.tipo !== tipoActivo
+                ) {
+                    return false;
+                }
+
+                if (estadoActivo === 'resueltos' && ejercicio.completados === 0) {
+                    return false;
+                }
+                if (
+                    estadoActivo === 'no_resueltos' &&
+                    ejercicio.sinIniciar + ejercicio.enProgreso === 0
+                ) {
+                    return false;
+                }
+                if (
+                    estadoActivo === 'en_progreso' &&
+                    ejercicio.enProgreso === 0
+                ) {
+                    return false;
+                }
+                if (
+                    estadoActivo === 'sin_iniciar' &&
+                    ejercicio.sinIniciar === 0
+                ) {
+                    return false;
+                }
+                if (
+                    estadoActivo === 'por_calificar' &&
+                    ejercicio.pendientesCalificar === 0
+                ) {
+                    return false;
+                }
+                if (estadoActivo === 'calificados' && ejercicio.calificados === 0) {
+                    return false;
+                }
+                if (estadoActivo === 'vencidos') {
+                    if (!ejercicio.fecha_limite) return false;
+                    const limite = new Date(`${ejercicio.fecha_limite}T23:59:59`);
+                    if (limite >= hoy) return false;
+                }
+
+                if (!fechaDesde && !fechaHasta) return true;
+                if (criterioFecha === 'creacion') {
+                    return fechaEnRango(
+                        ejercicio.createdAt,
+                        fechaDesde,
+                        fechaHasta,
+                    );
+                }
+                if (criterioFecha === 'limite') {
+                    return ejercicio.fecha_limite
+                        ? fechaEnRango(
+                              `${ejercicio.fecha_limite}T23:59:59`,
+                              fechaDesde,
+                              fechaHasta,
+                          )
+                        : false;
+                }
+                if (criterioFecha === 'entrega') {
+                    return entregas.some(
+                        (entrega) =>
+                            entrega.ejercicio_id === ejercicio.id &&
+                            entrega.completado &&
+                            fechaEnRango(
+                                entrega.fecha_completado,
+                                fechaDesde,
+                                fechaHasta,
+                            ),
+                    );
+                }
+                if (criterioFecha === 'actividad') {
+                    return entregas.some(
+                        (entrega) =>
+                            entrega.ejercicio_id === ejercicio.id &&
+                            fechaEnRango(
+                                entrega.ultima_actividad,
+                                fechaDesde,
+                                fechaHasta,
+                            ),
+                    );
+                }
+                const inscripcionesEnRango = estudiantes.some(
+                    (estudiante) =>
+                        fechaEnRango(
+                            estudiante.fecha_union,
+                            fechaDesde,
+                            fechaHasta,
+                        ) &&
+                        entregas.some(
+                            (entrega) =>
+                                entrega.usuario_id === estudiante.id &&
+                                entrega.ejercicio_id === ejercicio.id,
+                        ),
+                );
+                return inscripcionesEnRango;
+            });
+        },
+        [
+            reporte,
+            temarioActivo,
+            tipoActivo,
+            estadoActivo,
+            criterioFecha,
+            fechaDesde,
+            fechaHasta,
+        ],
     );
 
     const estudiantesVisibles = useMemo(
-        () =>
-            (reporte?.estudiantes ?? []).map((estudiante) => ({
-                ...estudiante,
-                metricas:
-                    temarioActivo === 'todos'
-                        ? estudiante
-                        : (estudiante.porTemario.find(
-                              (temario) =>
-                                  temario.temario_id ===
-                                  Number(temarioActivo),
-                          ) ?? METRICAS_VACIAS),
-            })),
-        [reporte, temarioActivo],
+        () => {
+            const hoy = new Date();
+            hoy.setHours(23, 59, 59, 999);
+
+            return (reporte?.estudiantes ?? [])
+                .map((estudiante) => ({
+                    ...estudiante,
+                    metricas:
+                        temarioActivo === 'todos'
+                            ? estudiante
+                            : (estudiante.porTemario.find(
+                                  (temario) =>
+                                      temario.temario_id ===
+                                      Number(temarioActivo),
+                              ) ?? METRICAS_VACIAS),
+                }))
+                .filter((estudiante) => {
+                    const texto = `${estudiante.username} ${estudiante.codigo}`.toLowerCase();
+                    if (
+                        busqueda.trim() &&
+                        !texto.includes(busqueda.trim().toLowerCase())
+                    ) {
+                        return false;
+                    }
+                    if (
+                        estadoActivo === 'resueltos' &&
+                        estudiante.metricas.completados === 0
+                    ) {
+                        return false;
+                    }
+                    if (
+                        estadoActivo === 'no_resueltos' &&
+                        estudiante.metricas.completados ===
+                            estudiante.metricas.ejerciciosTotales
+                    ) {
+                        return false;
+                    }
+                    if (
+                        estadoActivo === 'en_progreso' &&
+                        estudiante.metricas.enProgreso === 0
+                    ) {
+                        return false;
+                    }
+                    if (
+                        estadoActivo === 'sin_iniciar' &&
+                        estudiante.metricas.sinIniciar === 0
+                    ) {
+                        return false;
+                    }
+                    if (
+                        estadoActivo === 'por_calificar' &&
+                        estudiante.metricas.pendientesCalificar === 0
+                    ) {
+                        return false;
+                    }
+                    if (
+                        estadoActivo === 'calificados' &&
+                        estudiante.metricas.calificados === 0
+                    ) {
+                        return false;
+                    }
+                    if (estadoActivo === 'vencidos') {
+                        const tieneVencido = ejerciciosVisibles.some(
+                            (ejercicio) => {
+                                if (!ejercicio.fecha_limite) return false;
+                                const limite = new Date(
+                                    `${ejercicio.fecha_limite}T23:59:59`,
+                                );
+                                if (limite >= hoy) return false;
+                                const entrega = (reporte?.entregas ?? []).find(
+                                    (item) =>
+                                        item.usuario_id === estudiante.id &&
+                                        item.ejercicio_id === ejercicio.id,
+                                );
+                                return !entrega?.completado;
+                            },
+                        );
+                        if (!tieneVencido) return false;
+                    }
+
+                    if (!fechaDesde && !fechaHasta) return true;
+                    if (criterioFecha === 'inscripcion') {
+                        return fechaEnRango(
+                            estudiante.fecha_union,
+                            fechaDesde,
+                            fechaHasta,
+                        );
+                    }
+                    const entregasEstudiante = (reporte?.entregas ?? []).filter(
+                        (entrega) => entrega.usuario_id === estudiante.id,
+                    );
+                    if (criterioFecha === 'entrega') {
+                        return entregasEstudiante.some(
+                            (entrega) =>
+                                entrega.completado &&
+                                fechaEnRango(
+                                    entrega.fecha_completado,
+                                    fechaDesde,
+                                    fechaHasta,
+                                ),
+                        );
+                    }
+                    if (criterioFecha === 'actividad') {
+                        return entregasEstudiante.some((entrega) =>
+                            fechaEnRango(
+                                entrega.ultima_actividad,
+                                fechaDesde,
+                                fechaHasta,
+                            ),
+                        );
+                    }
+                    if (criterioFecha === 'creacion') {
+                        return ejerciciosVisibles.some((ejercicio) =>
+                            fechaEnRango(
+                                ejercicio.createdAt,
+                                fechaDesde,
+                                fechaHasta,
+                            ),
+                        );
+                    }
+                    return ejerciciosVisibles.some(
+                        (ejercicio) =>
+                            ejercicio.fecha_limite &&
+                            fechaEnRango(
+                                `${ejercicio.fecha_limite}T23:59:59`,
+                                fechaDesde,
+                                fechaHasta,
+                            ),
+                    );
+                });
+        },
+        [
+            reporte,
+            temarioActivo,
+            busqueda,
+            estadoActivo,
+            criterioFecha,
+            fechaDesde,
+            fechaHasta,
+            ejerciciosVisibles,
+        ],
     );
 
     const resumenVisible = useMemo(() => {
@@ -187,33 +489,170 @@ const ReporteGrupoPage = () => {
                                 El reporte incluye únicamente los ejercicios de
                                 este grupo.
                             </p>
-                            <label className="flex items-center gap-3 text-sm text-gray-300">
-                                Temario
-                                <select
-                                    value={temarioActivo}
-                                    onChange={(event) =>
-                                        setTemarioActivo(event.target.value)
-                                    }
-                                    className="rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white focus:border-[#FF7C02] focus:outline-none"
-                                >
-                                    <option value="todos">Todos</option>
-                                    {reporte.temarios.map((temario) => (
-                                        <option
-                                            key={temario.id}
-                                            value={temario.id}
-                                        >
-                                            {temario.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setTemarioActivo('todos');
+                                    setTipoActivo('todos');
+                                    setEstadoActivo('todos');
+                                    setBusqueda('');
+                                    setCriterioFecha('entrega');
+                                    setFechaDesde('');
+                                    setFechaHasta('');
+                                    setEjercicioSeleccionado(null);
+                                    setEstudianteSeleccionado(null);
+                                }}
+                                className="rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:border-[#FF7C02]/50 hover:text-white"
+                            >
+                                Limpiar filtros
+                            </button>
                         </div>
+
+                        <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                                <label className="text-sm text-gray-300">
+                                    Temario
+                                    <select
+                                        value={temarioActivo}
+                                        onChange={(event) =>
+                                            setTemarioActivo(event.target.value)
+                                        }
+                                        className="mt-1 w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white focus:border-[#FF7C02] focus:outline-none"
+                                    >
+                                        <option value="todos">Todos</option>
+                                        {reporte.temarios.map((temario) => (
+                                            <option
+                                                key={temario.id}
+                                                value={temario.id}
+                                            >
+                                                {temario.nombre}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                                <label className="text-sm text-gray-300">
+                                    Tipo
+                                    <select
+                                        value={tipoActivo}
+                                        onChange={(event) =>
+                                            setTipoActivo(
+                                                event.target.value as
+                                                    | 'todos'
+                                                    | 'diagrama'
+                                                    | 'pseudocodigo',
+                                            )
+                                        }
+                                        className="mt-1 w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white focus:border-[#FF7C02] focus:outline-none"
+                                    >
+                                        <option value="todos">Todos</option>
+                                        <option value="diagrama">Diagrama</option>
+                                        <option value="pseudocodigo">
+                                            Pseudocódigo
+                                        </option>
+                                    </select>
+                                </label>
+                                <label className="text-sm text-gray-300">
+                                    Estado
+                                    <select
+                                        value={estadoActivo}
+                                        onChange={(event) =>
+                                            setEstadoActivo(
+                                                event.target.value as EstadoReporte,
+                                            )
+                                        }
+                                        className="mt-1 w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white focus:border-[#FF7C02] focus:outline-none"
+                                    >
+                                        <option value="todos">Todos</option>
+                                        <option value="resueltos">Resueltos</option>
+                                        <option value="no_resueltos">
+                                            No resueltos
+                                        </option>
+                                        <option value="en_progreso">
+                                            En progreso
+                                        </option>
+                                        <option value="sin_iniciar">
+                                            Sin iniciar
+                                        </option>
+                                        <option value="por_calificar">
+                                            Por calificar
+                                        </option>
+                                        <option value="calificados">
+                                            Calificados
+                                        </option>
+                                        <option value="vencidos">Vencidos</option>
+                                    </select>
+                                </label>
+                                <label className="text-sm text-gray-300">
+                                    Buscar estudiante
+                                    <input
+                                        value={busqueda}
+                                        onChange={(event) =>
+                                            setBusqueda(event.target.value)
+                                        }
+                                        placeholder="Nombre o código"
+                                        className="mt-1 w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white placeholder:text-gray-600 focus:border-[#FF7C02] focus:outline-none"
+                                    />
+                                </label>
+                            </div>
+                            <div className="mt-3 grid gap-3 md:grid-cols-3">
+                                <label className="text-sm text-gray-300">
+                                    Filtrar por fecha
+                                    <select
+                                        value={criterioFecha}
+                                        onChange={(event) =>
+                                            setCriterioFecha(
+                                                event.target.value as CriterioFecha,
+                                            )
+                                        }
+                                        className="mt-1 w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white focus:border-[#FF7C02] focus:outline-none"
+                                    >
+                                        <option value="creacion">
+                                            Creación del ejercicio
+                                        </option>
+                                        <option value="limite">
+                                            Fecha límite
+                                        </option>
+                                        <option value="entrega">
+                                            Fecha de entrega
+                                        </option>
+                                        <option value="actividad">
+                                            Última actividad
+                                        </option>
+                                        <option value="inscripcion">
+                                            Inscripción
+                                        </option>
+                                    </select>
+                                </label>
+                                <label className="text-sm text-gray-300">
+                                    Desde
+                                    <input
+                                        type="date"
+                                        value={fechaDesde}
+                                        onChange={(event) =>
+                                            setFechaDesde(event.target.value)
+                                        }
+                                        className="mt-1 w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white"
+                                    />
+                                </label>
+                                <label className="text-sm text-gray-300">
+                                    Hasta
+                                    <input
+                                        type="date"
+                                        value={fechaHasta}
+                                        onChange={(event) =>
+                                            setFechaHasta(event.target.value)
+                                        }
+                                        className="mt-1 w-full rounded-xl border border-white/10 bg-[#181818] px-3 py-2 text-white"
+                                    />
+                                </label>
+                            </div>
+                        </section>
 
                         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                             <TarjetaReporte
                                 titulo="Estudiantes"
                                 valor={formatearNumero(
-                                    reporte.resumen.estudiantes,
+                                    estudiantesVisibles.length,
                                 )}
                                 detalle="Inscritos en el grupo"
                             />
@@ -296,9 +735,17 @@ const ReporteGrupoPage = () => {
                                                         className="bg-[#181818]"
                                                     >
                                                         <td className="rounded-l-xl px-3 py-3">
-                                                            <span className="font-semibold text-white">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setEstudianteSeleccionado(
+                                                                        estudianteId,
+                                                                    )
+                                                                }
+                                                                className="font-semibold text-white hover:text-[#FF7C02]"
+                                                            >
                                                                 {username}
-                                                            </span>
+                                                            </button>
                                                             <span className="mt-1 block font-mono text-xs text-gray-500">
                                                                 {codigo}
                                                             </span>
@@ -392,9 +839,17 @@ const ReporteGrupoPage = () => {
                                                         className="bg-[#181818]"
                                                     >
                                                         <td className="rounded-l-xl px-3 py-3">
-                                                            <span className="font-semibold text-white">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    setEjercicioSeleccionado(
+                                                                        ejercicio.id,
+                                                                    )
+                                                                }
+                                                                className="font-semibold text-white hover:text-[#FF7C02]"
+                                                            >
                                                                 {ejercicio.titulo}
-                                                            </span>
+                                                            </button>
                                                             <span className="mt-1 block text-xs text-gray-500">
                                                                 {ejercicio.temario}
                                                             </span>
@@ -422,6 +877,216 @@ const ReporteGrupoPage = () => {
                                 </div>
                             )}
                         </section>
+
+                        {ejercicioSeleccionado !== null && (
+                            (() => {
+                                const ejercicio = reporte.ejercicios.find(
+                                    (item) => item.id === ejercicioSeleccionado,
+                                );
+                                if (!ejercicio) return null;
+                                const hoy = new Date();
+                                hoy.setHours(23, 59, 59, 999);
+                                const vencido =
+                                    Boolean(ejercicio.fecha_limite) &&
+                                    new Date(
+                                        `${ejercicio.fecha_limite}T23:59:59`,
+                                    ) < hoy;
+
+                                return (
+                                    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-white">
+                                                    Estudiantes: {ejercicio.titulo}
+                                                </h2>
+                                                <p className="mt-1 text-sm text-gray-400">
+                                                    {ejercicio.temario} ·{' '}
+                                                    {ejercicio.tipo === 'diagrama'
+                                                        ? 'Diagrama'
+                                                        : 'Pseudocódigo'}{' '}
+                                                    · {ejercicio.puntos} pts
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setEjercicioSeleccionado(null)
+                                                }
+                                                className="text-sm text-gray-400 hover:text-white"
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                        <div className="mt-4 grid gap-2 sm:grid-cols-4">
+                                            <span className="rounded-xl bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+                                                Resolvieron: {ejercicio.completados}
+                                            </span>
+                                            <span className="rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+                                                En progreso: {ejercicio.enProgreso}
+                                            </span>
+                                            <span className="rounded-xl bg-white/5 px-3 py-2 text-sm text-gray-300">
+                                                Sin iniciar: {ejercicio.sinIniciar}
+                                            </span>
+                                            <span className="rounded-xl bg-sky-500/10 px-3 py-2 text-sm text-sky-300">
+                                                Por calificar:{' '}
+                                                {ejercicio.pendientesCalificar}
+                                            </span>
+                                        </div>
+                                        <div className="mt-4 overflow-x-auto">
+                                            <table className="w-full min-w-[700px] border-separate border-spacing-y-2 text-left text-sm">
+                                                <thead>
+                                                    <tr className="text-xs uppercase tracking-wider text-gray-400">
+                                                        <th className="px-3 py-2">Estudiante</th>
+                                                        <th className="px-3 py-2">Estado</th>
+                                                        <th className="px-3 py-2">Entrega</th>
+                                                        <th className="px-3 py-2">Calificación</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {reporte.estudiantes.map((estudiante) => {
+                                                        const entrega = (reporte.entregas ?? []).find(
+                                                            (item) =>
+                                                                item.usuario_id === estudiante.id &&
+                                                                item.ejercicio_id === ejercicio.id,
+                                                        );
+                                                        let estado = 'Sin iniciar';
+                                                        if (entrega?.calificado) estado = 'Calificado';
+                                                        else if (entrega?.completado) estado = 'Entregado';
+                                                        else if (entrega) estado = 'En progreso';
+                                                        else if (vencido) estado = 'Vencido sin entregar';
+
+                                                        return (
+                                                            <tr
+                                                                key={estudiante.id}
+                                                                className="bg-[#181818]"
+                                                            >
+                                                                <td className="rounded-l-xl px-3 py-3">
+                                                                    <span className="font-semibold text-white">
+                                                                        {estudiante.username}
+                                                                    </span>
+                                                                    <span className="mt-1 block font-mono text-xs text-gray-500">
+                                                                        {estudiante.codigo}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-3 py-3 text-gray-300">
+                                                                    {estado}
+                                                                </td>
+                                                                <td className="px-3 py-3 text-xs text-gray-400">
+                                                                    {formatearFechaHora(
+                                                                        entrega?.fecha_completado ??
+                                                                            null,
+                                                                    )}
+                                                                </td>
+                                                                <td className="rounded-r-xl px-3 py-3 text-xs text-gray-300">
+                                                                    {entrega?.calificado
+                                                                        ? `${entrega.puntos_profesor ?? 0}/${ejercicio.puntos} pts`
+                                                                        : 'Pendiente'}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </section>
+                                );
+                            })()
+                        )}
+
+                        {estudianteSeleccionado !== null && (
+                            (() => {
+                                const estudiante = reporte.estudiantes.find(
+                                    (item) => item.id === estudianteSeleccionado,
+                                );
+                                if (!estudiante) return null;
+
+                                return (
+                                    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <h2 className="text-xl font-bold text-white">
+                                                    Ejercicios: {estudiante.username}
+                                                </h2>
+                                                <p className="mt-1 font-mono text-xs text-gray-500">
+                                                    {estudiante.codigo}
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setEstudianteSeleccionado(null)
+                                                }
+                                                className="text-sm text-gray-400 hover:text-white"
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                        <div className="mt-4 overflow-x-auto">
+                                            <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
+                                                <thead>
+                                                    <tr className="text-xs uppercase tracking-wider text-gray-400">
+                                                        <th className="px-3 py-2">Ejercicio</th>
+                                                        <th className="px-3 py-2">Estado</th>
+                                                        <th className="px-3 py-2">Última actividad</th>
+                                                        <th className="px-3 py-2">Entrega</th>
+                                                        <th className="px-3 py-2">Puntaje</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {ejerciciosVisibles.map((ejercicio) => {
+                                                        const entrega = (reporte.entregas ?? []).find(
+                                                            (item) =>
+                                                                item.usuario_id === estudiante.id &&
+                                                                item.ejercicio_id === ejercicio.id,
+                                                        );
+                                                        let estado = 'Sin iniciar';
+                                                        if (entrega?.calificado) estado = 'Calificado';
+                                                        else if (entrega?.completado) estado = 'Entregado';
+                                                        else if (entrega) estado = 'En progreso';
+
+                                                        return (
+                                                            <tr
+                                                                key={ejercicio.id}
+                                                                className="bg-[#181818]"
+                                                            >
+                                                                <td className="rounded-l-xl px-3 py-3">
+                                                                    <span className="font-semibold text-white">
+                                                                        {ejercicio.titulo}
+                                                                    </span>
+                                                                    <span className="mt-1 block text-xs text-gray-500">
+                                                                        {ejercicio.temario}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-3 py-3 text-gray-300">
+                                                                    {estado}
+                                                                </td>
+                                                                <td className="px-3 py-3 text-xs text-gray-400">
+                                                                    {formatearFechaHora(
+                                                                        entrega?.ultima_actividad ??
+                                                                            null,
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 py-3 text-xs text-gray-400">
+                                                                    {formatearFechaHora(
+                                                                        entrega?.fecha_completado ??
+                                                                            null,
+                                                                    )}
+                                                                </td>
+                                                                <td className="rounded-r-xl px-3 py-3 text-xs text-[#FF7C02]">
+                                                                    {entrega?.calificado
+                                                                        ? `${entrega.puntos_profesor ?? 0}/${ejercicio.puntos}`
+                                                                        : 'Pendiente'}
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </section>
+                                );
+                            })()
+                        )}
                     </>
                 ) : null}
             </main>

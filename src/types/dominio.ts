@@ -106,6 +106,8 @@ export interface ReporteGrupo {
         temario: string;
         puntos: number;
         fecha_limite: string | null;
+        tipo: 'diagrama' | 'pseudocodigo';
+        createdAt: string;
         iniciados: number;
         completados: number;
         enProgreso: number;
@@ -124,6 +126,18 @@ export interface ReporteGrupo {
             >;
         } & MetricasProgresoGrupo
     >;
+    entregas: Array<{
+        ejercicio_id: number;
+        usuario_id: number;
+        estado_tablero: string | null;
+        completado: boolean;
+        calificado: boolean;
+        puntos: number;
+        puntos_profesor: number | null;
+        comentario_profesor: string | null;
+        fecha_completado: string | null;
+        ultima_actividad: string | null;
+    }>;
 }
 
 /** Grupo visto por el profesor (con conteo de inscritos). */
