@@ -55,6 +55,7 @@ const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 interface LocationState {
     juegoId?: number;
     juegoDescripcion?: string;
+    rutaVolver?: string;
 }
 
 /** Información del ejercicio de grupo para el banner del tablero. */
@@ -92,6 +93,14 @@ function DesignBoard() {
         ? Number(searchParams.get('revisarEstudiante'))
         : null;
     const esRevision = esModoGrupo && revisarEstudianteId !== null;
+    const rutaVolverDetalle =
+        esRevision &&
+        grupoId &&
+        locationState?.rutaVolver?.startsWith(
+            `/grupos/${grupoId}/reporte/estudiantes/`,
+        )
+            ? locationState.rutaVolver
+            : null;
     const [infoGrupo, setInfoGrupo] = useState<InfoEjercicioGrupo | null>(
         null
     );
@@ -668,7 +677,8 @@ function DesignBoard() {
                     ejecutando={ejecutando}
                     rutaVolver={
                         esRevision && grupoId && ejercicioId
-                            ? `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=diagrama`
+                            ? rutaVolverDetalle ??
+                              `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=diagrama`
                             : esModoGrupo && grupoId
                               ? `/grupos/${grupoId}`
                               : undefined

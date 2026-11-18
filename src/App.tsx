@@ -35,6 +35,7 @@ import EditingBoard from './pages/Games/GeneradosPorIA/EditingBoard/EditingBoard
 import GruposInicio from './pages/Grupos/GruposInicio';
 import GrupoDetalle from './pages/Grupos/GrupoDetalle';
 import ReporteGrupoPage from './pages/Grupos/ReporteGrupo';
+import ReporteEstudianteGrupo from './pages/Grupos/ReporteEstudianteGrupo';
 import CrearEjercicioPage from './pages/Grupos/CrearEjercicioPage';
 import RevisarEntregas from './pages/Grupos/RevisarEntregas';
 import TableroGrupo from './pages/Grupos/tableros/TableroGrupo';
@@ -171,6 +172,10 @@ function App() {
                                         />
                                     }
                                 >
+                                    <Route
+                                        path="/grupos/:id/reporte/estudiantes/:estudianteId"
+                                        element={<ReporteEstudianteGrupo />}
+                                    />
                                     <Route
                                         path="/grupos/:id/reporte"
                                         element={<ReporteGrupoPage />}

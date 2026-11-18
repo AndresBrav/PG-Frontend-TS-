@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell';
 import PantallaCargando from '../../components/ui/PantallaCargando';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
@@ -71,6 +71,7 @@ const fechaEnRango = (
 
 const ReporteGrupoPage = () => {
     const { id } = useParams<{ id: string }>();
+    const [searchParams] = useSearchParams();
     const { claveAcceso } = useContext(TokenContext);
     const { usuario } = useContext(UsuarioContext);
     const navigate = useNavigate();
@@ -79,21 +80,56 @@ const ReporteGrupoPage = () => {
     const [reporte, setReporte] = useState<ReporteGrupo | null>(null);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [temarioActivo, setTemarioActivo] = useState('todos');
-    const [tipoActivo, setTipoActivo] = useState<'todos' | 'diagrama' | 'pseudocodigo'>(
-        'todos',
+    const [temarioActivo, setTemarioActivo] = useState(
+        () => searchParams.get('temario') ?? 'todos',
     );
+    const [tipoActivo, setTipoActivo] = useState<
+        'todos' | 'diagrama' | 'pseudocodigo'
+    >(() => {
+        const tipo = searchParams.get('tipo');
+        return tipo === 'diagrama' || tipo === 'pseudocodigo' ? tipo : 'todos';
+    });
     const [estadoActivo, setEstadoActivo] =
-        useState<EstadoReporte>('todos');
-    const [busqueda, setBusqueda] = useState('');
+        useState<EstadoReporte>(() => {
+            const estado = searchParams.get('estado');
+            return estado &&
+                [
+                    'todos',
+                    'resueltos',
+                    'no_resueltos',
+                    'en_progreso',
+                    'sin_iniciar',
+                    'por_calificar',
+                    'calificados',
+                    'vencidos',
+                ].includes(estado)
+                ? (estado as EstadoReporte)
+                : 'todos';
+        });
+    const [busqueda, setBusqueda] = useState(
+        () => searchParams.get('q') ?? '',
+    );
     const [criterioFecha, setCriterioFecha] =
-        useState<CriterioFecha>('entrega');
-    const [fechaDesde, setFechaDesde] = useState('');
-    const [fechaHasta, setFechaHasta] = useState('');
+        useState<CriterioFecha>(() => {
+            const criterio = searchParams.get('fecha');
+            return criterio &&
+                [
+                    'creacion',
+                    'limite',
+                    'entrega',
+                    'actividad',
+                    'inscripcion',
+                ].includes(criterio)
+                ? (criterio as CriterioFecha)
+                : 'entrega';
+        });
+    const [fechaDesde, setFechaDesde] = useState(
+        () => searchParams.get('desde') ?? '',
+    );
+    const [fechaHasta, setFechaHasta] = useState(
+        () => searchParams.get('hasta') ?? '',
+    );
     const [ejercicioSeleccionado, setEjercicioSeleccionado] = useState<
-        number | null
-    >(null);
-    const [estudianteSeleccionado, setEstudianteSeleccionado] = useState<
         number | null
     >(null);
     const rolReporte =
@@ -500,7 +536,6 @@ const ReporteGrupoPage = () => {
                                     setFechaDesde('');
                                     setFechaHasta('');
                                     setEjercicioSeleccionado(null);
-                                    setEstudianteSeleccionado(null);
                                 }}
                                 className="rounded-xl border border-white/10 px-3 py-2 text-sm text-gray-300 hover:border-[#FF7C02]/50 hover:text-white"
                             >
@@ -735,20 +770,28 @@ const ReporteGrupoPage = () => {
                                                         className="bg-[#181818]"
                                                     >
                                                         <td className="rounded-l-xl px-3 py-3">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    setEstudianteSeleccionado(
-                                                                        estudianteId,
-                                                                    )
-                                                                }
-                                                                className="font-semibold text-white hover:text-[#FF7C02]"
-                                                            >
+                                                            <span className="font-semibold text-white">
                                                                 {username}
-                                                            </button>
+                                                            </span>
                                                             <span className="mt-1 block font-mono text-xs text-gray-500">
                                                                 {codigo}
                                                             </span>
+                                                            <Link
+                                                                to={`/grupos/${id}/reporte/estudiantes/${estudianteId}?${new URLSearchParams(
+                                                                    {
+                                                                        temario: temarioActivo,
+                                                                        tipo: tipoActivo,
+                                                                        estado: estadoActivo,
+                                                                        q: busqueda,
+                                                                        fecha: criterioFecha,
+                                                                        desde: fechaDesde,
+                                                                        hasta: fechaHasta,
+                                                                    },
+                                                                ).toString()}`}
+                                                                className="mt-2 inline-flex rounded-lg border border-[#FF7C02]/40 px-2.5 py-1 text-xs font-medium text-[#FF9A3D] hover:bg-[#FF7C02]/10"
+                                                            >
+                                                                Ver detalle
+                                                            </Link>
                                                         </td>
                                                         <td className="px-3 py-3">
                                                             <div className="flex items-center gap-2">
@@ -993,100 +1036,6 @@ const ReporteGrupoPage = () => {
                             })()
                         )}
 
-                        {estudianteSeleccionado !== null && (
-                            (() => {
-                                const estudiante = reporte.estudiantes.find(
-                                    (item) => item.id === estudianteSeleccionado,
-                                );
-                                if (!estudiante) return null;
-
-                                return (
-                                    <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div>
-                                                <h2 className="text-xl font-bold text-white">
-                                                    Ejercicios: {estudiante.username}
-                                                </h2>
-                                                <p className="mt-1 font-mono text-xs text-gray-500">
-                                                    {estudiante.codigo}
-                                                </p>
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    setEstudianteSeleccionado(null)
-                                                }
-                                                className="text-sm text-gray-400 hover:text-white"
-                                            >
-                                                Cerrar
-                                            </button>
-                                        </div>
-                                        <div className="mt-4 overflow-x-auto">
-                                            <table className="w-full min-w-[760px] border-separate border-spacing-y-2 text-left text-sm">
-                                                <thead>
-                                                    <tr className="text-xs uppercase tracking-wider text-gray-400">
-                                                        <th className="px-3 py-2">Ejercicio</th>
-                                                        <th className="px-3 py-2">Estado</th>
-                                                        <th className="px-3 py-2">Última actividad</th>
-                                                        <th className="px-3 py-2">Entrega</th>
-                                                        <th className="px-3 py-2">Puntaje</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {ejerciciosVisibles.map((ejercicio) => {
-                                                        const entrega = (reporte.entregas ?? []).find(
-                                                            (item) =>
-                                                                item.usuario_id === estudiante.id &&
-                                                                item.ejercicio_id === ejercicio.id,
-                                                        );
-                                                        let estado = 'Sin iniciar';
-                                                        if (entrega?.calificado) estado = 'Calificado';
-                                                        else if (entrega?.completado) estado = 'Entregado';
-                                                        else if (entrega) estado = 'En progreso';
-
-                                                        return (
-                                                            <tr
-                                                                key={ejercicio.id}
-                                                                className="bg-[#181818]"
-                                                            >
-                                                                <td className="rounded-l-xl px-3 py-3">
-                                                                    <span className="font-semibold text-white">
-                                                                        {ejercicio.titulo}
-                                                                    </span>
-                                                                    <span className="mt-1 block text-xs text-gray-500">
-                                                                        {ejercicio.temario}
-                                                                    </span>
-                                                                </td>
-                                                                <td className="px-3 py-3 text-gray-300">
-                                                                    {estado}
-                                                                </td>
-                                                                <td className="px-3 py-3 text-xs text-gray-400">
-                                                                    {formatearFechaHora(
-                                                                        entrega?.ultima_actividad ??
-                                                                            null,
-                                                                    )}
-                                                                </td>
-                                                                <td className="px-3 py-3 text-xs text-gray-400">
-                                                                    {formatearFechaHora(
-                                                                        entrega?.fecha_completado ??
-                                                                            null,
-                                                                    )}
-                                                                </td>
-                                                                <td className="rounded-r-xl px-3 py-3 text-xs text-[#FF7C02]">
-                                                                    {entrega?.calificado
-                                                                        ? `${entrega.puntos_profesor ?? 0}/${ejercicio.puntos}`
-                                                                        : 'Pendiente'}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </section>
-                                );
-                            })()
-                        )}
                     </>
                 ) : null}
             </main>

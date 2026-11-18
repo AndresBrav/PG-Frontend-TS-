@@ -1,5 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+    Link,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from 'react-router-dom';
 import Swal from 'sweetalert2';
 import AppShell from '../../components/layout/AppShell';
 import PantallaCargando from '../../components/ui/PantallaCargando';
@@ -31,7 +36,8 @@ const RevisarEntregas = () => {
         ejercicioId: string;
     }>();
     const [params] = useSearchParams();
-    const tipoTablero = params.get('tipo') === 'diagrama' ? 'diagrama' : 'pseudocodigo';
+    const tipoTablero =
+        params.get('tipo') === 'diagrama' ? 'diagrama' : 'pseudocodigo';
     const { claveAcceso } = useContext(TokenContext);
     const navigate = useNavigate();
 
@@ -50,7 +56,7 @@ const RevisarEntregas = () => {
                 listarEjerciciosGrupoProfesor(claveAcceso, id),
             ]);
             const ejercicio = ejercicios.find(
-                (item) => item.id === Number(ejercicioId),
+                (item) => item.id === Number(ejercicioId)
             );
             if (!ejercicio) {
                 throw new Error('No se encontró el ejercicio de este grupo');
@@ -62,7 +68,7 @@ const RevisarEntregas = () => {
             if (esErrorDeSesion(error)) return;
             const mensaje = obtenerMensajeError(
                 error,
-                'No se pudieron cargar las entregas',
+                'No se pudieron cargar las entregas'
             );
             await Swal.fire({ icon: 'error', title: 'Error', text: mensaje });
         } finally {
@@ -95,15 +101,15 @@ const RevisarEntregas = () => {
                 >
                 <textarea id="comentario" class="swal2-textarea"
                     placeholder="Comentario (opcional)">${
-                    entrega.comentario_profesor ?? ''
-                }</textarea>
+                        entrega.comentario_profesor ?? ''
+                    }</textarea>
             `,
             showCancelButton: true,
             confirmButtonText: 'Calificar',
             cancelButtonText: 'Cancelar',
             preConfirm: () => {
                 const inputPuntos = document.getElementById(
-                    'puntos',
+                    'puntos'
                 ) as HTMLInputElement | null;
                 if (!inputPuntos?.value.trim()) {
                     Swal.showValidationMessage('Ingresa una puntuación');
@@ -111,9 +117,7 @@ const RevisarEntregas = () => {
                 }
                 const puntos = Number(inputPuntos.value);
                 const comentario = (
-                    document.getElementById(
-                        'comentario',
-                    ) as HTMLTextAreaElement
+                    document.getElementById('comentario') as HTMLTextAreaElement
                 )?.value;
                 if (
                     !Number.isInteger(puntos) ||
@@ -121,7 +125,7 @@ const RevisarEntregas = () => {
                     puntos > puntosMaximos
                 ) {
                     Swal.showValidationMessage(
-                        `Los puntos deben ser un entero entre 0 y ${puntosMaximos}`,
+                        `Los puntos deben ser un entero entre 0 y ${puntosMaximos}`
                     );
                     return null;
                 }
@@ -138,7 +142,7 @@ const RevisarEntregas = () => {
                 ejercicioId ?? '',
                 entrega.usuario_id,
                 puntos,
-                comentario.trim() || null,
+                comentario.trim() || null
             );
             await Swal.fire({
                 icon: 'success',
@@ -149,10 +153,7 @@ const RevisarEntregas = () => {
             });
             void cargar();
         } catch (error) {
-            const mensaje = obtenerMensajeError(
-                error,
-                'No se pudo calificar',
-            );
+            const mensaje = obtenerMensajeError(error, 'No se pudo calificar');
             await Swal.fire({ icon: 'error', title: 'Error', text: mensaje });
         }
     };
@@ -180,9 +181,9 @@ const RevisarEntregas = () => {
                     Entregas del ejercicio
                 </h1>
                 <p className="mb-6 text-sm text-gray-500">
-                    Cada fila es la entrega de UN estudiante en ESTE
-                    ejercicio (calificar aquí no afecta a otros
-                    ejercicios). Puntaje máximo: {puntosMaximos ?? '—'} pts.
+                    Cada fila es la entrega de UN estudiante en ESTE ejercicio
+                    (calificar aquí no afecta a otros ejercicios). Puntaje
+                    máximo: {puntosMaximos ?? '—'} pts.
                 </p>
 
                 <div className="grid gap-3">
@@ -211,7 +212,8 @@ const RevisarEntregas = () => {
                                         )}
                                         {entrega.calificado && (
                                             <span className="rounded-full bg-amber-400/10 px-3 py-0.5 text-xs text-amber-300">
-                                                ⭐ {entrega.puntos_profesor ?? 0}{' '}
+                                                ⭐{' '}
+                                                {entrega.puntos_profesor ?? 0}{' '}
                                                 pts (profesor)
                                             </span>
                                         )}
@@ -220,14 +222,14 @@ const RevisarEntregas = () => {
                                         Última actividad:{' '}
                                         {entrega.ultima_actividad
                                             ? formatearFechaHora(
-                                                  entrega.ultima_actividad,
+                                                  entrega.ultima_actividad
                                               )
                                             : '—'}
                                         {entrega.comentario_profesor && (
                                             <>
-                                                {' '}· 💬 "
-                                                {entrega.comentario_profesor}
-                                                "
+                                                {' '}
+                                                · 💬 "
+                                                {entrega.comentario_profesor}"
                                             </>
                                         )}
                                     </p>
@@ -237,7 +239,7 @@ const RevisarEntregas = () => {
                                     <button
                                         onClick={() =>
                                             navigate(
-                                                `/grupos/${id}/ejercicios/${ejercicioId}/${tipoTablero}?revisarEstudiante=${entrega.usuario_id}`,
+                                                `/grupos/${id}/ejercicios/${ejercicioId}/${tipoTablero}?revisarEstudiante=${entrega.usuario_id}`
                                             )
                                         }
                                         className="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
@@ -258,20 +260,17 @@ const RevisarEntregas = () => {
                                         <h3 className="font-semibold text-white">
                                             Resultados de casos de prueba
                                         </h3>
-                                        <span className="text-xs text-amber-200">
-                                            Reportados por el estudiante; no
-                                            verificados en el servidor
-                                        </span>
                                     </div>
                                     {entrega.resultado_casos_prueba ? (
                                         <>
                                             <p className="mt-2 text-sm text-gray-300">
-                                                {entrega.resultado_casos_prueba.filter(
-                                                    (resultado) =>
-                                                        resultado.aprobado,
-                                                ).length}
-                                                /
-                                                {casosPrueba.length} casos
+                                                {
+                                                    entrega.resultado_casos_prueba.filter(
+                                                        (resultado) =>
+                                                            resultado.aprobado
+                                                    ).length
+                                                }
+                                                /{casosPrueba.length} casos
                                                 aprobados
                                             </p>
                                             <div className="mt-3 grid gap-2">
@@ -281,21 +280,19 @@ const RevisarEntregas = () => {
                                                             entrega.resultado_casos_prueba?.find(
                                                                 (item) =>
                                                                     item.indice ===
-                                                                    indice,
+                                                                    indice
                                                             );
                                                         return (
                                                             <ResultadoCaso
                                                                 key={indice}
-                                                                indice={
-                                                                    indice
-                                                                }
+                                                                indice={indice}
                                                                 caso={caso}
                                                                 resultado={
                                                                     resultado
                                                                 }
                                                             />
                                                         );
-                                                    },
+                                                    }
                                                 )}
                                             </div>
                                         </>

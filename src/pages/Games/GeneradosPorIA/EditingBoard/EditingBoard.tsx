@@ -48,6 +48,7 @@ import type {
 interface LocationState {
     juegoId?: number;
     juegoDescripcion?: string;
+    rutaVolver?: string;
 }
 
 /** Información del ejercicio de grupo para la franja de estado. */
@@ -107,6 +108,14 @@ const EditingBoard: React.FC = () => {
         ? Number(searchParams.get('revisarEstudiante'))
         : null;
     const esRevision = esModoGrupo && revisarEstudianteId !== null;
+    const rutaVolverDetalle =
+        esRevision &&
+        grupoId &&
+        locationState?.rutaVolver?.startsWith(
+            `/grupos/${grupoId}/reporte/estudiantes/`,
+        )
+            ? locationState.rutaVolver
+            : null;
     const [infoGrupo, setInfoGrupo] = useState<InfoEjercicioGrupo | null>(
         null
     );
@@ -123,7 +132,8 @@ const EditingBoard: React.FC = () => {
         esModoGrupo && (esRevision || infoGrupo?.vencido === true);
     const rutaVolver =
         esRevision && grupoId && ejercicioId
-            ? `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=pseudocodigo`
+            ? rutaVolverDetalle ??
+              `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=pseudocodigo`
             : esModoGrupo && grupoId
               ? `/grupos/${grupoId}`
               : '/ejercicios-ia';
