@@ -98,7 +98,7 @@ export async function ejecutarPseudocodigo(
     };
     let __debugPaso = 0;
     let __debugUltimo = '';
-    const __debug = (pares, numLinea) => {
+    const __debug = (pares, numLinea, instruccion, iteraciones) => {
         if (!callbacks.onEstado) return;
         __debugPaso++;
         // Para programas con cientos de miles de pasos solo se
@@ -111,10 +111,21 @@ export async function ejecutarPseudocodigo(
         }
         // Sin cambios desde la última captura: no se reenvía al panel
         // (la línea cuenta como cambio para resaltar la línea en ejecución)
-        const huella = (numLinea ?? 0) + '|' + JSON.stringify(variables);
+        const huella =
+            (numLinea ?? 0) +
+            '|' +
+            JSON.stringify(variables) +
+            '|' +
+            JSON.stringify(iteraciones);
         if (huella === __debugUltimo) return;
         __debugUltimo = huella;
-        callbacks.onEstado({ paso: __debugPaso, linea: numLinea, variables });
+        callbacks.onEstado({
+            paso: __debugPaso,
+            linea: numLinea,
+            instruccion,
+            iteraciones,
+            variables,
+        });
     };
     const __ultimoMensaje = { valor: '' };
     const __leer = async (nombre, tipo) => {

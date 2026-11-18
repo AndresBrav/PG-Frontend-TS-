@@ -23,6 +23,7 @@ export {
 } from './tipos';
 export type {
     CallbacksEjecucion,
+    ContextoIteracion,
     EstadoEjecucion,
     Linea,
     ResultadoEjecucion,

@@ -170,7 +170,11 @@ export function preprocesar(codigo: string): Linea[] {
         if (!limpia) {
             return;
         }
-        lineas.push({ numero: idx + 1, toks: tokenizar(limpia, idx + 1) });
+        lineas.push({
+            numero: idx + 1,
+            texto: limpia,
+            toks: tokenizar(limpia, idx + 1),
+        });
     });
     return lineas;
 }

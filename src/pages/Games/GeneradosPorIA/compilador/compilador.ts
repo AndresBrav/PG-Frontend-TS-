@@ -30,6 +30,11 @@ class Compilador {
     private out: string[] = [];
     private contador = 0;
     private debug: boolean;
+    private ciclosDebug: Array<{
+        tipo: 'Para' | 'Mientras' | 'Repetir';
+        contador: string;
+        variable?: string;
+    }> = [];
 
     constructor(lineas: Linea[], debug = false) {
         this.lineas = lineas;
@@ -72,6 +77,7 @@ class Compilador {
      * (excepto declaraciones) emite la captura de debug si está activo.
      */
     private compilarSentencia(): void {
+        const lineaSentencia = this.lineas[this.i];
         const k = this.clave();
         // Las declaraciones puras y Finalizar no generan captura de variables
         const esDeclaracion =
@@ -130,7 +136,7 @@ class Compilador {
                 this.compilarAsignacion();
         }
         if (this.debug && !esDeclaracion) {
-            this.emitirDebug();
+            this.emitirDebug(lineaSentencia);
         }
     }
 
@@ -138,7 +144,10 @@ class Compilador {
      * Modo debug: tras cada instrucción emite una llamada __debug(...)
      * con los valores actuales de las variables declaradas hasta aquí.
      */
-    private emitirDebug(): void {
+    private emitirDebug(linea = this.lineas[this.i]): void {
+        if (!this.debug) {
+            return;
+        }
         const nombres = [...this.declaradas];
         if (nombres.length === 0) {
             return;
@@ -149,8 +158,18 @@ class Compilador {
                     `['${v}', typeof ${v} === 'object' && ${v} !== null ? JSON.stringify(${v}) : ${v}]`
             )
             .join(', ');
+        const iteraciones = `[${this.ciclosDebug
+            .map(
+                (ciclo) =>
+                    `{ tipo: ${JSON.stringify(ciclo.tipo)}, iteracion: ${ciclo.contador}, variable: ${JSON.stringify(ciclo.variable ?? null)}, valor: ${
+                        ciclo.variable
+                            ? `String(${ciclo.variable})`
+                            : 'null'
+                    } }`,
+            )
+            .join(', ')}]`;
         this.out.push(
-            `try { __debug([${pares}], ${this.lineas[this.i]?.numero ?? 0}); } catch (e) {}`
+            `try { __debug([${pares}], ${linea?.numero ?? 0}, ${JSON.stringify(linea?.texto ?? '')}, ${iteraciones}); } catch (e) {}`
         );
     }
 
@@ -559,9 +578,22 @@ class Compilador {
                 `no se esperaba '${expCond.actual()?.val}' en la condición del Mientras.`
             );
         }
-        this.out.push(`while (${cond}) { __paso();`);
-        // Snapshot al inicio de cada iteración (ilumina el rombo del bucle)
-        this.emitirDebug();
+        const contadorIteracion = this.debug
+            ? `__debugIter${this.contador++}`
+            : null;
+        if (contadorIteracion) {
+            this.out.push(`{ let ${contadorIteracion} = 0;`);
+        }
+        this.out.push(
+            `while (${cond}) { ${contadorIteracion ? `${contadorIteracion}++; ` : ''}__paso();`
+        );
+        if (contadorIteracion) {
+            this.ciclosDebug.push({
+                tipo: 'Mientras',
+                contador: contadorIteracion,
+            });
+            this.emitirDebug(linea);
+        }
         this.i++;
         this.recorrerHasta(['finmientras'], {
             linea,
@@ -569,7 +601,13 @@ class Compilador {
             cierre: 'FinMientras',
         });
         this.i++;
+        if (contadorIteracion) {
+            this.ciclosDebug.pop();
+        }
         this.out.push('}');
+        if (contadorIteracion) {
+            this.out.push('}');
+        }
     }
 
     /**
@@ -688,13 +726,24 @@ class Compilador {
             );
         }
         const pasoVar = `__pi${this.contador++}`;
+        const contadorIteracion = this.debug
+            ? `__debugIter${this.contador++}`
+            : null;
         this.declararVariable(vNombre);
-        this.out.push(`{ const ${pasoVar} = ${pasoVal};`);
         this.out.push(
-            `for (${vNombre} = ${ini}; ${pasoVar} > 0 ? ${vNombre} <= ${fin} : ${vNombre} >= ${fin}; ${vNombre} = ${vNombre} + ${pasoVar}) { __paso();`
+            `{ const ${pasoVar} = ${pasoVal};${contadorIteracion ? ` let ${contadorIteracion} = 0;` : ''}`
         );
-        // Snapshot al inicio de cada iteración (ve el iterador cambiar)
-        this.emitirDebug();
+        this.out.push(
+            `for (${vNombre} = ${ini}; ${pasoVar} > 0 ? ${vNombre} <= ${fin} : ${vNombre} >= ${fin}; ${vNombre} = ${vNombre} + ${pasoVar}) { ${contadorIteracion ? `${contadorIteracion}++; ` : ''}__paso();`
+        );
+        if (contadorIteracion) {
+            this.ciclosDebug.push({
+                tipo: 'Para',
+                contador: contadorIteracion,
+                variable: vNombre,
+            });
+            this.emitirDebug(linea);
+        }
         this.i++;
         this.recorrerHasta(['finpara'], {
             linea,
@@ -703,6 +752,9 @@ class Compilador {
         });
         if (this.clave() === 'finpara') {
             this.i++;
+        }
+        if (contadorIteracion) {
+            this.ciclosDebug.pop();
         }
         this.out.push('}');
         this.out.push('}');
@@ -714,7 +766,21 @@ class Compilador {
      */
     private compilarRepetir(): void {
         const linea = this.lineas[this.i];
-        this.out.push('do { __paso();');
+        const contadorIteracion = this.debug
+            ? `__debugIter${this.contador++}`
+            : null;
+        if (contadorIteracion) {
+            this.out.push(`{ let ${contadorIteracion} = 0;`);
+        }
+        this.out.push(
+            `do { ${contadorIteracion ? `${contadorIteracion}++; ` : ''}__paso();`
+        );
+        if (contadorIteracion) {
+            this.ciclosDebug.push({
+                tipo: 'Repetir',
+                contador: contadorIteracion,
+            });
+        }
         this.i++;
         this.recorrerHasta(['hasta'], {
             linea,
@@ -750,7 +816,13 @@ class Compilador {
             }
             this.i++;
         }
+        if (contadorIteracion) {
+            this.ciclosDebug.pop();
+        }
         this.out.push(`} while (!(${cond}));`);
+        if (contadorIteracion) {
+            this.out.push('}');
+        }
     }
 
     /**

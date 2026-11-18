@@ -23,11 +23,22 @@ export interface VariableEstado {
     valor: string;
 }
 
+export interface ContextoIteracion {
+    tipo: 'Para' | 'Mientras' | 'Repetir';
+    iteracion: number;
+    variable?: string | null;
+    valor?: string | null;
+}
+
 export interface EstadoEjecucion {
     /** Número de instrucción ejecutada (1-based). */
     paso: number;
     /** Línea del pseudocódigo que se estaba ejecutando (1-based, opcional). */
     linea?: number;
+    /** Instrucción de origen asociada a esta captura. */
+    instruccion?: string;
+    /** Ciclos activos al momento de registrar la captura. */
+    iteraciones?: ContextoIteracion[];
     variables: VariableEstado[];
 }
 
@@ -70,5 +81,6 @@ export interface Token {
 
 export interface Linea {
     numero: number;
+    texto?: string;
     toks: Token[];
 }

@@ -4,7 +4,12 @@ import React, {
     useRef,
     useState,
 } from 'react';
-import type { EstadoEjecucion, VariableEstado } from '../compilador';
+import { normVar } from '../compilador';
+import type {
+    ContextoIteracion,
+    EstadoEjecucion,
+    VariableEstado,
+} from '../compilador';
 import { perfilesDe } from './visualUtils';
 import { colorDeVariable } from './visualUtils';
 import GraficaEvolucion from './GraficaEvolucion';
@@ -23,10 +28,15 @@ interface PanelVariablesEjecucionProps {
     onLineaActiva?: (linea: number | null) => void;
 }
 
-type TabVisual = 'tabla' | 'evolucion' | 'barras' | 'arreglos';
+type TabVisual = 'tabla' | 'escritorio' | 'evolucion' | 'barras' | 'arreglos';
 
 const TABS: { id: TabVisual; etiqueta: string; titulo: string }[] = [
     { id: 'tabla', etiqueta: '📋 Tabla', titulo: 'chips y traza tipo PSeInt' },
+    {
+        id: 'escritorio',
+        etiqueta: '🧾 Escritorio',
+        titulo: 'valores antes y después de cada asignación',
+    },
     { id: 'evolucion', etiqueta: '📈 Evolución', titulo: 'cómo cambia cada variable en el tiempo' },
     { id: 'barras', etiqueta: '📊 Barras', titulo: 'variables numéricas contra una escala común' },
     { id: 'arreglos', etiqueta: '🧮 Arreglos', titulo: 'Dimension dibujado en casillas' },
@@ -47,6 +57,53 @@ const coloresVariable = [
 
 const colorDe = (indice: number) =>
     coloresVariable[indice % coloresVariable.length];
+
+interface FilaPruebaEscritorio {
+    paso: number;
+    linea: number;
+    iteracion: string;
+    control: string;
+    variable: string;
+    anterior: string;
+    operacion: string;
+    nuevo: string;
+}
+
+const sustituirVariables = (
+    expresion: string,
+    valores: Map<string, string>,
+): string =>
+    expresion.replace(
+        /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)/g,
+        (
+            coincidencia,
+            textoLiteral: string | undefined,
+            nombre: string | undefined,
+        ) => {
+            if (textoLiteral || !nombre) return coincidencia;
+            return valores.get(normVar(nombre)) ?? nombre;
+        },
+    );
+
+const describirControl = (iteraciones: ContextoIteracion[]): string =>
+    iteraciones.length
+        ? iteraciones
+              .map((ciclo) => {
+                  const nombre =
+                      ciclo.variable && ciclo.valor !== undefined
+                          ? `${ciclo.variable}=${ciclo.valor}`
+                          : ciclo.tipo;
+                  return `${ciclo.tipo} ${ciclo.iteracion} (${nombre})`;
+              })
+              .join(' / ')
+        : 'Fuera del ciclo';
+
+const celdaEscritorio = {
+    padding: '5px 10px',
+    fontSize: 11,
+    borderBottom: '1px solid var(--border)',
+    whiteSpace: 'nowrap' as const,
+};
 
 /**
  * Panel de la ejecución, con vista de película: pestañas de tabla tipo
@@ -113,6 +170,71 @@ const PanelVariablesEjecucion = ({
     }, [cortado, captura]);
 
     const filas = useMemo(() => cortado.slice(-MAX_FILAS), [cortado]);
+    const filasEscritorio = useMemo(() => {
+        const filasGeneradas: FilaPruebaEscritorio[] = [];
+        const asignacionesFueraDeCiclo = new Set<string>();
+
+        cortado.forEach((capturaDe, indice) => {
+            const instruccion = capturaDe.instruccion?.trim();
+            const asignacion = instruccion?.match(
+                /^([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*(?:\s*\[[^\]]+\])?)\s*<-\s*(.+)$/,
+            );
+            if (!asignacion) return;
+
+            const objetivo = asignacion[1].trim();
+            const nombreVariable = objetivo.split('[')[0].trim();
+            const nombreNormalizado = normVar(nombreVariable);
+            const valoresActuales = new Map<string, string>(
+                capturaDe.variables.map((variable) => [
+                    normVar(variable.nombre),
+                    variable.valor,
+                ]),
+            );
+            const valorNuevo = valoresActuales.get(nombreNormalizado);
+            if (valorNuevo === undefined) return;
+
+            const capturaAnterior = cortado[indice - 1];
+            const valoresAnteriores = new Map<string, string>(
+                (capturaAnterior?.variables ?? []).map((variable) => [
+                    normVar(variable.nombre),
+                    variable.valor,
+                ]),
+            );
+            const iteraciones = capturaDe.iteraciones ?? [];
+            const cicloActivo = iteraciones[iteraciones.length - 1];
+            const yaAsignadaFueraDeCiclo =
+                asignacionesFueraDeCiclo.has(nombreNormalizado);
+
+            filasGeneradas.push({
+                paso: capturaDe.paso,
+                linea: capturaDe.linea ?? 0,
+                iteracion: cicloActivo
+                    ? String(cicloActivo.iteracion)
+                    : yaAsignadaFueraDeCiclo
+                      ? '—'
+                      : 'Inicial',
+                control: describirControl(iteraciones),
+                variable: objetivo,
+                anterior:
+                    cicloActivo || yaAsignadaFueraDeCiclo
+                        ? (valoresAnteriores.get(nombreNormalizado) ?? '—')
+                        : '—',
+                operacion: cicloActivo
+                    ? sustituirVariables(
+                          asignacion[2].trim(),
+                          valoresAnteriores,
+                      )
+                    : `${objetivo} ← ${asignacion[2].trim()}`,
+                nuevo: valorNuevo,
+            });
+
+            if (!cicloActivo) {
+                asignacionesFueraDeCiclo.add(nombreNormalizado);
+            }
+        });
+
+        return filasGeneradas.slice(-MAX_FILAS);
+    }, [cortado]);
 
     // Si la traza se reinicia (nueva ejecución) regresamos al modo vivo
     useEffect(() => {
@@ -451,6 +573,121 @@ const PanelVariablesEjecucion = ({
                         </div>
                     )}
                 </>
+            )}
+
+            {tab === 'escritorio' && (
+                <div>
+                    <div style={{ marginBottom: 6 }}>
+                        <strong style={{ fontSize: 12 }}>
+                            Prueba de escritorio
+                        </strong>
+                        <p style={{ fontSize: 10, color: '#888', margin: 0 }}>
+                            Cada fila muestra una asignación y los valores
+                            anteriores y nuevos. La traza completa sigue
+                            disponible en la pestaña Tabla.
+                        </p>
+                    </div>
+                    {filasEscritorio.length === 0 ? (
+                        <span style={{ fontSize: 11, color: '#888' }}>
+                            Ejecuta un algoritmo con asignaciones para generar
+                            esta tabla.
+                        </span>
+                    ) : (
+                        <div
+                            style={{
+                                overflow: 'auto',
+                                maxHeight: 220,
+                                border: '1px solid var(--border)',
+                                borderRadius: 8,
+                            }}
+                        >
+                            <table
+                                style={{
+                                    borderCollapse: 'collapse',
+                                    minWidth: '100%',
+                                }}
+                            >
+                                <thead>
+                                    <tr
+                                        style={{
+                                            backgroundColor:
+                                                'rgba(255,255,255,0.05)',
+                                            position: 'sticky',
+                                            top: 0,
+                                        }}
+                                    >
+                                        {[
+                                            'iteración',
+                                            'control',
+                                            'variable',
+                                            'valor anterior',
+                                            'operación',
+                                            'valor nuevo',
+                                        ].map((titulo) => (
+                                            <th
+                                                key={titulo}
+                                                style={{
+                                                    padding: '6px 10px',
+                                                    fontSize: 10,
+                                                    color: '#888',
+                                                    textAlign: 'left',
+                                                    whiteSpace: 'nowrap',
+                                                    borderBottom:
+                                                        '1px solid var(--border)',
+                                                }}
+                                            >
+                                                {titulo}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filasEscritorio.map((fila, indice) => (
+                                        <tr
+                                            key={`${fila.paso}-${fila.linea}-${indice}`}
+                                        >
+                                            <td style={celdaEscritorio}>
+                                                {fila.iteracion}
+                                            </td>
+                                            <td style={celdaEscritorio}>
+                                                {fila.control}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    ...celdaEscritorio,
+                                                    fontWeight: 700,
+                                                    color: '#60A5FA',
+                                                }}
+                                            >
+                                                {fila.variable}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    ...celdaEscritorio,
+                                                    color: '#FBBF24',
+                                                }}
+                                            >
+                                                {fila.anterior}
+                                            </td>
+                                            <td style={celdaEscritorio}>
+                                                {fila.operacion}
+                                            </td>
+                                            <td
+                                                style={{
+                                                    ...celdaEscritorio,
+                                                    color: '#4ADE80',
+                                                    fontWeight: 700,
+                                                }}
+                                            >
+                                                {fila.nuevo}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
             )}
 
             {tab === 'evolucion' && <GraficaEvolucion perfiles={perfiles} />}
