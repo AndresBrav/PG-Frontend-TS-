@@ -19,6 +19,10 @@ interface ReproductorEjecucionProps {
     velocidad: number;
     /** Cambia la vista a un índice de captura concreto (slider). */
     onSeleccionar: (indice: number) => void;
+    /** Retrocede una captura y pausa el modo película. */
+    onPasoAnterior: () => void;
+    /** Avanza una captura y pausa el modo película. */
+    onPasoSiguiente: () => void;
     /** Vuelve a seguir la ejecución en vivo. */
     onIrVivo: () => void;
     /** Alterna ▶/⏸ del modo película. */
@@ -57,10 +61,15 @@ const ReproductorEjecucion = ({
     reproduciendo,
     velocidad,
     onSeleccionar,
+    onPasoAnterior,
+    onPasoSiguiente,
     onIrVivo,
     onTogglePlay,
     onVelocidad,
 }: ReproductorEjecucionProps) => {
+    const hayPasoAnterior = total > 0 && indice > 0;
+    const hayPasoSiguiente = total > 0 && indice < total - 1;
+
     return (
         <div
             style={{
@@ -81,7 +90,21 @@ const ReproductorEjecucion = ({
                     flexWrap: 'wrap',
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <button
+                        type="button"
+                        onClick={onPasoAnterior}
+                        disabled={!hayPasoAnterior}
+                        style={{
+                            ...estiloBoton(false),
+                            opacity: hayPasoAnterior ? 1 : 0.4,
+                            cursor: hayPasoAnterior ? 'pointer' : 'not-allowed',
+                        }}
+                        title="Ir al paso anterior"
+                        aria-label="Ir al paso anterior"
+                    >
+                        ←
+                    </button>
                     <button
                         type="button"
                         onClick={onTogglePlay}
@@ -95,6 +118,20 @@ const ReproductorEjecucion = ({
                         }
                     >
                         {modoVivo ? '▶' : reproduciendo ? '⏸' : '▶'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onPasoSiguiente}
+                        disabled={!hayPasoSiguiente}
+                        style={{
+                            ...estiloBoton(false),
+                            opacity: hayPasoSiguiente ? 1 : 0.4,
+                            cursor: hayPasoSiguiente ? 'pointer' : 'not-allowed',
+                        }}
+                        title="Ir al paso siguiente"
+                        aria-label="Ir al paso siguiente"
+                    >
+                        →
                     </button>
                     <button
                         type="button"

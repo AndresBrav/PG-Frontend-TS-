@@ -296,6 +296,14 @@ const PanelVariablesEjecucion = ({
         setIndiceRep(indice);
     };
 
+    const irAlPasoAnterior = () => {
+        seleccionar(Math.max(idxSeguro - 1, 0));
+    };
+
+    const irAlPasoSiguiente = () => {
+        seleccionar(Math.min(idxSeguro + 1, Math.max(total - 1, 0)));
+    };
+
     if (!estado) {
         return null;
     }
@@ -720,6 +728,8 @@ const PanelVariablesEjecucion = ({
                     reproduciendo={reproduciendo}
                     velocidad={velocidad}
                     onSeleccionar={seleccionar}
+                    onPasoAnterior={irAlPasoAnterior}
+                    onPasoSiguiente={irAlPasoSiguiente}
                     onIrVivo={irVivo}
                     onTogglePlay={alternarPlay}
                     onVelocidad={setVelocidad}
