@@ -15,6 +15,7 @@ import { colorDeVariable } from './visualUtils';
 import GraficaEvolucion from './GraficaEvolucion';
 import BarrasEjecucion from './BarrasEjecucion';
 import ArregloCasillas from './ArregloCasillas';
+import SimulacionMovimiento from './SimulacionMovimiento';
 import ReproductorEjecucion from './ReproductorEjecucion';
 
 interface PanelVariablesEjecucionProps {
@@ -28,7 +29,13 @@ interface PanelVariablesEjecucionProps {
     onLineaActiva?: (linea: number | null) => void;
 }
 
-type TabVisual = 'tabla' | 'escritorio' | 'evolucion' | 'barras' | 'arreglos';
+type TabVisual =
+    | 'tabla'
+    | 'escritorio'
+    | 'evolucion'
+    | 'barras'
+    | 'arreglos'
+    | 'simulacion';
 
 const TABS: { id: TabVisual; etiqueta: string; titulo: string }[] = [
     { id: 'tabla', etiqueta: '📋 Tabla', titulo: 'chips y traza tipo PSeInt' },
@@ -40,6 +47,11 @@ const TABS: { id: TabVisual; etiqueta: string; titulo: string }[] = [
     { id: 'evolucion', etiqueta: '📈 Evolución', titulo: 'cómo cambia cada variable en el tiempo' },
     { id: 'barras', etiqueta: '📊 Barras', titulo: 'variables numéricas contra una escala común' },
     { id: 'arreglos', etiqueta: '🧮 Arreglos', titulo: 'Dimension dibujado en casillas' },
+    {
+        id: 'simulacion',
+        etiqueta: '🎬 Simulación',
+        titulo: 'simulación gráfica interactiva con animación de intercambios y punteros',
+    },
 ];
 
 const MAX_FILAS = 150;
@@ -794,6 +806,14 @@ const PanelVariablesEjecucion = ({
 
             {tab === 'arreglos' && (
                 <ArregloCasillas
+                    perfiles={perfiles}
+                    captura={captura}
+                    anterior={anterior}
+                />
+            )}
+
+            {tab === 'simulacion' && (
+                <SimulacionMovimiento
                     perfiles={perfiles}
                     captura={captura}
                     anterior={anterior}
