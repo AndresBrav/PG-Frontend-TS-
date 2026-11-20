@@ -5,332 +5,99 @@ export const verificarReultado = (
     columna: number[],
     fila: number[]
 ): boolean[] => {
-    let boolean1: boolean = false;
-    let boolean2: boolean = false;
-    let boolean3: boolean = false;
-    let boolean4: boolean = false;
-    let boolean5: boolean = false;
-    let boolean6: boolean = false;
-    let boolean7: boolean = false;
-    let boolean8: boolean = false;
-    let boolean9: boolean = false;
-    let boolean10: boolean = false;
-    let boolean11: boolean = false;
-    let boolean12: boolean = false;
-    let boolean13: boolean = false;
-    let boolean14: boolean = false;
-    let boolean15: boolean = false;
-    let boolean16: boolean = false;
+    // Buscar posición del widget "inicio" (id 4)
+    const indiceInicio = ids.indexOf(4);
+    if (indiceInicio === -1) {
+        return new Array(16).fill(false);
+    }
 
-    ids.forEach((id) => {
-        console.log("Widget ID:", id);
-    });
-    fila.forEach((i) => {
-        console.log("fila:", i);
-    });
-    columna.forEach((i) => {
-        console.log("columna:", i);
-    });
-
-    const indiceInicio = ids.indexOf(4); // id del widget "inicio"
     const filaInicio = fila[indiceInicio];
     const columnaInicio = columna[indiceInicio];
 
-    if (filaInicio === 0) {
-        // console.log("la fila de inicio es correcta");
-        boolean1 = true;
-        // let columnaInicio = columna[indiceInicio];
-        // console.log("la columna de inicio es: ", columnaInicio);
-    } else {
-        console.log("la fila de inicio es incorrecta");
-        boolean1 = false;
+    // Mapa de posiciones ocupadas: "col,fila" -> id
+    const mapaOcupacion = new Map<string, number>();
+    for (let i = 0; i < ids.length; i++) {
+        mapaOcupacion.set(`${columna[i]},${fila[i]}`, ids[i]);
     }
 
-    /****************************** */
-    const indiceLineaAbajo1 = ids.indexOf(7); // id del widget "linea abajo"
-    const filaLineaAbajo1 = fila[indiceLineaAbajo1];
-    const columnaLineaAbajo1 = columna[indiceLineaAbajo1];
-    const indiceLineaAbajo2 = ids.indexOf(14); // id del widget "linea abajo"
-    const filaLineaAbajo2 = fila[indiceLineaAbajo2];
-    const columnaLineaAbajo2 = columna[indiceLineaAbajo2];
-    const indiceLineaAbajo3 = ids.indexOf(15); // id del widget "linea abajo"
-    const filaLineaAbajo3 = fila[indiceLineaAbajo3];
-    const columnaLineaAbajo3 = columna[indiceLineaAbajo3];
-    const indiceLineaAbajo4 = ids.indexOf(16); // id del widget "linea abajo"
-    const filaLineaAbajo4 = fila[indiceLineaAbajo4];
-    const columnaLineaAbajo4 = columna[indiceLineaAbajo4];
+    // Conjuntos de IDs intercambiables
+    const FLECHAS_ABAJO = new Set([7, 14, 15, 16]);
+    const LINEAS_VERTICALES = new Set([8, 9, 10]);
 
-    if (
-        (columnaLineaAbajo1 === columnaInicio && filaLineaAbajo1 === 1) ||
-        (columnaLineaAbajo2 === columnaInicio && filaLineaAbajo2 === 1) ||
-        (columnaLineaAbajo3 === columnaInicio && filaLineaAbajo3 === 1) ||
-        (columnaLineaAbajo4 === columnaInicio && filaLineaAbajo4 === 1)
-    ) {
-        boolean2 = true; /* la linea abajo es correcta */
-    } else {
-        boolean2 = false;
+    // Registro de widgets ya consumidos para evitar que un mismo widget satisfaga 2 pasos
+    const widgetsUsados = new Set<number>();
+
+    const verificarPaso = (
+        colEsperada: number,
+        filaEsperada: number,
+        idsValidos: number[] | Set<number>
+    ): boolean => {
+        const idEnCelda = mapaOcupacion.get(`${colEsperada},${filaEsperada}`);
+        if (idEnCelda === undefined) return false;
+
+        const esValido = idsValidos instanceof Set 
+            ? idsValidos.has(idEnCelda) 
+            : idsValidos.includes(idEnCelda);
+
+        if (esValido && !widgetsUsados.has(idEnCelda)) {
+            widgetsUsados.add(idEnCelda);
+            return true;
+        }
+        return false;
+    };
+
+    // 1. Inicio (ID 4)
+    // Se valida que Inicio exista en el grid (permite comenzar en fila 0 o con offset si cabe en el tablero)
+    const boolean1 = filaInicio >= 0 && filaInicio <= 1; // permite fila 0 o 1
+    if (boolean1) {
+        widgetsUsados.add(4);
     }
 
-    /*********leer n1,n2***** */
-    const leerN1N2 = ids.indexOf(3); // id del widget "leer n1,n2"
-    const filaLeerN1N2 = fila[leerN1N2];
-    const columnaLeerN1N2 = columna[leerN1N2];
+    // 2. Línea/flecha abajo debajo de inicio
+    const boolean2 = verificarPaso(columnaInicio, filaInicio + 1, FLECHAS_ABAJO);
 
-    if (columnaLeerN1N2 === columnaInicio && filaLeerN1N2 === 2) {
-        boolean3 = true; /* leer n1,n2 es correcta */
-    } else {
-        boolean3 = false;
-    }
+    // 3. Leer n1, n2 (ID 3)
+    const boolean3 = verificarPaso(columnaInicio, filaInicio + 2, [3]);
 
-    /****** verificar la flecha hacia abajo ****/
-    const indiceLineaAbajo_7 = ids.indexOf(7); // id del widget "linea abajo 7"
-    const filaLineaAbajo_7 = fila[indiceLineaAbajo_7];
-    const columnaLineaAbajo_7 = columna[indiceLineaAbajo_7];
+    // 4. Flecha abajo debajo de leer n1, n2
+    const boolean4 = verificarPaso(columnaInicio, filaInicio + 3, FLECHAS_ABAJO);
 
-    const indiceLineaAbajo_14 = ids.indexOf(14); // id del widget "linea abajo 14"
-    const filaLineaAbajo_14 = fila[indiceLineaAbajo_14];
-    const columnaLineaAbajo_14 = columna[indiceLineaAbajo_14];
+    // 5. Decisión Si No (ID 1)
+    const boolean5 = verificarPaso(columnaInicio, filaInicio + 4, [1]);
 
-    const indiceLineaAbajo_15 = ids.indexOf(15); // id del widget "linea abajo 15"
-    const filaLineaAbajo_15 = fila[indiceLineaAbajo_15];
-    const columnaLineaAbajo_15 = columna[indiceLineaAbajo_15];
+    // 6. Flecha abajo debajo de decisión
+    const boolean6 = verificarPaso(columnaInicio, filaInicio + 5, FLECHAS_ABAJO);
 
-    const indiceLineaAbajo_16 = ids.indexOf(16); // id del widget "linea abajo 16"
-    const filaLineaAbajo_16 = fila[indiceLineaAbajo_16];
-    const columnaLineaAbajo_16 = columna[indiceLineaAbajo_16];
+    // 7. Son iguales (ID 2)
+    const boolean7 = verificarPaso(columnaInicio, filaInicio + 6, [2]);
 
-    if (
-        (columnaLineaAbajo_7 === columnaInicio && filaLineaAbajo_7 === 3) ||
-        (columnaLineaAbajo_14 === columnaInicio && filaLineaAbajo_14 === 3) ||
-        (columnaLineaAbajo_15 === columnaInicio && filaLineaAbajo_15 === 3) ||
-        (columnaLineaAbajo_16 === columnaInicio && filaLineaAbajo_16 === 3)
-    ) {
-        boolean4 = true; /* la linea abajo es correcta */
-    } else {
-        boolean4 = false;
-    }
+    // 8. Flecha abajo debajo de son iguales
+    const boolean8 = verificarPaso(columnaInicio, filaInicio + 7, FLECHAS_ABAJO);
 
-    // verificar decision si no
-    const decisionSiNo = ids.indexOf(1); // id del widget "decision si no"
-    const filaDecisionSiNo = fila[decisionSiNo];
-    const columnaDecisionSiNo = columna[decisionSiNo];
+    // 9. Fin (ID 13)
+    const boolean9 = verificarPaso(columnaInicio, filaInicio + 8, [13]);
 
-    if (columnaDecisionSiNo === columnaInicio && filaDecisionSiNo === 4) {
-        boolean5 = true; /* decision si  es correcta */
-    } else {
-        boolean5 = false;
-    }
-    // verificar la otra linea abajo
-    /****** verificar la flecha hacia abajo ****/
-    const indiceFlechaAbajo_7 = ids.indexOf(7); // id del widget "flecha abajo 7"
-    const filaFlechaAbajo_7 = fila[indiceFlechaAbajo_7];
-    const columnaFlechaAbajo_7 = columna[indiceFlechaAbajo_7];
+    // Rama Derecha ("No son iguales"):
+    // 10. Línea derecha saliendo de decisión (ID 11)
+    const boolean10 = verificarPaso(columnaInicio + 1, filaInicio + 4, [11]);
 
-    const indiceFlechaAbajo_14 = ids.indexOf(14); // id del widget "flecha abajo 14"
-    const filaFlechaAbajo_14 = fila[indiceFlechaAbajo_14];
-    const columnaFlechaAbajo_14 = columna[indiceFlechaAbajo_14];
+    // 11. No son iguales (ID 6)
+    const boolean11 = verificarPaso(columnaInicio + 2, filaInicio + 4, [6]);
 
-    const indiceFlechaAbajo_15 = ids.indexOf(15); // id del widget "flecha abajo 15"
-    const filaFlechaAbajo_15 = fila[indiceFlechaAbajo_15];
-    const columnaFlechaAbajo_15 = columna[indiceFlechaAbajo_15];
+    // 12. Línea vertical 1 debajo de "no son iguales"
+    const boolean12 = verificarPaso(columnaInicio + 2, filaInicio + 5, LINEAS_VERTICALES);
 
-    const indiceFlechaAbajo_16 = ids.indexOf(16); // id del widget "flecha abajo 16"
-    const filaFlechaAbajo_16 = fila[indiceFlechaAbajo_16];
-    const columnaFlechaAbajo_16 = columna[indiceFlechaAbajo_16];
+    // 13. Línea vertical 2 debajo de la línea 1
+    const boolean13 = verificarPaso(columnaInicio + 2, filaInicio + 6, LINEAS_VERTICALES);
 
-    if (
-        (columnaFlechaAbajo_7 === columnaInicio && filaFlechaAbajo_7 === 5) ||
-        (columnaFlechaAbajo_14 === columnaInicio && filaFlechaAbajo_14 === 5) ||
-        (columnaFlechaAbajo_15 === columnaInicio && filaFlechaAbajo_15 === 5) ||
-        (columnaFlechaAbajo_16 === columnaInicio && filaFlechaAbajo_16 === 5)
-    ) {
-        boolean6 = true; /* la flecha hacia abajo es correcta */
-    } else {
-        boolean6 = false;
-    }
+    // 14. Línea vertical 3 debajo de la línea 2
+    const boolean14 = verificarPaso(columnaInicio + 2, filaInicio + 7, LINEAS_VERTICALES);
 
-    /******************************* */
-    // verificar si son iguales
-    const sonIguales = ids.indexOf(2); // id del widget "son iguales"
-    const filaSonIguales = fila[sonIguales];
-    const columnaSonIguales = columna[sonIguales];
-    if (columnaSonIguales === columnaInicio && filaSonIguales === 6) {
-        boolean7 = true; /* son iguales es correcta */
-    } else {
-        boolean7 = false;
-    }
+    // 15. Línea doblada / esquina (ID 5)
+    const boolean15 = verificarPaso(columnaInicio + 2, filaInicio + 8, [5]);
 
-    // verificar la linea de abajo
-    /****** Comprobar posición de widgets abajo ****/
-    const checkAbajoIndex_7 = ids.indexOf(7); // widget abajo ID 7
-    const checkAbajoFila_7 = fila[checkAbajoIndex_7];
-    const checkAbajoColumna_7 = columna[checkAbajoIndex_7];
-
-    const checkAbajoIndex_14 = ids.indexOf(14); // widget abajo ID 14
-    const checkAbajoFila_14 = fila[checkAbajoIndex_14];
-    const checkAbajoColumna_14 = columna[checkAbajoIndex_14];
-
-    const checkAbajoIndex_15 = ids.indexOf(15); // widget abajo ID 15
-    const checkAbajoFila_15 = fila[checkAbajoIndex_15];
-    const checkAbajoColumna_15 = columna[checkAbajoIndex_15];
-
-    const checkAbajoIndex_16 = ids.indexOf(16); // widget abajo ID 16
-    const checkAbajoFila_16 = fila[checkAbajoIndex_16];
-    const checkAbajoColumna_16 = columna[checkAbajoIndex_16];
-
-    if (
-        (checkAbajoColumna_7 === columnaInicio && checkAbajoFila_7 === 7) ||
-        (checkAbajoColumna_14 === columnaInicio && checkAbajoFila_14 === 7) ||
-        (checkAbajoColumna_15 === columnaInicio && checkAbajoFila_15 === 7) ||
-        (checkAbajoColumna_16 === columnaInicio && checkAbajoFila_16 === 7)
-    ) {
-        boolean8 = true; /* comprobación de widgets abajo correcta */
-    } else {
-        boolean8 = false;
-    }
-
-    /******************************* */
-    // verificar el fin
-    const fin = ids.indexOf(13); // id del widget "fin"
-    const filaFin = fila[fin];
-    const columnaFin = columna[fin];
-
-    if (columnaFin === columnaInicio && filaFin === 8) {
-        boolean9 = true; /* fin es correcta */
-    } else {
-        boolean9 = false;
-    }
-
-    // verificar si no son iguales
-    const lineaDerecha = ids.indexOf(11); // id del widget "linea derecha"
-    const filaLineaDerecha = fila[lineaDerecha];
-    const columnaLineaDerecha = columna[lineaDerecha];
-
-    if (
-        filaLineaDerecha === 4 &&
-        columnaLineaDerecha === columnaDecisionSiNo + 1
-    ) {
-        boolean10 = true; /* linea derecha es correcta */
-    }
-    /* ** */
-    const noSonIguales = ids.indexOf(6); // id del widget "no son iguales"
-    const filaNoSonIguales = fila[noSonIguales];
-    const columnaNoSonIguales = columna[noSonIguales];
-
-    if (
-        filaNoSonIguales === 4 &&
-        columnaNoSonIguales === columnaDecisionSiNo + 2
-    ) {
-        boolean11 = true; /* no son iguales es correcta */
-    }
-
-    /*  */
-    const indiceLinea1 = ids.indexOf(8); // id del widget "linea abajo"
-    const filaLinea1 = fila[indiceLinea1];
-    const columnaLinea1 = columna[indiceLinea1];
-    const indiceLinea2 = ids.indexOf(9); // id del widget "linea abajo"
-    const filaLinea2 = fila[indiceLinea2];
-    const columnaLinea2 = columna[indiceLinea2];
-    const indiceLinea3 = ids.indexOf(10); // id del widget "linea abajo"
-    const filaLinea3 = fila[indiceLinea3];
-    const columnaLinea3 = columna[indiceLinea3];
-
-    console.log("la columa de no son iguales es: ", columnaNoSonIguales);
-    console.log(columnaLinea1, columnaLinea2, columnaLinea3);
-    console.log(filaLinea1, filaLinea2, filaLinea3);
-
-    if (columnaLinea1 === columnaNoSonIguales && filaLinea1 === 5) {
-        boolean12 = true; /* la línea 1 es correcta */
-    } else if (columnaLinea2 === columnaNoSonIguales && filaLinea2 === 5) {
-        boolean12 = true; /* la línea 2 es correcta */
-    } else if (columnaLinea3 === columnaNoSonIguales && filaLinea3 === 5) {
-        boolean12 = true; /* la línea 3 es correcta */
-    } else {
-        boolean12 = false; /* ninguna línea es correcta */
-    }
-
-    /********otra linea******** */
-    /****** Verificar líneas especiales ****/
-    const checkLineaIndex_8 = ids.indexOf(8); // id del widget "línea especial 8"
-    const checkLineaFila_8 = fila[checkLineaIndex_8];
-    const checkLineaColumna_8 = columna[checkLineaIndex_8];
-
-    const checkLineaIndex_9 = ids.indexOf(9); // id del widget "línea especial 9"
-    const checkLineaFila_9 = fila[checkLineaIndex_9];
-    const checkLineaColumna_9 = columna[checkLineaIndex_9];
-
-    const checkLineaIndex_10 = ids.indexOf(10); // id del widget "línea especial 10"
-    const checkLineaFila_10 = fila[checkLineaIndex_10];
-    const checkLineaColumna_10 = columna[checkLineaIndex_10];
-
-    if (checkLineaColumna_8 === columnaNoSonIguales && checkLineaFila_8 === 6) {
-        boolean13 = true; /* la línea 1 es correcta */
-    } else if (
-        checkLineaColumna_9 === columnaNoSonIguales &&
-        checkLineaFila_9 === 6
-    ) {
-        boolean13 = true; /* la línea 2 es correcta */
-    } else if (
-        checkLineaColumna_10 === columnaNoSonIguales &&
-        checkLineaFila_10 === 6
-    ) {
-        boolean13 = true; /* la línea 3 es correcta */
-    } else {
-        boolean13 = false; /* ninguna línea es correcta */
-    }
-
-    /********otra linea******** */
-    /****** Validar líneas especiales ****/
-    const validaLineaIdx_8 = ids.indexOf(8); // id del widget "línea especial 8"
-    const validaLineaFila_8 = fila[validaLineaIdx_8];
-    const validaLineaCol_8 = columna[validaLineaIdx_8];
-
-    const validaLineaIdx_9 = ids.indexOf(9); // id del widget "línea especial 9"
-    const validaLineaFila_9 = fila[validaLineaIdx_9];
-    const validaLineaCol_9 = columna[validaLineaIdx_9];
-
-    const validaLineaIdx_10 = ids.indexOf(10); // id del widget "línea especial 10"
-    const validaLineaFila_10 = fila[validaLineaIdx_10];
-    const validaLineaCol_10 = columna[validaLineaIdx_10];
-
-    if (validaLineaCol_8 === columnaNoSonIguales && validaLineaFila_8 === 7) {
-        boolean14 = true; /* la línea 1 es correcta */
-    } else if (
-        validaLineaCol_9 === columnaNoSonIguales &&
-        validaLineaFila_9 === 7
-    ) {
-        boolean14 = true; /* la línea 2 es correcta */
-    } else if (
-        validaLineaCol_10 === columnaNoSonIguales &&
-        validaLineaFila_10 === 7
-    ) {
-        boolean14 = true; /* la línea 3 es correcta */
-    } else {
-        boolean14 = false; /* ninguna línea es correcta */
-    }
-
-    /* ****** linea de esquina****** */
-    const lineaEsquina = ids.indexOf(5); // id del widget "linea doblada"
-    const filaLineaEsquina = fila[lineaEsquina];
-    const columnaLineaEsquina = columna[lineaEsquina];
-
-    if (columnaLineaEsquina === columnaNoSonIguales && filaLineaEsquina === 8) {
-        boolean15 = true; /* linea de esquina es correcta */
-    } else {
-        boolean15 = false;
-    }
-    /* ****** linea izquierda****** */
-    const lineaIzquierda = ids.indexOf(12); // id del widget "linea izquierda"
-    const filaLineaIzquierda = fila[lineaIzquierda];
-    const columnaLineaIzquierda = columna[lineaIzquierda];
-    if (
-        filaLineaIzquierda === 8 &&
-        columnaLineaIzquierda === columnaNoSonIguales - 1
-    ) {
-        boolean16 = true; /* linea izquierda es correcta */
-    } else {
-        boolean16 = false;
-    }
+    // 16. Línea izquierda que conecta hacia el Fin (ID 12)
+    const boolean16 = verificarPaso(columnaInicio + 1, filaInicio + 8, [12]);
 
     return [
         boolean1,
