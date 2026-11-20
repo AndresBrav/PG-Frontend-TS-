@@ -20,6 +20,8 @@ import type {
  * del cuerpo generado por ejecutarPseudocodigo.
  */
 const FUNCIONES_INCORPORADAS = `
+    const PI = Math.PI;
+    const pi = Math.PI;
     const longitud = (s) => String(s).length;
     const mayusculas = (s) => String(s).toUpperCase();
     const minusculas = (s) => String(s).toLowerCase();
@@ -44,9 +46,15 @@ const FUNCIONES_INCORPORADAS = `
         return p === -1 ? 0 : p + 1;
     };
     const azar = (n) => Math.floor(Math.random() * Number(n));
+    const aleatorio = (min, max) => {
+        const a = Math.ceil(Number(min));
+        const b = Math.floor(Number(max));
+        return Math.floor(Math.random() * (b - a + 1)) + a;
+    };
     const redondear = (n) => Math.round(Number(n));
     const truncar = (n) => Math.trunc(Number(n));
     const raiz = (n) => Math.sqrt(Number(n));
+    const rc = raiz;
     const abs = (n) => Math.abs(Number(n));
     const potencia = (b, e) => Math.pow(Number(b), Number(e));
     const sen = (n) => Math.sin(Number(n));
@@ -59,6 +67,7 @@ const FUNCIONES_INCORPORADAS = `
         return !Number.isNaN(n);
     };
     const limpiarpantalla = () => {
+        salida.length = 0;
         callbacks.imprimir('[Pantalla limpiada]');
     };
 `;
@@ -94,6 +103,76 @@ export async function ejecutarPseudocodigo(
         __pasos++;
         if (__pasos > __MAX_PASOS) {
             throw new Error('Se superó el límite de ${MAX_PASOS} pasos. ¿Tienes un bucle infinito?');
+        }
+    };
+    const __arrGet = (arr, nombre, numLinea, ...indices) => {
+        if (!Array.isArray(arr)) {
+            throw new Error('Error en la línea ' + numLinea + ': la variable \\'' + nombre + '\\' no es un arreglo o no ha sido dimensionada.');
+        }
+        if (indices.length === 1) {
+            const idx = Math.trunc(Number(indices[0]));
+            if (Number.isNaN(idx) || idx < 1 || idx > arr.length) {
+                throw new Error('Error en la línea ' + numLinea + ': subíndice (' + indices[0] + ') fuera de rango (1...' + arr.length + ') en el arreglo \\'' + nombre + '\\'.');
+            }
+            return arr[idx - 1];
+        }
+        if (indices.length === 2) {
+            const f = Math.trunc(Number(indices[0]));
+            if (Number.isNaN(f) || f < 1 || f > arr.length) {
+                throw new Error('Error en la línea ' + numLinea + ': subíndice de fila (' + indices[0] + ') fuera de rango (1...' + arr.length + ') en la matriz \\'' + nombre + '\\'.');
+            }
+            const fila = arr[f - 1];
+            if (!Array.isArray(fila)) {
+                throw new Error('Error en la línea ' + numLinea + ': dimensión inválida en la matriz \\'' + nombre + '\\'.');
+            }
+            const c = Math.trunc(Number(indices[1]));
+            if (Number.isNaN(c) || c < 1 || c > fila.length) {
+                throw new Error('Error en la línea ' + numLinea + ': subíndice de columna (' + indices[1] + ') fuera de rango (1...' + fila.length + ') en la matriz \\'' + nombre + '\\'.');
+            }
+            return fila[c - 1];
+        }
+        return arr;
+    };
+    const __arrSet = (arr, nombre, valor, numLinea, ...indices) => {
+        if (!Array.isArray(arr)) {
+            throw new Error('Error en la línea ' + numLinea + ': la variable \\'' + nombre + '\\' no es un arreglo o no ha sido dimensionada.');
+        }
+        if (indices.length === 1) {
+            const idx = Math.trunc(Number(indices[0]));
+            if (Number.isNaN(idx) || idx < 1 || idx > arr.length) {
+                throw new Error('Error en la línea ' + numLinea + ': subíndice (' + indices[0] + ') fuera de rango (1...' + arr.length + ') en el arreglo \\'' + nombre + '\\'.');
+            }
+            arr[idx - 1] = valor;
+            return valor;
+        }
+        if (indices.length === 2) {
+            const f = Math.trunc(Number(indices[0]));
+            if (Number.isNaN(f) || f < 1 || f > arr.length) {
+                throw new Error('Error en la línea ' + numLinea + ': subíndice de fila (' + indices[0] + ') fuera de rango (1...' + arr.length + ') en la matriz \\'' + nombre + '\\'.');
+            }
+            const fila = arr[f - 1];
+            if (!Array.isArray(fila)) {
+                throw new Error('Error en la línea ' + numLinea + ': dimensión inválida en la matriz \\'' + nombre + '\\'.');
+            }
+            const c = Math.trunc(Number(indices[1]));
+            if (Number.isNaN(c) || c < 1 || c > fila.length) {
+                throw new Error('Error en la línea ' + numLinea + ': subíndice de columna (' + indices[1] + ') fuera de rango (1...' + fila.length + ') en la matriz \\'' + nombre + '\\'.');
+            }
+            fila[c - 1] = valor;
+            return valor;
+        }
+        return valor;
+    };
+    const __limpiarPantalla = () => {
+        salida.length = 0;
+        callbacks.imprimir('[Pantalla limpiada]');
+    };
+    const __esperar = (ms) => new Promise((resolve) => setTimeout(resolve, Math.max(0, Number(ms))));
+    const __esperarTecla = async () => {
+        if (callbacks.pedirEntrada) {
+            await callbacks.pedirEntrada('tecla', 'cadena', 'Presiona Aceptar para continuar...');
+        } else {
+            await __esperar(300);
         }
     };
     let __debugPaso = 0;
@@ -204,4 +283,4 @@ function convertir(valor: unknown, tipo: string): unknown {
     return Number.isNaN(flexible) ? v : flexible;
 }
 
-export default ejecutarPseudocodigo;
+export default ejecutarPseudocodigo;

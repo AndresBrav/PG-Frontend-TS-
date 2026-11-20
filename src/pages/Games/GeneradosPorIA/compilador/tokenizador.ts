@@ -159,13 +159,74 @@ export function normalizarLinea(linea: string): string {
 }
 
 /**
+ * Elimina comentarios de bloque /* ... * / respetando cadenas de texto
+ * y preservando los saltos de línea \n para que la numeración de líneas
+ * no se altere.
+ */
+export function limpiarComentariosBloque(codigo: string): string {
+    let resultado = '';
+    let i = 0;
+    let comilla: string | null = null;
+    let enBloque = false;
+
+    while (i < codigo.length) {
+        const c = codigo[i];
+        const sig = codigo[i + 1];
+
+        if (enBloque) {
+            if (c === '*' && sig === '/') {
+                enBloque = false;
+                i += 2;
+                continue;
+            }
+            if (c === '\n') {
+                resultado += '\n';
+            } else {
+                resultado += ' ';
+            }
+            i++;
+            continue;
+        }
+
+        if (comilla) {
+            resultado += c;
+            if (c === comilla) {
+                comilla = null;
+            }
+            i++;
+            continue;
+        }
+
+        if (c === '"' || c === "'") {
+            comilla = c;
+            resultado += c;
+            i++;
+            continue;
+        }
+
+        if (c === '/' && sig === '*') {
+            enBloque = true;
+            resultado += '  ';
+            i += 2;
+            continue;
+        }
+
+        resultado += c;
+        i++;
+    }
+
+    return resultado;
+}
+
+/**
  * Prepara el código fuente para el Compilador: separa por líneas, limpia
  * comentarios y tokeniza cada línea conservando su número original (1-based),
  * de modo que los errores puedan señalar la línea exacta del editor.
  */
 export function preprocesar(codigo: string): Linea[] {
+    const sinBloques = limpiarComentariosBloque(codigo);
     const lineas: Linea[] = [];
-    codigo.split('\n').forEach((bruta, idx) => {
+    sinBloques.split('\n').forEach((bruta, idx) => {
         const limpia = normalizarLinea(bruta);
         if (!limpia) {
             return;
@@ -177,4 +238,4 @@ export function preprocesar(codigo: string): Linea[] {
         });
     });
     return lineas;
-}
+}

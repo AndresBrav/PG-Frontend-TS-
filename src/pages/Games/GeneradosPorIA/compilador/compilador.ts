@@ -84,7 +84,7 @@ class Compilador {
             k === 'definir' ||
             k === 'dimension' ||
             k === 'finalizar' ||
-            k === 'terminar';
+            k === 'terminar' || k === 'romper' || k === 'interrumpir' || k === 'continuar';
         switch (k) {
             case 'definir':
                 this.compilarDefinir();
@@ -125,6 +125,20 @@ class Compilador {
             case 'devolver':
             case 'regresar':
                 this.compilarRetornar();
+                break;
+            case 'limpiar':
+            case 'borrar':
+                this.compilarLimpiarPantalla();
+                break;
+            case 'esperar':
+                this.compilarEsperar();
+                break;
+            case 'romper':
+            case 'interrumpir':
+                this.compilarRomper();
+                break;
+            case 'continuar':
+                this.compilarContinuar();
                 break;
             // Instrucción interna del generador diagrama→código: termina el
             // programa desde una rama (se traduce a return; del proceso).
@@ -397,22 +411,16 @@ class Compilador {
             );
             if (tieneIndice) {
                 const expDest = new Expresion(seg, linea);
-                const destino = expDest.parse();
+                const { nombre, indices } = expDest.analizarIndizado();
                 if (!expDest.esFinal()) {
                     this.errorSintaxis(
                         linea,
                         `no se esperaba '${expDest.actual()?.val}' en el Leer.`
                     );
                 }
-                const nombre = normVar(
-                    seg.find((t) => t.tipo === 'word')?.val ?? ''
-                );
-                if (!nombre) {
-                    continue;
-                }
                 const tipoSeg = this.tipos.get(nombre) ?? '';
                 this.out.push(
-                    `${destino} = await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipoSeg)});`
+                    `__arrSet(${nombre}, '${nombre}', await __leer(${JSON.stringify(nombre)}, ${JSON.stringify(tipoSeg)}), ${linea.numero}, ${indices.join(', ')});`
                 );
             } else {
                 if (seg.length !== 1 || seg[0].tipo !== 'word') {
@@ -913,14 +921,14 @@ class Compilador {
                 const labelsToks =
                     idxPuntos <= 0
                         ? linea.toks
-                              .slice(inicioLabels)
-                              .filter(
-                                  (t) =>
-                                      !(
-                                          t.tipo === 'punt' &&
-                                          (t.val === ':' || t.val === '-')
-                                      )
-                              )
+                               .slice(inicioLabels)
+                               .filter(
+                                   (t) =>
+                                       !(
+                                           t.tipo === 'punt' &&
+                                           (t.val === ':' || t.val === '-')
+                                       )
+                               )
                         : linea.toks.slice(inicioLabels, idxPuntos);
                 const labels = new Expresion(labelsToks, linea).argumentos();
                 for (const lbl of labels) {
@@ -1148,7 +1156,82 @@ class Compilador {
         this.declaradas = declaradasAnteriores;
     }
 
-    /** Instrucción interna del generador diagrama→código: sale del proceso. */
+    /**
+     * Transpila 'Limpiar Pantalla' o 'Borrar Pantalla'.
+     */
+    private compilarLimpiarPantalla(): void {
+        const linea = this.lineas[this.i];
+        if (
+            linea.toks[1]?.tipo === 'word' &&
+            normVar(linea.toks[1].val) === 'pantalla'
+        ) {
+            this.out.push('__limpiarPantalla();');
+            this.i++;
+            return;
+        }
+        this.compilarAsignacion();
+    }
+
+    /**
+     * Transpila 'Esperar Tecla' o 'Esperar n Segundos/Milisegundos'.
+     */
+    private compilarEsperar(): void {
+        const linea = this.lineas[this.i];
+        const toks = linea.toks.slice(1);
+        if (toks.length === 0) {
+            this.errorSintaxis(
+                linea,
+                "se esperaba 'Tecla' o una cantidad de tiempo después de 'Esperar'."
+            );
+        }
+        if (toks[0].tipo === 'word' && normVar(toks[0].val) === 'tecla') {
+            this.out.push('await __esperarTecla();');
+            this.i++;
+            return;
+        }
+        let unidad = 'segundos';
+        let finExpr = toks.length;
+        const ult = toks[toks.length - 1];
+        if (ult && ult.tipo === 'word') {
+            const u = normVar(ult.val);
+            if (['segundos', 'segundo', 'seg', 's'].includes(u)) {
+                unidad = 'segundos';
+                finExpr = toks.length - 1;
+            } else if (['milisegundos', 'milisegundo', 'ms'].includes(u)) {
+                unidad = 'milisegundos';
+                finExpr = toks.length - 1;
+            }
+        }
+        const exprToks = toks.slice(0, finExpr);
+        if (exprToks.length === 0) {
+            this.errorSintaxis(
+                linea,
+                "se esperaba el tiempo a esperar después de 'Esperar'."
+            );
+        }
+        const exp = new Expresion(exprToks, linea);
+        const duracion = exp.parse();
+        const multiplicador = unidad === 'segundos' ? 1000 : 1;
+        this.out.push(`await __esperar((${duracion}) * ${multiplicador});`);
+        this.i++;
+    }
+
+    /**
+     * Transpila 'Romper' o 'Interrumpir' (break en bucles).
+     */
+    private compilarRomper(): void {
+        this.out.push('break;');
+        this.i++;
+    }
+
+    /**
+     * Transpila 'Continuar' (continue en bucles).
+     */
+    private compilarContinuar(): void {
+        this.out.push('continue;');
+        this.i++;
+    }
+
     private compilarFinalizar(): void {
         this.out.push('return;');
         this.i++;
@@ -1289,14 +1372,17 @@ class Compilador {
                 `no se esperaba '${expAsg.actual()?.val}' en la asignación.`
             );
         }
-        const { esArreglo, destino } = this.analizarDestino(
+        const dest = this.analizarDestino(
             linea.toks.slice(0, opIdx),
             linea
         );
-        if (!esArreglo) {
-            this.declararVariable(nombre);
+        if (dest.esArreglo && dest.indices) {
+            this.out.push(
+                `__arrSet(${dest.nombre}, '${dest.nombre}', ${expr}, ${linea.numero}, ${dest.indices.join(', ')});`);
+        } else {
+            this.declararVariable(dest.nombre);
+            this.out.push(`${dest.nombre} = ${expr};`);
         }
-        this.out.push(`${destino} = ${expr};`);
         this.i++;
     }
 
@@ -1310,21 +1396,25 @@ class Compilador {
         linea?: Linea
     ): {
         esArreglo: boolean;
-        destino: string;
+        nombre: string;
+        indices?: string[];
     } {
         const tieneCorchete = toks.some(
             (t, idx) => idx > 0 && t.tipo === 'punt' && t.val === '['
         );
         if (tieneCorchete) {
+            const exp = new Expresion(toks, linea);
+            const { nombre, indices } = exp.analizarIndizado();
             return {
                 esArreglo: true,
-                destino: new Expresion(toks, linea).parse(),
+                nombre,
+                indices,
             };
         }
         if (toks.length > 0 && toks[0].tipo === 'word') {
-            return { esArreglo: false, destino: normVar(toks[0].val) };
+            return { esArreglo: false, nombre: normVar(toks[0].val) };
         }
-        return { esArreglo: false, destino: '' };
+        return { esArreglo: false, nombre: '' };
     }
 
     /**
@@ -1399,9 +1489,11 @@ const NOMBRES_INCORPORADOS = new Set([
     'reemplazar',
     'buscar',
     'azar',
+    'aleatorio',
     'redondear',
     'truncar',
     'raiz',
+    'rc',
     'abs',
     'potencia',
     'sen',
@@ -1411,4 +1503,5 @@ const NOMBRES_INCORPORADOS = new Set([
     'exp',
     'esnumero',
     'limpiarpantalla',
-]);
+    'pi',
+]);

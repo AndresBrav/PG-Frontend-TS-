@@ -176,22 +176,7 @@ const PanelVariablesEjecucion = ({
 
         cortado.forEach((capturaDe, indice) => {
             const instruccion = capturaDe.instruccion?.trim();
-            const asignacion = instruccion?.match(
-                /^([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*(?:\s*\[[^\]]+\])?)\s*<-\s*(.+)$/,
-            );
-            if (!asignacion) return;
-
-            const objetivo = asignacion[1].trim();
-            const nombreVariable = objetivo.split('[')[0].trim();
-            const nombreNormalizado = normVar(nombreVariable);
-            const valoresActuales = new Map<string, string>(
-                capturaDe.variables.map((variable) => [
-                    normVar(variable.nombre),
-                    variable.valor,
-                ]),
-            );
-            const valorNuevo = valoresActuales.get(nombreNormalizado);
-            if (valorNuevo === undefined) return;
+            if (!instruccion) return;
 
             const capturaAnterior = cortado[indice - 1];
             const valoresAnteriores = new Map<string, string>(
@@ -200,36 +185,135 @@ const PanelVariablesEjecucion = ({
                     variable.valor,
                 ]),
             );
+            const valoresActuales = new Map<string, string>(
+                capturaDe.variables.map((variable) => [
+                    normVar(variable.nombre),
+                    variable.valor,
+                ]),
+            );
             const iteraciones = capturaDe.iteraciones ?? [];
             const cicloActivo = iteraciones[iteraciones.length - 1];
-            const yaAsignadaFueraDeCiclo =
-                asignacionesFueraDeCiclo.has(nombreNormalizado);
 
-            filasGeneradas.push({
-                paso: capturaDe.paso,
-                linea: capturaDe.linea ?? 0,
-                iteracion: cicloActivo
-                    ? String(cicloActivo.iteracion)
-                    : yaAsignadaFueraDeCiclo
-                      ? '—'
-                      : 'Inicial',
-                control: describirControl(iteraciones),
-                variable: objetivo,
-                anterior:
+            // 1. Asignaciones con <-
+            const asignacion = instruccion.match(
+                /^([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*(?:\s*\[[^\]]+\])?)\s*<-\s*(.+)$/,
+            );
+            if (asignacion) {
+                const objetivo = asignacion[1].trim();
+                const esArreglo = objetivo.includes('[');
+                const nombreVariable = objetivo.split('[')[0].trim();
+                const nombreNormalizado = normVar(nombreVariable);
+                const valorNuevoTotal = valoresActuales.get(nombreNormalizado);
+                if (valorNuevoTotal === undefined) return;
+
+                const yaAsignadaFueraDeCiclo =
+                    asignacionesFueraDeCiclo.has(nombreNormalizado);
+
+                let valorCeldaNuevo = valorNuevoTotal;
+                const valorCeldaAnterior =
                     cicloActivo || yaAsignadaFueraDeCiclo
                         ? (valoresAnteriores.get(nombreNormalizado) ?? '—')
-                        : '—',
-                operacion: cicloActivo
-                    ? sustituirVariables(
-                          asignacion[2].trim(),
-                          valoresAnteriores,
-                      )
-                    : `${objetivo} ← ${asignacion[2].trim()}`,
-                nuevo: valorNuevo,
-            });
+                        : '—';
 
-            if (!cicloActivo) {
-                asignacionesFueraDeCiclo.add(nombreNormalizado);
+                if (esArreglo) {
+                    try {
+                        const parsed = JSON.parse(valorNuevoTotal);
+                        const corcheteMatch = objetivo.match(/\[([^\]]+)\]/);
+                        if (corcheteMatch) {
+                            const subIndices = corcheteMatch[1].split(',').map((s) => s.trim());
+                            let valCur: unknown = parsed;
+                            for (const s of subIndices) {
+                                const idxNum = parseInt(sustituirVariables(s, valoresAnteriores), 10);
+                                if (!Number.isNaN(idxNum) && Array.isArray(valCur) && idxNum >= 1 && idxNum <= valCur.length) {
+                                    valCur = (valCur as unknown[])[idxNum - 1];
+                                }
+                            }
+                            if (valCur !== undefined && !Array.isArray(valCur)) {
+                                valorCeldaNuevo = String(valCur);
+                            }
+                        }
+                    } catch {
+                        // Conservar valorNuevoTotal si no es JSON válido
+                    }
+                }
+
+                filasGeneradas.push({
+                    paso: capturaDe.paso,
+                    linea: capturaDe.linea ?? 0,
+                    iteracion: cicloActivo
+                        ? String(cicloActivo.iteracion)
+                        : yaAsignadaFueraDeCiclo
+                          ? '—'
+                          : 'Inicial',
+                    control: describirControl(iteraciones),
+                    variable: objetivo,
+                    anterior: valorCeldaAnterior,
+                    operacion: cicloActivo
+                        ? sustituirVariables(
+                              asignacion[2].trim(),
+                              valoresAnteriores,
+                          )
+                        : `${objetivo} ← ${asignacion[2].trim()}`,
+                    nuevo: valorCeldaNuevo,
+                });
+
+                if (!cicloActivo) {
+                    asignacionesFueraDeCiclo.add(nombreNormalizado);
+                }
+                return;
+            }
+
+            // 2. Cabecera del ciclo Para (iterador)
+            const esPara = instruccion.match(
+                /^para\s+([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)\s*<-\s*(.+?)\s+hasta\s+(.+)$/i,
+            );
+            if (esPara && cicloActivo && cicloActivo.tipo === 'Para') {
+                const varPara = esPara[1].trim();
+                const varParaNorm = normVar(varPara);
+                const valorNuevo = valoresActuales.get(varParaNorm);
+                if (valorNuevo !== undefined) {
+                    const valorAnterior = valoresAnteriores.get(varParaNorm) ?? '—';
+                    filasGeneradas.push({
+                        paso: capturaDe.paso,
+                        linea: capturaDe.linea ?? 0,
+                        iteracion: String(cicloActivo.iteracion),
+                        control: describirControl(iteraciones),
+                        variable: varPara,
+                        anterior: valorAnterior,
+                        operacion:
+                            cicloActivo.iteracion === 1
+                                ? sustituirVariables(esPara[2].trim(), valoresAnteriores)
+                                : `${varPara} + paso`,
+                        nuevo: valorNuevo,
+                    });
+                }
+                return;
+            }
+
+            // 3. Lectura de entrada (Leer v1, v2, ...)
+            const esLeer = instruccion.match(/^leer\s+(.+)$/i);
+            if (esLeer) {
+                const variablesLeidas = esLeer[1].split(',').map((v) => v.trim());
+                for (const v of variablesLeidas) {
+                    const nombreBase = v.split('[')[0].trim();
+                    const nombreNorm = normVar(nombreBase);
+                    const valorNuevo = valoresActuales.get(nombreNorm);
+                    if (valorNuevo !== undefined) {
+                        const valorAnterior = valoresAnteriores.get(nombreNorm) ?? '—';
+                        filasGeneradas.push({
+                            paso: capturaDe.paso,
+                            linea: capturaDe.linea ?? 0,
+                            iteracion: cicloActivo
+                                ? String(cicloActivo.iteracion)
+                                : '—',
+                            control: describirControl(iteraciones),
+                            variable: v,
+                            anterior: valorAnterior,
+                            operacion: `Leer(${v})`,
+                            nuevo: valorNuevo,
+                        });
+                    }
+                }
             }
         });
 

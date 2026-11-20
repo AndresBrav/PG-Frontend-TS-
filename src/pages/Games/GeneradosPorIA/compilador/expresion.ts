@@ -250,6 +250,9 @@ class Expresion {
             if (palabra === 'falso') {
                 return 'false';
             }
+            if (palabra === 'pi') {
+                return 'Math.PI';
+            }
             if (this.actual()?.val === '(') {
                 this.pos++;
                 const args = this.argumentos();
@@ -285,6 +288,36 @@ class Expresion {
         return this.pos >= this.toks.length;
     }
 
+    /**
+     * Parsea un destino indexado de arreglo: `arr[i]` o `mat[i, j]`.
+     * Usado para asignaciones y lecturas con validación de límites.
+     */
+    analizarIndizado(): { nombre: string; indices: string[] } {
+        const prim = this.actual();
+        if (!prim || prim.tipo !== 'word') {
+            this.error('se esperaba el nombre del arreglo.');
+        }
+        const nombre = normVar(prim.val);
+        this.pos++;
+        if (this.actual()?.val !== '[') {
+            this.error("se esperaba '[' en el arreglo.");
+        }
+        this.pos++;
+        const indices: string[] = [];
+        while (this.actual() && this.actual()?.val !== ']') {
+            indices.push(this.parse());
+            if (this.actual()?.val === ',') {
+                this.pos++;
+            }
+        }
+        if (this.actual()?.val === ']') {
+            this.pos++;
+        } else {
+            this.error('falta cerrar el corchete del arreglo.');
+        }
+        return { nombre, indices };
+    }
+
     private indizado(palabra: string): string {
         this.pos++;
         const indices: string[] = [];
@@ -300,9 +333,8 @@ class Expresion {
         } else {
             this.error('falta cerrar el corchete del arreglo.');
         }
-        return indices
-            .map((i) => `[(${i}) - 1]`)
-            .reduce((acc, seg) => acc + seg, palabra);
+        const numLinea = this.linea?.numero ?? 0;
+        return `__arrGet(${palabra}, '${palabra}', ${numLinea}, ${indices.join(', ')})`;
     }
 }
 
@@ -314,4 +346,4 @@ export const TIPOS_PSEINT = new Set([
     'cadena',
     'logico',
     'numerico',
-]);
+]);
