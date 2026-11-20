@@ -5,8 +5,10 @@ import {
     detectarComparacion,
     detectarPunterosArreglo,
     detectarSwapArreglo,
+    detectarTransferenciaVariable,
     type PerfilVariable,
 } from './visualUtils';
+import PistaTransferencia from './PistaTransferencia';
 
 interface SimulacionMovimientoProps {
     /** Perfiles de variables calculados sobre la traza histórica. */
@@ -65,11 +67,21 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
         return mapa;
     }, [anterior]);
 
-    // Instrucción actual y detección de comparación
+    // Instrucción actual y detección de comparación y transferencia
     const instruccionActual = captura.instruccion ?? '';
     const comparacion = useMemo(
         () => detectarComparacion(instruccionActual),
         [instruccionActual]
+    );
+
+    const transferencia = useMemo(
+        () =>
+            detectarTransferenciaVariable(
+                instruccionActual,
+                captura.variables,
+                valoresAnteriores
+            ),
+        [instruccionActual, captura.variables, valoresAnteriores]
     );
 
     // Separamos las variables en arreglos y escalares
@@ -476,7 +488,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                     padding: '12px 14px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 10,
+                    gap: 12,
                 }}
             >
                 <div
@@ -494,6 +506,14 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                         Transformaciones directas (ej: a = 5, b = a + 3, aux)
                     </span>
                 </div>
+
+                {/* Pista de transferencia animada (vuelo físico de valores) */}
+                {transferencia.hayTransferencia && (
+                    <PistaTransferencia
+                        transferencia={transferencia}
+                        paso={captura.paso}
+                    />
+                )}
 
                 {variablesEscalares.length === 0 ? (
                     <p style={{ fontSize: 11, color: '#888', margin: 0 }}>
@@ -513,19 +533,35 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                             const esNuevo = anterior !== null && valorPrevio === undefined;
                             const color = colorDeVariable(idx);
 
+                            const nombreNorm = v.nombre.toLowerCase();
+                            const esEmisora =
+                                transferencia.hayTransferencia &&
+                                transferencia.variableOrigen?.toLowerCase() === nombreNorm;
+                            const esReceptora =
+                                transferencia.hayTransferencia &&
+                                transferencia.variableDestino.toLowerCase() === nombreNorm;
+
                             const esAuxiliar = /^(aux|temp|temporal|buffer|swap)/i.test(v.nombre);
 
                             return (
                                 <div
                                     key={v.nombre}
                                     style={{
-                                        background: haCambiado
-                                            ? 'rgba(74, 222, 128, 0.12)'
+                                        background: esReceptora
+                                            ? 'rgba(74, 222, 128, 0.16)'
+                                            : esEmisora
+                                            ? 'rgba(251, 191, 36, 0.16)'
+                                            : haCambiado
+                                            ? 'rgba(74, 222, 128, 0.10)'
                                             : esNuevo
-                                            ? 'rgba(96, 165, 250, 0.12)'
+                                            ? 'rgba(96, 165, 250, 0.10)'
                                             : 'rgba(255, 255, 255, 0.04)',
                                         border: `1px solid ${
-                                            haCambiado
+                                            esReceptora
+                                                ? '#4ADE80'
+                                                : esEmisora
+                                                ? '#FBBF24'
+                                                : haCambiado
                                                 ? 'rgba(74, 222, 128, 0.5)'
                                                 : esNuevo
                                                 ? 'rgba(96, 165, 250, 0.5)'
@@ -536,7 +572,13 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                         display: 'flex',
                                         flexDirection: 'column',
                                         gap: 4,
-                                        boxShadow: haCambiado ? '0 0 10px rgba(74, 222, 128, 0.25)' : 'none',
+                                        boxShadow: esReceptora
+                                            ? '0 0 12px rgba(74, 222, 128, 0.45)'
+                                            : esEmisora
+                                            ? '0 0 12px rgba(251, 191, 36, 0.45)'
+                                            : haCambiado
+                                            ? '0 0 10px rgba(74, 222, 128, 0.25)'
+                                            : 'none',
                                         transition: 'all 0.3s ease',
                                     }}
                                 >
@@ -574,7 +616,37 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             </span>
                                         )}
 
-                                        {haCambiado && (
+                                        {esEmisora && (
+                                            <span
+                                                style={{
+                                                    fontSize: 9,
+                                                    fontWeight: 700,
+                                                    color: '#FBBF24',
+                                                    background: 'rgba(251, 191, 36, 0.2)',
+                                                    padding: '1px 4px',
+                                                    borderRadius: 4,
+                                                }}
+                                            >
+                                                📤 Emisor
+                                            </span>
+                                        )}
+
+                                        {esReceptora && (
+                                            <span
+                                                style={{
+                                                    fontSize: 9,
+                                                    fontWeight: 700,
+                                                    color: '#4ADE80',
+                                                    background: 'rgba(74, 222, 128, 0.2)',
+                                                    padding: '1px 4px',
+                                                    borderRadius: 4,
+                                                }}
+                                            >
+                                                📥 Receptor
+                                            </span>
+                                        )}
+
+                                        {!esReceptora && !esEmisora && haCambiado && (
                                             <span
                                                 style={{
                                                     fontSize: 9,

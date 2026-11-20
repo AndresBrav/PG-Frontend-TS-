@@ -236,3 +236,169 @@ export const detectarComparacion = (
     }
     return { activa: false, texto: '', variablesOindices: [] };
 };
+
+export type TipoTransferencia = 'literal' | 'directa' | 'calculo';
+
+export interface TransferenciaVariable {
+    hayTransferencia: boolean;
+    tipo: TipoTransferencia;
+    variableDestino: string;
+    valorNuevo: string;
+    valorPrevioDestino?: string;
+    variableOrigen?: string;
+    valorOrigen?: string;
+    formula?: string;
+    operacionVisual?: string;
+}
+
+const PALABRAS_CLAVE_EXPR = new Set([
+    'rc',
+    'raiz',
+    'sen',
+    'cos',
+    'tan',
+    'abs',
+    'azar',
+    'aleatorio',
+    'pi',
+    'verdadero',
+    'falso',
+    'longitud',
+    'subcadena',
+    'mayusculas',
+    'minusculas',
+]);
+
+/**
+ * Detecta si la instrucción actual es una asignación a variable o celda,
+ * y clasifica la transferencia de valores para animarla en la simulación.
+ */
+export const detectarTransferenciaVariable = (
+    instruccion?: string,
+    variablesActuales?: { nombre: string; valor: string }[],
+    valoresAnteriores?: Map<string, string>
+): TransferenciaVariable => {
+    if (!instruccion) {
+        return {
+            hayTransferencia: false,
+            tipo: 'literal',
+            variableDestino: '',
+            valorNuevo: '',
+        };
+    }
+
+    const limpia = instruccion.trim();
+    // Excluir estructuras de bucle o condicional
+    if (/^(si|mientras|para|repetir|hasta|segun|funcion|proceso|algoritmo)\b/i.test(limpia)) {
+        return {
+            hayTransferencia: false,
+            tipo: 'literal',
+            variableDestino: '',
+            valorNuevo: '',
+        };
+    }
+
+    const match = limpia.match(
+        /^([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*(\[[^\]]*\])?)\s*(?:<-|:=|=)\s*(.+)$/i
+    );
+    if (!match) {
+        return {
+            hayTransferencia: false,
+            tipo: 'literal',
+            variableDestino: '',
+            valorNuevo: '',
+        };
+    }
+
+    const variableDestino = match[1].trim();
+    const nombreBaseDestino = variableDestino.split('[')[0].trim().toLowerCase();
+    const expresion = match[3].trim();
+
+    const mapaActual = new Map<string, string>();
+    if (variablesActuales) {
+        for (const v of variablesActuales) {
+            mapaActual.set(v.nombre.toLowerCase(), v.valor);
+        }
+    }
+
+    const valorNuevo = mapaActual.get(nombreBaseDestino) ?? '';
+    const valorPrevioDestino = valoresAnteriores?.get(nombreBaseDestino);
+
+    // Buscar identificadores usados en la expresión
+    const tokens = expresion.match(/[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*/g) || [];
+    const variablesOrigenEncontradas: string[] = [];
+
+    for (const t of tokens) {
+        const tLower = t.toLowerCase();
+        if (
+            !PALABRAS_CLAVE_EXPR.has(tLower) &&
+            ((valoresAnteriores && valoresAnteriores.has(tLower)) ||
+                mapaActual.has(tLower))
+        ) {
+            if (!variablesOrigenEncontradas.includes(t)) {
+                variablesOrigenEncontradas.push(t);
+            }
+        }
+    }
+
+    // 1. Literal puro (sin variables origen, ej: a <- 5)
+    if (variablesOrigenEncontradas.length === 0) {
+        return {
+            hayTransferencia: true,
+            tipo: 'literal',
+            variableDestino,
+            valorNuevo: valorNuevo || expresion,
+            valorPrevioDestino,
+            formula: expresion,
+        };
+    }
+
+    // 2. Transferencia directa de una variable a otra (ej: aux <- a, a <- b)
+    if (
+        variablesOrigenEncontradas.length === 1 &&
+        expresion.trim().toLowerCase() === variablesOrigenEncontradas[0].toLowerCase()
+    ) {
+        const origen = variablesOrigenEncontradas[0];
+        const valOrig =
+            valoresAnteriores?.get(origen.toLowerCase()) ??
+            mapaActual.get(origen.toLowerCase()) ??
+            '';
+
+        return {
+            hayTransferencia: true,
+            tipo: 'directa',
+            variableDestino,
+            valorNuevo,
+            valorPrevioDestino,
+            variableOrigen: origen,
+            valorOrigen: valOrig,
+            formula: `${variableDestino} ← ${origen}`,
+        };
+    }
+
+    // 3. Cálculo con expresión (ej: b <- a + 3, c <- a * b)
+    const primerOrigen = variablesOrigenEncontradas[0];
+    const valOrig =
+        valoresAnteriores?.get(primerOrigen.toLowerCase()) ??
+        mapaActual.get(primerOrigen.toLowerCase()) ??
+        '';
+
+    // Extraer operación visual (ej: si a + 3 -> "+ 3")
+    let operacionVisual = expresion;
+    if (variablesOrigenEncontradas.length === 1) {
+        const reOrig = new RegExp(`\\b${primerOrigen}\\b`, 'i');
+        operacionVisual = expresion.replace(reOrig, '').trim();
+    }
+
+    return {
+        hayTransferencia: true,
+        tipo: 'calculo',
+        variableDestino,
+        valorNuevo,
+        valorPrevioDestino,
+        variableOrigen: primerOrigen,
+        valorOrigen: valOrig,
+        formula: expresion,
+        operacionVisual: operacionVisual || expresion,
+    };
+};
