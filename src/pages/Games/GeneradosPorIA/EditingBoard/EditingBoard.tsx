@@ -1308,21 +1308,33 @@ const EditingBoard: React.FC = () => {
                     }}
                     className="main-layout-panels"
                 >
-                    {/* Panel Izquierdo: Editor con Sidebar de Numeros Integrado */}
+                    {/* Columna Izquierda: Editor (80% del alto) + Consola de Salida debajo (20% del alto) */}
                     <div
                         style={{
                             flex: 1,
                             display: 'flex',
                             flexDirection: 'column',
-                            backgroundColor: 'var(--code-bg)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '10px',
-                            overflow: 'hidden',
+                            gap: '10px',
                             minWidth: 0,
                             minHeight: 0,
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                            overflow: 'hidden',
                         }}
                     >
+                        {/* Editor de Pseudocódigo (80% del alto) */}
+                        <div
+                            style={{
+                                flex: 8,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                backgroundColor: 'var(--code-bg)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '10px',
+                                overflow: 'hidden',
+                                minWidth: 0,
+                                minHeight: 0,
+                                boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                            }}
+                        >
                         {/* Editor Header */}
                         <div
                             style={{
@@ -1452,96 +1464,95 @@ const EditingBoard: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Panel Derecho: Consola y Guia Rapida */}
+                    {/* Consola de Salida debajo del Editor (20% del alto) */}
                     <div
                         style={{
-                            flex: 1,
+                            flex: 2,
+                            backgroundColor: '#1e1e1e',
+                            borderRadius: '10px',
+                            border: '1px solid #333',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '15px',
-                            minWidth: 0,
-                            minHeight: 0,
                             overflow: 'hidden',
+                            boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                            minHeight: 0,
                         }}
                     >
-                        {/* Simulacion de Consola */}
+                        <div
+                            style={{
+                                backgroundColor: '#2d2d2d',
+                                padding: '8px 15px',
+                                color: '#ccc',
+                                fontSize: '13px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                borderBottom: '1px solid #444',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <span>📟 Consola de Salida</span>
+                            <button
+                                onClick={() => setConsoleOutput([])}
+                                style={{
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#888',
+                                    cursor: 'pointer',
+                                    fontSize: '12px',
+                                }}
+                            >
+                                Limpiar
+                            </button>
+                        </div>
                         <div
                             style={{
                                 flex: 1,
-                                backgroundColor: '#1e1e1e',
-                                borderRadius: '10px',
-                                border: '1px solid #333',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                overflow: 'hidden',
-                                boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                                minHeight: 0,
+                                padding: '12px',
+                                fontFamily: 'var(--mono)',
+                                fontSize: '12px',
+                                color: '#00FF00',
+                                overflowY: 'auto',
+                                lineHeight: '1.6',
                             }}
                         >
-                            <div
-                                style={{
-                                    backgroundColor: '#2d2d2d',
-                                    padding: '8px 15px',
-                                    color: '#ccc',
-                                    fontSize: '13px',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    borderBottom: '1px solid #444',
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <span>📟 Consola de Salida</span>
-                                <button
-                                    onClick={() => setConsoleOutput([])}
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: '#888',
-                                        cursor: 'pointer',
-                                        fontSize: '12px',
-                                    }}
-                                >
-                                    Limpiar
-                                </button>
-                            </div>
-                            <div
-                                style={{
-                                    flex: 1,
-                                    padding: '12px',
-                                    fontFamily: 'var(--mono)',
-                                    fontSize: '12px',
-                                    color: '#00FF00',
-                                    overflowY: 'auto',
-                                    lineHeight: '1.6',
-                                }}
-                            >
-                                {consoleOutput.length === 0 ? (
-                                    <span style={{ color: '#888' }}>
-                                        Haz clic en "Ejecutar" para ver la
-                                        simulacion de tu codigo aqui.
-                                    </span>
-                                ) : (
-                                    consoleOutput.map((log, index) => (
-                                        <div
-                                            key={index}
-                                            style={{ whiteSpace: 'pre-wrap' }}
-                                        >
-                                            {log}
-                                        </div>
-                                    ))
-                                )}
-                            </div>
+                            {consoleOutput.length === 0 ? (
+                                <span style={{ color: '#888' }}>
+                                    Haz clic en "Ejecutar" para ver la
+                                    simulacion de tu codigo aqui.
+                                </span>
+                            ) : (
+                                consoleOutput.map((log, index) => (
+                                    <div
+                                        key={index}
+                                        style={{ whiteSpace: 'pre-wrap' }}
+                                    >
+                                        {log}
+                                    </div>
+                                ))
+                            )}
                         </div>
-
-                        {/* Panel de variables en ejecución (debug + película) */}
-                        <PanelVariablesEjecucion
-                            estado={estadoVariables}
-                            historial={historialVariables}
-                            enEjecucion={isRunning}
-                            onLineaActiva={setLineaActiva}
-                        />
                     </div>
+                </div>
+
+                {/* Columna Derecha: Panel de variables en ejecución (Ocupa toda su columna) */}
+                <div
+                    style={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        minWidth: 0,
+                        minHeight: 0,
+                        overflow: 'hidden',
+                    }}
+                >
+                    <PanelVariablesEjecucion
+                        estado={estadoVariables}
+                        historial={historialVariables}
+                        enEjecucion={isRunning}
+                        onLineaActiva={setLineaActiva}
+                    />
+                </div>
                 </div>
                 {esModoGrupo &&
                     !esRevision &&

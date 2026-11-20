@@ -1,4 +1,4 @@
-import type { EstadoEjecucion } from '../compilador';
+import type { ContextoIteracion, EstadoEjecucion } from '../compilador';
 
 /** Paleta compartida de colores por variable (orden de aparición). */
 export const COLORES_VARIABLE = [
@@ -181,16 +181,51 @@ export interface PunteroArreglo {
     color: string;
 }
 
+const NO_SON_PUNTEROS =
+    /^(contador|cont|suma|sum|total|tot|acum|acumulador|aux|temp|temporal|buffer|res|resultado|promedio|prom|bandera|flag|estado|sw|max|min|valor)$/i;
+
+const ES_NOMBRE_INDICE =
+    /^(i|j|k|p|pos|idx|indice|ptr|posicion|ind|k1|k2)$/i;
+
 /**
- * Detecta variables enteras activas que actúan como punteros (i, j, k, pos, etc.)
+ * Detecta variables enteras activas que actúan legítimamente como punteros o índices
  * sobre las posiciones de un arreglo (rango 1...longitud).
+ * Excluye acumuladores, contadores y variables independientes.
  */
 export const detectarPunterosArreglo = (
     variables: { nombre: string; valor: string }[],
-    longitudArreglo: number
+    longitudArreglo: number,
+    nombreArreglo?: string,
+    iteraciones?: ContextoIteracion[],
+    instruccion?: string
 ): PunteroArreglo[] => {
     const punteros: PunteroArreglo[] = [];
+
+    // Variables activas de ciclos Para o bucles
+    const varsCiclo = new Set(
+        iteraciones
+            ?.map((it) => it.variable?.toLowerCase())
+            .filter((v): v is string => Boolean(v)) ?? []
+    );
+
+    // ¿El nombre de la variable indexa este arreglo en la instrucción actual? Ej: numeros[i]
+    const indexaEnInstruccion = (nombreVar: string): boolean => {
+        if (!nombreArreglo || !instruccion) return false;
+        const re = new RegExp(
+            `\\b${nombreArreglo}\\s*\\[[^\\]]*\\b${nombreVar}\\b`,
+            'i'
+        );
+        return re.test(instruccion);
+    };
+
     variables.forEach((v, idx) => {
+        const nombreLower = v.nombre.toLowerCase();
+
+        // 1. Descartar si coincide con nombres de acumuladores o contadores
+        if (NO_SON_PUNTEROS.test(nombreLower)) {
+            return;
+        }
+
         const num = parseInt(v.valor, 10);
         if (
             !Number.isNaN(num) &&
@@ -198,14 +233,25 @@ export const detectarPunterosArreglo = (
             num >= 1 &&
             num <= longitudArreglo
         ) {
-            punteros.push({
-                variable: v.nombre,
-                posicion1Based: num,
-                indice0Based: num - 1,
-                color: colorDeVariable(idx),
-            });
+            // 2. Verificar rol de índice legítimo:
+            // - Es un iterador activo de ciclo (ej: i en 'Para i <- ...')
+            // - Indexa el arreglo en la instrucción actual (ej: numeros[i])
+            // - O tiene un nombre típico de índice (i, j, k, pos, idx)
+            const esIterador = varsCiclo.has(nombreLower);
+            const indexa = indexaEnInstruccion(v.nombre);
+            const nombreTipico = ES_NOMBRE_INDICE.test(nombreLower);
+
+            if (esIterador || indexa || nombreTipico) {
+                punteros.push({
+                    variable: v.nombre,
+                    posicion1Based: num,
+                    indice0Based: num - 1,
+                    color: colorDeVariable(idx),
+                });
+            }
         }
     });
+
     return punteros;
 };
 
