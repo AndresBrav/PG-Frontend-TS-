@@ -14,7 +14,6 @@ import { perfilesDe } from './visualUtils';
 import { colorDeVariable } from './visualUtils';
 import GraficaEvolucion from './GraficaEvolucion';
 import BarrasEjecucion from './BarrasEjecucion';
-import ArregloCasillas from './ArregloCasillas';
 import SimulacionMovimiento from './SimulacionMovimiento';
 import ReproductorEjecucion from './ReproductorEjecucion';
 
@@ -34,7 +33,6 @@ type TabVisual =
     | 'escritorio'
     | 'evolucion'
     | 'barras'
-    | 'arreglos'
     | 'simulacion';
 
 const TABS: { id: TabVisual; etiqueta: string; titulo: string }[] = [
@@ -46,7 +44,6 @@ const TABS: { id: TabVisual; etiqueta: string; titulo: string }[] = [
     },
     { id: 'evolucion', etiqueta: '📈 Evolución', titulo: 'cómo cambia cada variable en el tiempo' },
     { id: 'barras', etiqueta: '📊 Barras', titulo: 'variables numéricas contra una escala común' },
-    { id: 'arreglos', etiqueta: '🧮 Arreglos', titulo: 'Dimension dibujado en casillas' },
     {
         id: 'simulacion',
         etiqueta: '🎬 Simulación',
@@ -799,14 +796,6 @@ const PanelVariablesEjecucion = ({
 
             {tab === 'barras' && (
                 <BarrasEjecucion
-                    perfiles={perfiles}
-                    captura={captura}
-                    anterior={anterior}
-                />
-            )}
-
-            {tab === 'arreglos' && (
-                <ArregloCasillas
                     perfiles={perfiles}
                     captura={captura}
                     anterior={anterior}
