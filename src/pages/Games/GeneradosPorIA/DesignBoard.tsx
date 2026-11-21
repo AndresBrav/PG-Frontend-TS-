@@ -899,145 +899,119 @@ function DesignBoard() {
                         onAddNode={isTouchDevice ? onAddNode : undefined}
                     />
                 )}
-                <FlowEditor
-                    ref={flowEditorRef}
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={handleNodesChange}
-                    onEdgesChange={handleEdgesChange}
-                    onFlowChange={handleFlowChange}
-                    soloLectura={soloLectura}
-                />
-                {panelVisible && (
-                    <div
-                        style={{
-                            flexShrink: 0,
-                            height: 'clamp(240px, 40vh, 380px)',
-                            margin: '0 10px 10px',
-                            borderRadius: '10px',
-                            overflow: 'hidden',
-                            border: '1px solid #444',
-                            background: '#1e1e1e',
-                            display: 'flex',
-                            gap: '1px',
-                        }}
-                    >
-                        {/* Consola de salida */}
-                        <div
-                            style={{
-                                flex: 1,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                minWidth: 0,
-                                background: '#1e1e1e',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '8px 12px',
-                                    borderBottom: '1px solid #444',
-                                    color: '#ddd',
-                                    fontSize: '13px',
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <span>📟 Consola de Salida</span>
-                                <span
+                <div className="designboard-workspace">
+                    <FlowEditor
+                        ref={flowEditorRef}
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={handleNodesChange}
+                        onEdgesChange={handleEdgesChange}
+                        onFlowChange={handleFlowChange}
+                        soloLectura={soloLectura}
+                    />
+                    {panelVisible && (
+                        <div className="designboard-side-panel">
+                            {/* Panel de variables en ejecución (Laptop: 85% alto, Celular: 70% ancho) */}
+                            <div className="designboard-panel-variables">
+                                <PanelVariablesEjecucion
+                                    estado={estadoVariables}
+                                    historial={historialVariables}
+                                    enEjecucion={ejecutando}
+                                    onLineaActiva={(linea) => {
+                                        const nodo = linea
+                                            ? (mapaLineaNodoRef.current?.get(
+                                                  linea
+                                              ) ?? null)
+                                            : null;
+                                        flowEditorRef.current?.setNodeHighlight(
+                                            nodo
+                                        );
+                                    }}
+                                />
+                            </div>
+
+                            {/* Consola de salida (Laptop: 15% alto, Celular: 30% ancho) */}
+                            <div className="designboard-panel-consola">
+                                <div
                                     style={{
                                         display: 'flex',
+                                        justifyContent: 'space-between',
                                         alignItems: 'center',
-                                        gap: '12px',
+                                        padding: '6px 12px',
+                                        borderBottom: '1px solid #444',
+                                        color: '#ddd',
+                                        fontSize: '12px',
+                                        flexShrink: 0,
+                                        backgroundColor: '#2d2d2d',
                                     }}
                                 >
-                                    <button
-                                        onClick={() => setSalidaConsola([])}
+                                    <span>📟 Consola de Salida</span>
+                                    <span
                                         style={{
-                                            background: 'transparent',
-                                            border: 'none',
-                                            color: '#888',
-                                            cursor: 'pointer',
-                                            fontSize: '12px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
                                         }}
                                     >
-                                        Limpiar
-                                    </button>
-                                    <button
-                                        onClick={() => setPanelVisible(false)}
-                                        style={{
-                                            background: 'transparent',
-                                            border: 'none',
-                                            color: '#888',
-                                            cursor: 'pointer',
-                                            fontSize: '14px',
-                                            lineHeight: 1,
-                                        }}
-                                        title="Cerrar panel"
-                                    >
-                                        ✕
-                                    </button>
-                                </span>
-                            </div>
-                            <div
-                                style={{
-                                    flex: 1,
-                                    padding: '12px',
-                                    fontFamily: 'var(--mono)',
-                                    fontSize: '12px',
-                                    color: '#00FF00',
-                                    overflowY: 'auto',
-                                    lineHeight: '1.6',
-                                }}
-                            >
-                                {salidaConsola.length === 0 ? (
-                                    <span style={{ color: '#888' }}>
-                                        Presiona "▶ Ejecutar" para correr tu
-                                        diagrama aquí.
-                                    </span>
-                                ) : (
-                                    salidaConsola.map((log, index) => (
-                                        <div
-                                            key={index}
-                                            style={{ whiteSpace: 'pre-wrap' }}
+                                        <button
+                                            onClick={() => setSalidaConsola([])}
+                                            style={{
+                                                background: 'transparent',
+                                                border: 'none',
+                                                color: '#888',
+                                                cursor: 'pointer',
+                                                fontSize: '11px',
+                                            }}
                                         >
-                                            {log}
-                                        </div>
-                                    ))
-                                )}
+                                            Limpiar
+                                        </button>
+                                        <button
+                                            onClick={() => setPanelVisible(false)}
+                                            style={{
+                                                background: 'transparent',
+                                                border: 'none',
+                                                color: '#888',
+                                                cursor: 'pointer',
+                                                fontSize: '13px',
+                                                lineHeight: 1,
+                                            }}
+                                            title="Cerrar panel"
+                                        >
+                                            ✕
+                                        </button>
+                                    </span>
+                                </div>
+                                <div
+                                    style={{
+                                        flex: 1,
+                                        padding: '10px 12px',
+                                        fontFamily: 'var(--mono)',
+                                        fontSize: '12px',
+                                        color: '#00FF00',
+                                        overflowY: 'auto',
+                                        lineHeight: '1.5',
+                                    }}
+                                >
+                                    {salidaConsola.length === 0 ? (
+                                        <span style={{ color: '#888' }}>
+                                            Presiona "▶ Ejecutar" para correr tu
+                                            diagrama aquí.
+                                        </span>
+                                    ) : (
+                                        salidaConsola.map((log, index) => (
+                                            <div
+                                                key={index}
+                                                style={{ whiteSpace: 'pre-wrap' }}
+                                            >
+                                                {log}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
                             </div>
                         </div>
-
-                        {/* Panel de variables en ejecución (debug + película) */}
-                        <div
-                            style={{
-                                flex: 1,
-                                minWidth: 0,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                overflow: 'hidden',
-                                borderLeft: '1px solid #444',
-                            }}
-                        >
-                            <PanelVariablesEjecucion
-                                estado={estadoVariables}
-                                historial={historialVariables}
-                                enEjecucion={ejecutando}
-                                onLineaActiva={(linea) => {
-                                    const nodo = linea
-                                        ? (mapaLineaNodoRef.current?.get(
-                                              linea
-                                          ) ?? null)
-                                        : null;
-                                    flowEditorRef.current?.setNodeHighlight(
-                                        nodo
-                                    );
-                                }}
-                            />
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
                 {esModoGrupo &&
                     !esRevision &&
                     infoGrupo?.casosPrueba &&
