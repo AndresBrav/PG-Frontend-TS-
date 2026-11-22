@@ -70,27 +70,78 @@ const Ejercicio5Laptop: React.FC = () => {
             { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[3] }, //flecha 2
             { imagen: 'https://i.imgur.com/PwPIo74.png', estado: resultado[4] }, //desicion 1
             { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[5] }, //flecha 3
-            { imagen: 'https://i.imgur.com/rfDPtA3.png', estado: resultado[6] }, //contador = 2
+            { imagen: 'https://i.imgur.com/1BrMTRA.png', estado: resultado[6] }, //contador = 2
             { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[7] }, //flecha 4
             { imagen: 'https://i.imgur.com/0SSFhh7.png', estado: resultado[8] }, //desicion 2
             { imagen: 'https://i.imgur.com/QRehLgq.png', estado: resultado[9] }, //flecha 5
-            { imagen: 'https://i.imgur.com/SVOl5q9.png', estado: resultado[10] }, //desicion 3
-            { imagen: 'https://i.imgur.com/dHDnrEA.png', estado: resultado[11] }, //es primo
-            { imagen: 'https://i.imgur.com/ASMoZbM.png', estado: resultado[12] }, //final 2
-            { imagen: 'https://i.imgur.com/ue7FrUg.png', estado: resultado[13] }, //no es primo 1
-            { imagen: 'https://i.imgur.com/GKkw3jK.png', estado: resultado[14] }, //final 1
-            { imagen: 'https://i.imgur.com/ue7FrUg.png', estado: resultado[15] }, //no es primo 2
-            { imagen: 'https://i.imgur.com/3qDWaU4.png', estado: resultado[16] }, //final 3
-            { imagen: 'https://i.imgur.com/YgzpNdS.png', estado: resultado[17] }, //contador++
-            { imagen: 'https://i.imgur.com/ZR9Z8MJ.png', estado: resultado[18] }, //esquina 2
-            { imagen: 'https://i.imgur.com/cxdXkSx.png', estado: resultado[19] }, //flecha izquierda 1
-            { imagen: 'https://i.imgur.com/VqytbNj.png', estado: resultado[20] }, //esquina 1
-            { imagen: 'https://i.imgur.com/z0qDiIh.png', estado: resultado[21] }, //esquina 4
-            { imagen: 'https://i.imgur.com/cxdXkSx.png', estado: resultado[22] }, //flecha izquierda 2
-            { imagen: 'https://i.imgur.com/j6t9al9.png', estado: resultado[23] }, //esquina 3
-            { imagen: 'https://i.imgur.com/Rxl6UGT.png', estado: resultado[24] }, //ir al final 1
-            { imagen: 'https://i.imgur.com/Rxl6UGT.png', estado: resultado[25] }, //ir al final 2
-            { imagen: 'https://i.imgur.com/Rxl6UGT.png', estado: resultado[26] }, //ir al final 3
+            {
+                imagen: 'https://i.imgur.com/MN9rFoq.png',
+                estado: resultado[10],
+            }, //desicion 3
+            {
+                imagen: 'https://i.imgur.com/Twzh3Ok.png',
+                estado: resultado[11],
+            }, //es primo
+            {
+                imagen: 'https://i.imgur.com/ASMoZbM.png',
+                estado: resultado[12],
+            }, //final 2
+            {
+                imagen: 'https://i.imgur.com/oPzHUp2.png',
+                estado: resultado[13],
+            }, //no es primo 1
+            {
+                imagen: 'https://i.imgur.com/GKkw3jK.png',
+                estado: resultado[14],
+            }, //final 1
+            {
+                imagen: 'https://i.imgur.com/oPzHUp2.png',
+                estado: resultado[15],
+            }, //no es primo 2
+            {
+                imagen: 'https://i.imgur.com/3qDWaU4.png',
+                estado: resultado[16],
+            }, //final 3
+            {
+                imagen: 'https://i.imgur.com/qmMEDYe.png',
+                estado: resultado[17],
+            }, //contador++
+            {
+                imagen: 'https://i.imgur.com/ZR9Z8MJ.png',
+                estado: resultado[18],
+            }, //esquina 2
+            {
+                imagen: 'https://i.imgur.com/cxdXkSx.png',
+                estado: resultado[19],
+            }, //flecha izquierda 1
+            {
+                imagen: 'https://i.imgur.com/VqytbNj.png',
+                estado: resultado[20],
+            }, //esquina 1
+            {
+                imagen: 'https://i.imgur.com/z0qDiIh.png',
+                estado: resultado[21],
+            }, //esquina 4
+            {
+                imagen: 'https://i.imgur.com/cxdXkSx.png',
+                estado: resultado[22],
+            }, //flecha izquierda 2
+            {
+                imagen: 'https://i.imgur.com/j6t9al9.png',
+                estado: resultado[23],
+            }, //esquina 3
+            {
+                imagen: 'https://i.imgur.com/Rxl6UGT.png',
+                estado: resultado[24],
+            }, //ir al final 1
+            {
+                imagen: 'https://i.imgur.com/Rxl6UGT.png',
+                estado: resultado[25],
+            }, //ir al final 2
+            {
+                imagen: 'https://i.imgur.com/Rxl6UGT.png',
+                estado: resultado[26],
+            }, //ir al final 3
         ];
 
         const htmlContenido = `

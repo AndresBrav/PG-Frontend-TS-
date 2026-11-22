@@ -97,12 +97,12 @@ export const initialWidgetsEjercicio5: Widget[] = [
     { id: 7, content: 'https://i.imgur.com/BwMrDVL.png' }, //Ingresar N
     { id: 8, content: 'https://i.imgur.com/PwPIo74.png' }, // Descicion1
     { id: 9, content: 'https://i.imgur.com/0SSFhh7.png' }, // Descicion2
-    { id: 10, content: 'https://i.imgur.com/SVOl5q9.png' }, // Descicion3
-    { id: 11, content: 'https://i.imgur.com/ue7FrUg.png' }, // No es primo 1
-    { id: 12, content: 'https://i.imgur.com/ue7FrUg.png' }, // No es primo 2
-    { id: 13, content: 'https://i.imgur.com/dHDnrEA.png' }, //es primo
-    { id: 14, content: 'https://i.imgur.com/rfDPtA3.png' }, // contador = 2
-    { id: 15, content: 'https://i.imgur.com/YgzpNdS.png' }, // contador++
+    { id: 10, content: 'https://i.imgur.com/MN9rFoq.png' }, // Descicion3
+    { id: 11, content: 'https://i.imgur.com/oPzHUp2.png' }, // No es primo 1
+    { id: 12, content: 'https://i.imgur.com/oPzHUp2.png' }, // No es primo 2
+    { id: 13, content: 'https://i.imgur.com/Twzh3Ok.png' }, //es primo
+    { id: 14, content: 'https://i.imgur.com/1BrMTRA.png' }, // contador = 2
+    { id: 15, content: 'https://i.imgur.com/qmMEDYe.png' }, // contador++
     { id: 16, content: 'https://i.imgur.com/GKkw3jK.png' }, // final 1
     { id: 17, content: 'https://i.imgur.com/ASMoZbM.png' }, // final 2
     { id: 18, content: 'https://i.imgur.com/3qDWaU4.png' }, // final 3
