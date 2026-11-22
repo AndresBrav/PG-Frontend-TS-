@@ -66,26 +66,62 @@ const Ejercicio3Laptop: React.FC = () => {
         const pasos = [
             { imagen: 'https://i.imgur.com/x7IcPAY.png', estado: resultado[0] }, //inicio
             { imagen: 'https://i.imgur.com/L0MV75y.png', estado: resultado[1] }, //flecha abajo1
-            { imagen: 'https://i.imgur.com/RYGH9tV.png', estado: resultado[2] }, // suma =0
+            { imagen: 'https://i.imgur.com/1X7HZ0i.png', estado: resultado[2] }, // suma =0
             { imagen: 'https://i.imgur.com/L0MV75y.png', estado: resultado[3] }, // flecha abajo2
-            { imagen: 'https://i.imgur.com/A1aTCPU.png', estado: resultado[4] }, // contador =1
+            { imagen: 'https://i.imgur.com/wq7v1sm.png', estado: resultado[4] }, // contador =1
             { imagen: 'https://i.imgur.com/L0MV75y.png', estado: resultado[5] }, // flecha abajo3
             { imagen: 'https://i.imgur.com/FZLtIRu.png', estado: resultado[6] }, // descicion
             { imagen: 'https://i.imgur.com/L0MV75y.png', estado: resultado[7] }, // flecha abajo4
             { imagen: 'https://i.imgur.com/UvuCO4L.png', estado: resultado[8] }, // leer numero
             { imagen: 'https://i.imgur.com/L0MV75y.png', estado: resultado[9] }, // flecha abajo5
-            { imagen: 'https://i.imgur.com/KC2On76.png', estado: resultado[10] }, // suma = suma + numero
-            { imagen: 'https://i.imgur.com/L0MV75y.png', estado: resultado[11] }, // flecha abajo6
-            { imagen: 'https://i.imgur.com/qgZYFaK.png', estado: resultado[12] }, // contador = contador +1
-            { imagen: 'https://i.imgur.com/ICyFXrP.png', estado: resultado[13] }, // esquina izquierda
-            { imagen: 'https://i.imgur.com/MTL5zju.jpeg', estado: resultado[14] }, // linea 1
-            { imagen: 'https://i.imgur.com/MTL5zju.jpeg', estado: resultado[15] }, // linea 2
-            { imagen: 'https://i.imgur.com/MTL5zju.jpeg', estado: resultado[16] }, // linea 3
-            { imagen: 'https://i.imgur.com/U57Uh8j.png', estado: resultado[17] }, // doblado
-            { imagen: 'https://i.imgur.com/jNXzpFf.png', estado: resultado[18] }, // flecha arriba
-            { imagen: 'https://i.imgur.com/TMDvptF.png', estado: resultado[19] }, // esquina derecha
-            { imagen: 'https://i.imgur.com/AGMK3q1.png', estado: resultado[20] }, // mostrar suma
-            { imagen: 'https://i.imgur.com/2JpAMKr.png', estado: resultado[21] }, // fin
+            {
+                imagen: 'https://i.imgur.com/ahARBDC.png',
+                estado: resultado[10],
+            }, // suma = suma + numero
+            {
+                imagen: 'https://i.imgur.com/L0MV75y.png',
+                estado: resultado[11],
+            }, // flecha abajo6
+            {
+                imagen: 'https://i.imgur.com/C26an5u.png',
+                estado: resultado[12],
+            }, // contador = contador +1
+            {
+                imagen: 'https://i.imgur.com/ICyFXrP.png',
+                estado: resultado[13],
+            }, // esquina izquierda
+            {
+                imagen: 'https://i.imgur.com/MTL5zju.jpeg',
+                estado: resultado[14],
+            }, // linea 1
+            {
+                imagen: 'https://i.imgur.com/MTL5zju.jpeg',
+                estado: resultado[15],
+            }, // linea 2
+            {
+                imagen: 'https://i.imgur.com/MTL5zju.jpeg',
+                estado: resultado[16],
+            }, // linea 3
+            {
+                imagen: 'https://i.imgur.com/U57Uh8j.png',
+                estado: resultado[17],
+            }, // doblado
+            {
+                imagen: 'https://i.imgur.com/jNXzpFf.png',
+                estado: resultado[18],
+            }, // flecha arriba
+            {
+                imagen: 'https://i.imgur.com/TMDvptF.png',
+                estado: resultado[19],
+            }, // esquina derecha
+            {
+                imagen: 'https://i.imgur.com/4LLSYvX.png',
+                estado: resultado[20],
+            }, // mostrar suma
+            {
+                imagen: 'https://i.imgur.com/2JpAMKr.png',
+                estado: resultado[21],
+            }, // fin
         ];
 
         const htmlContenido = `

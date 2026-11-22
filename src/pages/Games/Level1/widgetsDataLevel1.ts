@@ -56,14 +56,14 @@ export const initialWidgetsEjercicio3: Widget[] = [
     { id: 5, content: 'https://i.imgur.com/L0MV75y.png' }, //flecha abajo4
     { id: 6, content: 'https://i.imgur.com/L0MV75y.png' }, //flecha abajo5
     { id: 7, content: 'https://i.imgur.com/L0MV75y.png' }, //flecha abajo6
-    { id: 8, content: 'https://i.imgur.com/RYGH9tV.png' }, // suma =0
-    { id: 9, content: 'https://i.imgur.com/A1aTCPU.png' }, // contador =1
+    { id: 8, content: 'https://i.imgur.com/1X7HZ0i.png' }, // suma =0
+    { id: 9, content: 'https://i.imgur.com/wq7v1sm.png' }, // contador =1
     { id: 10, content: 'https://i.imgur.com/FZLtIRu.png' }, // descicion
-    { id: 11, content: 'https://i.imgur.com/AGMK3q1.png' }, // mostrar suma
+    { id: 11, content: 'https://i.imgur.com/4LLSYvX.png' }, // mostrar suma
     { id: 12, content: 'https://i.imgur.com/2JpAMKr.png' }, // fin
     { id: 13, content: 'https://i.imgur.com/UvuCO4L.png' }, // leer numero
-    { id: 14, content: 'https://i.imgur.com/KC2On76.png' }, // suma = suma + numero
-    { id: 15, content: 'https://i.imgur.com/qgZYFaK.png' }, // contador = contador + 1
+    { id: 14, content: 'https://i.imgur.com/ahARBDC.png' }, // suma = suma + numero
+    { id: 15, content: 'https://i.imgur.com/C26an5u.png' }, // contador = contador + 1
     { id: 16, content: 'https://i.imgur.com/U57Uh8j.png' }, // izquierda arriba doblada
     { id: 17, content: 'https://i.imgur.com/MTL5zju.jpeg' }, // linea 1
     { id: 18, content: 'https://i.imgur.com/MTL5zju.jpeg' }, // linea 2
