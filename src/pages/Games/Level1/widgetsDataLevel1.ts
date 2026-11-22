@@ -76,15 +76,15 @@ export const initialWidgetsEjercicio3: Widget[] = [
 
 export const initialWidgetsEjercicio4: Widget[] = [
     { id: 2, content: 'https://i.imgur.com/RESU9Wb.png' }, //fin
-    { id: 3, content: 'https://i.imgur.com/I9rPg9Q.png' }, //Mostrar area
-    { id: 4, content: 'https://i.imgur.com/hUCWk5Q.png' }, //inicio de variables
-    { id: 5, content: 'https://i.imgur.com/duXzF5m.png' }, //calcular area
+    { id: 3, content: 'https://i.imgur.com/5DPbV0v.png' }, //Mostrar area
+    { id: 4, content: 'https://i.imgur.com/1SjKD2T.png' }, //inicio de variables
+    { id: 5, content: 'https://i.imgur.com/DqsxPpq.png' }, //calcular area
     { id: 7, content: 'https://i.imgur.com/G9A6r4u.png' }, //flecha 1
     { id: 8, content: 'https://i.imgur.com/G9A6r4u.png' }, //flecha 2
     { id: 9, content: 'https://i.imgur.com/G9A6r4u.png' }, //flecha 3
     { id: 10, content: 'https://i.imgur.com/G9A6r4u.png' }, //flecha 4
     { id: 11, content: 'https://i.imgur.com/G9A6r4u.png' }, //flecha 5
-    { id: 6, content: 'https://i.imgur.com/nigQnxc.png' }, //leer base y altura
+    { id: 6, content: 'https://i.imgur.com/xCfpQTC.png' }, //leer base y altura
     { id: 1, content: 'https://i.imgur.com/8Oalgpj.png' }, //inicio
 ];
 

@@ -66,15 +66,18 @@ const Ejercicio4Phone: React.FC = () => {
         const pasos = [
             { imagen: 'https://i.imgur.com/8Oalgpj.png', estado: resultado[0] }, //inicio
             { imagen: 'https://i.imgur.com/G9A6r4u.png', estado: resultado[1] }, //flecha 1
-            { imagen: 'https://i.imgur.com/hUCWk5Q.png', estado: resultado[2] }, //inicio variables
+            { imagen: 'https://i.imgur.com/1SjKD2T.png', estado: resultado[2] }, //inicio variables
             { imagen: 'https://i.imgur.com/G9A6r4u.png', estado: resultado[3] }, //flecha 2
-            { imagen: 'https://i.imgur.com/nigQnxc.png', estado: resultado[4] }, //leer base altura
+            { imagen: 'https://i.imgur.com/xCfpQTC.png', estado: resultado[4] }, //leer base altura
             { imagen: 'https://i.imgur.com/G9A6r4u.png', estado: resultado[5] }, //flecha 3
-            { imagen: 'https://i.imgur.com/duXzF5m.png', estado: resultado[6] }, //calcular area
+            { imagen: 'https://i.imgur.com/DqsxPpq.png', estado: resultado[6] }, //calcular area
             { imagen: 'https://i.imgur.com/G9A6r4u.png', estado: resultado[7] }, //flecha 4
-            { imagen: 'https://i.imgur.com/I9rPg9Q.png', estado: resultado[8] }, //mostrar area
+            { imagen: 'https://i.imgur.com/5DPbV0v.png', estado: resultado[8] }, //mostrar area
             { imagen: 'https://i.imgur.com/G9A6r4u.png', estado: resultado[9] }, //flecha 5
-            { imagen: 'https://i.imgur.com/RESU9Wb.png', estado: resultado[10] }, //fin
+            {
+                imagen: 'https://i.imgur.com/RESU9Wb.png',
+                estado: resultado[10],
+            }, //fin
         ];
 
         const htmlContenido = `
