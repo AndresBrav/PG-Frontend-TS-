@@ -81,9 +81,9 @@ const Ejercicio1Phone: React.FC = () => {
                 imagen: 'https://i.imgur.com/hNUaZS0.jpeg',
                 estado: resultado[11],
             }, // linea
-            { imagen: 'https://i.imgur.com/2n11hJn.png', estado: resultado[6] }, //son iguales
+            { imagen: 'https://i.imgur.com/BpIBnxA.png', estado: resultado[6] }, //son iguales
             {
-                imagen: 'https://i.imgur.com/oRp6iv2.png',
+                imagen: 'https://i.imgur.com/rODGmbG.png',
                 estado: resultado[10],
             }, // no son iguales
             {
