@@ -67,25 +67,61 @@ const Ejercicio2Laptop: React.FC = () => {
         const pasos = [
             { imagen: 'https://i.imgur.com/3MzUgfA.png', estado: resultado[0] }, //inicio
             { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[1] }, //flecha abajo
-            { imagen: 'https://i.imgur.com/r8r7BIt.png', estado: resultado[2] }, //introduzca
+            { imagen: 'https://i.imgur.com/UgeWYCJ.png', estado: resultado[2] }, //introduzca
             { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[3] }, //flecha abajo
             { imagen: 'https://i.imgur.com/v8uvFLP.png', estado: resultado[4] }, //leer n1 n2
             { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[5] }, //flecha abajo
             { imagen: 'https://i.imgur.com/8wCxpum.png', estado: resultado[6] }, //descicion 1
-            { imagen: 'https://i.imgur.com/oC9J3TN.png', estado: resultado[10] }, //flecha abajo
-            { imagen: 'https://i.imgur.com/sFAFzl4.png', estado: resultado[11] }, //n2 es mayor
-            { imagen: 'https://i.imgur.com/L2Z7DVd.jpeg', estado: resultado[12] }, //linea
-            { imagen: 'https://i.imgur.com/MSjy0TA.png', estado: resultado[13] }, //esquina derecha 2
+            {
+                imagen: 'https://i.imgur.com/oC9J3TN.png',
+                estado: resultado[10],
+            }, //flecha abajo
+            {
+                imagen: 'https://i.imgur.com/KNPBU0U.png',
+                estado: resultado[11],
+            }, //n2 es mayor
+            {
+                imagen: 'https://i.imgur.com/L2Z7DVd.jpeg',
+                estado: resultado[12],
+            }, //linea
+            {
+                imagen: 'https://i.imgur.com/MSjy0TA.png',
+                estado: resultado[13],
+            }, //esquina derecha 2
             { imagen: 'https://i.imgur.com/Od4jxIE.png', estado: resultado[7] }, //esquina derecha 1
-            { imagen: 'https://i.imgur.com/L2Z7DVd.jpeg', estado: resultado[8] }, //linea
+            {
+                imagen: 'https://i.imgur.com/L2Z7DVd.jpeg',
+                estado: resultado[8],
+            }, //linea
             { imagen: 'https://i.imgur.com/L8yntMk.png', estado: resultado[9] }, //descicion 2
-            { imagen: 'https://i.imgur.com/goRKMj3.png', estado: resultado[16] }, //n1 es mayor
-            { imagen: 'https://i.imgur.com/L2Z7DVd.jpeg', estado: resultado[17] }, //linea
-            { imagen: 'https://i.imgur.com/jnKoRnc.png', estado: resultado[18] }, //esquina izquierda 2
-            { imagen: 'https://i.imgur.com/42u2BvY.png', estado: resultado[14] }, //esquina derecha 4
-            { imagen: 'https://i.imgur.com/cJqYyTX.png', estado: resultado[19] }, //esquina izquierda 1
-            { imagen: 'https://i.imgur.com/Y7okYCi.png', estado: resultado[15] }, //esquina derecha 3
-            { imagen: 'https://i.imgur.com/mt4Z8y1.png', estado: resultado[20] }, //fin
+            {
+                imagen: 'https://i.imgur.com/z0wZgmJ.png',
+                estado: resultado[16],
+            }, //n1 es mayor
+            {
+                imagen: 'https://i.imgur.com/L2Z7DVd.jpeg',
+                estado: resultado[17],
+            }, //linea
+            {
+                imagen: 'https://i.imgur.com/jnKoRnc.png',
+                estado: resultado[18],
+            }, //esquina izquierda 2
+            {
+                imagen: 'https://i.imgur.com/42u2BvY.png',
+                estado: resultado[14],
+            }, //esquina derecha 4
+            {
+                imagen: 'https://i.imgur.com/cJqYyTX.png',
+                estado: resultado[19],
+            }, //esquina izquierda 1
+            {
+                imagen: 'https://i.imgur.com/Y7okYCi.png',
+                estado: resultado[15],
+            }, //esquina derecha 3
+            {
+                imagen: 'https://i.imgur.com/mt4Z8y1.png',
+                estado: resultado[20],
+            }, //fin
         ];
 
         const htmlContenido = `

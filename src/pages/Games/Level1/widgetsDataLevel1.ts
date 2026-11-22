@@ -30,7 +30,7 @@ export const initialWidgetsEjercicio2: Widget[] = [
     { id: 2, content: 'https://i.imgur.com/mt4Z8y1.png' }, //fin
     { id: 3, content: 'https://i.imgur.com/oC9J3TN.png' }, //flecha abajo 1
     { id: 4, content: 'https://i.imgur.com/3MzUgfA.png' }, //inicio
-    { id: 5, content: 'https://i.imgur.com/r8r7BIt.png' }, //introdusca n1,n2
+    { id: 5, content: 'https://i.imgur.com/UgeWYCJ.png' }, //introdusca numeros distintos
     { id: 6, content: 'https://i.imgur.com/v8uvFLP.png' }, //leer n1,n2
     { id: 7, content: 'https://i.imgur.com/L8yntMk.png' }, //descicion 2
     { id: 8, content: 'https://i.imgur.com/Od4jxIE.png' }, //esquina derecha 1
@@ -39,8 +39,8 @@ export const initialWidgetsEjercicio2: Widget[] = [
     { id: 11, content: 'https://i.imgur.com/42u2BvY.png' }, //esquina derecha 4
     { id: 12, content: 'https://i.imgur.com/cJqYyTX.png' }, //esquina izquierda 1
     { id: 13, content: 'https://i.imgur.com/jnKoRnc.png' }, //esquina izquierda 2
-    { id: 17, content: 'https://i.imgur.com/goRKMj3.png' }, //n1 es mayor
-    { id: 18, content: 'https://i.imgur.com/sFAFzl4.png' }, //n2 es mayor
+    { id: 17, content: 'https://i.imgur.com/z0wZgmJ.png' }, //n1 es mayor
+    { id: 18, content: 'https://i.imgur.com/KNPBU0U.png' }, //n2 es mayor
     { id: 19, content: 'https://i.imgur.com/oC9J3TN.png' }, //flecha abajo 2
     { id: 20, content: 'https://i.imgur.com/oC9J3TN.png' }, //flecha abajo 3
     { id: 14, content: 'https://i.imgur.com/L2Z7DVd.jpeg' }, //linea 1
