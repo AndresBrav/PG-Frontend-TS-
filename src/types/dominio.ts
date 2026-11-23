@@ -32,16 +32,24 @@ export interface MiProgreso {
 export interface EstadisticasAdmin {
     usuarios: {
         estudiantes: number;
+        profesores: number;
         admins: number;
     };
     completados: {
         fijos: number;
         ia: number;
+        grupos: number;
     };
     puntos: {
         fijos: number;
         ia: number;
+        grupos: number;
         total: number;
+    };
+    grupos: {
+        total: number;
+        ejercicios: number;
+        pendientes: number;
     };
     ultimaActividad: string | null;
 }
@@ -54,6 +62,14 @@ export interface EstudianteAdmin {
     createdAt: string;
     puntos: number;
     completados: number;
+    puntosFijos: number;
+    puntosIA: number;
+    puntosGrupos: number;
+    completadosFijos: number;
+    completadosIA: number;
+    completadosGrupos: number;
+    pendientesGrupos: number;
+    grupos: number;
 }
 
 export interface GrupoAdmin {
@@ -63,6 +79,8 @@ export interface GrupoAdmin {
     profesor: string;
     estudiantes: number;
     ejercicios: number;
+    completados: number;
+    pendientes: number;
 }
 
 // ===================== GRUPOS (profesor + estudiante) =====================

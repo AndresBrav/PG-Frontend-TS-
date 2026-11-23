@@ -188,9 +188,10 @@ const TabResumen = ({
                     titulo="Ejercicios completados"
                     valor={formatearNumero(
                         estadisticas.completados.fijos +
-                            estadisticas.completados.ia,
+                            estadisticas.completados.ia +
+                            estadisticas.completados.grupos,
                     )}
-                    detalle="Fijos y con IA"
+                    detalle="Fijos, IA y grupos"
                     acento="verde"
                 />
                 <TarjetaResumen
@@ -232,6 +233,16 @@ const TabResumen = ({
                             </dd>
                         </div>
                         <div className="flex items-center justify-between gap-3">
+                            <dt className="text-gray-400">
+                                Ejercicios de grupo completados
+                            </dt>
+                            <dd className="font-bold text-emerald-300">
+                                {formatearNumero(
+                                    estadisticas.completados.grupos,
+                                )}
+                            </dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
                             <dt className="text-gray-400">Puntos fijos</dt>
                             <dd className="font-bold text-white">
                                 {formatearNumero(estadisticas.puntos.fijos)}
@@ -241,6 +252,28 @@ const TabResumen = ({
                             <dt className="text-gray-400">Puntos con IA</dt>
                             <dd className="font-bold text-white">
                                 {formatearNumero(estadisticas.puntos.ia)}
+                            </dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                            <dt className="text-gray-400">
+                                Puntos de grupos
+                            </dt>
+                            <dd className="font-bold text-emerald-300">
+                                {formatearNumero(estadisticas.puntos.grupos)}
+                            </dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                            <dt className="text-gray-400">Grupos activos</dt>
+                            <dd className="font-bold text-purple-300">
+                                {formatearNumero(estadisticas.grupos.total)}
+                            </dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                            <dt className="text-gray-400">
+                                Entregas pendientes
+                            </dt>
+                            <dd className="font-bold text-amber-300">
+                                {formatearNumero(estadisticas.grupos.pendientes)}
                             </dd>
                         </div>
                     </dl>
@@ -258,6 +291,11 @@ const TabResumen = ({
                                 color: 'bg-sky-400',
                             },
                             {
+                                nombre: 'Profesores',
+                                valor: estadisticas.usuarios.profesores,
+                                color: 'bg-emerald-400',
+                            },
+                            {
                                 nombre: 'Administradores',
                                 valor: estadisticas.usuarios.admins,
                                 color: 'bg-purple-400',
@@ -265,6 +303,7 @@ const TabResumen = ({
                         ].map((item) => {
                             const total =
                                 estadisticas.usuarios.estudiantes +
+                                estadisticas.usuarios.profesores +
                                 estadisticas.usuarios.admins;
                             const porcentaje = total
                                 ? Math.round((item.valor / total) * 100)
@@ -328,14 +367,21 @@ const TablaEstudiantes = ({
         ) : (
             <>
                 <div className="mt-5 hidden overflow-x-auto lg:block">
-                    <table className="w-full min-w-[560px] border-separate border-spacing-y-2 text-left text-sm">
+                    <table className="w-full min-w-[1050px] border-separate border-spacing-y-2 text-left text-sm">
                         <thead>
                             <tr className="text-xs uppercase tracking-wider text-gray-400">
                                 <th className="px-3 py-2">Estudiante</th>
                                 <th className="px-3 py-2">Código</th>
                                 <th className="px-3 py-2">Edad</th>
-                                <th className="px-3 py-2">Puntos</th>
-                                <th className="px-3 py-2">Completados</th>
+                                <th className="px-3 py-2">Puntos estáticos</th>
+                                <th className="px-3 py-2">Puntos IA</th>
+                                <th className="px-3 py-2">Puntos de grupo</th>
+                                <th className="px-3 py-2">Total puntos</th>
+                                <th className="px-3 py-2">
+                                    Ejercicios completados
+                                </th>
+                                <th className="px-3 py-2">Grupos</th>
+                                <th className="px-3 py-2">Por grupo</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -353,11 +399,30 @@ const TablaEstudiantes = ({
                                     <td className="px-3 py-3 text-gray-300">
                                         {estudiante.edad}
                                     </td>
+                                    <td className="px-3 py-3 font-semibold text-sky-300">
+                                        {formatearNumero(
+                                            estudiante.puntosFijos,
+                                        )}
+                                    </td>
+                                    <td className="px-3 py-3 font-semibold text-purple-300">
+                                        {formatearNumero(estudiante.puntosIA)}
+                                    </td>
+                                    <td className="px-3 py-3 font-semibold text-emerald-300">
+                                        {formatearNumero(
+                                            estudiante.puntosGrupos,
+                                        )}
+                                    </td>
                                     <td className="px-3 py-3 font-bold text-[#FF7C02]">
                                         {formatearNumero(estudiante.puntos)}
                                     </td>
                                     <td className="rounded-r-xl px-3 py-3 text-emerald-300">
                                         {estudiante.completados}
+                                    </td>
+                                    <td className="px-3 py-3 text-purple-300">
+                                        {estudiante.grupos}
+                                    </td>
+                                    <td className="px-3 py-3 text-amber-300">
+                                        {estudiante.pendientesGrupos} pendientes
                                     </td>
                                 </tr>
                             ))}
@@ -382,15 +447,38 @@ const TablaEstudiantes = ({
                                 </div>
                                 <span className="text-sm font-bold text-[#FF7C02]">
                                     {formatearNumero(estudiante.puntos)} pts
+                                    total
                                 </span>
                             </div>
                             <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                                <span className="rounded-lg bg-white/5 px-2 py-1 text-sky-300">
+                                    Estáticos:{' '}
+                                    {formatearNumero(estudiante.puntosFijos)} pts
+                                </span>
+                                <span className="rounded-lg bg-white/5 px-2 py-1 text-purple-300">
+                                    IA: {formatearNumero(estudiante.puntosIA)}{' '}
+                                    pts
+                                </span>
+                                <span className="rounded-lg bg-white/5 px-2 py-1 text-emerald-300">
+                                    Grupos:{' '}
+                                    {formatearNumero(estudiante.puntosGrupos)}{' '}
+                                    pts
+                                </span>
                                 <span className="rounded-lg bg-white/5 px-2 py-1 text-gray-400">
                                     {estudiante.edad} años
                                 </span>
                                 <span className="rounded-lg bg-white/5 px-2 py-1 text-emerald-300">
-                                    {estudiante.completados} completados
+                                    {estudiante.completados} ejercicios
+                                    completados
                                 </span>
+                                <span className="rounded-lg bg-white/5 px-2 py-1 text-purple-300">
+                                    {estudiante.grupos} grupos
+                                </span>
+                                {estudiante.pendientesGrupos > 0 && (
+                                    <span className="rounded-lg bg-amber-400/10 px-2 py-1 text-amber-300">
+                                        {estudiante.pendientesGrupos} pendientes
+                                    </span>
+                                )}
                             </div>
                         </article>
                     ))}
@@ -427,6 +515,8 @@ const TablaGrupos = ({ grupos }: { grupos: GrupoAdmin[] }) => (
                             <th className="px-3 py-2">Profesor</th>
                             <th className="px-3 py-2">Estudiantes</th>
                             <th className="px-3 py-2">Ejercicios</th>
+                            <th className="px-3 py-2">Completados</th>
+                            <th className="px-3 py-2">Pendientes</th>
                             <th className="px-3 py-2">Reporte</th>
                         </tr>
                     </thead>
@@ -444,6 +534,12 @@ const TablaGrupos = ({ grupos }: { grupos: GrupoAdmin[] }) => (
                                 </td>
                                 <td className="px-3 py-3 text-gray-300">
                                     {grupo.ejercicios}
+                                </td>
+                                <td className="px-3 py-3 text-emerald-300">
+                                    {grupo.completados}
+                                </td>
+                                <td className="px-3 py-3 text-amber-300">
+                                    {grupo.pendientes}
                                 </td>
                                 <td className="rounded-r-xl px-3 py-3">
                                     <Link

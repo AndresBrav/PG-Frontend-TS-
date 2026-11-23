@@ -8,12 +8,15 @@ import {
 import Swal from 'sweetalert2';
 import AppShell from '../../components/layout/AppShell';
 import PantallaCargando from '../../components/ui/PantallaCargando';
+import { UsuarioContext } from '../../Context/UsuarioContext';
 import { TokenContext } from '../../Context/TokenContext';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import {
     calificarEntregaGrupo,
+    listarEjerciciosGrupoAdmin,
     listarEjerciciosGrupoProfesor,
     listarSolucionesEjercicio,
+    listarSolucionesEjercicioAdmin,
 } from '../../api/gruposApi';
 import type {
     CasoPruebaGrupo,
@@ -39,6 +42,7 @@ const RevisarEntregas = () => {
     const tipoTablero =
         params.get('tipo') === 'diagrama' ? 'diagrama' : 'pseudocodigo';
     const { claveAcceso } = useContext(TokenContext);
+    const { usuario } = useContext(UsuarioContext);
     const navigate = useNavigate();
 
     const [cargando, setCargando] = useState(true);
@@ -52,8 +56,16 @@ const RevisarEntregas = () => {
         setPuntosMaximos(null);
         try {
             const [lista, ejercicios] = await Promise.all([
-                listarSolucionesEjercicio(claveAcceso, ejercicioId),
-                listarEjerciciosGrupoProfesor(claveAcceso, id),
+                usuario?.rol === 'admin'
+                    ? listarSolucionesEjercicioAdmin(
+                          claveAcceso,
+                          id,
+                          ejercicioId,
+                      )
+                    : listarSolucionesEjercicio(claveAcceso, ejercicioId),
+                usuario?.rol === 'admin'
+                    ? listarEjerciciosGrupoAdmin(claveAcceso, id)
+                    : listarEjerciciosGrupoProfesor(claveAcceso, id),
             ]);
             const ejercicio = ejercicios.find(
                 (item) => item.id === Number(ejercicioId)
@@ -79,10 +91,16 @@ const RevisarEntregas = () => {
     useEffect(() => {
         void cargar();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [claveAcceso, id, ejercicioId]);
+    }, [claveAcceso, id, ejercicioId, usuario?.rol]);
 
     const calificar = async (entrega: EntregaGrupo) => {
-        if (!claveAcceso || puntosMaximos === null) return;
+        if (
+            usuario?.rol !== 'profesor' ||
+            !claveAcceso ||
+            puntosMaximos === null
+        ) {
+            return;
+        }
 
         const resultado = await Swal.fire<{
             puntos: number;
@@ -246,12 +264,16 @@ const RevisarEntregas = () => {
                                     >
                                         Ver solución
                                     </button>
-                                    <button
-                                        onClick={() => calificar(entrega)}
-                                        className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-semibold text-black hover:brightness-110"
-                                    >
-                                        ⭐ Calificar
-                                    </button>
+                                    {usuario?.rol === 'profesor' && (
+                                        <button
+                                            onClick={() => calificar(entrega)}
+                                            className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-semibold text-black hover:brightness-110"
+                                        >
+                                            {entrega.calificado
+                                                ? '⭐ Editar nota'
+                                                : '⭐ Calificar'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             {casosPrueba.length > 0 && (

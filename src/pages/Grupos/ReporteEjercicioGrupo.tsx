@@ -7,7 +7,11 @@ import {
     useSearchParams,
 } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { calificarEntregaGrupo, listarEjerciciosGrupoProfesor } from '../../api/gruposApi';
+import {
+    calificarEntregaGrupo,
+    listarEjerciciosGrupoAdmin,
+    listarEjerciciosGrupoProfesor,
+} from '../../api/gruposApi';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import { obtenerReporteGrupo } from '../../api/reportesApi';
 import AppShell from '../../components/layout/AppShell';
@@ -78,7 +82,9 @@ const ReporteEjercicioGrupo = () => {
             try {
                 const [datosReporte, ejerciciosGrupo] = await Promise.all([
                     obtenerReporteGrupo(claveAcceso, id, rolReporte),
-                    listarEjerciciosGrupoProfesor(claveAcceso, id),
+                    rolReporte === 'admin'
+                        ? listarEjerciciosGrupoAdmin(claveAcceso, id)
+                        : listarEjerciciosGrupoProfesor(claveAcceso, id),
                 ]);
                 if (!activo) return;
 
@@ -191,6 +197,7 @@ const ReporteEjercicioGrupo = () => {
     ) => {
         const { entrega, estudiante } = fila;
         if (
+            usuario?.rol !== 'profesor' ||
             !claveAcceso ||
             !id ||
             !entrega?.completado ||
@@ -660,7 +667,9 @@ const ReporteEjercicioGrupo = () => {
                                                                         Sin solución
                                                                     </span>
                                                                 )}
-                                                                {entrega?.completado && (
+                                                                {usuario?.rol ===
+                                                                    'profesor' &&
+                                                                    entrega?.completado && (
                                                                     <button
                                                                         type="button"
                                                                         disabled={

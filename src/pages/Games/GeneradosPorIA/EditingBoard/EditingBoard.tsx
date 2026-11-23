@@ -13,6 +13,7 @@ import {
 } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { TokenContext } from '../../../../Context/TokenContext';
+import { UsuarioContext } from '../../../../Context/UsuarioContext';
 import { completarJuego } from '../../../../api/ejerciciosIA/ejercicios';
 import { verificarPseudocodigo } from '../../../../api/ejerciciosIA/verificarPseudocodigo';
 import {
@@ -36,6 +37,9 @@ import {
     completarEjercicioGrupo,
     guardarEstadoEjercicioGrupo,
     listarSolucionesEjercicio,
+    listarSolucionesEjercicioAdmin,
+    listarEjerciciosGrupoAdmin,
+    listarEjerciciosGrupoProfesor,
 } from '../../../../api/gruposApi';
 import { obtenerMensajeError } from '../../../../api/http';
 import '../app.css';
@@ -93,6 +97,7 @@ const EditingBoard: React.FC = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { claveAcceso } = useContext(TokenContext);
+    const { usuario } = useContext(UsuarioContext);
 
     const locationState = location.state as LocationState | null;
     const queryId = searchParams.get('id');
@@ -136,7 +141,9 @@ const EditingBoard: React.FC = () => {
     const rutaVolver =
         esRevision && grupoId && ejercicioId
             ? rutaVolverDetalle ??
-              `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=pseudocodigo`
+              (usuario?.rol === 'admin'
+                  ? `/grupos/${grupoId}/reporte/ejercicios/${ejercicioId}`
+                  : `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=pseudocodigo`)
             : esModoGrupo && grupoId
               ? `/grupos/${grupoId}`
               : '/ejercicios-ia';
@@ -227,11 +234,24 @@ const EditingBoard: React.FC = () => {
         const cargarGrupo = async () => {
             try {
                 if (esRevision && revisarEstudianteId !== null) {
-                    // Profesor: la entrega vive en las soluciones del ejercicio
-                    const soluciones = await listarSolucionesEjercicio(
-                        claveAcceso,
-                        ejercicioId
-                    );
+                    const [soluciones, ejercicios] = await Promise.all([
+                        usuario?.rol === 'admin'
+                            ? listarSolucionesEjercicioAdmin(
+                                  claveAcceso,
+                                  grupoId,
+                                  ejercicioId,
+                              )
+                            : listarSolucionesEjercicio(
+                                  claveAcceso,
+                                  ejercicioId,
+                              ),
+                        usuario?.rol === 'admin'
+                            ? listarEjerciciosGrupoAdmin(claveAcceso, grupoId)
+                            : listarEjerciciosGrupoProfesor(
+                                  claveAcceso,
+                                  grupoId,
+                              ),
+                    ]);
                     const entrega = soluciones.find(
                         (s) => s.usuario_id === revisarEstudianteId
                     );
@@ -245,17 +265,23 @@ const EditingBoard: React.FC = () => {
                         navigate(`/grupos/${grupoId}`);
                         return;
                     }
+                    const ejercicio = ejercicios.find(
+                        (item) => item.id === Number(ejercicioId),
+                    );
                     setInfoGrupo({
-                        fechaLimite: null,
+                        fechaLimite: ejercicio?.fecha_limite ?? null,
                         vencido: false,
                         completado: entrega.completado,
                         puntos: entrega.puntos,
                         calificado: entrega.calificado,
                         puntosProfesor: entrega.puntos_profesor,
                         comentario: entrega.comentario_profesor,
-                        casosPrueba: [],
+                        casosPrueba: ejercicio?.casos_prueba ?? [],
                         estudiante: entrega.estudiante.username,
                     });
+                    if (ejercicio?.enunciado) {
+                        setEnunciado(ejercicio.enunciado);
+                    }
                     aplicarEstado(entrega.estado_tablero);
                 } else {
                     // Estudiante: abre su propia entrega
@@ -301,7 +327,7 @@ const EditingBoard: React.FC = () => {
             activo = false;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [esModoGrupo, claveAcceso, grupoId, ejercicioId, esRevision, revisarEstudianteId]);
+    }, [esModoGrupo, claveAcceso, grupoId, ejercicioId, esRevision, revisarEstudianteId, usuario?.rol]);
 
     // Funcion de guardado en la base de datos
     const guardarProgresoEnBD = useCallback(

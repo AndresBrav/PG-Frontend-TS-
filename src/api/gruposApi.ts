@@ -138,6 +138,17 @@ export const listarEjerciciosGrupoProfesor = async (
     return data;
 };
 
+export const listarEjerciciosGrupoAdmin = async (
+    clave: string,
+    grupoId: number | string,
+): Promise<EjercicioGrupo[]> => {
+    const { data } = await api.get<EjercicioGrupo[]>(
+        `/admin/grupos/${grupoId}/ejercicios`,
+        configConToken(clave),
+    );
+    return data;
+};
+
 export const eliminarEjercicioGrupo = async (
     clave: string,
     ejercicioId: number | string,
@@ -154,6 +165,18 @@ export const listarSolucionesEjercicio = async (
 ): Promise<EntregaGrupo[]> => {
     const { data } = await api.get<EntregaGrupo[]>(
         `/profesor/ejercicios/${ejercicioId}/soluciones`,
+        configConToken(clave),
+    );
+    return data;
+};
+
+export const listarSolucionesEjercicioAdmin = async (
+    clave: string,
+    grupoId: number | string,
+    ejercicioId: number | string,
+): Promise<EntregaGrupo[]> => {
+    const { data } = await api.get<EntregaGrupo[]>(
+        `/admin/grupos/${grupoId}/ejercicios/${ejercicioId}/soluciones`,
         configConToken(clave),
     );
     return data;

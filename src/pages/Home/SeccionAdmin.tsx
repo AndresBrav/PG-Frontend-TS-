@@ -109,9 +109,10 @@ const SeccionAdmin = ({ claveAcceso, usuario }: SeccionAdminProps) => {
                             titulo="Ejercicios completados"
                             valor={formatearNumero(
                                 estadisticas.completados.fijos +
-                                    estadisticas.completados.ia,
+                                    estadisticas.completados.ia +
+                                    estadisticas.completados.grupos,
                             )}
-                            detalle="Fijos y con IA"
+                            detalle="Fijos, IA y grupos"
                             acento="verde"
                         />
                         <TarjetaResumen
@@ -158,6 +159,16 @@ const SeccionAdmin = ({ claveAcceso, usuario }: SeccionAdminProps) => {
                                 </div>
                                 <div className="flex items-center justify-between gap-3">
                                     <dt className="text-gray-400">
+                                        Completados en grupos
+                                    </dt>
+                                    <dd className="font-bold text-emerald-400">
+                                        {formatearNumero(
+                                            estadisticas.completados.grupos,
+                                        )}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <dt className="text-gray-400">
                                         Puntos fijos
                                     </dt>
                                     <dd className="font-bold text-white">
@@ -173,6 +184,34 @@ const SeccionAdmin = ({ claveAcceso, usuario }: SeccionAdminProps) => {
                                     <dd className="font-bold text-white">
                                         {formatearNumero(
                                             estadisticas.puntos.ia,
+                                        )}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <dt className="text-gray-400">
+                                        Puntos de grupos
+                                    </dt>
+                                    <dd className="font-bold text-emerald-400">
+                                        {formatearNumero(
+                                            estadisticas.puntos.grupos,
+                                        )}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <dt className="text-gray-400">Grupos</dt>
+                                    <dd className="font-bold text-purple-300">
+                                        {formatearNumero(
+                                            estadisticas.grupos.total,
+                                        )}
+                                    </dd>
+                                </div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <dt className="text-gray-400">
+                                        Entregas pendientes
+                                    </dt>
+                                    <dd className="font-bold text-amber-300">
+                                        {formatearNumero(
+                                            estadisticas.grupos.pendientes,
                                         )}
                                     </dd>
                                 </div>

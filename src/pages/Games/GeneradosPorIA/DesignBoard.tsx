@@ -18,6 +18,7 @@ import Sidebar from './components/Sidebar';
 import FlowEditor, { type FlowEditorRef } from './components/FlowEditor';
 import Toolbar from './components/Toolbar';
 import { TokenContext } from '../../../Context/TokenContext';
+import { UsuarioContext } from '../../../Context/UsuarioContext';
 import {
     obtenerJuegoIAPorId,
     guardarEstadoTablero,
@@ -27,7 +28,10 @@ import {
     abrirEjercicioGrupo,
     completarEjercicioGrupo,
     guardarEstadoEjercicioGrupo,
+    listarEjerciciosGrupoAdmin,
+    listarEjerciciosGrupoProfesor,
     listarSolucionesEjercicio,
+    listarSolucionesEjercicioAdmin,
 } from '../../../api/gruposApi';
 import { obtenerMensajeError } from '../../../api/http';
 import {
@@ -79,6 +83,7 @@ function DesignBoard() {
     const [searchParams] = useSearchParams();
     const routeParams = useParams<{ id?: string; ejercicioId?: string }>();
     const { claveAcceso } = useContext(TokenContext);
+    const { usuario } = useContext(UsuarioContext);
 
     const locationState = location.state as LocationState | null;
     const queryId = searchParams.get('id');
@@ -207,11 +212,24 @@ function DesignBoard() {
         const cargarGrupo = async () => {
             try {
                 if (esRevision && revisarEstudianteId !== null) {
-                    // Profesor: la entrega vive en las soluciones del ejercicio
-                    const soluciones = await listarSolucionesEjercicio(
-                        claveAcceso,
-                        ejercicioId
-                    );
+                    const [soluciones, ejercicios] = await Promise.all([
+                        usuario?.rol === 'admin'
+                            ? listarSolucionesEjercicioAdmin(
+                                  claveAcceso,
+                                  grupoId,
+                                  ejercicioId,
+                              )
+                            : listarSolucionesEjercicio(
+                                  claveAcceso,
+                                  ejercicioId,
+                              ),
+                        usuario?.rol === 'admin'
+                            ? listarEjerciciosGrupoAdmin(claveAcceso, grupoId)
+                            : listarEjerciciosGrupoProfesor(
+                                  claveAcceso,
+                                  grupoId,
+                              ),
+                    ]);
                     const entrega = soluciones.find(
                         (s) => s.usuario_id === revisarEstudianteId
                     );
@@ -225,16 +243,22 @@ function DesignBoard() {
                         navigate(`/grupos/${grupoId}`);
                         return;
                     }
+                    const ejercicio = ejercicios.find(
+                        (item) => item.id === Number(ejercicioId),
+                    );
                     setInfoGrupo({
-                        titulo: 'Revisión de entrega',
-                        enunciado: `Solución de ${entrega.estudiante.username} (${entrega.estudiante.codigo}).`,
-                        fechaLimite: null,
+                        titulo: ejercicio?.titulo ?? 'Revisión de entrega',
+                        enunciado:
+                            ejercicio?.enunciado ??
+                            `Solución de ${entrega.estudiante.username} (${entrega.estudiante.codigo}).`,
+                        fechaLimite: ejercicio?.fecha_limite ?? null,
                         vencido: false,
                         completado: entrega.completado,
                         puntos: entrega.puntos,
                         calificado: entrega.calificado,
                         puntosProfesor: entrega.puntos_profesor,
                         comentario: entrega.comentario_profesor,
+                        casosPrueba: ejercicio?.casos_prueba ?? [],
                         estudiante: entrega.estudiante.username,
                     });
                     aplicarEstado(entrega.estado_tablero);
@@ -281,7 +305,15 @@ function DesignBoard() {
             activo = false;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [esModoGrupo, claveAcceso, grupoId, ejercicioId, esRevision, revisarEstudianteId]);
+    }, [
+        esModoGrupo,
+        claveAcceso,
+        grupoId,
+        ejercicioId,
+        esRevision,
+        revisarEstudianteId,
+        usuario?.rol,
+    ]);
 
     // Funcion de guardado (manual o automatica)
     const guardarProgresoEnBD = useCallback(
@@ -681,7 +713,9 @@ function DesignBoard() {
                     rutaVolver={
                         esRevision && grupoId && ejercicioId
                             ? rutaVolverDetalle ??
-                              `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=diagrama`
+                              (usuario?.rol === 'admin'
+                                  ? `/grupos/${grupoId}/reporte/ejercicios/${ejercicioId}`
+                                  : `/profesor/grupos/${grupoId}/ejercicios/${ejercicioId}/revisar?tipo=diagrama`)
                             : esModoGrupo && grupoId
                               ? `/grupos/${grupoId}`
                               : undefined

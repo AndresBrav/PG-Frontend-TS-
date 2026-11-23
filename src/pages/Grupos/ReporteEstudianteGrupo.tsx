@@ -148,7 +148,14 @@ const ReporteEstudianteGrupo = () => {
     );
 
     const calificar = async (ejercicioId: number, puntosMaximos: number) => {
-        if (!claveAcceso || !estudiante || calificando) return;
+        if (
+            usuario?.rol !== 'profesor' ||
+            !claveAcceso ||
+            !estudiante ||
+            calificando
+        ) {
+            return;
+        }
 
         const resultado = await Swal.fire<{
             puntos: number;
@@ -644,9 +651,11 @@ const ReporteEstudianteGrupo = () => {
                                                 <th className="px-3 py-2">
                                                     Solución
                                                 </th>
-                                                <th className="px-3 py-2">
-                                                    Calificar
-                                                </th>
+                                                {usuario?.rol === 'profesor' && (
+                                                    <th className="px-3 py-2">
+                                                        Calificar
+                                                    </th>
+                                                )}
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -760,31 +769,36 @@ const ReporteEstudianteGrupo = () => {
                                                                 </span>
                                                             )}
                                                         </td>
-                                                        <td className="rounded-r-xl px-3 py-3">
-                                                            {entrega?.completado ? (
-                                                                <button
-                                                                    type="button"
-                                                                    disabled={calificando}
-                                                                    onClick={() =>
-                                                                        void calificar(
-                                                                            ejercicio.id,
-                                                                            ejercicio.puntos,
-                                                                        )
-                                                                    }
-                                                                    className="rounded-lg border border-[#FF7C02]/50 px-3 py-1.5 text-xs font-semibold text-[#FF9A3D] hover:bg-[#FF7C02]/10 disabled:cursor-not-allowed disabled:opacity-50"
-                                                                >
-                                                                    {calificando
-                                                                        ? 'Guardando…'
-                                                                        : entrega.calificado
-                                                                          ? 'Editar'
-                                                                          : 'Calificar'}
-                                                                </button>
-                                                            ) : (
-                                                                <span className="text-xs text-gray-500">
-                                                                    Disponible al entregar
-                                                                </span>
-                                                            )}
-                                                        </td>
+                                                        {usuario?.rol ===
+                                                            'profesor' && (
+                                                            <td className="rounded-r-xl px-3 py-3">
+                                                                {entrega?.completado ? (
+                                                                    <button
+                                                                        type="button"
+                                                                        disabled={
+                                                                            calificando
+                                                                        }
+                                                                        onClick={() =>
+                                                                            void calificar(
+                                                                                ejercicio.id,
+                                                                                ejercicio.puntos,
+                                                                            )
+                                                                        }
+                                                                        className="rounded-lg border border-[#FF7C02]/50 px-3 py-1.5 text-xs font-semibold text-[#FF9A3D] hover:bg-[#FF7C02]/10 disabled:cursor-not-allowed disabled:opacity-50"
+                                                                    >
+                                                                        {calificando
+                                                                            ? 'Guardando…'
+                                                                            : entrega.calificado
+                                                                              ? 'Editar'
+                                                                              : 'Calificar'}
+                                                                    </button>
+                                                                ) : (
+                                                                    <span className="text-xs text-gray-500">
+                                                                        Disponible al entregar
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                        )}
                                                     </tr>
                                                 ),
                                             )}
