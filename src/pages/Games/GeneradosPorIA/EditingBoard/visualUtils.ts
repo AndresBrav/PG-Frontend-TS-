@@ -138,23 +138,27 @@ export interface SwapInfo {
 }
 
 /**
- * Detecta si dos casillas de un arreglo intercambiaron sus valores.
- * Tolera tanto intercambios atómicos directos (2 cambiados que cruzaron)
- * como swaps en 3 pasos procedurales (aux <- arr[j], arr[j] <- arr[j+1], arr[j+1] <- aux)
- * inspeccionando los pasos recientes de la traza histórica.
+ * Detecta si en el paso actual se consumó un intercambio (Swap) entre dos casillas.
+ * Regla de oro: El swap se dispara EXACTAMENTE UNA VEZ por cada intercambio físico,
+ * únicamente en el paso donde se completa la permutación en el arreglo, sin disparos
+ * repetidos en pasos posteriores (ej: banderas como intercambiado <- Verdadero).
  */
 export const detectarSwapArreglo = (
     antes: unknown[] | null,
     actual: unknown[],
     nombreArreglo?: string,
-    historialReciente?: EstadoEjecucion[],
-    instruccionActual?: string
+    historialReciente?: EstadoEjecucion[]
 ): SwapInfo => {
     if (!actual || actual.length < 2) {
         return { haySwap: false, indiceA: -1, indiceB: -1, posA: -1, posB: -1 };
     }
 
-    // 1. Detección atómica clásica (si ambos cambiaron entre antes y actual)
+    // 1. REGLA FUNDAMENTAL: Si el arreglo NO cambió en este paso, es imposible que sea un swap
+    if (antes && JSON.stringify(antes) === JSON.stringify(actual)) {
+        return { haySwap: false, indiceA: -1, indiceB: -1, posA: -1, posB: -1 };
+    }
+
+    // 2. Detección atómica directa: exactamente 2 celdas cambiaron entre 'antes' y 'actual' cruzando valores
     if (antes && antes.length === actual.length) {
         const cambiados: number[] = [];
         for (let i = 0; i < actual.length; i++) {
@@ -182,10 +186,11 @@ export const detectarSwapArreglo = (
         }
     }
 
-    // 2. Detección procedural multi-paso (PSeInt con aux):
-    // Inspeccionamos los últimos 4 pasos para verificar si hubo un intercambio en curso
+    // 3. Detección procedural (PSeInt con aux o con sumas/restas):
+    // Como el arreglo sí cambió en este paso, buscamos en los pasos previos (hace 2 a 4 pasos)
+    // el estado del arreglo antes de iniciar el bloque de asignaciones del intercambio
     if (nombreArreglo && historialReciente && historialReciente.length >= 2) {
-        const ventana = historialReciente.slice(-4);
+        const ventana = historialReciente.slice(-5);
         const extraerArreglo = (e: EstadoEjecucion): unknown[] | null => {
             const v = e.variables.find((x) => x.nombre.toLowerCase() === nombreArreglo.toLowerCase());
             if (!v || !v.valor.startsWith('[')) return null;
@@ -197,7 +202,8 @@ export const detectarSwapArreglo = (
             }
         };
 
-        // Buscamos si en la ventana reciente hubo un estado previo donde 2 celdas permutaron
+        // Buscamos el estado base previo antes del inicio del intercambio actual
+        // que difiera de 'actual' exactamente en una permutación de 2 celdas
         for (let k = 0; k < ventana.length - 1; k++) {
             const arrPrevio = extraerArreglo(ventana[k]);
             if (arrPrevio && arrPrevio.length === actual.length) {
@@ -207,6 +213,8 @@ export const detectarSwapArreglo = (
                         cambiados.push(i);
                     }
                 }
+
+                // Si entre el estado previo y el actual exactamente 2 celdas han permutado sus valores:
                 if (cambiados.length === 2) {
                     const [a, b] = cambiados;
                     if (
@@ -223,66 +231,6 @@ export const detectarSwapArreglo = (
                             esAscendente: true,
                         };
                     }
-                }
-            }
-        }
-    }
-
-    // 3. Detección en la instrucción activa si involucra asignación arr[x] <- aux o arr[x] <- arr[y]
-    if (instruccionActual && nombreArreglo) {
-        const matchCopia = new RegExp(
-            `^\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]\\s*(?:<-|:=|=)\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]`,
-            'i'
-        ).exec(instruccionActual);
-
-        if (matchCopia && historialReciente && historialReciente.length > 0) {
-            const ultimaCaptura = historialReciente[historialReciente.length - 1];
-            const varsMap = new Map(ultimaCaptura.variables.map((v) => [v.nombre.toLowerCase(), parseInt(v.valor, 10)]));
-            const p1 = parseInt(matchCopia[1], 10) || varsMap.get(matchCopia[1].toLowerCase());
-            const p2 = parseInt(matchCopia[2], 10) || varsMap.get(matchCopia[2].toLowerCase());
-            if (p1 && p2 && p1 >= 1 && p1 <= actual.length && p2 >= 1 && p2 <= actual.length && p1 !== p2) {
-                const a = Math.min(p1 - 1, p2 - 1);
-                const b = Math.max(p1 - 1, p2 - 1);
-                return {
-                    haySwap: true,
-                    indiceA: a,
-                    indiceB: b,
-                    posA: a + 1,
-                    posB: b + 1,
-                    distanciaSlots: Math.abs(b - a),
-                    esAscendente: true,
-                };
-            }
-        }
-
-        const matchCierreAux = new RegExp(
-            `^\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]\\s*(?:<-|:=|=)\\s*(?:aux|temp|temporal|buffer)`,
-            'i'
-        ).exec(instruccionActual);
-
-        if (matchCierreAux && historialReciente && historialReciente.length > 1) {
-            const penultima = historialReciente[historialReciente.length - 2];
-            const matchPrevio = new RegExp(
-                `^\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]\\s*(?:<-|:=|=)\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]`,
-                'i'
-            ).exec(penultima.instruccion ?? '');
-
-            if (matchPrevio) {
-                const varsMap = new Map(penultima.variables.map((v) => [v.nombre.toLowerCase(), parseInt(v.valor, 10)]));
-                const p1 = parseInt(matchPrevio[1], 10) || varsMap.get(matchPrevio[1].toLowerCase());
-                const p2 = parseInt(matchPrevio[2], 10) || varsMap.get(matchPrevio[2].toLowerCase());
-                if (p1 && p2 && p1 >= 1 && p1 <= actual.length && p2 >= 1 && p2 <= actual.length && p1 !== p2) {
-                    const a = Math.min(p1 - 1, p2 - 1);
-                    const b = Math.max(p1 - 1, p2 - 1);
-                    return {
-                        haySwap: true,
-                        indiceA: a,
-                        indiceB: b,
-                        posA: a + 1,
-                        posB: b + 1,
-                        distanciaSlots: Math.abs(b - a),
-                        esAscendente: true,
-                    };
                 }
             }
         }
@@ -377,6 +325,7 @@ export interface ComparacionActiva {
     texto: string;
     textoDesglosado?: string;
     variablesOindices: string[];
+    indicesComparadosPorArreglo?: Record<string, number[]>;
 }
 
 /**
@@ -502,6 +451,7 @@ export const detectarComparacion = (
 
     let condIndices = cond;
     let condValores = cond;
+    const indicesComparadosPorArreglo: Record<string, number[]> = {};
 
     // Detectar patrones arr[expr] en la condición
     const accesos = cond.match(/[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g) || [];
@@ -511,6 +461,13 @@ export const detectarComparacion = (
             condIndices = condIndices.replace(acc, evalAcc.celdaConcreta);
             if (evalAcc.valorCelda !== null) {
                 condValores = condValores.replace(acc, evalAcc.valorCelda);
+            }
+            const arrKey = evalAcc.nombreArr.toLowerCase();
+            if (!indicesComparadosPorArreglo[arrKey]) {
+                indicesComparadosPorArreglo[arrKey] = [];
+            }
+            if (!indicesComparadosPorArreglo[arrKey].includes(evalAcc.indiceEval)) {
+                indicesComparadosPorArreglo[arrKey].push(evalAcc.indiceEval);
             }
         }
     }
@@ -534,6 +491,7 @@ export const detectarComparacion = (
         texto: cond,
         textoDesglosado,
         variablesOindices: [cond],
+        indicesComparadosPorArreglo,
     };
 };
 

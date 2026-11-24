@@ -248,8 +248,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                     elementosAntes,
                     elementosActuales,
                     perfil.nombre,
-                    historial,
-                    instruccionActual
+                    historial
                 );
 
                 // Detección de punteros legítimos sobre este arreglo (filtrando acumuladores como contador)
@@ -445,32 +444,49 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                         (p) => p.posicion1Based === pos1Based
                                     );
 
-                                    // ¿Esta celda está en comparación condicional?
+                                    // ¿Esta celda está en comparación condicional sobre ESTE arreglo?
+                                    const indicesComparados =
+                                        comparacion.indicesComparadosPorArreglo?.[
+                                            perfil.nombre.toLowerCase()
+                                        ] ?? [];
                                     const esComparada =
                                         comparacion.activa &&
-                                        (punterosEnCelda.length > 0 ||
-                                            comparacion.texto.includes(
-                                                `[${pos1Based}]`
-                                            ));
+                                        indicesComparados.includes(pos1Based);
 
-                                    // Determinar color de la barra
+                                    // ¿El arreglo ya está en su fase final ordenada?
+                                    const esArregloOrdenado =
+                                        nums.length >= 2 &&
+                                        nums.every(
+                                            (val, i) => i === 0 || nums[i - 1] <= val
+                                        ) &&
+                                        (instruccionActual.toLowerCase().includes('escribir') ||
+                                            instruccionActual.toLowerCase().includes('ordenado') ||
+                                            captura.paso > 15);
+
+                                    // Determinar color de la barra (Paleta semántica de referencia)
                                     let barraBg =
-                                        'linear-gradient(180deg, #34D399, #059669)';
-                                    let borderColor = 'rgba(52, 211, 153, 0.4)';
+                                        'linear-gradient(180deg, #64748B, #334155)'; // Normal / En espera (Slate)
+                                    let borderColor = 'rgba(148, 163, 184, 0.35)';
                                     let glow = 'none';
 
                                     if (esParteDeSwap) {
                                         barraBg =
-                                            'linear-gradient(180deg, #FBBF24, #D97706)';
+                                            'linear-gradient(180deg, #FBBF24, #EF4444)'; // Intercambiando (Fuego/AlgoLab)
                                         borderColor = '#F59E0B';
                                         glow =
                                             '0 0 16px rgba(245, 158, 11, 0.7)';
                                     } else if (esComparada) {
                                         barraBg =
-                                            'linear-gradient(180deg, #818CF8, #4F46E5)';
-                                        borderColor = '#6366F1';
+                                            'linear-gradient(180deg, #FCD34D, #F59E0B)'; // Comparando (Ámbar)
+                                        borderColor = '#D97706';
                                         glow =
-                                            '0 0 12px rgba(99, 102, 241, 0.5)';
+                                            '0 0 14px rgba(245, 158, 11, 0.55)';
+                                    } else if (esArregloOrdenado) {
+                                        barraBg =
+                                            'linear-gradient(180deg, #4ADE80, #16A34A)'; // Ordenado (Verde)
+                                        borderColor = '#22C55E';
+                                        glow =
+                                            '0 0 12px rgba(34, 197, 94, 0.45)';
                                     }
 
                                     return (
@@ -502,7 +518,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     border: `1px solid ${borderColor}`,
                                                     boxShadow: glow,
                                                     transition:
-                                                        'height 0.35s ease, background 0.3s ease, box-shadow 0.3s ease',
+                                                        'height 0.35s ease, background 0.25s ease, box-shadow 0.25s ease',
                                                     display: 'flex',
                                                     alignItems: 'flex-start',
                                                     justifyContent: 'center',
@@ -523,7 +539,20 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                             style={{
                                                                 fontSize: 10,
                                                             }}
-                                                        ></span>
+                                                        >
+                                                            ⚖️
+                                                        </span>
+                                                    )}
+                                                {!esParteDeSwap &&
+                                                    !esComparada &&
+                                                    esArregloOrdenado && (
+                                                        <span
+                                                            style={{
+                                                                fontSize: 10,
+                                                            }}
+                                                        >
+                                                            ✓
+                                                        </span>
                                                     )}
                                             </div>
 
@@ -534,10 +563,12 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     padding: '4px 6px',
                                                     borderRadius: 6,
                                                     background: esParteDeSwap
-                                                        ? 'rgba(245, 158, 11, 0.18)'
+                                                        ? 'rgba(239, 68, 68, 0.2)'
                                                         : esComparada
-                                                          ? 'rgba(99, 102, 241, 0.18)'
-                                                          : 'rgba(255, 255, 255, 0.06)',
+                                                          ? 'rgba(245, 158, 11, 0.2)'
+                                                          : esArregloOrdenado
+                                                            ? 'rgba(34, 197, 94, 0.18)'
+                                                            : 'rgba(255, 255, 255, 0.05)',
                                                     border: `1px solid ${borderColor}`,
                                                     textAlign: 'center',
                                                     fontFamily: 'var(--mono)',
@@ -546,10 +577,12 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     color: esParteDeSwap
                                                         ? '#FBBF24'
                                                         : esComparada
-                                                          ? '#C7D2FE'
-                                                          : 'var(--text)',
+                                                          ? '#FCD34D'
+                                                          : esArregloOrdenado
+                                                            ? '#4ADE80'
+                                                            : 'var(--text)',
                                                     boxShadow: glow,
-                                                    transition: 'all 0.3s ease',
+                                                    transition: 'all 0.25s ease',
                                                 }}
                                             >
                                                 {formatoValor(item)}
@@ -627,6 +660,70 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                 })}
                             </div>
                         )}
+
+                        {/* Leyenda Semántica Estilo Visualizador de Referencia */}
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 16,
+                                fontSize: 11,
+                                color: '#94A3B8',
+                                paddingTop: 6,
+                                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                                flexWrap: 'wrap',
+                            }}
+                        >
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <i
+                                    style={{
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: 2,
+                                        background: '#F59E0B',
+                                        display: 'inline-block',
+                                    }}
+                                />
+                                Comparando
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <i
+                                    style={{
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: 2,
+                                        background: '#EF4444',
+                                        display: 'inline-block',
+                                    }}
+                                />
+                                Intercambiando (Salto AlgoLab)
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <i
+                                    style={{
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: 2,
+                                        background: '#22C55E',
+                                        display: 'inline-block',
+                                    }}
+                                />
+                                Ordenado
+                            </span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <i
+                                    style={{
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: 2,
+                                        background: '#475569',
+                                        display: 'inline-block',
+                                    }}
+                                />
+                                En espera
+                            </span>
+                        </div>
                     </div>
                 );
             })}
