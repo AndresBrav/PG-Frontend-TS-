@@ -358,7 +358,7 @@ const GrupoDetalle = () => {
                             key={ejercicio.id}
                             className="rounded-2xl border border-white/10 bg-white/5 p-5"
                         >
-                            <div className="flex flex-wrap items-start justify-between gap-4">
+                            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_14rem] md:items-start">
                                 <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <h3 className="text-lg font-bold text-white">
@@ -393,7 +393,7 @@ const GrupoDetalle = () => {
                                 </div>
 
                                 {esProfesor ? (
-                                    <div className="flex flex-col items-stretch gap-2">
+                                    <div className="flex w-full min-w-0 flex-col items-stretch gap-2 md:w-56">
                                         <span className="text-center text-xs text-gray-400">
                                             {ejercicio.asignacion ===
                                             'seleccionados'
@@ -427,7 +427,7 @@ const GrupoDetalle = () => {
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-stretch gap-2">
+                                    <div className="flex w-full min-w-0 flex-col items-stretch gap-2 md:w-56">
                                         {ejercicio.mi_entrega?.calificado && (
                                             <span className="rounded-full bg-amber-400/10 px-3 py-0.5 text-center text-xs text-amber-300">
                                                 ⭐ Calificado:{' '}
