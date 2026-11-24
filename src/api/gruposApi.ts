@@ -164,6 +164,22 @@ export const listarEjerciciosGrupoProfesor = async (
     return data;
 };
 
+export const actualizarAsignacionEjercicioGrupo = async (
+    clave: string,
+    ejercicioId: number | string,
+    asignacion: 'todos' | 'seleccionados',
+    estudiantesIds: number[],
+): Promise<void> => {
+    await api.put(
+        `/profesor/ejercicios/${ejercicioId}/asignacion`,
+        {
+            asignacion,
+            estudiantes_ids: estudiantesIds,
+        },
+        configConToken(clave),
+    );
+};
+
 export const listarEjerciciosGrupoAdmin = async (
     clave: string,
     grupoId: number | string,

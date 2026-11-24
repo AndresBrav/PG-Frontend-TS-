@@ -8,6 +8,7 @@ import { UsuarioContext } from '../../Context/UsuarioContext';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import {
     agregarEstudiantesPorCodigo,
+    actualizarAsignacionEjercicioGrupo,
     crearTemarioGrupo,
     eliminarEjercicioGrupo,
     eliminarTemarioGrupo,
@@ -50,6 +51,8 @@ const GrupoDetalle = () => {
     const [ranking, setRanking] = useState<FilaRankingGrupo[]>([]);
     const [temarioActivo, setTemarioActivo] = useState<number | null>(null);
     const [nuevoTemario, setNuevoTemario] = useState('');
+    const [ejercicioParaAsignar, setEjercicioParaAsignar] =
+        useState<EjercicioGrupo | null>(null);
 
     const esProfesor = usuario?.rol === 'profesor';
     const esAdmin = usuario?.rol === 'admin';
@@ -392,10 +395,22 @@ const GrupoDetalle = () => {
                                 {esProfesor ? (
                                     <div className="flex flex-col items-stretch gap-2">
                                         <span className="text-center text-xs text-gray-400">
-                                            {ejercicio.completados ?? 0}/
-                                            {ejercicio.entregas ?? 0}{' '}
-                                            completados/entregas
+                                            {ejercicio.asignacion ===
+                                            'seleccionados'
+                                                ? `${ejercicio.estudiantes_asignados_ids?.length ?? 0} estudiantes asignados`
+                                                : 'Todo el grupo'}
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setEjercicioParaAsignar(
+                                                    ejercicio,
+                                                )
+                                            }
+                                            className="rounded-xl border border-white/15 px-4 py-2 text-sm text-white hover:bg-white/10"
+                                        >
+                                            Editar asignación
+                                        </button>
                                         <Link
                                             to={`/profesor/grupos/${id}/ejercicios/${ejercicio.id}/revisar?tipo=${ejercicio.tipo}`}
                                             className="rounded-xl bg-[#FF7C02] px-4 py-2 text-center text-sm font-semibold text-black hover:brightness-110"
@@ -517,7 +532,378 @@ const GrupoDetalle = () => {
                 </div>
 
             </div>
+            {esProfesor && ejercicioParaAsignar && claveAcceso && id && (
+                <EditarAsignacionEjercicioModal
+                    clave={claveAcceso}
+                    grupoId={id}
+                    ejercicio={ejercicioParaAsignar}
+                    onClose={() => setEjercicioParaAsignar(null)}
+                    onSaved={() => {
+                        setEjercicioParaAsignar(null);
+                        void cargar();
+                    }}
+                />
+            )}
         </AppShell>
+    );
+};
+
+interface OpcionEstudianteAsignacion {
+    id: number;
+    codigo: string;
+    username: string;
+    inscrito: boolean;
+}
+
+const EditarAsignacionEjercicioModal = ({
+    clave,
+    grupoId,
+    ejercicio,
+    onClose,
+    onSaved,
+}: {
+    clave: string;
+    grupoId: string;
+    ejercicio: EjercicioGrupo;
+    onClose: () => void;
+    onSaved: () => void;
+}) => {
+    const asignacionInicial = ejercicio.asignacion ?? 'todos';
+    const [estudiantes, setEstudiantes] = useState<
+        OpcionEstudianteAsignacion[]
+    >([]);
+    const [asignacion, setAsignacion] = useState<
+        'todos' | 'seleccionados'
+    >(asignacionInicial);
+    const [estudiantesSeleccionados, setEstudiantesSeleccionados] = useState<
+        number[]
+    >(ejercicio.estudiantes_asignados_ids ?? []);
+    const [busqueda, setBusqueda] = useState('');
+    const [cargando, setCargando] = useState(true);
+    const [guardando, setGuardando] = useState(false);
+
+    useEffect(() => {
+        let activo = true;
+        const cargar = async () => {
+            try {
+                const grupo = await obtenerGrupoProfesor(clave, grupoId);
+                if (!grupo) {
+                    throw new Error('No se encontró el grupo');
+                }
+
+                const opciones = new Map<number, OpcionEstudianteAsignacion>();
+                for (const estudiante of grupo.estudiantes) {
+                    opciones.set(estudiante.id, {
+                        id: estudiante.id,
+                        codigo: estudiante.codigo,
+                        username: estudiante.username,
+                        inscrito: true,
+                    });
+                }
+
+                for (const asignado of ejercicio.estudiantes_asignados ?? []) {
+                    if (!opciones.has(asignado.id)) {
+                        opciones.set(asignado.id, {
+                            ...asignado,
+                            inscrito: false,
+                        });
+                    }
+                }
+
+                if (!activo) return;
+                setEstudiantes(
+                    [...opciones.values()].sort((a, b) =>
+                        a.username.localeCompare(b.username, 'es'),
+                    ),
+                );
+                setEstudiantesSeleccionados(
+                    asignacionInicial === 'todos'
+                        ? grupo.estudiantes.map((estudiante) => estudiante.id)
+                        : (ejercicio.estudiantes_asignados_ids ?? []),
+                );
+            } catch (error) {
+                if (!activo) return;
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo cargar la asignación',
+                    text: obtenerMensajeError(
+                        error,
+                        'No se pudo cargar la lista de estudiantes',
+                    ),
+                });
+                onClose();
+            } finally {
+                if (activo) setCargando(false);
+            }
+        };
+
+        void cargar();
+        return () => {
+            activo = false;
+        };
+    }, [
+        clave,
+        grupoId,
+        ejercicio,
+        asignacionInicial,
+        onClose,
+    ]);
+
+    const estudiantesFiltrados = estudiantes.filter((estudiante) => {
+        const consulta = busqueda.trim().toLocaleLowerCase();
+        return (
+            !consulta ||
+            estudiante.username.toLocaleLowerCase().includes(consulta) ||
+            estudiante.codigo.toLocaleLowerCase().includes(consulta)
+        );
+    });
+
+    const guardar = async () => {
+        if (guardando || cargando) return;
+        if (
+            asignacion === 'seleccionados' &&
+            estudiantesSeleccionados.length === 0
+        ) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Selecciona estudiantes',
+                text: 'Mantén al menos un estudiante asignado o cambia el alcance a todo el grupo.',
+            });
+            return;
+        }
+
+        const idsActuales = new Set(
+            estudiantes.filter((estudiante) => estudiante.inscrito).map((e) => e.id),
+        );
+        const asignadosAntes =
+            asignacionInicial === 'todos'
+                ? [...idsActuales]
+                : (ejercicio.estudiantes_asignados_ids ?? []);
+        const asignadosDespues =
+            asignacion === 'todos'
+                ? [...idsActuales]
+                : estudiantesSeleccionados;
+        const idsNuevos = new Set(asignadosDespues);
+        const idsRetirados = asignadosAntes.filter((id) => !idsNuevos.has(id));
+        const eliminaEntregas =
+            asignacion === 'seleccionados' &&
+            (asignacionInicial === 'todos' || idsRetirados.length > 0);
+
+        if (eliminaEntregas) {
+            const confirmacion = await Swal.fire({
+                icon: 'warning',
+                title: '¿Guardar la nueva asignación?',
+                text: `Los estudiantes que queden fuera perderán permanentemente sus entregas, soluciones guardadas y calificaciones.${asignacionInicial === 'todos' ? ' Los futuros integrantes dejarán de recibir este ejercicio automáticamente.' : ''}`,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar y eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#d33',
+            });
+            if (!confirmacion.isConfirmed) return;
+        }
+
+        setGuardando(true);
+        try {
+            await actualizarAsignacionEjercicioGrupo(
+                clave,
+                ejercicio.id,
+                asignacion,
+                asignacion === 'seleccionados'
+                    ? estudiantesSeleccionados
+                    : [],
+            );
+            await Swal.fire({
+                icon: 'success',
+                title: 'Asignación actualizada',
+                text: 'Se notificó a los estudiantes que se incorporaron a la asignación.',
+                timer: 1800,
+                showConfirmButton: false,
+            });
+            onSaved();
+        } catch (error) {
+            await Swal.fire({
+                icon: 'error',
+                title: 'No se pudo actualizar',
+                text: obtenerMensajeError(
+                    error,
+                    'No se pudo cambiar la asignación del ejercicio',
+                ),
+            });
+        } finally {
+            setGuardando(false);
+        }
+    };
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
+            role="presentation"
+        >
+            <section
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="titulo-editar-asignacion"
+                className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-[#181818] p-5 shadow-2xl"
+            >
+                <div className="flex items-start justify-between gap-4">
+                    <div>
+                        <h2
+                            id="titulo-editar-asignacion"
+                            className="text-xl font-bold text-white"
+                        >
+                            Editar asignación
+                        </h2>
+                        <p className="mt-1 text-sm text-gray-400">
+                            {ejercicio.titulo}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={guardando}
+                        aria-label="Cerrar"
+                        className="rounded-lg px-2 py-1 text-gray-400 hover:bg-white/10 hover:text-white"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div className="mt-5 grid gap-3">
+                    <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-3 text-white">
+                        <input
+                            type="radio"
+                            name="editar-asignacion"
+                            checked={asignacion === 'todos'}
+                            onChange={() => setAsignacion('todos')}
+                            className="mt-1 accent-[#FF7C02]"
+                        />
+                        <span>
+                            <span className="block font-medium">
+                                Todo el grupo
+                            </span>
+                            <span className="mt-1 block text-sm text-gray-400">
+                                Incluye a quienes se unan después.
+                            </span>
+                        </span>
+                    </label>
+                    <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-3 text-white">
+                        <input
+                            type="radio"
+                            name="editar-asignacion"
+                            checked={asignacion === 'seleccionados'}
+                            onChange={() => setAsignacion('seleccionados')}
+                            disabled={cargando || estudiantes.length === 0}
+                            className="mt-1 accent-[#FF7C02]"
+                        />
+                        <span>
+                            <span className="block font-medium">
+                                Estudiantes específicos
+                            </span>
+                            <span className="mt-1 block text-sm text-gray-400">
+                                Selecciona quienes conservarán o recibirán el
+                                ejercicio.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                {asignacion === 'seleccionados' && (
+                    <div className="mt-4">
+                        <input
+                            type="search"
+                            value={busqueda}
+                            onChange={(event) => setBusqueda(event.target.value)}
+                            placeholder="Buscar por nombre o código SIS"
+                            aria-label="Buscar estudiantes asignables"
+                            className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-white placeholder:text-gray-500 focus:border-[#FF7C02] focus:outline-none"
+                        />
+                        <p className="mt-2 text-sm text-gray-400">
+                            {estudiantesSeleccionados.length} seleccionados
+                        </p>
+                        <div className="mt-2 max-h-60 overflow-y-auto rounded-xl border border-white/10">
+                            {cargando ? (
+                                <p className="p-3 text-sm text-gray-400">
+                                    Cargando estudiantes…
+                                </p>
+                            ) : estudiantesFiltrados.length === 0 ? (
+                                <p className="p-3 text-sm text-gray-400">
+                                    No hay coincidencias.
+                                </p>
+                            ) : (
+                                estudiantesFiltrados.map((estudiante) => (
+                                    <label
+                                        key={estudiante.id}
+                                        className="flex cursor-pointer items-center gap-3 border-b border-white/5 px-3 py-2 text-white last:border-b-0 hover:bg-white/5"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={estudiantesSeleccionados.includes(
+                                                estudiante.id,
+                                            )}
+                                            onChange={(event) =>
+                                                setEstudiantesSeleccionados(
+                                                    (actuales) =>
+                                                        event.target.checked
+                                                            ? [
+                                                                  ...new Set([
+                                                                      ...actuales,
+                                                                      estudiante.id,
+                                                                  ]),
+                                                              ]
+                                                            : actuales.filter(
+                                                                  (id) =>
+                                                                      id !==
+                                                                      estudiante.id,
+                                                              ),
+                                                )
+                                            }
+                                            className="accent-[#FF7C02]"
+                                        />
+                                        <span>
+                                            <span className="block">
+                                                {estudiante.username}
+                                                {!estudiante.inscrito && (
+                                                    <span className="ml-2 text-xs text-amber-300">
+                                                        ya no está inscrito
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <span className="text-xs text-gray-400">
+                                                SIS: {estudiante.codigo}
+                                            </span>
+                                        </span>
+                                    </label>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                <div className="mt-5 flex flex-wrap justify-end gap-3">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={guardando}
+                        className="rounded-xl border border-white/15 px-4 py-2 text-white hover:bg-white/10 disabled:opacity-50"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => void guardar()}
+                        disabled={
+                            cargando ||
+                            guardando ||
+                            (asignacion === 'seleccionados' &&
+                                estudiantesSeleccionados.length === 0)
+                        }
+                        className="rounded-xl bg-[#FF7C02] px-4 py-2 font-semibold text-black disabled:opacity-50"
+                    >
+                        {guardando ? 'Guardando…' : 'Guardar asignación'}
+                    </button>
+                </div>
+            </section>
+        </div>
     );
 };
 

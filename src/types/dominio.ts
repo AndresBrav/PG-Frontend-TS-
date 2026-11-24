@@ -221,6 +221,11 @@ export interface EjercicioGrupo {
     tipo: 'diagrama' | 'pseudocodigo';
     asignacion?: 'todos' | 'seleccionados';
     estudiantes_asignados_ids?: number[];
+    estudiantes_asignados?: Array<{
+        id: number;
+        codigo: string;
+        username: string;
+    }>;
     puntos: number;
     fecha_limite: string | null;
     casos_prueba?: CasoPruebaGrupo[] | null;
