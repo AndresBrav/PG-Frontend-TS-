@@ -50,6 +50,30 @@ export const obtenerGrupoProfesor = async (
     return data;
 };
 
+export type EstadoInscripcionSIS =
+    | 'agregado'
+    | 'ya_inscrito'
+    | 'no_encontrado'
+    | 'no_es_estudiante';
+
+export interface ResultadoInscripcionSIS {
+    codigo: string;
+    estado: EstadoInscripcionSIS;
+}
+
+export const agregarEstudiantesPorCodigo = async (
+    clave: string,
+    grupoId: number | string,
+    codigos: string[],
+): Promise<ResultadoInscripcionSIS[]> => {
+    const { data } = await api.post<{ resultados: ResultadoInscripcionSIS[] }>(
+        `/profesor/grupos/${grupoId}/estudiantes`,
+        { codigos },
+        configConToken(clave),
+    );
+    return data.resultados;
+};
+
 export const eliminarGrupo = async (
     clave: string,
     grupoId: number | string,

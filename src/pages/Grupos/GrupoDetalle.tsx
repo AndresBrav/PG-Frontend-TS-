@@ -7,6 +7,7 @@ import { TokenContext } from '../../Context/TokenContext';
 import { UsuarioContext } from '../../Context/UsuarioContext';
 import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import {
+    agregarEstudiantesPorCodigo,
     crearTemarioGrupo,
     eliminarEjercicioGrupo,
     eliminarTemarioGrupo,
@@ -19,6 +20,7 @@ import {
     obtenerGrupoProfesor,
     renombrarTemarioGrupo,
 } from '../../api/gruposApi';
+import type { ResultadoInscripcionSIS } from '../../api/gruposApi';
 import type {
     EjercicioGrupo,
     EstudianteGrupo,
@@ -538,6 +540,108 @@ const EstudiantesListado = ({ grupoId }: { grupoId: string }) => {
         void cargar();
     }, [claveAcceso, grupoId]);
 
+    const agregarPorCodigoSIS = async () => {
+        if (!claveAcceso) return;
+
+        const { value, isConfirmed } = await Swal.fire({
+            title: 'Agregar estudiantes por código SIS',
+            input: 'textarea',
+            inputPlaceholder: 'Un código SIS por línea',
+            inputAttributes: {
+                'aria-label': 'Códigos SIS de los estudiantes',
+                rows: '8',
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Agregar',
+            cancelButtonText: 'Cancelar',
+            inputValidator: (valor) => {
+                const codigos = (valor ?? '')
+                    .split(/\r?\n/)
+                    .map((codigo) => codigo.trim())
+                    .filter(Boolean);
+
+                if (codigos.length === 0) {
+                    return 'Ingresa al menos un código SIS';
+                }
+                if (codigos.length > 100) {
+                    return 'Puedes ingresar hasta 100 códigos a la vez';
+                }
+                if (
+                    codigos.some(
+                        (codigo) => !/^[A-Za-z0-9]{4,20}$/.test(codigo),
+                    )
+                ) {
+                    return 'Cada código SIS debe tener entre 4 y 20 caracteres alfanuméricos';
+                }
+                return undefined;
+            },
+        });
+
+        if (!isConfirmed || typeof value !== 'string') return;
+
+        const codigos = value
+            .split(/\r?\n/)
+            .map((codigo) => codigo.trim())
+            .filter(Boolean);
+
+        let resultados: ResultadoInscripcionSIS[];
+        try {
+            resultados = await agregarEstudiantesPorCodigo(
+                claveAcceso,
+                grupoId,
+                codigos,
+            );
+        } catch (error) {
+            if (esErrorDeSesion(error)) return;
+            await Swal.fire({
+                icon: 'error',
+                title: 'No se pudieron agregar los estudiantes',
+                text: obtenerMensajeError(
+                    error,
+                    'No se pudo completar la inscripción',
+                ),
+            });
+            return;
+        }
+
+        let errorRecarga: unknown;
+        try {
+            setGrupo(await obtenerGrupoProfesor(claveAcceso, grupoId));
+        } catch (error) {
+            errorRecarga = error;
+        }
+
+        const etiquetas = {
+            agregado: 'agregado',
+            ya_inscrito: 'ya estaba inscrito',
+            no_encontrado: 'código no encontrado',
+            no_es_estudiante: 'no corresponde a un estudiante',
+        };
+        const detalle = resultados
+            .map(({ codigo, estado }) => `${codigo}: ${etiquetas[estado]}`)
+            .join('\n');
+        const todosAgregados = resultados.every(
+            ({ estado }) => estado === 'agregado',
+        );
+
+        await Swal.fire({
+            icon: todosAgregados ? 'success' : 'info',
+            title: 'Resultado de la inscripción',
+            text: detalle,
+        });
+
+        if (errorRecarga && !esErrorDeSesion(errorRecarga)) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Inscripción realizada',
+                text: `No se pudo actualizar la lista: ${obtenerMensajeError(
+                    errorRecarga,
+                    'error al recargar el grupo',
+                )}`,
+            });
+        }
+    };
+
     if (cargando || !grupo) return null;
 
     return (
@@ -556,25 +660,37 @@ const EstudiantesListado = ({ grupoId }: { grupoId: string }) => {
                 </span>
             </div>
 
-            {grupo.estudiantes.length > 0 && (
-                <>
-                    <h2 className="mb-3 text-xl font-bold text-white">
-                        👥 Estudiantes inscritos ({grupo.estudiantes.length})
-                    </h2>
-                    <div className="flex flex-wrap gap-2">
-                        {grupo.estudiantes.map((est) => (
-                            <span
-                                key={est.id}
-                                className="rounded-full bg-white/5 px-4 py-1.5 text-sm text-gray-300"
-                            >
-                                {est.username}{' '}
-                                <span className="text-xs text-gray-500">
-                                    · {est.codigo}
-                                </span>
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-xl font-bold text-white">
+                    👥 Estudiantes inscritos ({grupo.estudiantes.length})
+                </h2>
+                <button
+                    type="button"
+                    onClick={() => void agregarPorCodigoSIS()}
+                    className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#e66d00]"
+                >
+                    + Agregar por código SIS
+                </button>
+            </div>
+
+            {grupo.estudiantes.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                    {grupo.estudiantes.map((est) => (
+                        <span
+                            key={est.id}
+                            className="rounded-full bg-white/5 px-4 py-1.5 text-sm text-gray-300"
+                        >
+                            {est.username}{' '}
+                            <span className="text-xs text-gray-500">
+                                · {est.codigo}
                             </span>
-                        ))}
-                    </div>
-                </>
+                        </span>
+                    ))}
+                </div>
+            ) : (
+                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-5 text-sm text-gray-400">
+                    Aún no hay estudiantes inscritos en este grupo.
+                </p>
             )}
         </div>
     );
