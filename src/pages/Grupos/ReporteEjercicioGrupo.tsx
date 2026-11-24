@@ -91,7 +91,10 @@ const ReporteEjercicioGrupo = () => {
                 const ejercicioEncontrado = ejerciciosGrupo.find(
                     (item) => item.id === Number(ejercicioId),
                 );
-                if (!ejercicioEncontrado) {
+                const datosEjercicioReporte = datosReporte.ejercicios.find(
+                    (item) => item.id === Number(ejercicioId),
+                );
+                if (!ejercicioEncontrado || !datosEjercicioReporte) {
                     setError(
                         'No se encontró el ejercicio en este grupo o no tienes acceso.',
                     );
@@ -99,7 +102,12 @@ const ReporteEjercicioGrupo = () => {
                 }
 
                 setReporte(datosReporte);
-                setEjercicio(ejercicioEncontrado);
+                setEjercicio({
+                    ...ejercicioEncontrado,
+                    asignacion: datosEjercicioReporte.asignacion,
+                    estudiantes_asignados_ids:
+                        datosEjercicioReporte.estudiantes_asignados_ids,
+                });
             } catch (errorDesconocido) {
                 if (!activo) return;
                 if (esErrorDeSesion(errorDesconocido)) {
@@ -133,31 +141,41 @@ const ReporteEjercicioGrupo = () => {
             ? new Date(`${ejercicio.fecha_limite}T23:59:59`)
             : null;
 
-        return reporte.estudiantes.map((estudiante) => {
-            const entrega = (reporte.entregas ?? []).find(
-                (item) =>
-                    item.ejercicio_id === ejercicio.id &&
-                    item.usuario_id === estudiante.id,
-            );
-            const resuelto = Boolean(entrega?.completado);
-            const iniciado = Boolean(
-                entrega?.estado_tablero?.trim() || entrega?.ultima_actividad,
-            );
+        const estudiantesAsignados = new Set(
+            ejercicio.estudiantes_asignados_ids ?? [],
+        );
+        return reporte.estudiantes
+            .filter(
+                (estudiante) =>
+                    ejercicio.asignacion !== 'seleccionados' ||
+                    estudiantesAsignados.has(estudiante.id),
+            )
+            .map((estudiante) => {
+                const entrega = (reporte.entregas ?? []).find(
+                    (item) =>
+                        item.ejercicio_id === ejercicio.id &&
+                        item.usuario_id === estudiante.id,
+                );
+                const resuelto = Boolean(entrega?.completado);
+                const iniciado = Boolean(
+                    entrega?.estado_tablero?.trim() ||
+                        entrega?.ultima_actividad,
+                );
 
-            return {
-                estudiante,
-                entrega,
-                estado: resuelto
-                    ? 'resuelto'
-                    : iniciado
-                      ? 'en_progreso'
-                      : 'sin_iniciar',
-                vencido:
-                    !resuelto &&
-                    fechaLimite !== null &&
-                    fechaLimite < hoy,
-            };
-        });
+                return {
+                    estudiante,
+                    entrega,
+                    estado: resuelto
+                        ? 'resuelto'
+                        : iniciado
+                          ? 'en_progreso'
+                          : 'sin_iniciar',
+                    vencido:
+                        !resuelto &&
+                        fechaLimite !== null &&
+                        fechaLimite < hoy,
+                };
+            });
     }, [reporte, ejercicio]);
 
     const filasVisibles = useMemo(() => {
@@ -390,6 +408,12 @@ const ReporteEjercicioGrupo = () => {
                                         {' · '}Fecha límite:{' '}
                                         {formatearFecha(ejercicio.fecha_limite)}
                                     </p>
+                                    <p className="mt-1 text-sm text-gray-400">
+                                        Asignación:{' '}
+                                        {ejercicio.asignacion === 'todos'
+                                            ? 'Todo el grupo'
+                                            : 'Estudiantes seleccionados'}
+                                    </p>
                                 </div>
                                 <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-gray-300">
                                     {ejercicio.tipo === 'diagrama'
@@ -486,8 +510,8 @@ const ReporteEjercicioGrupo = () => {
                                         Estudiantes y entregas
                                     </h2>
                                     <p className="mt-1 text-sm text-gray-400">
-                                        Se incluyen todos los estudiantes
-                                        inscritos, también quienes aún no
+                                        Se incluyen solo los estudiantes
+                                        asignados, también quienes aún no
                                         iniciaron el ejercicio.
                                     </p>
                                 </div>

@@ -134,6 +134,8 @@ export interface DatosNuevoEjercicio {
     enunciado: string;
     tipo: 'diagrama' | 'pseudocodigo';
     puntos: number;
+    asignacion: 'todos' | 'seleccionados';
+    estudiantes_ids: number[];
     fecha_limite?: string | null;
     casos_prueba?: CasoPruebaGrupo[];
 }

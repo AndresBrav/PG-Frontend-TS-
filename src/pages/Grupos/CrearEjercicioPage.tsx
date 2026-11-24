@@ -8,8 +8,13 @@ import { esErrorDeSesion, obtenerMensajeError } from '../../api/http';
 import {
     crearEjercicioGrupo,
     listarTemariosGrupo,
+    obtenerGrupoProfesor,
 } from '../../api/gruposApi';
-import type { CasoPruebaGrupo, TemarioGrupo } from '../../types/dominio';
+import type {
+    CasoPruebaGrupo,
+    EstudianteGrupo,
+    TemarioGrupo,
+} from '../../types/dominio';
 
 interface CasoPruebaFormulario {
     entradas: string;
@@ -30,6 +35,7 @@ const CrearEjercicioPage = () => {
     const navigate = useNavigate();
 
     const [temarios, setTemarios] = useState<TemarioGrupo[]>([]);
+    const [estudiantes, setEstudiantes] = useState<EstudianteGrupo[]>([]);
     const [temarioId, setTemarioId] = useState<string>('');
     const [titulo, setTitulo] = useState('');
     const [enunciado, setEnunciado] = useState('');
@@ -42,36 +48,78 @@ const CrearEjercicioPage = () => {
     const [casosPrueba, setCasosPrueba] = useState<CasoPruebaFormulario[]>(
         [],
     );
+    const [asignacion, setAsignacion] = useState<
+        'todos' | 'seleccionados'
+    >('todos');
+    const [estudiantesSeleccionados, setEstudiantesSeleccionados] = useState<
+        number[]
+    >([]);
+    const [busquedaEstudiantes, setBusquedaEstudiantes] = useState('');
+    const [cargandoEstudiantes, setCargandoEstudiantes] = useState(false);
     const [guardando, setGuardando] = useState(false);
 
     useEffect(() => {
         const cargar = async () => {
             if (!claveAcceso || !id) return;
+            setCargandoEstudiantes(true);
             try {
-                const lista = await listarTemariosGrupo(claveAcceso, id);
-                setTemarios(lista);
-                if (lista.length > 0) {
-                    setTemarioId(String(lista[0].id));
+                const [listaTemarios, grupo] = await Promise.all([
+                    listarTemariosGrupo(claveAcceso, id),
+                    obtenerGrupoProfesor(claveAcceso, id),
+                ]);
+                if (!grupo) {
+                    throw new Error('No se encontró el grupo');
+                }
+                setTemarios(listaTemarios);
+                setEstudiantes(grupo.estudiantes);
+                if (listaTemarios.length > 0) {
+                    setTemarioId(String(listaTemarios[0].id));
                 }
             } catch (error) {
                 if (esErrorDeSesion(error)) return;
                 const mensaje = obtenerMensajeError(
                     error,
-                    'No se pudieron cargar los temarios',
+                    'No se pudieron cargar los datos del grupo',
                 );
                 await Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: mensaje,
                 });
+            } finally {
+                setCargandoEstudiantes(false);
             }
         };
         void cargar();
     }, [claveAcceso, id]);
 
+    const consultaEstudiantes = busquedaEstudiantes
+        .trim()
+        .toLocaleLowerCase();
+    const estudiantesFiltrados = estudiantes.filter((estudiante) => {
+        return (
+            !consultaEstudiantes ||
+            estudiante.username
+                .toLocaleLowerCase()
+                .includes(consultaEstudiantes) ||
+            estudiante.codigo.toLocaleLowerCase().includes(consultaEstudiantes)
+        );
+    });
+
     const guardar = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!claveAcceso || !id) return;
+        if (
+            asignacion === 'seleccionados' &&
+            estudiantesSeleccionados.length === 0
+        ) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Selecciona estudiantes',
+                text: 'Elige al menos un estudiante para asignar el ejercicio.',
+            });
+            return;
+        }
 
         const casosNormalizados: CasoPruebaGrupo[] = casosPrueba.map(
             (caso) => ({
@@ -105,6 +153,11 @@ const CrearEjercicioPage = () => {
                 enunciado: enunciado.trim(),
                 tipo,
                 puntos: Number(puntos),
+                asignacion,
+                estudiantes_ids:
+                    asignacion === 'seleccionados'
+                        ? estudiantesSeleccionados
+                        : [],
                 fecha_limite: conLimite && fechaLimite ? fechaLimite : null,
                 casos_prueba:
                     casosNormalizados.length > 0
@@ -115,7 +168,10 @@ const CrearEjercicioPage = () => {
             await Swal.fire({
                 icon: 'success',
                 title: 'Ejercicio publicado',
-                text: 'Los estudiantes del grupo recibieron una notificación.',
+                text:
+                    asignacion === 'todos'
+                        ? 'Los integrantes actuales recibieron una notificación. Los futuros integrantes también podrán ver este ejercicio.'
+                        : 'Los estudiantes seleccionados recibieron una notificación.',
                 timer: 1800,
                 showConfirmButton: false,
             });
@@ -191,6 +247,146 @@ const CrearEjercicioPage = () => {
                             required
                         />
                     </div>
+
+                    <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                        <h2 className="font-semibold text-white">
+                            Asignar ejercicio a
+                        </h2>
+                        <p className="mt-1 text-sm text-gray-400">
+                            Elige quién podrá ver y resolver este ejercicio.
+                        </p>
+                        <div className="mt-4 grid gap-3">
+                            <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-3 text-white">
+                                <input
+                                    type="radio"
+                                    name="asignacion"
+                                    value="todos"
+                                    checked={asignacion === 'todos'}
+                                    onChange={() => setAsignacion('todos')}
+                                    className="mt-1 accent-[#FF7C02]"
+                                />
+                                <span>
+                                    <span className="block font-medium">
+                                        Todo el grupo
+                                    </span>
+                                    <span className="mt-1 block text-sm text-gray-400">
+                                        Incluye a los estudiantes que se unan al
+                                        grupo más adelante.
+                                    </span>
+                                </span>
+                            </label>
+                            <label className="flex items-start gap-3 rounded-xl border border-white/10 bg-black/20 p-3 text-white">
+                                <input
+                                    type="radio"
+                                    name="asignacion"
+                                    value="seleccionados"
+                                    checked={asignacion === 'seleccionados'}
+                                    onChange={() =>
+                                        setAsignacion('seleccionados')
+                                    }
+                                    disabled={
+                                        cargandoEstudiantes ||
+                                        estudiantes.length === 0
+                                    }
+                                    className="mt-1 accent-[#FF7C02]"
+                                />
+                                <span>
+                                    <span className="block font-medium">
+                                        Estudiantes específicos
+                                    </span>
+                                    <span className="mt-1 block text-sm text-gray-400">
+                                        Busca por nombre o código SIS y
+                                        selecciona uno o varios.
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        {asignacion === 'seleccionados' && (
+                            <div className="mt-4">
+                                <label
+                                    htmlFor="buscar-estudiante-ejercicio"
+                                    className="mb-1 block text-sm text-gray-300"
+                                >
+                                    Buscar estudiante
+                                </label>
+                                <input
+                                    id="buscar-estudiante-ejercicio"
+                                    type="search"
+                                    value={busquedaEstudiantes}
+                                    onChange={(event) =>
+                                        setBusquedaEstudiantes(
+                                            event.target.value,
+                                        )
+                                    }
+                                    placeholder="Nombre o código SIS"
+                                    className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2 text-white placeholder:text-gray-500 focus:border-[#FF7C02] focus:outline-none"
+                                />
+                                <p className="mt-2 text-sm text-gray-400">
+                                    {estudiantesSeleccionados.length}{' '}
+                                    seleccionados
+                                </p>
+                                <div className="mt-2 max-h-64 overflow-y-auto rounded-xl border border-white/10">
+                                    {estudiantesFiltrados.length > 0 ? (
+                                        estudiantesFiltrados.map(
+                                            (estudiante) => (
+                                                <label
+                                                    key={estudiante.id}
+                                                    className="flex cursor-pointer items-center gap-3 border-b border-white/5 px-3 py-2 text-white last:border-b-0 hover:bg-white/5"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={estudiantesSeleccionados.includes(
+                                                            estudiante.id,
+                                                        )}
+                                                        onChange={(event) =>
+                                                            setEstudiantesSeleccionados(
+                                                                (actuales) =>
+                                                                    event.target
+                                                                        .checked
+                                                                        ? [
+                                                                              ...actuales,
+                                                                              estudiante.id,
+                                                                          ]
+                                                                        : actuales.filter(
+                                                                              (
+                                                                                  idEstudiante,
+                                                                              ) =>
+                                                                                  idEstudiante !==
+                                                                                  estudiante.id,
+                                                                          ),
+                                                            )
+                                                        }
+                                                        className="accent-[#FF7C02]"
+                                                    />
+                                                    <span>
+                                                        <span className="block">
+                                                            {estudiante.username}
+                                                        </span>
+                                                        <span className="text-xs text-gray-400">
+                                                            SIS:{' '}
+                                                            {estudiante.codigo}
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            ),
+                                        )
+                                    ) : (
+                                        <p className="p-3 text-sm text-gray-400">
+                                            {cargandoEstudiantes
+                                                ? 'Cargando estudiantes…'
+                                                : 'No hay estudiantes que coincidan con la búsqueda.'}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {!cargandoEstudiantes && estudiantes.length === 0 && (
+                            <p className="mt-3 text-sm text-gray-400">
+                                El grupo aún no tiene estudiantes inscritos.
+                            </p>
+                        )}
+                    </section>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div>
@@ -377,6 +573,9 @@ const CrearEjercicioPage = () => {
                         type="submit"
                         disabled={
                             guardando ||
+                            cargandoEstudiantes ||
+                            (asignacion === 'seleccionados' &&
+                                estudiantesSeleccionados.length === 0) ||
                             !temarioId ||
                             titulo.trim().length < 3 ||
                             enunciado.trim().length < 3

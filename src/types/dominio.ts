@@ -125,6 +125,8 @@ export interface ReporteGrupo {
         puntos: number;
         fecha_limite: string | null;
         tipo: 'diagrama' | 'pseudocodigo';
+        asignacion: 'todos' | 'seleccionados';
+        estudiantes_asignados_ids: number[];
         createdAt: string;
         iniciados: number;
         completados: number;
@@ -132,6 +134,7 @@ export interface ReporteGrupo {
         sinIniciar: number;
         calificados: number;
         pendientesCalificar: number;
+        estudiantesAsignados: number;
     }>;
     estudiantes: Array<
         {
@@ -216,6 +219,8 @@ export interface EjercicioGrupo {
     titulo: string;
     enunciado: string;
     tipo: 'diagrama' | 'pseudocodigo';
+    asignacion?: 'todos' | 'seleccionados';
+    estudiantes_asignados_ids?: number[];
     puntos: number;
     fecha_limite: string | null;
     casos_prueba?: CasoPruebaGrupo[] | null;

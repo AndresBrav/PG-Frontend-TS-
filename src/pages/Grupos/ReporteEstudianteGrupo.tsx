@@ -294,11 +294,17 @@ const ReporteEstudianteGrupo = () => {
         hoy.setHours(23, 59, 59, 999);
 
         return reporte.ejercicios
-            .filter(
-                (ejercicio) =>
+            .filter((ejercicio) => {
+                const estaAsignado =
+                    ejercicio.asignacion !== 'seleccionados' ||
+                    ejercicio.estudiantes_asignados_ids.includes(
+                        estudiante.id,
+                    );
+                const coincideTemario =
                     temarioActivo === 'todos' ||
-                    ejercicio.temario_id === Number(temarioActivo),
-            )
+                    ejercicio.temario_id === Number(temarioActivo);
+                return estaAsignado && coincideTemario;
+            })
             .map((ejercicio) => {
                 const entrega = (reporte.entregas ?? []).find(
                     (item) =>

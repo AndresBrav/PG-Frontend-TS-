@@ -462,8 +462,18 @@ const ReporteGrupoPage = () => {
                 total + estudiante.metricas.pendientesCalificar,
             0,
         );
-        const tareasPosibles =
-            estudiantesVisibles.length * ejerciciosVisibles.length;
+        const tareasPosibles = estudiantesVisibles.reduce(
+            (total, estudiante) =>
+                total +
+                ejerciciosVisibles.filter(
+                    (ejercicio) =>
+                        ejercicio.asignacion !== 'seleccionados' ||
+                        ejercicio.estudiantes_asignados_ids.includes(
+                            estudiante.id,
+                        ),
+                ).length,
+            0,
+        );
 
         return {
             completados,
