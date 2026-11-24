@@ -1349,16 +1349,16 @@ const EditingBoard: React.FC = () => {
                     {enunciadoVisible && (
                         <p
                             style={{
-                                margin: '4px 0 0',
-                                color: 'var(--text-h)',
-                                lineHeight: '1.35',
-                                fontSize: '12px',
-                                maxHeight: '60px',
+                                margin: '6px 0 0',
+                                color: 'var(--text-h, #ffffff)',
+                                lineHeight: '1.4',
+                                fontSize: '13px',
+                                maxHeight: '100px',
                                 overflowY: 'auto',
                                 whiteSpace: 'pre-line',
                             }}
                         >
-                            {esModoGrupo && infoGrupo ? infoGrupo.enunciado : enunciado}
+                            {enunciado || (esModoGrupo && infoGrupo ? infoGrupo.enunciado : '')}
                         </p>
                     )}
                 </div>
