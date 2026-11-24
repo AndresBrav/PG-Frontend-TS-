@@ -144,6 +144,28 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                 </div>
             </div>
 
+            {/* Desglose matemático riguroso para operaciones con celdas de arreglos */}
+            {transferencia.desgloseMatematico && (
+                <div
+                    style={{
+                        background: 'rgba(245, 158, 11, 0.12)',
+                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                        borderRadius: 6,
+                        padding: '4px 10px',
+                        fontSize: 11,
+                        fontFamily: 'var(--mono)',
+                        color: '#FCD34D',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        fontWeight: 600,
+                    }}
+                >
+                    <span>📐 Desglose de subíndices:</span>
+                    <span>{transferencia.desgloseMatematico}</span>
+                </div>
+            )}
+
             {/* Escenario PSeInt: DESTINO (Izq) ◀────── ORIGEN (Der) */}
             <div
                 style={{

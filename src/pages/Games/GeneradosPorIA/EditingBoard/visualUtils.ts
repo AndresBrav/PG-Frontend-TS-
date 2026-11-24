@@ -133,41 +133,158 @@ export interface SwapInfo {
     indiceB: number; // 0-based
     posA: number; // 1-based para PSeInt
     posB: number; // 1-based para PSeInt
+    distanciaSlots?: number; // B - A
+    esAscendente?: boolean; // si indiceA es el que salta hacia adelante
 }
 
 /**
- * Detecta si dos casillas de un arreglo intercambiaron sus valores
- * entre el paso anterior y el actual (patrón de Swap en Bubble Sort, etc.).
+ * Detecta si dos casillas de un arreglo intercambiaron sus valores.
+ * Tolera tanto intercambios atómicos directos (2 cambiados que cruzaron)
+ * como swaps en 3 pasos procedurales (aux <- arr[j], arr[j] <- arr[j+1], arr[j+1] <- aux)
+ * inspeccionando los pasos recientes de la traza histórica.
  */
 export const detectarSwapArreglo = (
     antes: unknown[] | null,
-    actual: unknown[]
+    actual: unknown[],
+    nombreArreglo?: string,
+    historialReciente?: EstadoEjecucion[],
+    instruccionActual?: string
 ): SwapInfo => {
-    if (!antes || antes.length !== actual.length || antes.length < 2) {
+    if (!actual || actual.length < 2) {
         return { haySwap: false, indiceA: -1, indiceB: -1, posA: -1, posB: -1 };
     }
 
-    const cambiados: number[] = [];
-    for (let i = 0; i < actual.length; i++) {
-        if (JSON.stringify(antes[i]) !== JSON.stringify(actual[i])) {
-            cambiados.push(i);
+    // 1. Detección atómica clásica (si ambos cambiaron entre antes y actual)
+    if (antes && antes.length === actual.length) {
+        const cambiados: number[] = [];
+        for (let i = 0; i < actual.length; i++) {
+            if (JSON.stringify(antes[i]) !== JSON.stringify(actual[i])) {
+                cambiados.push(i);
+            }
+        }
+
+        if (cambiados.length === 2) {
+            const [a, b] = cambiados;
+            if (
+                JSON.stringify(antes[a]) === JSON.stringify(actual[b]) &&
+                JSON.stringify(antes[b]) === JSON.stringify(actual[a])
+            ) {
+                return {
+                    haySwap: true,
+                    indiceA: Math.min(a, b),
+                    indiceB: Math.max(a, b),
+                    posA: Math.min(a, b) + 1,
+                    posB: Math.max(a, b) + 1,
+                    distanciaSlots: Math.abs(b - a),
+                    esAscendente: true,
+                };
+            }
         }
     }
 
-    // Un swap ideal tiene exactamente 2 posiciones que cruzaron valores
-    if (cambiados.length === 2) {
-        const [a, b] = cambiados;
-        if (
-            JSON.stringify(antes[a]) === JSON.stringify(actual[b]) &&
-            JSON.stringify(antes[b]) === JSON.stringify(actual[a])
-        ) {
-            return {
-                haySwap: true,
-                indiceA: a,
-                indiceB: b,
-                posA: a + 1,
-                posB: b + 1,
-            };
+    // 2. Detección procedural multi-paso (PSeInt con aux):
+    // Inspeccionamos los últimos 4 pasos para verificar si hubo un intercambio en curso
+    if (nombreArreglo && historialReciente && historialReciente.length >= 2) {
+        const ventana = historialReciente.slice(-4);
+        const extraerArreglo = (e: EstadoEjecucion): unknown[] | null => {
+            const v = e.variables.find((x) => x.nombre.toLowerCase() === nombreArreglo.toLowerCase());
+            if (!v || !v.valor.startsWith('[')) return null;
+            try {
+                const parsed = JSON.parse(v.valor);
+                return Array.isArray(parsed) ? parsed : null;
+            } catch {
+                return null;
+            }
+        };
+
+        // Buscamos si en la ventana reciente hubo un estado previo donde 2 celdas permutaron
+        for (let k = 0; k < ventana.length - 1; k++) {
+            const arrPrevio = extraerArreglo(ventana[k]);
+            if (arrPrevio && arrPrevio.length === actual.length) {
+                const cambiados: number[] = [];
+                for (let i = 0; i < actual.length; i++) {
+                    if (JSON.stringify(arrPrevio[i]) !== JSON.stringify(actual[i])) {
+                        cambiados.push(i);
+                    }
+                }
+                if (cambiados.length === 2) {
+                    const [a, b] = cambiados;
+                    if (
+                        JSON.stringify(arrPrevio[a]) === JSON.stringify(actual[b]) &&
+                        JSON.stringify(arrPrevio[b]) === JSON.stringify(actual[a])
+                    ) {
+                        return {
+                            haySwap: true,
+                            indiceA: Math.min(a, b),
+                            indiceB: Math.max(a, b),
+                            posA: Math.min(a, b) + 1,
+                            posB: Math.max(a, b) + 1,
+                            distanciaSlots: Math.abs(b - a),
+                            esAscendente: true,
+                        };
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Detección en la instrucción activa si involucra asignación arr[x] <- aux o arr[x] <- arr[y]
+    if (instruccionActual && nombreArreglo) {
+        const matchCopia = new RegExp(
+            `^\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]\\s*(?:<-|:=|=)\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]`,
+            'i'
+        ).exec(instruccionActual);
+
+        if (matchCopia && historialReciente && historialReciente.length > 0) {
+            const ultimaCaptura = historialReciente[historialReciente.length - 1];
+            const varsMap = new Map(ultimaCaptura.variables.map((v) => [v.nombre.toLowerCase(), parseInt(v.valor, 10)]));
+            const p1 = parseInt(matchCopia[1], 10) || varsMap.get(matchCopia[1].toLowerCase());
+            const p2 = parseInt(matchCopia[2], 10) || varsMap.get(matchCopia[2].toLowerCase());
+            if (p1 && p2 && p1 >= 1 && p1 <= actual.length && p2 >= 1 && p2 <= actual.length && p1 !== p2) {
+                const a = Math.min(p1 - 1, p2 - 1);
+                const b = Math.max(p1 - 1, p2 - 1);
+                return {
+                    haySwap: true,
+                    indiceA: a,
+                    indiceB: b,
+                    posA: a + 1,
+                    posB: b + 1,
+                    distanciaSlots: Math.abs(b - a),
+                    esAscendente: true,
+                };
+            }
+        }
+
+        const matchCierreAux = new RegExp(
+            `^\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]\\s*(?:<-|:=|=)\\s*(?:aux|temp|temporal|buffer)`,
+            'i'
+        ).exec(instruccionActual);
+
+        if (matchCierreAux && historialReciente && historialReciente.length > 1) {
+            const penultima = historialReciente[historialReciente.length - 2];
+            const matchPrevio = new RegExp(
+                `^\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]\\s*(?:<-|:=|=)\\s*${nombreArreglo}\\s*\\[\\s*(\\w+|\\d+)\\s*\\]`,
+                'i'
+            ).exec(penultima.instruccion ?? '');
+
+            if (matchPrevio) {
+                const varsMap = new Map(penultima.variables.map((v) => [v.nombre.toLowerCase(), parseInt(v.valor, 10)]));
+                const p1 = parseInt(matchPrevio[1], 10) || varsMap.get(matchPrevio[1].toLowerCase());
+                const p2 = parseInt(matchPrevio[2], 10) || varsMap.get(matchPrevio[2].toLowerCase());
+                if (p1 && p2 && p1 >= 1 && p1 <= actual.length && p2 >= 1 && p2 <= actual.length && p1 !== p2) {
+                    const a = Math.min(p1 - 1, p2 - 1);
+                    const b = Math.max(p1 - 1, p2 - 1);
+                    return {
+                        haySwap: true,
+                        indiceA: a,
+                        indiceB: b,
+                        posA: a + 1,
+                        posB: b + 1,
+                        distanciaSlots: Math.abs(b - a),
+                        esAscendente: true,
+                    };
+                }
+            }
         }
     }
 
@@ -258,29 +375,166 @@ export const detectarPunterosArreglo = (
 export interface ComparacionActiva {
     activa: boolean;
     texto: string;
+    textoDesglosado?: string;
     variablesOindices: string[];
 }
 
 /**
- * Detecta si la instrucción en ejecución es una comparación o condicional Si.
+ * Evalúa una expresión de índice aritmético (ej: "j", "j + 1", "i", "n - 1")
+ * usando los valores enteros actuales de las variables disponibles.
+ */
+export const evaluarIndiceArreglo = (
+    exprIndice: string,
+    varsMap: Map<string, string>
+): number | null => {
+    if (!exprIndice) return null;
+    let limpia = exprIndice.trim();
+
+    // Reemplaza nombres de variables por sus valores numéricos enteros
+    limpia = limpia.replace(/\b([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)\b/g, (match) => {
+        const val = varsMap.get(match.toLowerCase());
+        if (val !== undefined && /^-?\d+$/.test(val)) {
+            return val;
+        }
+        return match;
+    });
+
+    // Evalúa operaciones aritméticas seguras solo si contiene dígitos y operadores
+    if (/^[0-9+\-*/\s()]+$/.test(limpia)) {
+        try {
+            const res = Function(`"use strict"; return (${limpia});`)();
+            if (typeof res === 'number' && Number.isFinite(res)) {
+                return Math.round(res);
+            }
+        } catch {
+            return null;
+        }
+    }
+    const soloNum = parseInt(limpia, 10);
+    return Number.isNaN(soloNum) ? null : soloNum;
+};
+
+export interface AccesoArregloEvaluado {
+    nombreArr: string;
+    indiceExpr: string;
+    indiceEval: number | null;
+    celdaConcreta: string; // ej: "numeros[2]"
+    valorCelda: string | null; // ej: "9"
+}
+
+/**
+ * Evalúa un acceso a celda de arreglo (ej: "numeros[j + 1]") devolviendo
+ * el índice numérico evaluado y el valor escalar contenido en esa celda.
+ */
+export const evaluarAccesoArreglo = (
+    accesoStr: string,
+    variables: { nombre: string; valor: string }[],
+    mapaValoresAlternativo?: Map<string, string>
+): AccesoArregloEvaluado | null => {
+    if (!accesoStr) return null;
+    const match = accesoStr.trim().match(/^([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)\s*\[\s*(.+?)\s*\]$/);
+    if (!match) return null;
+
+    const nombreArr = match[1];
+    const indiceExpr = match[2].trim();
+
+    const varsMap = new Map<string, string>();
+    for (const v of variables) {
+        varsMap.set(v.nombre.toLowerCase(), v.valor);
+    }
+    if (mapaValoresAlternativo) {
+        for (const [k, val] of mapaValoresAlternativo.entries()) {
+            if (!varsMap.has(k)) {
+                varsMap.set(k.toLowerCase(), val);
+            }
+        }
+    }
+
+    const indiceEval = evaluarIndiceArreglo(indiceExpr, varsMap);
+    const celdaConcreta = indiceEval !== null ? `${nombreArr}[${indiceEval}]` : accesoStr;
+
+    let valorCelda: string | null = null;
+    const valArr = varsMap.get(nombreArr.toLowerCase());
+    if (valArr && valArr.startsWith('[') && indiceEval !== null && indiceEval >= 1) {
+        try {
+            const parsed = JSON.parse(valArr);
+            if (Array.isArray(parsed) && parsed.length >= indiceEval) {
+                const elem = parsed[indiceEval - 1];
+                valorCelda = elem !== undefined && elem !== null ? String(elem) : null;
+            }
+        } catch {
+            /* no parseable */
+        }
+    }
+
+    return {
+        nombreArr,
+        indiceExpr,
+        indiceEval,
+        celdaConcreta,
+        valorCelda,
+    };
+};
+
+/**
+ * Detecta si la instrucción en ejecución es una comparación o condicional Si,
+ * y desglosa matemáticamente los índices y valores de los arreglos.
  */
 export const detectarComparacion = (
-    instruccion?: string
+    instruccion?: string,
+    variablesActuales?: { nombre: string; valor: string }[]
 ): ComparacionActiva => {
     if (!instruccion) {
         return { activa: false, texto: '', variablesOindices: [] };
     }
     const limpia = instruccion.trim();
     const esSi = /^si\s+(.+?)\s+entonces/i.exec(limpia);
-    if (esSi) {
-        const cond = esSi[1].trim();
-        return {
-            activa: true,
-            texto: cond,
-            variablesOindices: [cond],
-        };
+    if (!esSi) {
+        return { activa: false, texto: '', variablesOindices: [] };
     }
-    return { activa: false, texto: '', variablesOindices: [] };
+
+    const cond = esSi[1].trim();
+    if (!variablesActuales || variablesActuales.length === 0) {
+        return { activa: true, texto: cond, variablesOindices: [cond] };
+    }
+
+    const varsMap = new Map(variablesActuales.map((v) => [v.nombre.toLowerCase(), v.valor]));
+
+    let condIndices = cond;
+    let condValores = cond;
+
+    // Detectar patrones arr[expr] en la condición
+    const accesos = cond.match(/[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g) || [];
+    for (const acc of accesos) {
+        const evalAcc = evaluarAccesoArreglo(acc, variablesActuales);
+        if (evalAcc && evalAcc.indiceEval !== null) {
+            condIndices = condIndices.replace(acc, evalAcc.celdaConcreta);
+            if (evalAcc.valorCelda !== null) {
+                condValores = condValores.replace(acc, evalAcc.valorCelda);
+            }
+        }
+    }
+
+    // Reemplaza variables simples restantes por sus valores escalares
+    condValores = condValores.replace(/\b([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)\b/g, (match) => {
+        const val = varsMap.get(match.toLowerCase());
+        if (val !== undefined && /^-?\d+(\.\d+)?$/.test(val)) {
+            return val;
+        }
+        return match;
+    });
+
+    let textoDesglosado: string | undefined;
+    if (condIndices !== cond || condValores !== cond) {
+        textoDesglosado = `${condIndices}  ⟶  ${condValores}`;
+    }
+
+    return {
+        activa: true,
+        texto: cond,
+        textoDesglosado,
+        variablesOindices: [cond],
+    };
 };
 
 export type TipoTransferencia = 'literal' | 'directa' | 'calculo';
@@ -295,6 +549,8 @@ export interface TransferenciaVariable {
     valorOrigen?: string;
     formula?: string;
     operacionVisual?: string;
+    desgloseMatematico?: string;
+    esCeldaArreglo?: boolean;
 }
 
 const PALABRAS_CLAVE_EXPR = new Set([
@@ -318,6 +574,7 @@ const PALABRAS_CLAVE_EXPR = new Set([
 /**
  * Detecta si la instrucción actual es una asignación a variable o celda,
  * y clasifica la transferencia de valores para animarla en la simulación.
+ * Resuelve con rigor matemático los accesos a celdas puntuales (ej: numeros[j] <- numeros[j+1]).
  */
 export const detectarTransferenciaVariable = (
     instruccion?: string,
@@ -356,8 +613,7 @@ export const detectarTransferenciaVariable = (
         };
     }
 
-    const variableDestino = match[1].trim();
-    const nombreBaseDestino = variableDestino.split('[')[0].trim().toLowerCase();
+    const variableDestinoRaw = match[1].trim();
     const expresion = match[3].trim();
 
     const mapaActual = new Map<string, string>();
@@ -367,10 +623,111 @@ export const detectarTransferenciaVariable = (
         }
     }
 
-    const valorNuevo = mapaActual.get(nombreBaseDestino) ?? '';
-    const valorPrevioDestino = valoresAnteriores?.get(nombreBaseDestino);
+    // A. ¿El destino es una celda de arreglo? ej: numeros[j]
+    const esDestinoCelda = variableDestinoRaw.includes('[');
+    let variableDestino = variableDestinoRaw;
+    let valorNuevo = '';
+    let valorPrevioDestino: string | undefined = undefined;
+    let evalDestino: AccesoArregloEvaluado | null = null;
 
-    // Buscar identificadores usados en la expresión
+    if (esDestinoCelda && variablesActuales) {
+        evalDestino = evaluarAccesoArreglo(variableDestinoRaw, variablesActuales, valoresAnteriores);
+        if (evalDestino && evalDestino.indiceEval !== null) {
+            variableDestino = evalDestino.celdaConcreta; // ej: "numeros[2]"
+            valorNuevo = evalDestino.valorCelda ?? '';
+
+            // Obtener valor previo de esa celda desde valoresAnteriores
+            const arrAntesStr = valoresAnteriores?.get(evalDestino.nombreArr.toLowerCase());
+            if (arrAntesStr && arrAntesStr.startsWith('[')) {
+                try {
+                    const parsedAntes = JSON.parse(arrAntesStr);
+                    if (Array.isArray(parsedAntes) && parsedAntes.length >= evalDestino.indiceEval) {
+                        const elemPrev = parsedAntes[evalDestino.indiceEval - 1];
+                        if (elemPrev !== undefined && elemPrev !== null) {
+                            valorPrevioDestino = String(elemPrev);
+                        }
+                    }
+                } catch {
+                    /* ignore */
+                }
+            }
+        }
+    } else {
+        const nombreBaseDestino = variableDestinoRaw.toLowerCase();
+        valorNuevo = mapaActual.get(nombreBaseDestino) ?? '';
+        valorPrevioDestino = valoresAnteriores?.get(nombreBaseDestino);
+    }
+
+    // B. ¿La expresión de origen es una celda de arreglo? ej: numeros[j + 1]
+    const esOrigenCelda = /^[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]$/.test(expresion);
+    let evalOrigen: AccesoArregloEvaluado | null = null;
+    if (esOrigenCelda && variablesActuales) {
+        // Para el origen de una transferencia, sus índices y valores provienen del paso que acaba de evaluarse
+        evalOrigen = evaluarAccesoArreglo(expresion, variablesActuales, valoresAnteriores);
+    }
+
+    // Caso 1: Destino Celda <- Origen Celda (ej: numeros[j] <- numeros[j + 1])
+    if (evalDestino && evalOrigen) {
+        const valOrig = evalOrigen.valorCelda ?? valorNuevo;
+        const desgloseMatematico = `${variableDestino} ← ${evalOrigen.celdaConcreta} (${valOrig} pasa a celda ${evalDestino.indiceEval})`;
+
+        return {
+            hayTransferencia: true,
+            tipo: 'directa',
+            variableDestino,
+            valorNuevo: valOrig,
+            valorPrevioDestino,
+            variableOrigen: evalOrigen.celdaConcreta,
+            valorOrigen: valOrig,
+            formula: `${variableDestino} ← ${evalOrigen.celdaConcreta}`,
+            desgloseMatematico,
+            esCeldaArreglo: true,
+        };
+    }
+
+    // Caso 2: Destino Variable Escalar <- Origen Celda (ej: aux <- numeros[j])
+    if (!esDestinoCelda && evalOrigen) {
+        const valOrig = evalOrigen.valorCelda ?? valorNuevo;
+        const desgloseMatematico = `${variableDestino} ← ${evalOrigen.celdaConcreta} (guarda ${valOrig} en ${variableDestino})`;
+
+        return {
+            hayTransferencia: true,
+            tipo: 'directa',
+            variableDestino,
+            valorNuevo: valOrig,
+            valorPrevioDestino,
+            variableOrigen: evalOrigen.celdaConcreta,
+            valorOrigen: valOrig,
+            formula: `${variableDestino} ← ${evalOrigen.celdaConcreta}`,
+            desgloseMatematico,
+            esCeldaArreglo: true,
+        };
+    }
+
+    // Caso 3: Destino Celda <- Origen Variable Escalar (ej: numeros[j + 1] <- aux)
+    if (evalDestino && !esOrigenCelda) {
+        const origenNombre = expresion.trim();
+        const valOrig =
+            valoresAnteriores?.get(origenNombre.toLowerCase()) ??
+            mapaActual.get(origenNombre.toLowerCase()) ??
+            valorNuevo;
+        const desgloseMatematico = `${variableDestino} ← ${origenNombre} (coloca ${valOrig} en celda ${evalDestino.indiceEval})`;
+
+        return {
+            hayTransferencia: true,
+            tipo: 'directa',
+            variableDestino,
+            valorNuevo: valOrig,
+            valorPrevioDestino,
+            variableOrigen: origenNombre,
+            valorOrigen: valOrig,
+            formula: `${variableDestino} ← ${origenNombre}`,
+            desgloseMatematico,
+            esCeldaArreglo: true,
+        };
+    }
+
+    // Buscar identificadores usados en la expresión para transferencias escalares estándar
     const tokens = expresion.match(/[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*/g) || [];
     const variablesOrigenEncontradas: string[] = [];
 
@@ -395,7 +752,7 @@ export const detectarTransferenciaVariable = (
             variableDestino,
             valorNuevo: valorNuevo || expresion,
             valorPrevioDestino,
-            formula: expresion,
+            formula: `${variableDestino} ← ${expresion}`,
         };
     }
 
@@ -414,7 +771,7 @@ export const detectarTransferenciaVariable = (
             hayTransferencia: true,
             tipo: 'directa',
             variableDestino,
-            valorNuevo,
+            valorNuevo: valorNuevo || valOrig,
             valorPrevioDestino,
             variableOrigen: origen,
             valorOrigen: valOrig,
@@ -429,7 +786,6 @@ export const detectarTransferenciaVariable = (
         mapaActual.get(primerOrigen.toLowerCase()) ??
         '';
 
-    // Extraer operación visual (ej: si a + 3 -> "+ 3")
     let operacionVisual = expresion;
     if (variablesOrigenEncontradas.length === 1) {
         const reOrig = new RegExp(`\\b${primerOrigen}\\b`, 'i');
@@ -444,7 +800,7 @@ export const detectarTransferenciaVariable = (
         valorPrevioDestino,
         variableOrigen: primerOrigen,
         valorOrigen: valOrig,
-        formula: expresion,
+        formula: `${variableDestino} ← ${expresion}`,
         operacionVisual: operacionVisual || expresion,
     };
 };

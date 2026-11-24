@@ -857,6 +857,8 @@ const PanelVariablesEjecucion = ({
                     perfiles={perfiles}
                     captura={captura}
                     anterior={anterior}
+                    historial={cortado}
+                    velocidad={velocidad}
                 />
             )}
             </div>
