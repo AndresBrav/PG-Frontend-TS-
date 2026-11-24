@@ -69,6 +69,20 @@ const fechaEnRango = (
     );
 };
 
+const imprimirSeccionReporte = (
+    seccion: 'estudiantes' | 'ejercicios',
+) => {
+    document.body.dataset.seccionReporteImpresion = seccion;
+    window.addEventListener(
+        'afterprint',
+        () => {
+            delete document.body.dataset.seccionReporteImpresion;
+        },
+        { once: true },
+    );
+    window.print();
+};
+
 const ReporteGrupoPage = () => {
     const { id } = useParams<{ id: string }>();
     const [searchParams] = useSearchParams();
@@ -498,6 +512,42 @@ const ReporteGrupoPage = () => {
 
     const volverA =
         rolReporte === 'admin' ? '/admin?tab=grupos' : `/grupos/${id}`;
+    const temarioImpresion =
+        temarioActivo === 'todos'
+            ? 'Todos'
+            : (reporte?.temarios.find(
+                  (temario) => temario.id === Number(temarioActivo),
+              )?.nombre ?? 'Temario seleccionado');
+    const tipoImpresion =
+        tipoActivo === 'diagrama'
+            ? 'Diagrama'
+            : tipoActivo === 'pseudocodigo'
+              ? 'Pseudocódigo'
+              : 'Todos';
+    const estadosImpresion: Record<EstadoReporte, string> = {
+        todos: 'Todos',
+        resueltos: 'Resueltos',
+        no_resueltos: 'No resueltos',
+        en_progreso: 'En progreso',
+        sin_iniciar: 'Sin iniciar',
+        por_calificar: 'Por calificar',
+        calificados: 'Calificados',
+        vencidos: 'Vencidos',
+    };
+    const fechasImpresion: Record<CriterioFecha, string> = {
+        creacion: 'Creación del ejercicio',
+        limite: 'Fecha límite',
+        entrega: 'Fecha de entrega',
+        actividad: 'Última actividad',
+        inscripcion: 'Inscripción',
+    };
+    const resumenFiltrosImpresion = [
+        `Temario: ${temarioImpresion}`,
+        `Tipo: ${tipoImpresion}`,
+        `Estado: ${estadosImpresion[estadoActivo]}`,
+        `Búsqueda: ${busqueda.trim() || 'Todos'}`,
+        `Fecha: ${fechasImpresion[criterioFecha]} (${fechaDesde || '—'} a ${fechaHasta || '—'})`,
+    ].join(' · ');
 
     return (
         <AppShell>
@@ -718,8 +768,29 @@ const ReporteGrupoPage = () => {
                             />
                         </section>
 
-                        <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
+                        <section className="reporte-seccion-impresion reporte-seccion-estudiantes-impresion rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                            <header className="reporte-solo-impresion">
+                                <h1>Avance por estudiante</h1>
+                                <p>Grupo: {reporte.grupo.nombre}</p>
+                                <p>
+                                    Generado:{' '}
+                                    {new Date().toLocaleDateString('es-BO', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}
+                                </p>
+                                <p>Filtros: {resumenFiltrosImpresion}</p>
+                                <p>
+                                    Estudiantes incluidos:{' '}
+                                    {estudiantesVisibles.length}
+                                </p>
+                                <p>
+                                    {resumenVisible.enProgreso} en progreso ·{' '}
+                                    {resumenVisible.sinIniciar} sin iniciar
+                                </p>
+                            </header>
+                            <div className="ocultar-en-impresion flex flex-wrap items-center justify-between gap-3">
                                 <div>
                                     <h2 className="text-xl font-bold text-white">
                                         Avance por estudiante
@@ -734,209 +805,364 @@ const ReporteGrupoPage = () => {
                                     {resumenVisible.enProgreso} en progreso ·{' '}
                                     {resumenVisible.sinIniciar} sin iniciar
                                 </span>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        imprimirSeccionReporte('estudiantes')
+                                    }
+                                    className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-black hover:brightness-110"
+                                >
+                                    Imprimir / guardar PDF
+                                </button>
                             </div>
 
                             {estudiantesVisibles.length === 0 ? (
-                                <p className="mt-5 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
-                                    Todavía no hay estudiantes inscritos en este
-                                    grupo.
-                                </p>
+                                <>
+                                    <p className="reporte-tabla-pantalla mt-5 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
+                                        {reporte.estudiantes.length === 0
+                                            ? 'Todavía no hay estudiantes inscritos en este grupo.'
+                                            : 'No hay estudiantes que coincidan con los filtros actuales.'}
+                                    </p>
+                                    <p className="reporte-tabla-impresion">
+                                        No hay estudiantes que coincidan con
+                                        los filtros actuales.
+                                    </p>
+                                </>
                             ) : (
-                                <div className="mt-5 overflow-x-auto">
-                                    <table className="w-full min-w-[850px] border-separate border-spacing-y-2 text-left text-sm">
-                                        <thead>
-                                            <tr className="text-xs uppercase tracking-wider text-gray-400">
-                                                <th className="px-3 py-2">
-                                                    Estudiante
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Progreso
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Estado de entregas
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Calificación
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Última actividad
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {estudiantesVisibles.map(
-                                                ({
-                                                    id: estudianteId,
-                                                    username,
-                                                    codigo,
-                                                    metricas,
-                                                }) => (
-                                                    <tr
-                                                        key={estudianteId}
-                                                        className="bg-[#181818]"
-                                                    >
-                                                        <td className="rounded-l-xl px-3 py-3">
-                                                            <span className="font-semibold text-white">
-                                                                {username}
-                                                            </span>
-                                                            <span className="mt-1 block font-mono text-xs text-gray-500">
-                                                                {codigo}
-                                                            </span>
-                                                            <Link
-                                                                to={`/grupos/${id}/reporte/estudiantes/${estudianteId}?${new URLSearchParams(
-                                                                    {
-                                                                        temario: temarioActivo,
-                                                                        tipo: tipoActivo,
-                                                                        estado: estadoActivo,
-                                                                        q: busqueda,
-                                                                        fecha: criterioFecha,
-                                                                        desde: fechaDesde,
-                                                                        hasta: fechaHasta,
-                                                                    },
-                                                                ).toString()}`}
-                                                                className="mt-2 inline-flex rounded-lg border border-[#FF7C02]/40 px-2.5 py-1 text-xs font-medium text-[#FF9A3D] hover:bg-[#FF7C02]/10"
-                                                            >
-                                                                Ver detalle
-                                                            </Link>
-                                                        </td>
-                                                        <td className="px-3 py-3">
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="h-2 w-24 overflow-hidden rounded-full bg-white/10">
-                                                                    <div
-                                                                        className="h-full rounded-full bg-[#FF7C02]"
-                                                                        style={{
-                                                                            width: `${metricas.avancePorcentaje}%`,
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                                <span className="text-gray-300">
-                                                                    {metricas.completados}/
-                                                                    {metricas.ejerciciosTotales}{' '}
-                                                                    (
-                                                                    {metricas.avancePorcentaje}
-                                                                    %)
+                                <>
+                                    <div className="reporte-tabla-pantalla mt-5 overflow-x-auto">
+                                        <table className="w-full min-w-[850px] border-separate border-spacing-y-2 text-left text-sm">
+                                            <thead>
+                                                <tr className="text-xs uppercase tracking-wider text-gray-400">
+                                                    <th className="px-3 py-2">
+                                                        Estudiante
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Progreso
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Estado de entregas
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Calificación
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Última actividad
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {estudiantesVisibles.map(
+                                                    ({
+                                                        id: estudianteId,
+                                                        username,
+                                                        codigo,
+                                                        metricas,
+                                                    }) => (
+                                                        <tr
+                                                            key={estudianteId}
+                                                            className="bg-[#181818]"
+                                                        >
+                                                            <td className="rounded-l-xl px-3 py-3">
+                                                                <span className="font-semibold text-white">
+                                                                    {username}
                                                                 </span>
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 py-3 text-xs text-gray-300">
-                                                            {metricas.enProgreso}{' '}
-                                                            en progreso ·{' '}
-                                                            {metricas.sinIniciar}{' '}
-                                                            sin iniciar
-                                                        </td>
-                                                        <td className="px-3 py-3 text-xs text-gray-300">
-                                                            {metricas.calificados}/
-                                                            {metricas.ejerciciosTotales}{' '}
-                                                            calificados ·{' '}
-                                                            {metricas.puntosCalificados}
-                                                            /
-                                                            {metricas.puntosMaximosCalificados}{' '}
-                                                            pts
-                                                        </td>
-                                                        <td className="rounded-r-xl px-3 py-3 text-xs text-gray-400">
-                                                            {formatearFechaHora(
-                                                                metricas.ultimaActividad,
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ),
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                                <span className="mt-1 block font-mono text-xs text-gray-500">
+                                                                    {codigo}
+                                                                </span>
+                                                                <Link
+                                                                    to={`/grupos/${id}/reporte/estudiantes/${estudianteId}?${new URLSearchParams(
+                                                                        {
+                                                                            temario: temarioActivo,
+                                                                            tipo: tipoActivo,
+                                                                            estado: estadoActivo,
+                                                                            q: busqueda,
+                                                                            fecha: criterioFecha,
+                                                                            desde: fechaDesde,
+                                                                            hasta: fechaHasta,
+                                                                        },
+                                                                    ).toString()}`}
+                                                                    className="mt-2 inline-flex rounded-lg border border-[#FF7C02]/40 px-2.5 py-1 text-xs font-medium text-[#FF9A3D] hover:bg-[#FF7C02]/10"
+                                                                >
+                                                                    Ver detalle
+                                                                </Link>
+                                                            </td>
+                                                            <td className="px-3 py-3">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="h-2 w-24 overflow-hidden rounded-full bg-white/10">
+                                                                        <div
+                                                                            className="h-full rounded-full bg-[#FF7C02]"
+                                                                            style={{
+                                                                                width: `${metricas.avancePorcentaje}%`,
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                    <span className="text-gray-300">
+                                                                        {metricas.completados}/
+                                                                        {metricas.ejerciciosTotales}{' '}
+                                                                        (
+                                                                        {metricas.avancePorcentaje}
+                                                                        %)
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-3 py-3 text-xs text-gray-300">
+                                                                {metricas.enProgreso}{' '}
+                                                                en progreso ·{' '}
+                                                                {metricas.sinIniciar}{' '}
+                                                                sin iniciar
+                                                            </td>
+                                                            <td className="px-3 py-3 text-xs text-gray-300">
+                                                                {metricas.calificados}/
+                                                                {metricas.ejerciciosTotales}{' '}
+                                                                calificados ·{' '}
+                                                                {metricas.puntosCalificados}
+                                                                /
+                                                                {metricas.puntosMaximosCalificados}{' '}
+                                                                pts
+                                                            </td>
+                                                            <td className="rounded-r-xl px-3 py-3 text-xs text-gray-400">
+                                                                {formatearFechaHora(
+                                                                    metricas.ultimaActividad,
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="reporte-tabla-impresion">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Estudiante</th>
+                                                    <th>Progreso</th>
+                                                    <th>Estado de entregas</th>
+                                                    <th>Calificación</th>
+                                                    <th>Última actividad</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {estudiantesVisibles.map(
+                                                    ({
+                                                        id: estudianteId,
+                                                        username,
+                                                        codigo,
+                                                        metricas,
+                                                    }) => (
+                                                        <tr key={estudianteId}>
+                                                            <td>
+                                                                {username} ({codigo})
+                                                            </td>
+                                                            <td>
+                                                                {metricas.completados}/
+                                                                {metricas.ejerciciosTotales}{' '}
+                                                                (
+                                                                {metricas.avancePorcentaje}
+                                                                %)
+                                                            </td>
+                                                            <td>
+                                                                {metricas.enProgreso}{' '}
+                                                                en progreso ·{' '}
+                                                                {metricas.sinIniciar}{' '}
+                                                                sin iniciar
+                                                            </td>
+                                                            <td>
+                                                                {metricas.calificados}/
+                                                                {metricas.ejerciciosTotales}{' '}
+                                                                calificados ·{' '}
+                                                                {metricas.puntosCalificados}
+                                                                /
+                                                                {metricas.puntosMaximosCalificados}{' '}
+                                                                pts
+                                                            </td>
+                                                            <td>
+                                                                {formatearFechaHora(
+                                                                    metricas.ultimaActividad,
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
                             )}
                         </section>
 
-                        <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                            <h2 className="text-xl font-bold text-white">
-                                Avance por ejercicio
-                            </h2>
-                            {ejerciciosVisibles.length === 0 ? (
-                                <p className="mt-5 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
-                                    No hay ejercicios en el temario seleccionado.
+                        <section className="reporte-seccion-impresion reporte-seccion-ejercicios-impresion rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                            <header className="reporte-solo-impresion">
+                                <h1>Avance por ejercicio</h1>
+                                <p>Grupo: {reporte.grupo.nombre}</p>
+                                <p>
+                                    Generado:{' '}
+                                    {new Date().toLocaleDateString('es-BO', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}
                                 </p>
+                                <p>Filtros: {resumenFiltrosImpresion}</p>
+                                <p>
+                                    Ejercicios incluidos:{' '}
+                                    {ejerciciosVisibles.length}
+                                </p>
+                            </header>
+                            <div className="ocultar-en-impresion flex flex-wrap items-center justify-between gap-3">
+                                <h2 className="text-xl font-bold text-white">
+                                    Avance por ejercicio
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        imprimirSeccionReporte('ejercicios')
+                                    }
+                                    className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-black hover:brightness-110"
+                                >
+                                    Imprimir / guardar PDF
+                                </button>
+                            </div>
+                            {ejerciciosVisibles.length === 0 ? (
+                                <>
+                                    <p className="reporte-tabla-pantalla mt-5 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
+                                        No hay ejercicios que coincidan con los
+                                        filtros actuales.
+                                    </p>
+                                    <p className="reporte-tabla-impresion">
+                                        No hay ejercicios que coincidan con los
+                                        filtros actuales.
+                                    </p>
+                                </>
                             ) : (
-                                <div className="mt-5 overflow-x-auto">
-                                    <table className="w-full min-w-[900px] border-separate border-spacing-y-2 text-left text-sm">
-                                        <thead>
-                                            <tr className="text-xs uppercase tracking-wider text-gray-400">
-                                                <th className="px-3 py-2">
-                                                    Ejercicio
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Puntaje máx.
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Entregados
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    En progreso
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Sin iniciar
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Por calificar
-                                                </th>
-                                                <th className="px-3 py-2">
-                                                    Detalle
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {ejerciciosVisibles.map(
-                                                (ejercicio) => (
-                                                    <tr
-                                                        key={ejercicio.id}
-                                                        className="bg-[#181818]"
-                                                    >
-                                                        <td className="rounded-l-xl px-3 py-3">
-                                                            <span className="font-semibold text-white">
+                                <>
+                                    <div className="reporte-tabla-pantalla mt-5 overflow-x-auto">
+                                        <table className="w-full min-w-[900px] border-separate border-spacing-y-2 text-left text-sm">
+                                            <thead>
+                                                <tr className="text-xs uppercase tracking-wider text-gray-400">
+                                                    <th className="px-3 py-2">
+                                                        Ejercicio
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Puntaje máx.
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Entregados
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        En progreso
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Sin iniciar
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Por calificar
+                                                    </th>
+                                                    <th className="px-3 py-2">
+                                                        Detalle
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {ejerciciosVisibles.map(
+                                                    (ejercicio) => (
+                                                        <tr
+                                                            key={ejercicio.id}
+                                                            className="bg-[#181818]"
+                                                        >
+                                                            <td className="rounded-l-xl px-3 py-3">
+                                                                <span className="font-semibold text-white">
+                                                                    {ejercicio.titulo}
+                                                                </span>
+                                                                <span className="mt-1 block text-xs text-gray-500">
+                                                                    {ejercicio.temario}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-3 py-3 text-[#FF7C02]">
+                                                                {ejercicio.puntos}{' '}
+                                                                pts
+                                                            </td>
+                                                            <td className="px-3 py-3 text-emerald-300">
+                                                                {ejercicio.completados}
+                                                            </td>
+                                                            <td className="px-3 py-3 text-amber-300">
+                                                                {ejercicio.enProgreso}
+                                                            </td>
+                                                            <td className="px-3 py-3 text-gray-400">
+                                                                {ejercicio.sinIniciar}
+                                                            </td>
+                                                            <td className="px-3 py-3 text-sky-300">
+                                                                {ejercicio.pendientesCalificar}
+                                                            </td>
+                                                            <td className="rounded-r-xl px-3 py-3">
+                                                                <Link
+                                                                    to={`/grupos/${id}/reporte/ejercicios/${ejercicio.id}?${new URLSearchParams(
+                                                                        {
+                                                                            temario: temarioActivo,
+                                                                            tipo: tipoActivo,
+                                                                            estado: estadoActivo,
+                                                                            q: busqueda,
+                                                                            fecha: criterioFecha,
+                                                                            desde: fechaDesde,
+                                                                            hasta: fechaHasta,
+                                                                        },
+                                                                    ).toString()}`}
+                                                                    className="inline-flex rounded-lg bg-[#FF7C02] px-3 py-1.5 text-xs font-semibold text-black hover:brightness-110"
+                                                                >
+                                                                    Ver detalle
+                                                                </Link>
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="reporte-tabla-impresion">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Ejercicio</th>
+                                                    <th>Puntaje máx.</th>
+                                                    <th>Entregados</th>
+                                                    <th>En progreso</th>
+                                                    <th>Sin iniciar</th>
+                                                    <th>Por calificar</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {ejerciciosVisibles.map(
+                                                    (ejercicio) => (
+                                                        <tr key={ejercicio.id}>
+                                                            <td>
                                                                 {ejercicio.titulo}
-                                                            </span>
-                                                            <span className="mt-1 block text-xs text-gray-500">
+                                                                {' · '}
                                                                 {ejercicio.temario}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-3 py-3 text-[#FF7C02]">
-                                                            {ejercicio.puntos} pts
-                                                        </td>
-                                                        <td className="px-3 py-3 text-emerald-300">
-                                                            {ejercicio.completados}
-                                                        </td>
-                                                        <td className="px-3 py-3 text-amber-300">
-                                                            {ejercicio.enProgreso}
-                                                        </td>
-                                                        <td className="px-3 py-3 text-gray-400">
-                                                            {ejercicio.sinIniciar}
-                                                        </td>
-                                                        <td className="px-3 py-3 text-sky-300">
-                                                            {ejercicio.pendientesCalificar}
-                                                        </td>
-                                                        <td className="rounded-r-xl px-3 py-3">
-                                                            <Link
-                                                                to={`/grupos/${id}/reporte/ejercicios/${ejercicio.id}?${new URLSearchParams(
-                                                                    {
-                                                                        temario: temarioActivo,
-                                                                        tipo: tipoActivo,
-                                                                        estado: estadoActivo,
-                                                                        q: busqueda,
-                                                                        fecha: criterioFecha,
-                                                                        desde: fechaDesde,
-                                                                        hasta: fechaHasta,
-                                                                    },
-                                                                ).toString()}`}
-                                                                className="inline-flex rounded-lg bg-[#FF7C02] px-3 py-1.5 text-xs font-semibold text-black hover:brightness-110"
-                                                            >
-                                                                Ver detalle
-                                                            </Link>
-                                                        </td>
-                                                    </tr>
-                                                ),
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                            </td>
+                                                            <td>
+                                                                {ejercicio.puntos}{' '}
+                                                                pts
+                                                            </td>
+                                                            <td>
+                                                                {ejercicio.completados}
+                                                            </td>
+                                                            <td>
+                                                                {ejercicio.enProgreso}
+                                                            </td>
+                                                            <td>
+                                                                {ejercicio.sinIniciar}
+                                                            </td>
+                                                            <td>
+                                                                {ejercicio.pendientesCalificar}
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
                             )}
                         </section>
 

@@ -1,5 +1,7 @@
 .solo-impresion,
-.estudiantes-tabla-impresion {
+.estudiantes-tabla-impresion,
+.reporte-solo-impresion,
+.reporte-tabla-impresion {
     display: none;
 }
 
@@ -24,11 +26,34 @@
     }
 
     .estudiantes-reporte-impresion,
-    .estudiantes-reporte-impresion * {
+    .estudiantes-reporte-impresion *,
+    body[data-seccion-reporte-impresion="estudiantes"]
+        .reporte-seccion-estudiantes-impresion,
+    body[data-seccion-reporte-impresion="estudiantes"]
+        .reporte-seccion-estudiantes-impresion *,
+    body[data-seccion-reporte-impresion="ejercicios"]
+        .reporte-seccion-ejercicios-impresion,
+    body[data-seccion-reporte-impresion="ejercicios"]
+        .reporte-seccion-ejercicios-impresion * {
         visibility: visible !important;
     }
 
     .estudiantes-reporte-impresion {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: 14mm !important;
+        -webkit-box-decoration-break: clone !important;
+        box-decoration-break: clone !important;
+        background: #fff !important;
+        color: #111 !important;
+        font-family: Arial, sans-serif !important;
+    }
+
+    .reporte-seccion-impresion {
         position: absolute !important;
         top: 0 !important;
         left: 0 !important;
@@ -49,13 +74,23 @@
         text-shadow: none !important;
     }
 
+    .reporte-seccion-impresion * {
+        color: #111 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
     .estudiantes-reporte-impresion .ocultar-en-impresion,
-    .estudiantes-tabla-pantalla {
+    .estudiantes-tabla-pantalla,
+    .reporte-seccion-impresion .ocultar-en-impresion,
+    .reporte-tabla-pantalla {
         display: none !important;
     }
 
     .estudiantes-reporte-impresion .solo-impresion,
-    .estudiantes-tabla-impresion {
+    .estudiantes-tabla-impresion,
+    .reporte-seccion-impresion .reporte-solo-impresion,
+    .reporte-tabla-impresion {
         display: block !important;
     }
 
@@ -74,6 +109,21 @@
         font-size: 10pt !important;
     }
 
+    .reporte-seccion-impresion .reporte-solo-impresion {
+        margin-bottom: 18px !important;
+    }
+
+    .reporte-seccion-impresion .reporte-solo-impresion h1 {
+        margin: 0 0 8px !important;
+        font-size: 20pt !important;
+        font-weight: 700 !important;
+    }
+
+    .reporte-seccion-impresion .reporte-solo-impresion p {
+        margin: 3px 0 !important;
+        font-size: 9pt !important;
+    }
+
     .estudiantes-reporte-impresion table {
         width: 100% !important;
         min-width: 0 !important;
@@ -81,11 +131,27 @@
         font-size: 10pt !important;
     }
 
+    .reporte-seccion-impresion table {
+        width: 100% !important;
+        min-width: 0 !important;
+        border-collapse: collapse !important;
+        font-size: 8pt !important;
+    }
+
     .estudiantes-reporte-impresion thead {
         display: table-header-group !important;
     }
 
+    .reporte-seccion-impresion thead {
+        display: table-header-group !important;
+    }
+
     .estudiantes-reporte-impresion tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .reporte-seccion-impresion tr {
         break-inside: avoid !important;
         page-break-inside: avoid !important;
     }
@@ -98,7 +164,20 @@
         text-align: left !important;
     }
 
+    .reporte-seccion-impresion th,
+    .reporte-seccion-impresion td {
+        border: 1px solid #444 !important;
+        padding: 5px 6px !important;
+        background: #fff !important;
+        text-align: left !important;
+    }
+
     .estudiantes-reporte-impresion th {
+        background: #eee !important;
+        font-weight: 700 !important;
+    }
+
+    .reporte-seccion-impresion th {
         background: #eee !important;
         font-weight: 700 !important;
     }
