@@ -135,6 +135,7 @@ const EditingBoard: React.FC = () => {
         [],
     );
     const [entregando, setEntregando] = useState(false);
+    const [enunciadoVisible, setEnunciadoVisible] = useState(true);
     // Solo lectura: revisión del profesor o ejercicio vencido.
     const soloLectura =
         esModoGrupo && (esRevision || infoGrupo?.vencido === true);
@@ -1171,153 +1172,194 @@ const EditingBoard: React.FC = () => {
                 {/* Enunciado del Ejercicio */}
                 <div
                     style={{
-                        padding: '12px 20px',
-                        margin: '12px 15px 5px 15px',
+                        padding: '6px 14px',
+                        margin: '5px 15px 4px 15px',
                         backgroundColor: 'rgba(217, 217, 217, 0.1)',
-                        borderRadius: '10px',
+                        borderRadius: '8px',
                         borderLeft: '4px solid #FF7C02',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                         flexShrink: 0,
                     }}
                 >
-                    <h3
+                    <div
                         style={{
-                            margin: '0 0 4px 0',
-                            color: '#FF7C02',
-                            fontSize: '14px',
-                            fontWeight: 'bold',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '8px',
                         }}
                     >
-                        Enunciado del Problema
-                    </h3>
-                    <p
-                        style={{
-                            margin: '0',
-                            color: 'var(--text-h)',
-                            lineHeight: '1.4',
-                            fontSize: '14px',
-                        }}
-                    >
-                        {enunciado}
-                    </p>
-
-                    {/* Estado del ejercicio de grupo + botón de entrega */}
-                    {esModoGrupo && infoGrupo && (
                         <div
                             style={{
                                 display: 'flex',
                                 flexWrap: 'wrap',
                                 alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: '10px',
-                                marginTop: '10px',
-                                paddingTop: '10px',
-                                borderTop: '1px solid rgba(255,255,255,0.08)',
+                                gap: '8px',
+                                minWidth: 0,
+                                flex: 1,
                             }}
                         >
-                            <div
+                            <h3
                                 style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    gap: '8px',
-                                    fontSize: '12px',
+                                    margin: 0,
+                                    color: '#FF7C02',
+                                    fontSize: '13px',
+                                    fontWeight: 'bold',
                                 }}
                             >
-                                <span
+                                {esModoGrupo && infoGrupo ? infoGrupo.titulo : 'Enunciado del Problema'}
+                            </h3>
+                            <button
+                                type="button"
+                                aria-expanded={enunciadoVisible}
+                                onClick={() =>
+                                    setEnunciadoVisible(
+                                        (visible) => !visible,
+                                    )
+                                }
+                                style={{
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    borderRadius: '5px',
+                                    padding: '2px 7px',
+                                    background: 'rgba(0,0,0,0.18)',
+                                    color: '#ddd',
+                                    fontSize: '11px',
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                {enunciadoVisible
+                                    ? 'Ocultar enunciado'
+                                    : 'Ver enunciado'}
+                            </button>
+
+                            {/* Etiquetas de estado en grupo */}
+                            {esModoGrupo && infoGrupo && (
+                                <div
                                     style={{
-                                        background: 'rgba(0,0,0,0.25)',
-                                        borderRadius: '999px',
-                                        padding: '3px 10px',
-                                        color: '#ddd',
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '6px',
+                                        fontSize: '11px',
                                     }}
                                 >
-                                    {infoGrupo.fechaLimite
-                                        ? infoGrupo.vencido
-                                            ? `⏰ Venció el ${infoGrupo.fechaLimite}`
-                                            : `⏰ Fecha límite: ${infoGrupo.fechaLimite}`
-                                        : 'Sin fecha límite'}
-                                </span>
-                                {infoGrupo.calificado && (
                                     <span
                                         style={{
-                                            background: 'rgba(255,124,2,0.18)',
+                                            background: 'rgba(0,0,0,0.25)',
                                             borderRadius: '999px',
-                                            padding: '3px 10px',
-                                            color: '#FFB86C',
+                                            padding: '2px 8px',
+                                            color: '#ddd',
                                         }}
                                     >
-                                        ⭐ Profesor:{' '}
-                                        {infoGrupo.puntosProfesor ?? 0} pts
-                                        {infoGrupo.comentario
-                                            ? ` — "${infoGrupo.comentario}"`
-                                            : ''}
+                                        {infoGrupo.fechaLimite
+                                            ? infoGrupo.vencido
+                                                ? `⏰ Venció el ${infoGrupo.fechaLimite}`
+                                                : `⏰ Fecha límite: ${infoGrupo.fechaLimite}`
+                                            : 'Sin fecha límite'}
                                     </span>
-                                )}
-                                {infoGrupo.completado &&
-                                    !infoGrupo.calificado && (
+                                    {infoGrupo.calificado && (
+                                        <span
+                                            style={{
+                                                background: 'rgba(255,124,2,0.18)',
+                                                borderRadius: '999px',
+                                                padding: '2px 8px',
+                                                color: '#FFB86C',
+                                            }}
+                                        >
+                                            ⭐ Profesor:{' '}
+                                            {infoGrupo.puntosProfesor ?? 0} pts
+                                            {infoGrupo.comentario
+                                                ? ` — "${infoGrupo.comentario}"`
+                                                : ''}
+                                        </span>
+                                    )}
+                                    {infoGrupo.completado &&
+                                        !infoGrupo.calificado && (
+                                            <span
+                                                style={{
+                                                    background:
+                                                        'rgba(39,167,69,0.18)',
+                                                    borderRadius: '999px',
+                                                    padding: '2px 8px',
+                                                    color: '#7DE08A',
+                                                }}
+                                            >
+                                                ✅ Entregado (+{infoGrupo.puntos}{' '}
+                                                pts)
+                                            </span>
+                                        )}
+                                    {esRevision && (
                                         <span
                                             style={{
                                                 background:
-                                                    'rgba(39,167,69,0.18)',
+                                                    'rgba(59,130,246,0.18)',
                                                 borderRadius: '999px',
-                                                padding: '3px 10px',
-                                                color: '#7DE08A',
+                                                padding: '2px 8px',
+                                                color: '#93C5FD',
                                             }}
                                         >
-                                            ✅ Entregado (+{infoGrupo.puntos}{' '}
-                                            pts)
+                                            👁 Solución de{' '}
+                                            {infoGrupo.estudiante} (solo lectura)
                                         </span>
                                     )}
-                                {esRevision && (
-                                    <span
-                                        style={{
-                                            background:
-                                                'rgba(59,130,246,0.18)',
-                                            borderRadius: '999px',
-                                            padding: '3px 10px',
-                                            color: '#93C5FD',
-                                        }}
-                                    >
-                                        👁 Solución de{' '}
-                                        {infoGrupo.estudiante} (solo lectura)
-                                    </span>
-                                )}
-                            </div>
-                            {!esRevision &&
-                                !infoGrupo.completado &&
-                                (infoGrupo.vencido ? (
-                                    <span
-                                        style={{
-                                            color: '#fca5a5',
-                                            fontSize: '13px',
-                                        }}
-                                    >
-                                        ⏰ Vencido: no puedes entregar
-                                    </span>
-                                ) : (
-                                    <button
-                                        onClick={() => void handleEntregarGrupo()}
-                                        disabled={entregando}
-                                        style={{
-                                            backgroundColor: '#FF7C02',
-                                            color: 'white',
-                                            border: 'none',
-                                            padding: '8px 16px',
-                                            borderRadius: '8px',
-                                            fontWeight: 'bold',
-                                            fontSize: '13px',
-                                            cursor: entregando
-                                                ? 'wait'
-                                                : 'pointer',
-                                            opacity: entregando ? 0.6 : 1,
-                                        }}
-                                    >
-                                        {entregando
-                                            ? '⏳ Entregando...'
-                                            : '✅ Entregar ejercicio'}
-                                    </button>
-                                ))}
+                                </div>
+                            )}
                         </div>
+
+                        {/* Botón entregar ejercicio */}
+                        {esModoGrupo && infoGrupo && !esRevision && !infoGrupo.completado && (
+                            infoGrupo.vencido ? (
+                                <span
+                                    style={{
+                                        color: '#fca5a5',
+                                        fontSize: '12px',
+                                        alignSelf: 'center',
+                                    }}
+                                >
+                                    ⏰ Vencido: no puedes entregar
+                                </span>
+                            ) : (
+                                <button
+                                    onClick={() => void handleEntregarGrupo()}
+                                    disabled={entregando}
+                                    style={{
+                                        backgroundColor: '#FF7C02',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '5px 12px',
+                                        borderRadius: '6px',
+                                        fontWeight: 'bold',
+                                        fontSize: '12px',
+                                        cursor: entregando
+                                            ? 'wait'
+                                            : 'pointer',
+                                        opacity: entregando ? 0.6 : 1,
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    {entregando
+                                        ? '⏳ Entregando...'
+                                        : '✅ Entregar ejercicio'}
+                                </button>
+                            )
+                        )}
+                    </div>
+
+                    {/* Texto del enunciado */}
+                    {enunciadoVisible && (
+                        <p
+                            style={{
+                                margin: '4px 0 0',
+                                color: 'var(--text-h)',
+                                lineHeight: '1.35',
+                                fontSize: '12px',
+                                maxHeight: '60px',
+                                overflowY: 'auto',
+                                whiteSpace: 'pre-line',
+                            }}
+                        >
+                            {esModoGrupo && infoGrupo ? infoGrupo.enunciado : enunciado}
+                        </p>
                     )}
                 </div>
 
