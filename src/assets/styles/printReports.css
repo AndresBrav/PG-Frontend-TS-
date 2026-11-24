@@ -1,0 +1,110 @@
+.solo-impresion,
+.estudiantes-tabla-impresion {
+    display: none;
+}
+
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    html,
+    body,
+    #root {
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    .estudiantes-reporte-impresion,
+    .estudiantes-reporte-impresion * {
+        visibility: visible !important;
+    }
+
+    .estudiantes-reporte-impresion {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: 14mm !important;
+        -webkit-box-decoration-break: clone !important;
+        box-decoration-break: clone !important;
+        background: #fff !important;
+        color: #111 !important;
+        font-family: Arial, sans-serif !important;
+    }
+
+    .estudiantes-reporte-impresion * {
+        color: #111 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    .estudiantes-reporte-impresion .ocultar-en-impresion,
+    .estudiantes-tabla-pantalla {
+        display: none !important;
+    }
+
+    .estudiantes-reporte-impresion .solo-impresion,
+    .estudiantes-tabla-impresion {
+        display: block !important;
+    }
+
+    .estudiantes-reporte-impresion .solo-impresion {
+        margin-bottom: 18px !important;
+    }
+
+    .estudiantes-reporte-impresion .solo-impresion h1 {
+        margin: 0 0 8px !important;
+        font-size: 20pt !important;
+        font-weight: 700 !important;
+    }
+
+    .estudiantes-reporte-impresion .solo-impresion p {
+        margin: 3px 0 !important;
+        font-size: 10pt !important;
+    }
+
+    .estudiantes-reporte-impresion table {
+        width: 100% !important;
+        min-width: 0 !important;
+        border-collapse: collapse !important;
+        font-size: 10pt !important;
+    }
+
+    .estudiantes-reporte-impresion thead {
+        display: table-header-group !important;
+    }
+
+    .estudiantes-reporte-impresion tr {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .estudiantes-reporte-impresion th,
+    .estudiantes-reporte-impresion td {
+        border: 1px solid #444 !important;
+        padding: 7px 8px !important;
+        background: #fff !important;
+        text-align: left !important;
+    }
+
+    .estudiantes-reporte-impresion th {
+        background: #eee !important;
+        font-weight: 700 !important;
+    }
+
+    .estudiantes-reporte-impresion th:last-child,
+    .estudiantes-reporte-impresion td:last-child {
+        text-align: right !important;
+    }
+}

@@ -931,6 +931,7 @@ export const EstudiantesListado = ({
 }) => {
     const { claveAcceso } = useContext(TokenContext);
     const [grupo, setGrupo] = useState<{
+        nombre: string;
         codigo: string;
         estudiantes: EstudianteGrupo[];
     } | null>(null);
@@ -1101,6 +1102,7 @@ export const EstudiantesListado = ({
                     </button>
                 </div>
                 <TablaEstudiantesGrupo
+                    nombreGrupo={grupo.nombre}
                     estudiantes={grupo.estudiantes.map((estudiante) => ({
                         ...estudiante,
                         puntos:
@@ -1113,8 +1115,10 @@ export const EstudiantesListado = ({
 };
 
 const TablaEstudiantesGrupo = ({
+    nombreGrupo,
     estudiantes,
 }: {
+    nombreGrupo: string;
     estudiantes: EstudianteConPuntos[];
 }) => {
     const [busqueda, setBusqueda] = useState('');
@@ -1133,34 +1137,75 @@ const TablaEstudiantesGrupo = ({
         );
     }, [estudiantes]);
 
-    const estudiantesVisibles = useMemo(() => {
-        const consulta = busqueda.trim().toLocaleLowerCase();
-        return estudiantes
-            .filter(
-                (estudiante) =>
-                    estudiante.username
-                        .toLocaleLowerCase()
-                        .includes(consulta) ||
-                    estudiante.codigo.toLocaleLowerCase().includes(consulta),
-            )
-            .sort((a, b) =>
+    const estudiantesOrdenados = useMemo(
+        () =>
+            [...estudiantes].sort((a, b) =>
                 orden === 'puntos'
                     ? b.puntos - a.puntos ||
                       compararNombreEstudiante(a, b)
                     : compararNombreEstudiante(a, b),
-            );
-    }, [busqueda, estudiantes, orden]);
+            ),
+        [estudiantes, orden],
+    );
+
+    const estudiantesVisibles = useMemo(() => {
+        const consulta = busqueda.trim().toLocaleLowerCase();
+        return estudiantesOrdenados.filter(
+            (estudiante) =>
+                estudiante.username.toLocaleLowerCase().includes(consulta) ||
+                estudiante.codigo.toLocaleLowerCase().includes(consulta),
+        );
+    }, [busqueda, estudiantesOrdenados]);
+
+    const renderFilas = (lista: EstudianteConPuntos[]) =>
+        lista.map((estudiante) => (
+            <tr
+                key={estudiante.id}
+                className="border-t border-white/5 text-gray-200"
+            >
+                <td className="px-4 py-3 font-semibold text-[#FF7C02]">
+                    {puestos.get(estudiante.id) ?? '—'}
+                </td>
+                <td className="px-4 py-3">{estudiante.username}</td>
+                <td className="px-4 py-3 text-gray-400">
+                    {estudiante.codigo}
+                </td>
+                <td className="px-4 py-3 text-right font-bold text-[#FF7C02]">
+                    {estudiante.puntos} pts
+                </td>
+            </tr>
+        ));
 
     return (
-        <div>
-            <div className="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="estudiantes-reporte-impresion">
+            <header className="solo-impresion">
+                <h1>Reporte de estudiantes</h1>
+                <p>Grupo: {nombreGrupo}</p>
+                <p>
+                    Generado:{' '}
+                    {new Date().toLocaleDateString('es-BO', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                    })}
+                </p>
+                <p>Estudiantes incluidos: {estudiantesVisibles.length}</p>
+                <p>
+                    Búsqueda: {busqueda.trim() || 'Todos'} · Orden:{' '}
+                    {orden === 'puntos'
+                        ? 'Puntos (mayor a menor)'
+                        : 'Nombre (A–Z)'}
+                </p>
+            </header>
+
+            <div className="ocultar-en-impresion mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <input
                     type="search"
                     value={busqueda}
                     onChange={(event) => setBusqueda(event.target.value)}
                     placeholder="Buscar por nombre o código SIS"
                     aria-label="Buscar estudiantes por nombre o código SIS"
-                    className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm text-white outline-none placeholder:text-gray-500 focus:border-[#FF7C02]"
+                    className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm text-white outline-none placeholder:text-gray-500 focus:border-[#FF7C02]"
                 />
                 <label className="flex items-center gap-2 text-sm text-gray-300">
                     Ordenar por
@@ -1179,48 +1224,67 @@ const TablaEstudiantesGrupo = ({
                         <option value="nombre">Nombre (A–Z)</option>
                     </select>
                 </label>
+                <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="whitespace-nowrap rounded-xl bg-[#FF7C02] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#e66d00]"
+                >
+                    Imprimir / guardar PDF
+                </button>
             </div>
 
-            {estudiantesVisibles.length > 0 ? (
-                <div className="overflow-x-auto rounded-xl border border-white/10">
-                    <table className="w-full min-w-[560px] text-left text-sm">
-                        <thead className="bg-white/5 text-xs uppercase text-gray-400">
-                            <tr>
-                                <th className="px-4 py-3">Puesto</th>
-                                <th className="px-4 py-3">Estudiante</th>
-                                <th className="px-4 py-3">Código SIS</th>
-                                <th className="px-4 py-3 text-right">Puntos</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {estudiantesVisibles.map((estudiante) => (
-                                <tr
-                                    key={estudiante.id}
-                                    className="border-t border-white/5 text-gray-200"
-                                >
-                                    <td className="px-4 py-3 font-semibold text-[#FF7C02]">
-                                        {puestos.get(estudiante.id) ?? '—'}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {estudiante.username}
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-400">
-                                        {estudiante.codigo}
-                                    </td>
-                                    <td className="px-4 py-3 text-right font-bold text-[#FF7C02]">
-                                        {estudiante.puntos} pts
-                                    </td>
+            {estudiantes.length > 0 ? (
+                <>
+                    <div className="estudiantes-tabla-pantalla overflow-x-auto rounded-xl border border-white/10">
+                        <table className="w-full min-w-[560px] text-left text-sm">
+                            <thead className="bg-white/5 text-xs uppercase text-gray-400">
+                                <tr>
+                                    <th className="px-4 py-3">Puesto</th>
+                                    <th className="px-4 py-3">Estudiante</th>
+                                    <th className="px-4 py-3">Código SIS</th>
+                                    <th className="px-4 py-3 text-right">
+                                        Puntos
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>{renderFilas(estudiantesVisibles)}</tbody>
+                        </table>
+                        {estudiantesVisibles.length === 0 && (
+                            <p className="px-4 py-5 text-center text-sm text-gray-400">
+                                No hay estudiantes que coincidan con la
+                                búsqueda.
+                            </p>
+                        )}
+                    </div>
+                    <div className="estudiantes-tabla-impresion">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Puesto</th>
+                                    <th>Estudiante</th>
+                                    <th>Código SIS</th>
+                                    <th>Puntos</th>
+                                </tr>
+                            </thead>
+                            <tbody>{renderFilas(estudiantesVisibles)}</tbody>
+                        </table>
+                        {estudiantesVisibles.length === 0 && (
+                            <p>
+                                No hay estudiantes que coincidan con la
+                                búsqueda.
+                            </p>
+                        )}
+                    </div>
+                </>
             ) : (
-                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-5 text-center text-sm text-gray-400">
-                    {estudiantes.length === 0
-                        ? 'Aún no hay estudiantes inscritos en este grupo.'
-                        : 'No hay estudiantes que coincidan con la búsqueda.'}
-                </p>
+                <>
+                    <p className="estudiantes-tabla-pantalla rounded-xl border border-white/10 bg-white/5 px-4 py-5 text-center text-sm text-gray-400">
+                        Aún no hay estudiantes inscritos en este grupo.
+                    </p>
+                    <p className="estudiantes-tabla-impresion">
+                        Aún no hay estudiantes inscritos en este grupo.
+                    </p>
+                </>
             )}
         </div>
     );
@@ -1287,7 +1351,10 @@ export const EstudiantesListadoAdmin = ({ grupoId }: { grupoId: string }) => {
                     Volver a grupos
                 </Link>
             </div>
-            <TablaEstudiantesGrupo estudiantes={estudiantes} />
+            <TablaEstudiantesGrupo
+                nombreGrupo={ranking.grupo.nombre}
+                estudiantes={estudiantes}
+            />
         </AppShell>
     );
 };
