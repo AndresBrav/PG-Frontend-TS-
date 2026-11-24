@@ -235,6 +235,17 @@ export const obtenerRankingGrupo = async (
     return data;
 };
 
+export const obtenerRankingGrupoAdmin = async (
+    clave: string,
+    grupoId: number | string,
+): Promise<RankingGrupo> => {
+    const { data } = await api.get<RankingGrupo>(
+        `/admin/grupos/${grupoId}/ranking`,
+        configConToken(clave),
+    );
+    return data;
+};
+
 export const obtenerRankingGrupoEstudiante = async (
     clave: string,
     grupoId: number | string,

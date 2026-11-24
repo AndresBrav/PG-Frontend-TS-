@@ -517,7 +517,7 @@ const TablaGrupos = ({ grupos }: { grupos: GrupoAdmin[] }) => (
                             <th className="px-3 py-2">Ejercicios</th>
                             <th className="px-3 py-2">Completados</th>
                             <th className="px-3 py-2">Pendientes</th>
-                            <th className="px-3 py-2">Reporte</th>
+                            <th className="px-3 py-2">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -542,12 +542,20 @@ const TablaGrupos = ({ grupos }: { grupos: GrupoAdmin[] }) => (
                                     {grupo.pendientes}
                                 </td>
                                 <td className="rounded-r-xl px-3 py-3">
-                                    <Link
-                                        to={`/grupos/${grupo.id}/reporte`}
-                                        className="font-semibold text-[#FF7C02] hover:underline"
-                                    >
-                                        Ver reporte →
-                                    </Link>
+                                    <div className="flex flex-col items-start gap-1">
+                                        <Link
+                                            to={`/grupos/${grupo.id}/estudiantes`}
+                                            className="font-semibold text-[#FF7C02] hover:underline"
+                                        >
+                                            Ver estudiantes
+                                        </Link>
+                                        <Link
+                                            to={`/grupos/${grupo.id}/reporte`}
+                                            className="text-gray-300 hover:underline"
+                                        >
+                                            Ver reporte →
+                                        </Link>
+                                    </div>
                                 </td>
                             </tr>
                         ))}

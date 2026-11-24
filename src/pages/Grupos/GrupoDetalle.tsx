@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import AppShell from '../../components/layout/AppShell';
 import PantallaCargando from '../../components/ui/PantallaCargando';
@@ -16,6 +16,7 @@ import {
     listarTemariosGrupo,
     listarTemariosGrupoEstudiante,
     obtenerRankingGrupo,
+    obtenerRankingGrupoAdmin,
     obtenerRankingGrupoEstudiante,
     obtenerGrupoProfesor,
     renombrarTemarioGrupo,
@@ -25,6 +26,7 @@ import type {
     EjercicioGrupo,
     EstudianteGrupo,
     FilaRankingGrupo,
+    RankingGrupo,
     TemarioGrupo,
 } from '../../types/dominio';
 
@@ -34,6 +36,7 @@ import type {
  *   ranking. Crea ejercicios en su propia página.
  * - Estudiante: ve temarios con su avance, ejercicios con su estado
  *   (✅ completado / ⏳ pendiente / calificado) y el ranking.
+ * - Admin: consulta la lista de estudiantes y puntos en solo lectura.
  */
 const GrupoDetalle = () => {
     const { id } = useParams<{ id: string }>();
@@ -49,9 +52,14 @@ const GrupoDetalle = () => {
     const [nuevoTemario, setNuevoTemario] = useState('');
 
     const esProfesor = usuario?.rol === 'profesor';
+    const esAdmin = usuario?.rol === 'admin';
 
     const cargar = async () => {
-        if (!claveAcceso || !id) return;
+        if (!claveAcceso || !id || !usuario) return;
+        if (esAdmin) {
+            setCargando(false);
+            return;
+        }
         setCargando(true);
         try {
             let listaTemarios: TemarioGrupo[];
@@ -111,6 +119,8 @@ const GrupoDetalle = () => {
     );
 
     if (!usuario || !id) return null;
+
+    if (esAdmin) return <Navigate to={`/grupos/${id}/estudiantes`} replace />;
 
     if (cargando) {
         return (
@@ -254,6 +264,12 @@ const GrupoDetalle = () => {
                                 className="rounded-xl border border-white/15 bg-white/5 px-5 py-2 font-semibold text-white hover:bg-white/10"
                             >
                                 📊 Reporte de avance
+                            </Link>
+                            <Link
+                                to={`/grupos/${id}/estudiantes`}
+                                className="rounded-xl border border-white/15 bg-white/5 px-5 py-2 font-semibold text-white hover:bg-white/10"
+                            >
+                                👥 Estudiantes
                             </Link>
                             <Link
                                 to={`/profesor/grupos/${id}/ejercicios/nuevo`}
@@ -500,17 +516,33 @@ const GrupoDetalle = () => {
                     </div>
                 </div>
 
-                {/* Estudiantes inscritos (solo profesor) */}
-                {esProfesor && (
-                    <EstudiantesListado grupoId={id} />
-                )}
             </div>
         </AppShell>
     );
 };
 
-/** Lista simple de inscritos (el profesor la ve al final). */
-const EstudiantesListado = ({ grupoId }: { grupoId: string }) => {
+interface EstudianteConPuntos {
+    id: number;
+    codigo: string;
+    username: string;
+    puntos: number;
+}
+
+const compararNombreEstudiante = (
+    a: EstudianteConPuntos,
+    b: EstudianteConPuntos,
+): number =>
+    a.username.localeCompare(b.username, 'es', { sensitivity: 'base' }) ||
+    a.id - b.id;
+
+/** Profesor: código de invitación e inscritos con búsqueda y ordenamiento. */
+export const EstudiantesListado = ({
+    grupoId,
+    ranking,
+}: {
+    grupoId: string;
+    ranking: FilaRankingGrupo[];
+}) => {
     const { claveAcceso } = useContext(TokenContext);
     const [grupo, setGrupo] = useState<{
         codigo: string;
@@ -644,6 +676,10 @@ const EstudiantesListado = ({ grupoId }: { grupoId: string }) => {
 
     if (cargando || !grupo) return null;
 
+    const puntosPorEstudiante = new Map(
+        ranking.map((fila) => [fila.estudiante.id, fila.puntos]),
+    );
+
     return (
         <div className="mt-8">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#FF7C02]/30 bg-[#FF7C02]/10 p-5">
@@ -660,39 +696,213 @@ const EstudiantesListado = ({ grupoId }: { grupoId: string }) => {
                 </span>
             </div>
 
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-xl font-bold text-white">
-                    👥 Estudiantes inscritos ({grupo.estudiantes.length})
-                </h2>
-                <button
-                    type="button"
-                    onClick={() => void agregarPorCodigoSIS()}
-                    className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#e66d00]"
-                >
-                    + Agregar por código SIS
-                </button>
+            <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 className="text-xl font-bold text-white">
+                            👥 Estudiantes inscritos ({grupo.estudiantes.length})
+                        </h2>
+                        <p className="mt-1 text-sm text-gray-400">
+                            Busca por nombre o SIS y ordena por puntos o nombre.
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => void agregarPorCodigoSIS()}
+                        className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#e66d00]"
+                    >
+                        + Agregar por código SIS
+                    </button>
+                </div>
+                <TablaEstudiantesGrupo
+                    estudiantes={grupo.estudiantes.map((estudiante) => ({
+                        ...estudiante,
+                        puntos:
+                            puntosPorEstudiante.get(estudiante.id) ?? 0,
+                    }))}
+                />
+            </section>
+        </div>
+    );
+};
+
+const TablaEstudiantesGrupo = ({
+    estudiantes,
+}: {
+    estudiantes: EstudianteConPuntos[];
+}) => {
+    const [busqueda, setBusqueda] = useState('');
+    const [orden, setOrden] = useState<'puntos' | 'nombre'>('puntos');
+
+    const puestos = useMemo(() => {
+        const ordenados = [...estudiantes].sort(
+            (a, b) =>
+                b.puntos - a.puntos || compararNombreEstudiante(a, b),
+        );
+        return new Map(
+            ordenados.map((estudiante, indice) => [
+                estudiante.id,
+                indice + 1,
+            ]),
+        );
+    }, [estudiantes]);
+
+    const estudiantesVisibles = useMemo(() => {
+        const consulta = busqueda.trim().toLocaleLowerCase();
+        return estudiantes
+            .filter(
+                (estudiante) =>
+                    estudiante.username
+                        .toLocaleLowerCase()
+                        .includes(consulta) ||
+                    estudiante.codigo.toLocaleLowerCase().includes(consulta),
+            )
+            .sort((a, b) =>
+                orden === 'puntos'
+                    ? b.puntos - a.puntos ||
+                      compararNombreEstudiante(a, b)
+                    : compararNombreEstudiante(a, b),
+            );
+    }, [busqueda, estudiantes, orden]);
+
+    return (
+        <div>
+            <div className="mb-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <input
+                    type="search"
+                    value={busqueda}
+                    onChange={(event) => setBusqueda(event.target.value)}
+                    placeholder="Buscar por nombre o código SIS"
+                    aria-label="Buscar estudiantes por nombre o código SIS"
+                    className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-2.5 text-sm text-white outline-none placeholder:text-gray-500 focus:border-[#FF7C02]"
+                />
+                <label className="flex items-center gap-2 text-sm text-gray-300">
+                    Ordenar por
+                    <select
+                        value={orden}
+                        onChange={(event) =>
+                            setOrden(
+                                event.target.value === 'nombre'
+                                    ? 'nombre'
+                                    : 'puntos',
+                            )
+                        }
+                        className="rounded-xl border border-white/10 bg-[#181818] px-3 py-2.5 text-white outline-none focus:border-[#FF7C02]"
+                    >
+                        <option value="puntos">Puntos (mayor a menor)</option>
+                        <option value="nombre">Nombre (A–Z)</option>
+                    </select>
+                </label>
             </div>
 
-            {grupo.estudiantes.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                    {grupo.estudiantes.map((est) => (
-                        <span
-                            key={est.id}
-                            className="rounded-full bg-white/5 px-4 py-1.5 text-sm text-gray-300"
-                        >
-                            {est.username}{' '}
-                            <span className="text-xs text-gray-500">
-                                · {est.codigo}
-                            </span>
-                        </span>
-                    ))}
+            {estudiantesVisibles.length > 0 ? (
+                <div className="overflow-x-auto rounded-xl border border-white/10">
+                    <table className="w-full min-w-[560px] text-left text-sm">
+                        <thead className="bg-white/5 text-xs uppercase text-gray-400">
+                            <tr>
+                                <th className="px-4 py-3">Puesto</th>
+                                <th className="px-4 py-3">Estudiante</th>
+                                <th className="px-4 py-3">Código SIS</th>
+                                <th className="px-4 py-3 text-right">Puntos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {estudiantesVisibles.map((estudiante) => (
+                                <tr
+                                    key={estudiante.id}
+                                    className="border-t border-white/5 text-gray-200"
+                                >
+                                    <td className="px-4 py-3 font-semibold text-[#FF7C02]">
+                                        {puestos.get(estudiante.id) ?? '—'}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        {estudiante.username}
+                                    </td>
+                                    <td className="px-4 py-3 text-gray-400">
+                                        {estudiante.codigo}
+                                    </td>
+                                    <td className="px-4 py-3 text-right font-bold text-[#FF7C02]">
+                                        {estudiante.puntos} pts
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             ) : (
-                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-5 text-sm text-gray-400">
-                    Aún no hay estudiantes inscritos en este grupo.
+                <p className="rounded-xl border border-white/10 bg-white/5 px-4 py-5 text-center text-sm text-gray-400">
+                    {estudiantes.length === 0
+                        ? 'Aún no hay estudiantes inscritos en este grupo.'
+                        : 'No hay estudiantes que coincidan con la búsqueda.'}
                 </p>
             )}
         </div>
+    );
+};
+
+export const EstudiantesListadoAdmin = ({ grupoId }: { grupoId: string }) => {
+    const { claveAcceso } = useContext(TokenContext);
+    const navigate = useNavigate();
+    const [ranking, setRanking] = useState<RankingGrupo | null>(null);
+    const [cargando, setCargando] = useState(true);
+
+    useEffect(() => {
+        const cargar = async () => {
+            if (!claveAcceso) return;
+            try {
+                setRanking(await obtenerRankingGrupoAdmin(claveAcceso, grupoId));
+            } catch (error) {
+                if (esErrorDeSesion(error)) return;
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'No se pudo cargar el grupo',
+                    text: obtenerMensajeError(
+                        error,
+                        'No se pudo cargar la lista de estudiantes',
+                    ),
+                });
+                navigate('/admin?tab=grupos');
+            } finally {
+                setCargando(false);
+            }
+        };
+        void cargar();
+    }, [claveAcceso, grupoId, navigate]);
+
+    if (cargando) {
+        return (
+            <AppShell>
+                <PantallaCargando mensaje="Cargando estudiantes del grupo..." />
+            </AppShell>
+        );
+    }
+    if (!ranking) return null;
+
+    const estudiantes = ranking.ranking.map(({ estudiante, puntos }) => ({
+        ...estudiante,
+        puntos,
+    }));
+
+    return (
+        <AppShell>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <p className="text-sm text-gray-400">
+                        Vista administrativa · Solo lectura
+                    </p>
+                    <h1 className="text-3xl font-bold text-white">
+                        Estudiantes de {ranking.grupo.nombre}
+                    </h1>
+                </div>
+                <Link
+                    to="/admin?tab=grupos"
+                    className="rounded-xl border border-white/10 px-4 py-2 text-sm text-gray-200 hover:bg-white/5"
+                >
+                    Volver a grupos
+                </Link>
+            </div>
+            <TablaEstudiantesGrupo estudiantes={estudiantes} />
+        </AppShell>
     );
 };
 
