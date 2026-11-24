@@ -720,6 +720,14 @@
         height: 420px !important;
         min-height: 350px !important;
     }
+
+    /* Panel de Variables en móvil: altura fija delimitada con scroll interno */
+    .main-layout-panels > div:last-child {
+        height: 400px !important;
+        min-height: 340px !important;
+        max-height: 460px !important;
+        overflow: hidden !important;
+    }
 }
 
 /* ── Layout Responsivo para DesignBoard (Diagramas de Flujo) ── */

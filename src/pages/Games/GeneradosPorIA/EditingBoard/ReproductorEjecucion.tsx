@@ -74,11 +74,12 @@ const ReproductorEjecucion = ({
         <div
             style={{
                 borderTop: '1px solid var(--border)',
-                paddingTop: 7,
+                paddingTop: 8,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 5,
+                gap: 6,
                 flexShrink: 0,
+                backgroundColor: 'var(--sidebar-bg)',
             }}
         >
             <div
@@ -86,11 +87,19 @@ const ReproductorEjecucion = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: 8,
+                    gap: 6,
                     flexWrap: 'wrap',
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                {/* Grupo de Controles: Anterior, Play/Pausa, Siguiente, En Vivo */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        flexShrink: 0,
+                    }}
+                >
                     <button
                         type="button"
                         onClick={onPasoAnterior}
@@ -99,6 +108,8 @@ const ReproductorEjecucion = ({
                             ...estiloBoton(false),
                             opacity: hayPasoAnterior ? 1 : 0.4,
                             cursor: hayPasoAnterior ? 'pointer' : 'not-allowed',
+                            minWidth: 26,
+                            padding: '3px 6px',
                         }}
                         title="Ir al paso anterior"
                         aria-label="Ir al paso anterior"
@@ -108,7 +119,11 @@ const ReproductorEjecucion = ({
                     <button
                         type="button"
                         onClick={onTogglePlay}
-                        style={estiloBoton(reproduciendo)}
+                        style={{
+                            ...estiloBoton(reproduciendo),
+                            minWidth: 28,
+                            padding: '3px 6px',
+                        }}
                         title={
                             modoVivo
                                 ? 'Reproducir la ejecución desde el inicio'
@@ -127,6 +142,8 @@ const ReproductorEjecucion = ({
                             ...estiloBoton(false),
                             opacity: hayPasoSiguiente ? 1 : 0.4,
                             cursor: hayPasoSiguiente ? 'pointer' : 'not-allowed',
+                            minWidth: 26,
+                            padding: '3px 6px',
                         }}
                         title="Ir al paso siguiente"
                         aria-label="Ir al paso siguiente"
@@ -136,28 +153,42 @@ const ReproductorEjecucion = ({
                     <button
                         type="button"
                         onClick={onIrVivo}
-                        style={estiloBoton(modoVivo)}
+                        style={{
+                            ...estiloBoton(modoVivo),
+                            padding: '3px 7px',
+                            fontSize: 11,
+                        }}
                         title="Seguir los pasos a medida que se ejecutan"
                     >
                         {enEjecucion ? '● vivo' : 'en vivo'}
                     </button>
                 </div>
 
+                {/* Indicador de Paso */}
                 <span
                     style={{
                         fontFamily: 'var(--mono)',
                         fontSize: 11,
                         color: '#aaa',
                         whiteSpace: 'nowrap',
+                        margin: '0 2px',
                     }}
                 >
                     {modoVivo ? 'paso ' : 'viendo '}
                     <b style={{ color: 'var(--text)' }}>{paso}</b>
                     {modoVivo ? '' : ' / '}
-                    {modoVivo ? ` de traza (${pasoUltimo} instr.)` : `${pasoUltimo}`}
+                    {modoVivo ? ` (${pasoUltimo} instr.)` : `${pasoUltimo}`}
                 </span>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                {/* Botones de Velocidad */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 3,
+                        flexShrink: 0,
+                    }}
+                >
                     {VELOCIDADES.map((v) => (
                         <button
                             key={v}
@@ -165,8 +196,9 @@ const ReproductorEjecucion = ({
                             onClick={() => onVelocidad(v)}
                             style={{
                                 ...estiloBoton(velocidad === v),
-                                fontSize: 11,
-                                padding: '2px 6px',
+                                fontSize: 10,
+                                padding: '2px 5px',
+                                minWidth: 24,
                             }}
                             title={`Velocidad ${v}×`}
                         >

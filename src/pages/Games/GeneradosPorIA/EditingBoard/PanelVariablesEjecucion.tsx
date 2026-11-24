@@ -413,24 +413,21 @@ const PanelVariablesEjecucion = ({
             return fila;
         });
 
-    const esTabDeGraficas = tab !== 'tabla';
-
     return (
         <div
             style={{
                 backgroundColor: 'var(--sidebar-bg)',
                 border: '1px solid var(--border)',
                 borderRadius: '10px',
-                padding: '12px 15px',
+                padding: '10px 12px',
                 color: 'var(--text)',
                 flex: 1,
                 height: '100%',
                 minHeight: 0,
                 overflow: 'hidden',
-                overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 8,
+                gap: 6,
             }}
         >
             <div
@@ -439,6 +436,7 @@ const PanelVariablesEjecucion = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     gap: 8,
+                    flexShrink: 0,
                 }}
             >
                 <span
@@ -470,13 +468,14 @@ const PanelVariablesEjecucion = ({
                 )}
             </div>
 
-            {/* Pestañas */}
+            {/* Pestañas (Fijas arriba) */}
             <div
                 style={{
                     display: 'flex',
                     gap: 4,
                     overflowX: 'auto',
                     scrollbarWidth: 'thin',
+                    flexShrink: 0,
                 }}
             >
                 {TABS.map((item) => (
@@ -506,7 +505,19 @@ const PanelVariablesEjecucion = ({
                 ))}
             </div>
 
-            {/* Contenido de la pestaña */}
+            {/* Contenedor scrolleable del contenido de la pestaña activa */}
+            <div
+                style={{
+                    flex: 1,
+                    minHeight: 0,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    paddingRight: 2,
+                }}
+            >
             {tab === 'tabla' && (
                 <>
                     {/* Valores actuales */}
@@ -554,35 +565,57 @@ const PanelVariablesEjecucion = ({
 
                     {/* Traza histórica tipo PSeInt */}
                     {nombres.length > 0 && filas.length > 0 && (
-                        <div>
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setMostrarHistorial((prev) => !prev)
-                                }
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                flex: 1,
+                                minHeight: 0,
+                                marginTop: 4,
+                            }}
+                        >
+                            <div
                                 style={{
-                                    background: 'transparent',
-                                    border: 'none',
-                                    color: '#8ab4f8',
-                                    cursor: 'pointer',
-                                    fontSize: 11,
-                                    whiteSpace: 'nowrap',
-                                    padding: 0,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    flexShrink: 0,
+                                    marginBottom: 4,
                                 }}
                             >
-                                {mostrarHistorial
-                                    ? 'Ocultar traza ▲'
-                                    : 'Ver traza ▼'}
-                            </button>
+                                <span style={{ fontSize: 11, color: '#aaa', fontWeight: 600 }}>
+                                    Traza de variables por paso ({filas.length} pasos)
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setMostrarHistorial((prev) => !prev)
+                                    }
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#8ab4f8',
+                                        cursor: 'pointer',
+                                        fontSize: 11,
+                                        whiteSpace: 'nowrap',
+                                        padding: 0,
+                                    }}
+                                >
+                                    {mostrarHistorial
+                                        ? 'Ocultar traza ▲'
+                                        : 'Ver traza ▼'}
+                                </button>
+                            </div>
 
                             {mostrarHistorial && (
                                 <div
                                     style={{
                                         overflow: 'auto',
-                                        maxHeight: 140,
+                                        flex: 1,
+                                        minHeight: 120,
+                                        maxHeight: 220,
                                         border: '1px solid var(--border)',
                                         borderRadius: 8,
-                                        marginTop: 5,
                                     }}
                                 >
                                     <table
@@ -598,6 +631,7 @@ const PanelVariablesEjecucion = ({
                                                         'rgba(255,255,255,0.05)',
                                                     position: 'sticky',
                                                     top: 0,
+                                                    zIndex: 2,
                                                 }}
                                             >
                                                 <th
@@ -608,6 +642,7 @@ const PanelVariablesEjecucion = ({
                                                         textAlign: 'left',
                                                         borderBottom:
                                                             '1px solid var(--border)',
+                                                        backgroundColor: 'var(--sidebar-bg)',
                                                     }}
                                                 >
                                                     paso
@@ -626,6 +661,7 @@ const PanelVariablesEjecucion = ({
                                                             color: colorDe(i),
                                                             whiteSpace:
                                                                 'nowrap',
+                                                            backgroundColor: 'var(--sidebar-bg)',
                                                         }}
                                                     >
                                                         {nombre}
@@ -634,40 +670,54 @@ const PanelVariablesEjecucion = ({
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {armarFilas().map((fila, i) => (
-                                                <tr key={`${filas[i]?.paso}-${i}`}>
-                                                    <td
+                                            {armarFilas().map((fila, i) => {
+                                                const pasoActual = filas[i]?.paso;
+                                                const esSeleccionado = captura?.paso === pasoActual;
+                                                return (
+                                                    <tr
+                                                        key={`${pasoActual}-${i}`}
                                                         style={{
-                                                            padding: '3px 12px',
-                                                            fontSize: 10,
-                                                            color: '#777',
+                                                            backgroundColor: esSeleccionado
+                                                                ? 'rgba(255,124,2,0.14)'
+                                                                : i % 2 === 0
+                                                                  ? 'transparent'
+                                                                  : 'rgba(255,255,255,0.02)',
                                                         }}
                                                     >
-                                                        {filas[i]?.paso ?? '—'}
-                                                    </td>
-                                                    {nombres.map((nombre) => (
                                                         <td
-                                                            key={nombre}
                                                             style={{
-                                                                padding: '3px 12px',
-                                                                fontSize: 12,
-                                                                fontFamily:
-                                                                    'var(--mono)',
-                                                                whiteSpace:
-                                                                    'nowrap',
-                                                                color:
-                                                                    fila[nombre] ===
-                                                                    undefined
-                                                                        ? '#555'
-                                                                        : 'var(--text)',
+                                                                padding: '4px 12px',
+                                                                fontSize: 10,
+                                                                color: esSeleccionado ? '#FF9D3D' : '#777',
+                                                                fontWeight: esSeleccionado ? 700 : 400,
                                                             }}
                                                         >
-                                                            {fila[nombre] ??
-                                                                '—'}
+                                                            {pasoActual ?? '—'}
                                                         </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
+                                                        {nombres.map((nombre) => (
+                                                            <td
+                                                                key={nombre}
+                                                                style={{
+                                                                    padding: '4px 12px',
+                                                                    fontSize: 12,
+                                                                    fontFamily:
+                                                                        'var(--mono)',
+                                                                    whiteSpace:
+                                                                        'nowrap',
+                                                                    color:
+                                                                        fila[nombre] ===
+                                                                        undefined
+                                                                            ? '#555'
+                                                                            : 'var(--text)',
+                                                                }}
+                                                            >
+                                                                {fila[nombre] ??
+                                                                    '—'}
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>
@@ -809,26 +859,25 @@ const PanelVariablesEjecucion = ({
                     anterior={anterior}
                 />
             )}
+            </div>
 
-            {/* Reproductor (para pestañas gráficas) */}
-            {esTabDeGraficas && (
-                <ReproductorEjecucion
-                    total={total}
-                    modoVivo={modoVivo}
-                    indice={idxSeguro}
-                    paso={captura?.paso ?? 0}
-                    pasoUltimo={ultima?.paso ?? 0}
-                    enEjecucion={enEjecucion}
-                    reproduciendo={reproduciendo}
-                    velocidad={velocidad}
-                    onSeleccionar={seleccionar}
-                    onPasoAnterior={irAlPasoAnterior}
-                    onPasoSiguiente={irAlPasoSiguiente}
-                    onIrVivo={irVivo}
-                    onTogglePlay={alternarPlay}
-                    onVelocidad={setVelocidad}
-                />
-            )}
+            {/* Reproductor de Modo Película (Fijo y Estático abajo de todo) */}
+            <ReproductorEjecucion
+                total={total}
+                modoVivo={modoVivo}
+                indice={idxSeguro}
+                paso={captura?.paso ?? 0}
+                pasoUltimo={ultima?.paso ?? 0}
+                enEjecucion={enEjecucion}
+                reproduciendo={reproduciendo}
+                velocidad={velocidad}
+                onSeleccionar={seleccionar}
+                onPasoAnterior={irAlPasoAnterior}
+                onPasoSiguiente={irAlPasoSiguiente}
+                onIrVivo={irVivo}
+                onTogglePlay={alternarPlay}
+                onVelocidad={setVelocidad}
+            />
         </div>
     );
 };
