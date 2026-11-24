@@ -34,7 +34,15 @@
     body[data-seccion-reporte-impresion="ejercicios"]
         .reporte-seccion-ejercicios-impresion,
     body[data-seccion-reporte-impresion="ejercicios"]
-        .reporte-seccion-ejercicios-impresion * {
+        .reporte-seccion-ejercicios-impresion *,
+    body[data-seccion-reporte-impresion="ejercicios-estudiante"]
+        .reporte-seccion-ejercicios-estudiante-impresion,
+    body[data-seccion-reporte-impresion="ejercicios-estudiante"]
+        .reporte-seccion-ejercicios-estudiante-impresion *,
+    body[data-seccion-reporte-impresion="entregas-ejercicio"]
+        .reporte-seccion-entregas-ejercicio-impresion,
+    body[data-seccion-reporte-impresion="entregas-ejercicio"]
+        .reporte-seccion-entregas-ejercicio-impresion * {
         visibility: visible !important;
     }
 

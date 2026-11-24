@@ -21,6 +21,7 @@ import { UsuarioContext } from '../../Context/UsuarioContext';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
 import type { EjercicioGrupo, ReporteGrupo } from '../../types/dominio';
 import { formatearFecha, formatearFechaHora } from '../../utils/fechas';
+import { imprimirSeccionReporte } from '../../utils/imprimirReporte';
 
 type EstadoEstudiante =
     | 'resuelto'
@@ -36,6 +37,28 @@ type FiltroEstado =
     | 'por_calificar'
     | 'calificados'
     | 'vencidos';
+
+const estadosValidos: FiltroEstado[] = [
+    'todos',
+    'resueltos',
+    'no_resueltos',
+    'en_progreso',
+    'sin_iniciar',
+    'por_calificar',
+    'calificados',
+    'vencidos',
+];
+
+const etiquetasEstado: Record<FiltroEstado, string> = {
+    todos: 'Todos',
+    resueltos: 'Resueltos',
+    no_resueltos: 'No resueltos',
+    en_progreso: 'En progreso',
+    sin_iniciar: 'Sin iniciar',
+    por_calificar: 'Por calificar',
+    calificados: 'Calificados',
+    vencidos: 'Vencidos',
+};
 
 type FilaEstudiante = {
     estudiante: ReporteGrupo['estudiantes'][number];
@@ -60,8 +83,15 @@ const ReporteEjercicioGrupo = () => {
     const [ejercicio, setEjercicio] = useState<EjercicioGrupo | null>(null);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>('todos');
-    const [busqueda, setBusqueda] = useState('');
+    const [filtroEstado, setFiltroEstado] = useState<FiltroEstado>(() => {
+        const estado = searchParams.get('estado');
+        return estado && estadosValidos.includes(estado as FiltroEstado)
+            ? (estado as FiltroEstado)
+            : 'todos';
+    });
+    const [busqueda, setBusqueda] = useState(
+        () => searchParams.get('q') ?? '',
+    );
     const [calificandoId, setCalificandoId] = useState<number | null>(null);
     const rolReporte =
         usuario?.rol === 'profesor' || usuario?.rol === 'admin'
@@ -360,6 +390,10 @@ const ReporteEjercicioGrupo = () => {
     const rutaRetorno = `/grupos/${id}/reporte${
         queryRetorno ? `?${queryRetorno}` : ''
     }`;
+    const resumenFiltrosImpresion = [
+        `Estado: ${etiquetasEstado[filtroEstado]}`,
+        `Búsqueda: ${busqueda.trim() || 'Todos'}`,
+    ].join(' · ');
 
     return (
         <AppShell>
@@ -503,8 +537,26 @@ const ReporteEjercicioGrupo = () => {
                             />
                         </section>
 
-                        <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                            <div className="flex flex-wrap items-end justify-between gap-3">
+                        <section className="reporte-seccion-impresion reporte-seccion-entregas-ejercicio-impresion rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                            <header className="reporte-solo-impresion">
+                                <h1>Estudiantes y entregas</h1>
+                                <p>Grupo: {reporte.grupo.nombre}</p>
+                                <p>Ejercicio: {ejercicio.titulo}</p>
+                                <p>
+                                    Generado:{' '}
+                                    {new Date().toLocaleDateString('es-BO', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}
+                                </p>
+                                <p>Filtros: {resumenFiltrosImpresion}</p>
+                                <p>
+                                    Estudiantes incluidos:{' '}
+                                    {filasVisibles.length}
+                                </p>
+                            </header>
+                            <div className="ocultar-en-impresion flex flex-wrap items-end justify-between gap-3">
                                 <div>
                                     <h2 className="text-xl font-bold text-white">
                                         Estudiantes y entregas
@@ -563,6 +615,17 @@ const ReporteEjercicioGrupo = () => {
                                         />
                                     </label>
                                 </div>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        imprimirSeccionReporte(
+                                            'entregas-ejercicio',
+                                        )
+                                    }
+                                    className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-black hover:brightness-110"
+                                >
+                                    Imprimir / guardar PDF
+                                </button>
                             </div>
 
                             {filasVisibles.length === 0 ? (
@@ -590,7 +653,7 @@ const ReporteEjercicioGrupo = () => {
                                                 <th className="px-3 py-2">
                                                     Calificación
                                                 </th>
-                                                <th className="px-3 py-2">
+                                                <th className="ocultar-en-impresion px-3 py-2">
                                                     Acciones
                                                 </th>
                                             </tr>
@@ -667,7 +730,7 @@ const ReporteEjercicioGrupo = () => {
                                                                 </span>
                                                             )}
                                                         </td>
-                                                        <td className="rounded-r-xl px-3 py-3">
+                                                        <td className="ocultar-en-impresion rounded-r-xl px-3 py-3">
                                                             <div className="flex flex-wrap gap-2">
                                                                 {puedeVerSolucion ? (
                                                                     <button

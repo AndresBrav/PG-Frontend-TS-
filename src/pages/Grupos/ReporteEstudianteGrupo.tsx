@@ -17,6 +17,7 @@ import { UsuarioContext } from '../../Context/UsuarioContext';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
 import type { ReporteGrupo } from '../../types/dominio';
 import { formatearFecha, formatearFechaHora } from '../../utils/fechas';
+import { imprimirSeccionReporte } from '../../utils/imprimirReporte';
 
 type EstadoDetalle =
     | 'todos'
@@ -47,6 +48,24 @@ const criteriosFechaValidos: CriterioFecha[] = [
     'entrega',
     'actividad',
 ];
+
+const etiquetasEstado: Record<EstadoDetalle, string> = {
+    todos: 'Todos',
+    resueltos: 'Resueltos',
+    no_resueltos: 'No resueltos',
+    en_progreso: 'En progreso',
+    sin_iniciar: 'Sin iniciar',
+    por_calificar: 'Por calificar',
+    calificados: 'Calificados',
+    vencidos: 'Vencidos',
+};
+
+const etiquetasCriterioFecha: Record<CriterioFecha, string> = {
+    creacion: 'Creación del ejercicio',
+    limite: 'Fecha límite',
+    entrega: 'Fecha de entrega',
+    actividad: 'Última actividad',
+};
 
 const dentroDelRango = (
     valor: string | null,
@@ -93,9 +112,19 @@ const ReporteEstudianteGrupo = () => {
             : 'todos';
     });
     const [criterioFecha, setCriterioFecha] =
-        useState<CriterioFecha>('entrega');
-    const [fechaDesde, setFechaDesde] = useState('');
-    const [fechaHasta, setFechaHasta] = useState('');
+        useState<CriterioFecha>(() => {
+            const criterio = searchParams.get('fecha');
+            return criterio &&
+                criteriosFechaValidos.includes(criterio as CriterioFecha)
+                ? (criterio as CriterioFecha)
+                : 'entrega';
+        });
+    const [fechaDesde, setFechaDesde] = useState(
+        () => searchParams.get('desde') ?? '',
+    );
+    const [fechaHasta, setFechaHasta] = useState(
+        () => searchParams.get('hasta') ?? '',
+    );
     const rolReporte =
         usuario?.rol === 'profesor' || usuario?.rol === 'admin'
             ? usuario.rol
@@ -414,6 +443,19 @@ const ReporteEstudianteGrupo = () => {
     const rutaRetorno = `/grupos/${id}/reporte${
         queryRetorno ? `?${queryRetorno}` : ''
     }`;
+    const temarioImpresion =
+        temarioActivo === 'todos'
+            ? 'Todos'
+            : (reporte?.temarios.find(
+                  (temario) => temario.id === Number(temarioActivo),
+              )?.nombre ?? 'Temario seleccionado');
+    const filtrosImpresion = [
+        `Temario: ${temarioImpresion}`,
+        `Estado: ${etiquetasEstado[estadoActivo]}`,
+        `Fecha: ${etiquetasCriterioFecha[criterioFecha]}`,
+        `Desde: ${fechaDesde || '—'}`,
+        `Hasta: ${fechaHasta || '—'}`,
+    ].join(' · ');
 
     return (
         <AppShell>
@@ -618,14 +660,50 @@ const ReporteEstudianteGrupo = () => {
                             />
                         </section>
 
-                        <section className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
-                            <h2 className="text-xl font-bold text-white">
-                                Ejercicios del estudiante
-                            </h2>
-                            <p className="mt-1 text-sm text-gray-400">
-                                Los ejercicios sin entrega registrada se muestran
-                                como “Sin iniciar”.
-                            </p>
+                        <section className="reporte-seccion-impresion reporte-seccion-ejercicios-estudiante-impresion rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+                            <header className="reporte-solo-impresion">
+                                <h1>Ejercicios del estudiante</h1>
+                                <p>
+                                    Estudiante: {estudiante.username} · SIS{' '}
+                                    {estudiante.codigo}
+                                </p>
+                                <p>Grupo: {reporte.grupo.nombre}</p>
+                                <p>
+                                    Generado:{' '}
+                                    {new Date().toLocaleDateString('es-BO', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}
+                                </p>
+                                <p>Filtros: {filtrosImpresion}</p>
+                                <p>
+                                    Ejercicios incluidos:{' '}
+                                    {ejerciciosConEstado.length}
+                                </p>
+                            </header>
+                            <div className="ocultar-en-impresion flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <h2 className="text-xl font-bold text-white">
+                                        Ejercicios del estudiante
+                                    </h2>
+                                    <p className="mt-1 text-sm text-gray-400">
+                                        Los ejercicios sin entrega registrada se muestran
+                                        como “Sin iniciar”.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        imprimirSeccionReporte(
+                                            'ejercicios-estudiante',
+                                        )
+                                    }
+                                    className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-black hover:brightness-110"
+                                >
+                                    Imprimir / guardar PDF
+                                </button>
+                            </div>
 
                             {ejerciciosConEstado.length === 0 ? (
                                 <p className="mt-5 rounded-xl border border-dashed border-white/15 px-4 py-8 text-center text-sm text-gray-400">
@@ -654,11 +732,11 @@ const ReporteEstudianteGrupo = () => {
                                                 <th className="px-3 py-2">
                                                     Calificación
                                                 </th>
-                                                <th className="px-3 py-2">
+                                                <th className="ocultar-en-impresion px-3 py-2">
                                                     Solución
                                                 </th>
                                                 {usuario?.rol === 'profesor' && (
-                                                    <th className="px-3 py-2">
+                                                    <th className="ocultar-en-impresion px-3 py-2">
                                                         Calificar
                                                     </th>
                                                 )}
@@ -747,7 +825,7 @@ const ReporteEstudianteGrupo = () => {
                                                                 </span>
                                                             )}
                                                         </td>
-                                                        <td className="px-3 py-3">
+                                                        <td className="ocultar-en-impresion px-3 py-3">
                                                             {entrega &&
                                                             (entrega.completado ||
                                                                 Boolean(
@@ -777,7 +855,7 @@ const ReporteEstudianteGrupo = () => {
                                                         </td>
                                                         {usuario?.rol ===
                                                             'profesor' && (
-                                                            <td className="rounded-r-xl px-3 py-3">
+                                                            <td className="ocultar-en-impresion rounded-r-xl px-3 py-3">
                                                                 {entrega?.completado ? (
                                                                     <button
                                                                         type="button"

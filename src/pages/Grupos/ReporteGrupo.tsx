@@ -9,6 +9,7 @@ import { UsuarioContext } from '../../Context/UsuarioContext';
 import useCerrarSesion from '../../hooks/useCerrarSesion';
 import type { MetricasProgresoGrupo, ReporteGrupo } from '../../types/dominio';
 import { formatearFechaHora, formatearNumero } from '../../utils/fechas';
+import { imprimirSeccionReporte } from '../../utils/imprimirReporte';
 
 const METRICAS_VACIAS: MetricasProgresoGrupo = {
     ejerciciosTotales: 0,
@@ -67,20 +68,6 @@ const fechaEnRango = (
         (!limiteDesde || fecha >= limiteDesde) &&
         (!limiteHasta || fecha <= limiteHasta)
     );
-};
-
-const imprimirSeccionReporte = (
-    seccion: 'estudiantes' | 'ejercicios',
-) => {
-    document.body.dataset.seccionReporteImpresion = seccion;
-    window.addEventListener(
-        'afterprint',
-        () => {
-            delete document.body.dataset.seccionReporteImpresion;
-        },
-        { once: true },
-    );
-    window.print();
 };
 
 const ReporteGrupoPage = () => {
