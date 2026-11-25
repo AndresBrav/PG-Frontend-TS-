@@ -309,11 +309,23 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                             </div>
 
                             {swapInfo.haySwap && (() => {
-                                // Valores antes del swap para mostrar en el badge
-                                const valA = elementosAntes && elementosAntes.length > swapInfo.indiceA
-                                    ? formatoValor(elementosAntes[swapInfo.indiceA]) : '?';
-                                const valB = elementosAntes && elementosAntes.length > swapInfo.indiceB
-                                    ? formatoValor(elementosAntes[swapInfo.indiceB]) : '?';
+                                // Variable auxiliar (caso típico de burbuja: aux <- numeros[j])
+                                const variableAux = captura.variables.find((v) =>
+                                    /^(aux|temp|temporal|buffer|swap)$/i.test(v.nombre)
+                                );
+
+                                // El valor que estaba originalmente en A proviene de aux, o del valor que pasó a B
+                                const valA = variableAux?.valor !== undefined
+                                    ? variableAux.valor
+                                    : (elementosActuales.length > swapInfo.indiceB
+                                        ? formatoValor(elementosActuales[swapInfo.indiceB])
+                                        : '?');
+
+                                // El valor que estaba originalmente en B es el que pasó a A
+                                const valB = elementosActuales.length > swapInfo.indiceA
+                                    ? formatoValor(elementosActuales[swapInfo.indiceA])
+                                    : '?';
+
                                 return (
                                     <div
                                         style={{
@@ -398,25 +410,34 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                     const esSwapB = swapInfo.haySwap && idx === swapInfo.indiceB;
                                     const esParteDeSwap = esSwapA || esSwapB;
 
-                                    // Para la animación de swap: mostrar el valor PREVIO al intercambio
-                                    // (antes del swap) y animarlo hacia la posición opuesta.
-                                    // Así el usuario ve el elemento que "estaba" en esta posición volar a la otra.
-                                    const itemVisual: unknown =
-                                        esParteDeSwap && elementosAntes && elementosAntes.length > idx
-                                            ? elementosAntes[idx]
-                                            : item;
+                                    // Variable auxiliar para intercambio de variables (ej: aux <- numeros[j])
+                                    const variableAux = captura.variables.find((v) =>
+                                        /^(aux|temp|temporal|buffer|swap)$/i.test(v.nombre)
+                                    );
 
-                                    const esNumero =
-                                        typeof itemVisual === 'number' ||
-                                        !Number.isNaN(Number(itemVisual));
-                                    const numVal = esNumero ? Number(itemVisual) : 0;
-                                    // Para la altura usamos el valor visual (previo) para coherencia
+                                    // Para la animación de swap: el valor que estaba en A es aux (o lo que ahora está en B).
+                                    // El valor que estaba en B es lo que ahora está en A.
+                                    let itemVisual: unknown = item;
+                                    if (esSwapA) {
+                                        itemVisual = variableAux?.valor !== undefined
+                                            ? variableAux.valor
+                                            : (elementosActuales.length > swapInfo.indiceB ? elementosActuales[swapInfo.indiceB] : item);
+                                    } else if (esSwapB) {
+                                        itemVisual = elementosActuales.length > swapInfo.indiceA
+                                            ? elementosActuales[swapInfo.indiceA]
+                                            : item;
+                                    }
+
+                                    // Altura de la barra animada que vuela en arco
+                                    const numVisual = !Number.isNaN(Number(itemVisual)) ? Number(itemVisual) : 0;
+                                    const ratioVisual = Math.max(0.12, Math.min(1, Math.abs(numVisual) / maxNum));
+                                    const alturaBarraAnimada = Math.round(ratioVisual * 75) + 12;
+
+                                    // Altura de la barra base con el valor final
                                     const numActual = typeof item === 'number' || !Number.isNaN(Number(item))
                                         ? Number(item) : 0;
-                                    const ratioBase = esParteDeSwap && elementosAntes
-                                        ? Math.max(0.12, Math.min(1, Math.abs(numVal) / maxNum))
-                                        : Math.max(0.12, Math.min(1, Math.abs(numActual) / maxNum));
-                                    const alturaBarra = Math.round(ratioBase * 75) + 12;
+                                    const ratioActual = Math.max(0.12, Math.min(1, Math.abs(numActual) / maxNum));
+                                    const alturaBarraBase = Math.round(ratioActual * 75) + 12;
 
                                     // Duración adaptativa a la velocidad del reproductor
                                     const duracionSwapMs = Math.max(
@@ -508,7 +529,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             <div
                                                 style={{
                                                     width: 24,
-                                                    height: alturaBarra,
+                                                    height: alturaBarraBase,
                                                     background: barraBg,
                                                     borderRadius: '5px 5px 2px 2px',
                                                     border: `1px solid ${borderColor}`,
@@ -625,7 +646,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             </div>
 
                                             {/* CAPA ANIMADA: valor previo que vuela hacia el destino del swap */}
-                                            {esParteDeSwap && elementosAntes && (
+                                            {esParteDeSwap && (
                                                 <div
                                                     style={
                                                         {
@@ -646,7 +667,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     <div
                                                         style={{
                                                             width: 24,
-                                                            height: alturaBarra,
+                                                            height: alturaBarraAnimada,
                                                             background: 'linear-gradient(180deg, #FBBF24, #EF4444)',
                                                             borderRadius: '5px 5px 2px 2px',
                                                             border: '1px solid #F59E0B',
