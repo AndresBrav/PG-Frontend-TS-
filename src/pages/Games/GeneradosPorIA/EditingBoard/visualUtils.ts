@@ -505,6 +505,7 @@ export interface TransferenciaVariable {
     valorPrevioDestino?: string;
     variableOrigen?: string;
     variablesOrigen?: string[];
+    origenesDetalle?: { nombre: string; valor: string }[];
     valorOrigen?: string;
     formula?: string;
     operacionVisual?: string;
@@ -686,11 +687,42 @@ export const detectarTransferenciaVariable = (
         };
     }
 
-    // Buscar identificadores usados en la expresión para transferencias escalares estándar
-    const tokens = expresion.match(/[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*/g) || [];
+    // Resolver celdas que aparezcan como operandos dentro de una expresión.
+    const accesosResueltos: {
+        posicion: number;
+        nombre: string;
+        valor: string;
+    }[] = [];
+    const expresionSinAccesos = expresion.replace(
+        /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g,
+        (acceso, posicion: number) => {
+            const evaluado = variablesActuales
+                ? evaluarAccesoArreglo(acceso, variablesActuales, valoresAnteriores)
+                : null;
+            if (
+                evaluado?.indiceEval !== null &&
+                evaluado?.indiceEval !== undefined &&
+                evaluado.valorCelda !== null
+            ) {
+                accesosResueltos.push({
+                    posicion,
+                    nombre: evaluado.celdaConcreta,
+                    valor: evaluado.valorCelda,
+                });
+                return ' '.repeat(acceso.length);
+            }
+            return acceso;
+        }
+    );
+
+    // Buscar identificadores restantes, excluyendo los que forman parte de celdas resueltas.
+    const tokens = Array.from(
+        expresionSinAccesos.matchAll(/[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*/g)
+    );
     const variablesOrigenEncontradas: string[] = [];
 
-    for (const t of tokens) {
+    for (const token of tokens) {
+        const t = token[0];
         const tLower = t.toLowerCase();
         if (
             !PALABRAS_CLAVE_EXPR.has(tLower) &&
@@ -703,8 +735,33 @@ export const detectarTransferenciaVariable = (
         }
     }
 
+    const origenesDetalle = [
+        ...variablesOrigenEncontradas.map((nombre) => ({
+            posicion:
+                tokens.find((token) => token[0].toLowerCase() === nombre.toLowerCase())
+                    ?.index ?? -1,
+            nombre,
+            valor:
+                valoresAnteriores?.get(nombre.toLowerCase()) ??
+                mapaActual.get(nombre.toLowerCase()) ??
+                '',
+        })),
+        ...accesosResueltos,
+    ]
+        .sort((a, b) => a.posicion - b.posicion)
+        .reduce<{ nombre: string; valor: string }[]>((origenes, origen) => {
+            if (
+                !origenes.some(
+                    (actual) => actual.nombre.toLowerCase() === origen.nombre.toLowerCase()
+                )
+            ) {
+                origenes.push({ nombre: origen.nombre, valor: origen.valor });
+            }
+            return origenes;
+        }, []);
+
     // 1. Literal puro (sin variables origen, ej: a <- 5)
-    if (variablesOrigenEncontradas.length === 0) {
+    if (origenesDetalle.length === 0) {
         return {
             hayTransferencia: true,
             tipo: 'literal',
@@ -718,6 +775,7 @@ export const detectarTransferenciaVariable = (
     // 2. Transferencia directa de una variable a otra (ej: aux <- a, a <- b)
     if (
         variablesOrigenEncontradas.length === 1 &&
+        accesosResueltos.length === 0 &&
         expresion.trim().toLowerCase() === variablesOrigenEncontradas[0].toLowerCase()
     ) {
         const origen = variablesOrigenEncontradas[0];
@@ -741,22 +799,11 @@ export const detectarTransferenciaVariable = (
     }
 
     // 3. Cálculo con expresión (ej: b <- a + 3, c <- a * b, suma <- a + b, x <- a + b + c / d)
-    const primerOrigen = variablesOrigenEncontradas[0];
-    const valOrig =
-        valoresAnteriores?.get(primerOrigen.toLowerCase()) ??
-        mapaActual.get(primerOrigen.toLowerCase()) ??
-        '';
-
-    const origenesDetalle = variablesOrigenEncontradas.map((nombre) => ({
-        nombre,
-        valor:
-            valoresAnteriores?.get(nombre.toLowerCase()) ??
-            mapaActual.get(nombre.toLowerCase()) ??
-            '',
-    }));
+    const primerOrigen = origenesDetalle[0].nombre;
+    const valOrig = origenesDetalle[0].valor;
 
     let operacionVisual = expresion;
-    if (variablesOrigenEncontradas.length === 1) {
+    if (origenesDetalle.length === 1 && accesosResueltos.length === 0) {
         const reOrig = new RegExp(`\\b${primerOrigen}\\b`, 'i');
         operacionVisual = expresion.replace(reOrig, '').trim();
     }
@@ -768,7 +815,7 @@ export const detectarTransferenciaVariable = (
         valorNuevo,
         valorPrevioDestino,
         variableOrigen: primerOrigen,
-        variablesOrigen: variablesOrigenEncontradas,
+        variablesOrigen: origenesDetalle.map((origen) => origen.nombre),
         origenesDetalle,
         valorOrigen: valOrig,
         formula: `${variableDestino} ← ${expresion}`,
