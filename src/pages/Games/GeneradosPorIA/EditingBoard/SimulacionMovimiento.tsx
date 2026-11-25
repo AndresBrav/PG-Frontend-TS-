@@ -841,7 +841,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                             style={{
                                 display: 'grid',
                                 gridTemplateColumns:
-                                    'repeat(auto-fill, minmax(88px, 1fr))',
+                                    'repeat(auto-fill, minmax(min(100%, 88px), 1fr))',
                                 gap: 5,
                             }}
                         >
@@ -937,6 +937,8 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                     <div
                                         key={v.nombre}
                                         style={{
+                                            minWidth: 0,
+                                            boxSizing: 'border-box',
                                             background: esReceptora
                                                 ? 'rgba(74, 222, 128, 0.18)'
                                                 : esEmisora
@@ -1073,6 +1075,8 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                 display: 'flex',
                                                 alignItems: 'baseline',
                                                 gap: 4,
+                                                minWidth: 0,
+                                                flexWrap: 'wrap',
                                             }}
                                         >
                                             <span
@@ -1080,6 +1084,9 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     fontFamily: 'var(--mono)',
                                                     fontSize: 12,
                                                     fontWeight: 700,
+                                                    minWidth: 0,
+                                                    maxWidth: '100%',
+                                                    overflowWrap: 'anywhere',
                                                     color: esReceptora
                                                         ? '#4ADE80'
                                                         : esEmisora
@@ -1097,6 +1104,8 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     style={{
                                                         fontFamily: 'var(--mono)',
                                                         fontSize: 9,
+                                                        maxWidth: '100%',
+                                                        overflowWrap: 'anywhere',
                                                         color: '#9CA3AF',
                                                         textDecoration: 'line-through',
                                                     }}
