@@ -308,29 +308,45 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                 </span>
                             </div>
 
-                            {swapInfo.haySwap && (
-                                <span
-                                    style={{
-                                        fontSize: 11,
-                                        fontWeight: 700,
-                                        background: 'rgba(245, 158, 11, 0.2)',
-                                        border: '1px solid #F59E0B',
-                                        color: '#FBBF24',
-                                        padding: '3px 10px',
-                                        borderRadius: 6,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                        boxShadow: '0 0 12px rgba(245, 158, 11, 0.4)',
-                                    }}
-                                >
-                                    <span>🔄 Intercambio en arco:</span>
-                                    <span>
-                                        {perfil.nombre}[{swapInfo.posA}] ↷{' '}
-                                        {perfil.nombre}[{swapInfo.posB}]
-                                    </span>
-                                </span>
-                            )}
+                            {swapInfo.haySwap && (() => {
+                                // Valores antes del swap para mostrar en el badge
+                                const valA = elementosAntes && elementosAntes.length > swapInfo.indiceA
+                                    ? formatoValor(elementosAntes[swapInfo.indiceA]) : '?';
+                                const valB = elementosAntes && elementosAntes.length > swapInfo.indiceB
+                                    ? formatoValor(elementosAntes[swapInfo.indiceB]) : '?';
+                                return (
+                                    <div
+                                        style={{
+                                            fontSize: 11,
+                                            fontWeight: 700,
+                                            background: 'rgba(245, 158, 11, 0.18)',
+                                            border: '1px solid #F59E0B',
+                                            color: '#FBBF24',
+                                            padding: '4px 10px',
+                                            borderRadius: 6,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 6,
+                                            boxShadow: '0 0 14px rgba(245, 158, 11, 0.45)',
+                                        }}
+                                    >
+                                        <span>🔄</span>
+                                        <span style={{ fontFamily: 'var(--mono)' }}>
+                                            {perfil.nombre}[{swapInfo.posA}]
+                                        </span>
+                                        <span style={{ color: '#EF4444', fontWeight: 900 }}>
+                                            ({valA})
+                                        </span>
+                                        <span style={{ color: '#94A3B8' }}>⇄</span>
+                                        <span style={{ fontFamily: 'var(--mono)' }}>
+                                            {perfil.nombre}[{swapInfo.posB}]
+                                        </span>
+                                        <span style={{ color: '#60A5FA', fontWeight: 900 }}>
+                                            ({valB})
+                                        </span>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {elementosActuales.length === 0 ? (
@@ -359,69 +375,53 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                 {/* Keyframes para el salto en arco parabólico estilo AlgoLab */}
                                 <style>{`
                                     @keyframes saltoArcoSuperior {
-                                        0% {
-                                            transform: translate(0, 0) scale(1);
-                                            z-index: 30;
-                                        }
-                                        45% {
-                                            transform: translate(calc(var(--delta-x) * 0.5), -32px) scale(1.15);
-                                            box-shadow: 0 12px 22px rgba(245, 158, 11, 0.6);
-                                            z-index: 30;
-                                        }
-                                        80% {
-                                            transform: translate(calc(var(--delta-x) * 0.9), -4px) scale(1.03);
-                                            z-index: 30;
-                                        }
-                                        100% {
-                                            transform: translate(var(--delta-x), 0) scale(1);
-                                            z-index: 1;
-                                        }
+                                        0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+                                        30%  { transform: translate(calc(var(--delta-x) * 0.3), -58px) scale(1.2); box-shadow: 0 16px 28px rgba(245,158,11,0.7); opacity: 1; }
+                                        60%  { transform: translate(calc(var(--delta-x) * 0.65), -50px) scale(1.1); opacity: 1; }
+                                        85%  { transform: translate(calc(var(--delta-x) * 0.92), -8px) scale(1.03); opacity: 1; }
+                                        100% { transform: translate(var(--delta-x), 0) scale(1); opacity: 0; }
                                     }
                                     @keyframes saltoArcoInferior {
-                                        0% {
-                                            transform: translate(0, 0) scale(1);
-                                            z-index: 10;
-                                        }
-                                        45% {
-                                            transform: translate(calc(var(--delta-x) * 0.5), 10px) scale(0.92);
-                                            z-index: 10;
-                                            opacity: 0.85;
-                                        }
-                                        80% {
-                                            transform: translate(calc(var(--delta-x) * 0.9), 2px) scale(0.98);
-                                            z-index: 10;
-                                            opacity: 0.95;
-                                        }
-                                        100% {
-                                            transform: translate(var(--delta-x), 0) scale(1);
-                                            z-index: 1;
-                                            opacity: 1;
-                                        }
+                                        0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+                                        30%  { transform: translate(calc(var(--delta-x) * 0.3), 15px) scale(0.88); opacity: 0.88; }
+                                        60%  { transform: translate(calc(var(--delta-x) * 0.65), 11px) scale(0.93); opacity: 0.94; }
+                                        85%  { transform: translate(calc(var(--delta-x) * 0.92), 3px) scale(0.98); opacity: 0.98; }
+                                        100% { transform: translate(var(--delta-x), 0) scale(1); opacity: 0; }
                                     }
                                 `}</style>
 
                                 {elementosActuales.map((item, idx) => {
                                     const pos1Based = idx + 1;
-                                    const esNumero =
-                                        typeof item === 'number' ||
-                                        !Number.isNaN(Number(item));
-                                    const numVal = esNumero ? Number(item) : 0;
-                                    const ratio = Math.max(
-                                        0.12,
-                                        Math.min(1, Math.abs(numVal) / maxNum)
-                                    );
-                                    const alturaBarra =
-                                        Math.round(ratio * 75) + 12;
 
                                     // Cálculo de swap en arco
                                     const esSwapA = swapInfo.haySwap && idx === swapInfo.indiceA;
                                     const esSwapB = swapInfo.haySwap && idx === swapInfo.indiceB;
                                     const esParteDeSwap = esSwapA || esSwapB;
 
+                                    // Para la animación de swap: mostrar el valor PREVIO al intercambio
+                                    // (antes del swap) y animarlo hacia la posición opuesta.
+                                    // Así el usuario ve el elemento que "estaba" en esta posición volar a la otra.
+                                    const itemVisual: unknown =
+                                        esParteDeSwap && elementosAntes && elementosAntes.length > idx
+                                            ? elementosAntes[idx]
+                                            : item;
+
+                                    const esNumero =
+                                        typeof itemVisual === 'number' ||
+                                        !Number.isNaN(Number(itemVisual));
+                                    const numVal = esNumero ? Number(itemVisual) : 0;
+                                    // Para la altura usamos el valor visual (previo) para coherencia
+                                    const numActual = typeof item === 'number' || !Number.isNaN(Number(item))
+                                        ? Number(item) : 0;
+                                    const ratioBase = esParteDeSwap && elementosAntes
+                                        ? Math.max(0.12, Math.min(1, Math.abs(numVal) / maxNum))
+                                        : Math.max(0.12, Math.min(1, Math.abs(numActual) / maxNum));
+                                    const alturaBarra = Math.round(ratioBase * 75) + 12;
+
                                     // Duración adaptativa a la velocidad del reproductor
                                     const duracionSwapMs = Math.max(
-                                        180,
-                                        Math.round(650 / Math.max(0.25, velocidad))
+                                        220,
+                                        Math.round(750 / Math.max(0.25, velocidad))
                                     );
 
                                     // Distancia entre ranuras (pitch de 34px ancho + 8px gap = 42px)
@@ -432,11 +432,11 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                     if (esSwapA) {
                                         const distancia = (swapInfo.indiceB - swapInfo.indiceA);
                                         deltaXPixels = distancia * PITCH_RANURA;
-                                        animacionSwap = `saltoArcoSuperior ${duracionSwapMs}ms cubic-bezier(0.34, 1.45, 0.64, 1) forwards`;
+                                        animacionSwap = `saltoArcoSuperior ${duracionSwapMs}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
                                     } else if (esSwapB) {
                                         const distancia = (swapInfo.indiceA - swapInfo.indiceB);
                                         deltaXPixels = distancia * PITCH_RANURA;
-                                        animacionSwap = `saltoArcoInferior ${duracionSwapMs}ms cubic-bezier(0.34, 1.45, 0.64, 1) forwards`;
+                                        animacionSwap = `saltoArcoInferior ${duracionSwapMs}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`;
                                     }
 
                                     // Punteros activos que apuntan a esta celda
@@ -492,71 +492,46 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                     return (
                                         <div
                                             key={`${idx}-${captura.paso}`}
-                                            style={
-                                                {
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center',
-                                                    gap: 4,
-                                                    minWidth: 34,
-                                                    width: 34,
-                                                    position: 'relative',
-                                                    animation: animacionSwap,
-                                                    zIndex: esSwapA ? 30 : esSwapB ? 10 : 1,
-                                                    '--delta-x': `${deltaXPixels}px`,
-                                                } as React.CSSProperties
-                                            }
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: 4,
+                                                minWidth: 34,
+                                                width: 34,
+                                                position: 'relative',
+                                                zIndex: esSwapA ? 30 : esSwapB ? 8 : 1,
+                                            }}
                                         >
+                                            {/* CAPA BASE: valor final (ya intercambiado), siempre presente */}
                                             {/* Barra vertical con altura proporcional */}
                                             <div
                                                 style={{
                                                     width: 24,
                                                     height: alturaBarra,
                                                     background: barraBg,
-                                                    borderRadius:
-                                                        '5px 5px 2px 2px',
+                                                    borderRadius: '5px 5px 2px 2px',
                                                     border: `1px solid ${borderColor}`,
                                                     boxShadow: glow,
-                                                    transition:
-                                                        'height 0.35s ease, background 0.25s ease, box-shadow 0.25s ease',
+                                                    transition: 'height 0.35s ease, background 0.25s ease, box-shadow 0.25s ease',
                                                     display: 'flex',
                                                     alignItems: 'flex-start',
                                                     justifyContent: 'center',
                                                     paddingTop: 3,
                                                 }}
                                             >
-                                                {/* Mini icono o destello si hay swap o comparación */}
                                                 {esParteDeSwap && (
-                                                    <span
-                                                        style={{ fontSize: 9 }}
-                                                    >
-                                                        🔄
-                                                    </span>
+                                                    <span style={{ fontSize: 9 }}>🔄</span>
                                                 )}
-                                                {!esParteDeSwap &&
-                                                    esComparada && (
-                                                        <span
-                                                            style={{
-                                                                fontSize: 9,
-                                                            }}
-                                                        >
-                                                            ⚖️
-                                                        </span>
-                                                    )}
-                                                {!esParteDeSwap &&
-                                                    !esComparada &&
-                                                    esArregloOrdenado && (
-                                                        <span
-                                                            style={{
-                                                                fontSize: 9,
-                                                            }}
-                                                        >
-                                                            ✓
-                                                        </span>
-                                                    )}
+                                                {!esParteDeSwap && esComparada && (
+                                                    <span style={{ fontSize: 9 }}>⚖️</span>
+                                                )}
+                                                {!esParteDeSwap && !esComparada && esArregloOrdenado && (
+                                                    <span style={{ fontSize: 9 }}>✓</span>
+                                                )}
                                             </div>
 
-                                            {/* Tarjeta con el valor numérico */}
+                                            {/* Tarjeta con el valor final */}
                                             <div
                                                 style={{
                                                     minWidth: 32,
@@ -600,7 +575,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                 [{pos1Based}]
                                             </div>
 
-                                            {/* Punteros que apuntan a esta posición (alineación horizontal para evitar desniveles) */}
+                                            {/* Punteros que apuntan a esta posición */}
                                             <div
                                                 style={{
                                                     display: 'flex',
@@ -617,12 +592,9 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                         key={ptr.variable}
                                                         style={{
                                                             display: 'flex',
-                                                            flexDirection:
-                                                                'column',
-                                                            alignItems:
-                                                                'center',
-                                                            animation:
-                                                                'bounce 1s infinite',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            animation: 'bounce 1s infinite',
                                                         }}
                                                     >
                                                         <span
@@ -639,15 +611,11 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                                 fontSize: 9,
                                                                 fontWeight: 700,
                                                                 color: '#000',
-                                                                background:
-                                                                    ptr.color,
-                                                                padding:
-                                                                    '1px 4px',
+                                                                background: ptr.color,
+                                                                padding: '1px 4px',
                                                                 borderRadius: 3,
-                                                                whiteSpace:
-                                                                    'nowrap',
-                                                                boxShadow:
-                                                                    '0 1px 3px rgba(0,0,0,0.3)',
+                                                                whiteSpace: 'nowrap',
+                                                                boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                                                             }}
                                                         >
                                                             {ptr.variable}
@@ -655,6 +623,61 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     </div>
                                                 ))}
                                             </div>
+
+                                            {/* CAPA ANIMADA: valor previo que vuela hacia el destino del swap */}
+                                            {esParteDeSwap && elementosAntes && (
+                                                <div
+                                                    style={
+                                                        {
+                                                            position: 'absolute',
+                                                            top: 0,
+                                                            left: 0,
+                                                            width: '100%',
+                                                            display: 'flex',
+                                                            flexDirection: 'column',
+                                                            alignItems: 'center',
+                                                            gap: 4,
+                                                            animation: animacionSwap,
+                                                            pointerEvents: 'none',
+                                                            '--delta-x': `${deltaXPixels}px`,
+                                                        } as React.CSSProperties
+                                                    }
+                                                >
+                                                    <div
+                                                        style={{
+                                                            width: 24,
+                                                            height: alturaBarra,
+                                                            background: 'linear-gradient(180deg, #FBBF24, #EF4444)',
+                                                            borderRadius: '5px 5px 2px 2px',
+                                                            border: '1px solid #F59E0B',
+                                                            boxShadow: '0 0 18px rgba(245, 158, 11, 0.8)',
+                                                            display: 'flex',
+                                                            alignItems: 'flex-start',
+                                                            justifyContent: 'center',
+                                                            paddingTop: 3,
+                                                        }}
+                                                    >
+                                                        <span style={{ fontSize: 9 }}>🔄</span>
+                                                    </div>
+                                                    <div
+                                                        style={{
+                                                            minWidth: 32,
+                                                            padding: '3px 4px',
+                                                            borderRadius: 5,
+                                                            background: 'rgba(239, 68, 68, 0.3)',
+                                                            border: '1px solid #F59E0B',
+                                                            textAlign: 'center',
+                                                            fontFamily: 'var(--mono)',
+                                                            fontSize: 11,
+                                                            fontWeight: 700,
+                                                            color: '#FBBF24',
+                                                            boxShadow: '0 0 10px rgba(245, 158, 11, 0.6)',
+                                                        }}
+                                                    >
+                                                        {formatoValor(itemVisual)}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
