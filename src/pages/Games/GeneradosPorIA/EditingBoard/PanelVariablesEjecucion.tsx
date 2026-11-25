@@ -578,7 +578,9 @@ const PanelVariablesEjecucion = ({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 8,
-                    paddingRight: 2,
+                    paddingRight: 4,
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(255, 157, 61, 0.4) rgba(255, 255, 255, 0.03)',
                 }}
             >
             {tab === 'tabla' && (
