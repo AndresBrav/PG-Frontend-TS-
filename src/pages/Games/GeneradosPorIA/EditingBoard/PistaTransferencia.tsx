@@ -31,11 +31,11 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
             style={{
                 background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.45), rgba(15, 23, 42, 0.65))',
                 border: '1px solid rgba(255, 157, 61, 0.35)',
-                borderRadius: 10,
-                padding: '12px 14px',
+                borderRadius: 8,
+                padding: '8px 10px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 10,
+                gap: 8,
                 position: 'relative',
                 overflow: 'hidden',
                 boxShadow: '0 4px 15px rgba(0, 0, 0, 0.25)',
@@ -173,11 +173,11 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     position: 'relative',
-                    padding: '16px 12px',
+                    padding: '10px 10px',
                     background: 'rgba(0, 0, 0, 0.25)',
                     borderRadius: 8,
                     border: '1px solid rgba(255, 255, 255, 0.05)',
-                    minHeight: 88,
+                    minHeight: 70,
                 }}
             >
                 {/* 1. Ranura Destino (Receptora - Izquierda, como en a <- ...) */}
@@ -186,14 +186,14 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
-                        gap: 4,
-                        minWidth: 88,
+                        gap: 3,
+                        minWidth: 78,
                         zIndex: 2,
                     }}
                 >
                     <span
                         style={{
-                            fontSize: 10,
+                            fontSize: 9,
                             fontWeight: 700,
                             color: '#4ADE80',
                             fontFamily: 'var(--mono)',
@@ -204,18 +204,18 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
 
                     <div
                         style={{
-                            padding: '6px 14px',
+                            padding: '4px 10px',
                             borderRadius: 6,
                             background: 'rgba(74, 222, 128, 0.18)',
                             border: '1px solid #4ADE80',
                             color: '#4ADE80',
                             fontFamily: 'var(--mono)',
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: 700,
                             animation: 'pulsoReceptor 0.8s ease-out 0.4s forwards',
                             display: 'flex',
                             alignItems: 'baseline',
-                            gap: 6,
+                            gap: 5,
                             boxShadow: '0 0 10px rgba(74, 222, 128, 0.3)',
                         }}
                     >
@@ -223,7 +223,7 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                         {valorPrevioDestino && valorPrevioDestino !== valorNuevo && (
                             <span
                                 style={{
-                                    fontSize: 10,
+                                    fontSize: 9,
                                     color: '#9CA3AF',
                                     textDecoration: 'line-through',
                                     opacity: 0.7,
@@ -244,8 +244,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                         alignItems: 'center',
                         justifyContent: 'center',
                         position: 'relative',
-                        margin: '0 16px',
-                        height: 48,
+                        margin: '0 12px',
+                        height: 38,
                     }}
                 >
                     {/* Flecha indicadora de dirección PSeInt (<-) */}

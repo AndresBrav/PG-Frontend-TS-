@@ -504,6 +504,7 @@ export interface TransferenciaVariable {
     valorNuevo: string;
     valorPrevioDestino?: string;
     variableOrigen?: string;
+    variablesOrigen?: string[];
     valorOrigen?: string;
     formula?: string;
     operacionVisual?: string;
@@ -732,12 +733,13 @@ export const detectarTransferenciaVariable = (
             valorNuevo: valorNuevo || valOrig,
             valorPrevioDestino,
             variableOrigen: origen,
+            variablesOrigen: variablesOrigenEncontradas,
             valorOrigen: valOrig,
             formula: `${variableDestino} ← ${origen}`,
         };
     }
 
-    // 3. Cálculo con expresión (ej: b <- a + 3, c <- a * b)
+    // 3. Cálculo con expresión (ej: b <- a + 3, c <- a * b, suma <- a + b, x <- a + b + c / d)
     const primerOrigen = variablesOrigenEncontradas[0];
     const valOrig =
         valoresAnteriores?.get(primerOrigen.toLowerCase()) ??
@@ -757,6 +759,7 @@ export const detectarTransferenciaVariable = (
         valorNuevo,
         valorPrevioDestino,
         variableOrigen: primerOrigen,
+        variablesOrigen: variablesOrigenEncontradas,
         valorOrigen: valOrig,
         formula: `${variableDestino} ← ${expresion}`,
         operacionVisual: operacionVisual || expresion,

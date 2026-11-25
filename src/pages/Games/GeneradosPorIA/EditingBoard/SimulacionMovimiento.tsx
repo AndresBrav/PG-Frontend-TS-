@@ -351,8 +351,8 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                     alignItems: 'flex-end',
                                     justifyContent: 'center',
                                     overflowX: 'auto',
-                                    padding: '38px 8px 16px 8px',
-                                    minHeight: 200,
+                                    padding: '24px 6px 12px 6px',
+                                    minHeight: 155,
                                     position: 'relative',
                                 }}
                             >
@@ -364,12 +364,12 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             z-index: 30;
                                         }
                                         45% {
-                                            transform: translate(calc(var(--delta-x) * 0.5), -42px) scale(1.18);
-                                            box-shadow: 0 16px 28px rgba(245, 158, 11, 0.6);
+                                            transform: translate(calc(var(--delta-x) * 0.5), -32px) scale(1.15);
+                                            box-shadow: 0 12px 22px rgba(245, 158, 11, 0.6);
                                             z-index: 30;
                                         }
                                         80% {
-                                            transform: translate(calc(var(--delta-x) * 0.9), -6px) scale(1.04);
+                                            transform: translate(calc(var(--delta-x) * 0.9), -4px) scale(1.03);
                                             z-index: 30;
                                         }
                                         100% {
@@ -383,7 +383,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             z-index: 10;
                                         }
                                         45% {
-                                            transform: translate(calc(var(--delta-x) * 0.5), 12px) scale(0.92);
+                                            transform: translate(calc(var(--delta-x) * 0.5), 10px) scale(0.92);
                                             z-index: 10;
                                             opacity: 0.85;
                                         }
@@ -411,7 +411,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                         Math.min(1, Math.abs(numVal) / maxNum)
                                     );
                                     const alturaBarra =
-                                        Math.round(ratio * 105) + 15;
+                                        Math.round(ratio * 75) + 12;
 
                                     // Cálculo de swap en arco
                                     const esSwapA = swapInfo.haySwap && idx === swapInfo.indiceA;
@@ -424,8 +424,8 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                         Math.round(650 / Math.max(0.25, velocidad))
                                     );
 
-                                    // Distancia entre ranuras (pitch de 44px ancho + 10px gap = 54px)
-                                    const PITCH_RANURA = 54;
+                                    // Distancia entre ranuras (pitch de 34px ancho + 8px gap = 42px)
+                                    const PITCH_RANURA = 42;
                                     let deltaXPixels = 0;
                                     let animacionSwap = 'none';
 
@@ -474,19 +474,19 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             'linear-gradient(180deg, #FBBF24, #EF4444)'; // Intercambiando (Fuego/AlgoLab)
                                         borderColor = '#F59E0B';
                                         glow =
-                                            '0 0 16px rgba(245, 158, 11, 0.7)';
+                                            '0 0 14px rgba(245, 158, 11, 0.7)';
                                     } else if (esComparada) {
                                         barraBg =
                                             'linear-gradient(180deg, #FCD34D, #F59E0B)'; // Comparando (Ámbar)
                                         borderColor = '#D97706';
                                         glow =
-                                            '0 0 14px rgba(245, 158, 11, 0.55)';
+                                            '0 0 12px rgba(245, 158, 11, 0.55)';
                                     } else if (esArregloOrdenado) {
                                         barraBg =
                                             'linear-gradient(180deg, #4ADE80, #16A34A)'; // Ordenado (Verde)
                                         borderColor = '#22C55E';
                                         glow =
-                                            '0 0 12px rgba(34, 197, 94, 0.45)';
+                                            '0 0 10px rgba(34, 197, 94, 0.45)';
                                     }
 
                                     return (
@@ -497,9 +497,9 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     display: 'flex',
                                                     flexDirection: 'column',
                                                     alignItems: 'center',
-                                                    gap: 6,
-                                                    minWidth: 44,
-                                                    width: 44,
+                                                    gap: 4,
+                                                    minWidth: 34,
+                                                    width: 34,
                                                     position: 'relative',
                                                     animation: animacionSwap,
                                                     zIndex: esSwapA ? 30 : esSwapB ? 10 : 1,
@@ -510,11 +510,11 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             {/* Barra vertical con altura proporcional */}
                                             <div
                                                 style={{
-                                                    width: 32,
+                                                    width: 24,
                                                     height: alturaBarra,
                                                     background: barraBg,
                                                     borderRadius:
-                                                        '6px 6px 2px 2px',
+                                                        '5px 5px 2px 2px',
                                                     border: `1px solid ${borderColor}`,
                                                     boxShadow: glow,
                                                     transition:
@@ -522,13 +522,13 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     display: 'flex',
                                                     alignItems: 'flex-start',
                                                     justifyContent: 'center',
-                                                    paddingTop: 4,
+                                                    paddingTop: 3,
                                                 }}
                                             >
                                                 {/* Mini icono o destello si hay swap o comparación */}
                                                 {esParteDeSwap && (
                                                     <span
-                                                        style={{ fontSize: 10 }}
+                                                        style={{ fontSize: 9 }}
                                                     >
                                                         🔄
                                                     </span>
@@ -537,7 +537,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     esComparada && (
                                                         <span
                                                             style={{
-                                                                fontSize: 10,
+                                                                fontSize: 9,
                                                             }}
                                                         >
                                                             ⚖️
@@ -548,7 +548,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     esArregloOrdenado && (
                                                         <span
                                                             style={{
-                                                                fontSize: 10,
+                                                                fontSize: 9,
                                                             }}
                                                         >
                                                             ✓
@@ -559,9 +559,9 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             {/* Tarjeta con el valor numérico */}
                                             <div
                                                 style={{
-                                                    minWidth: 38,
-                                                    padding: '4px 6px',
-                                                    borderRadius: 6,
+                                                    minWidth: 32,
+                                                    padding: '3px 4px',
+                                                    borderRadius: 5,
                                                     background: esParteDeSwap
                                                         ? 'rgba(239, 68, 68, 0.2)'
                                                         : esComparada
@@ -572,7 +572,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     border: `1px solid ${borderColor}`,
                                                     textAlign: 'center',
                                                     fontFamily: 'var(--mono)',
-                                                    fontSize: 13,
+                                                    fontSize: 11,
                                                     fontWeight: 700,
                                                     color: esParteDeSwap
                                                         ? '#FBBF24'
@@ -591,7 +591,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             {/* Índice 1-based (PSeInt) */}
                                             <div
                                                 style={{
-                                                    fontSize: 10,
+                                                    fontSize: 9,
                                                     fontWeight: 600,
                                                     color: '#9CA3AF',
                                                     fontFamily: 'var(--mono)',
@@ -607,8 +607,8 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                     flexDirection: 'row',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    minHeight: 28,
-                                                    gap: 4,
+                                                    minHeight: 24,
+                                                    gap: 3,
                                                     flexWrap: 'wrap',
                                                 }}
                                             >
@@ -628,7 +628,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                         <span
                                                             style={{
                                                                 color: ptr.color,
-                                                                fontSize: 10,
+                                                                fontSize: 9,
                                                                 lineHeight: 1,
                                                             }}
                                                         >
@@ -636,14 +636,14 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                         </span>
                                                         <span
                                                             style={{
-                                                                fontSize: 10,
+                                                                fontSize: 9,
                                                                 fontWeight: 700,
                                                                 color: '#000',
                                                                 background:
                                                                     ptr.color,
                                                                 padding:
-                                                                    '1px 5px',
-                                                                borderRadius: 4,
+                                                                    '1px 4px',
+                                                                borderRadius: 3,
                                                                 whiteSpace:
                                                                     'nowrap',
                                                                 boxShadow:
@@ -779,8 +779,8 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                         style={{
                             display: 'grid',
                             gridTemplateColumns:
-                                'repeat(auto-fill, minmax(130px, 1fr))',
-                            gap: 8,
+                                'repeat(auto-fill, minmax(110px, 1fr))',
+                            gap: 6,
                         }}
                     >
                         {variablesEscalares.map((v, idx) => {
@@ -794,14 +794,18 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                             const color = colorDeVariable(idx);
 
                             const nombreNorm = v.nombre.toLowerCase();
-                            const esEmisora =
+                            const esEmisora = Boolean(
+                                transferencia.hayTransferencia && (
+                                    transferencia.variableOrigen?.toLowerCase() === nombreNorm ||
+                                    transferencia.variablesOrigen?.some(
+                                        (orig) => orig.toLowerCase() === nombreNorm
+                                    )
+                                )
+                            );
+                            const esReceptora = Boolean(
                                 transferencia.hayTransferencia &&
-                                transferencia.variableOrigen?.toLowerCase() ===
-                                    nombreNorm;
-                            const esReceptora =
-                                transferencia.hayTransferencia &&
-                                transferencia.variableDestino.toLowerCase() ===
-                                    nombreNorm;
+                                transferencia.variableDestino.toLowerCase() === nombreNorm
+                            );
 
                             const esAuxiliar =
                                 /^(aux|temp|temporal|buffer|swap)/i.test(
@@ -873,9 +877,9 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                     key={v.nombre}
                                     style={{
                                         background: esReceptora
-                                            ? 'rgba(74, 222, 128, 0.16)'
+                                            ? 'rgba(74, 222, 128, 0.18)'
                                             : esEmisora
-                                              ? 'rgba(251, 191, 36, 0.16)'
+                                              ? 'rgba(251, 191, 36, 0.18)'
                                               : haCambiado
                                                 ? 'rgba(74, 222, 128, 0.10)'
                                                 : esNuevo
@@ -892,15 +896,15 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                       ? 'rgba(96, 165, 250, 0.5)'
                                                       : 'var(--border)'
                                         }`,
-                                        borderRadius: 8,
-                                        padding: '6px 8px',
+                                        borderRadius: 6,
+                                        padding: '4px 7px',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        gap: 3,
+                                        gap: 2,
                                         boxShadow: esReceptora
-                                            ? '0 0 10px rgba(74, 222, 128, 0.4)'
+                                            ? '0 0 10px rgba(74, 222, 128, 0.45)'
                                             : esEmisora
-                                              ? '0 0 10px rgba(251, 191, 36, 0.4)'
+                                              ? '0 0 10px rgba(251, 191, 36, 0.45)'
                                               : 'none',
                                         transition: 'all 0.25s ease',
                                     }}
@@ -918,8 +922,12 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                 style={{
                                                     fontFamily: 'var(--mono)',
                                                     fontWeight: 700,
-                                                    fontSize: 12,
-                                                    color: color,
+                                                    fontSize: 11,
+                                                    color: esReceptora
+                                                        ? '#4ADE80'
+                                                        : esEmisora
+                                                          ? '#FBBF24'
+                                                          : color,
                                                 }}
                                             >
                                                 {v.nombre}
@@ -927,7 +935,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             {esAuxiliar && (
                                                 <span
                                                     style={{
-                                                        fontSize: 9,
+                                                        fontSize: 8,
                                                         fontWeight: 600,
                                                         background: 'rgba(244, 114, 182, 0.2)',
                                                         color: '#F472B6',
@@ -941,7 +949,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             {esTamanio && (
                                                 <span
                                                     style={{
-                                                        fontSize: 9,
+                                                        fontSize: 8,
                                                         fontWeight: 600,
                                                         background: 'rgba(148, 163, 184, 0.2)',
                                                         color: '#94A3B8',
@@ -954,10 +962,38 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             )}
                                         </div>
 
-                                        {haCambiado && !esReceptora && !esEmisora && (
+                                        {esReceptora ? (
                                             <span
                                                 style={{
-                                                    fontSize: 9,
+                                                    fontSize: 8,
+                                                    fontWeight: 700,
+                                                    color: '#4ADE80',
+                                                    background: 'rgba(74, 222, 128, 0.25)',
+                                                    padding: '1px 4px',
+                                                    borderRadius: 3,
+                                                }}
+                                                title="Variable recibiendo el resultado de la asignación"
+                                            >
+                                                ← destino
+                                            </span>
+                                        ) : esEmisora ? (
+                                            <span
+                                                style={{
+                                                    fontSize: 8,
+                                                    fontWeight: 700,
+                                                    color: '#FBBF24',
+                                                    background: 'rgba(251, 191, 36, 0.25)',
+                                                    padding: '1px 4px',
+                                                    borderRadius: 3,
+                                                }}
+                                                title="Variable aportando valor para la asignación"
+                                            >
+                                                origen
+                                            </span>
+                                        ) : haCambiado ? (
+                                            <span
+                                                style={{
+                                                    fontSize: 8,
                                                     fontWeight: 700,
                                                     color: '#4ADE80',
                                                     background: 'rgba(74, 222, 128, 0.2)',
@@ -967,7 +1003,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                             >
                                                 ✎ mod
                                             </span>
-                                        )}
+                                        ) : null}
                                     </div>
 
                                     {/* Fila de Valor actual y transición */}
@@ -975,15 +1011,21 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                         style={{
                                             display: 'flex',
                                             alignItems: 'baseline',
-                                            gap: 6,
+                                            gap: 5,
                                         }}
                                     >
                                         <span
                                             style={{
                                                 fontFamily: 'var(--mono)',
-                                                fontSize: 14,
+                                                fontSize: 13,
                                                 fontWeight: 700,
-                                                color: haCambiado ? '#4ADE80' : 'var(--text)',
+                                                color: esReceptora
+                                                    ? '#4ADE80'
+                                                    : esEmisora
+                                                      ? '#FBBF24'
+                                                      : haCambiado
+                                                        ? '#4ADE80'
+                                                        : 'var(--text)',
                                             }}
                                         >
                                             {v.valor}
