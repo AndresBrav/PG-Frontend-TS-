@@ -413,6 +413,69 @@ const PanelVariablesEjecucion = ({
             return fila;
         });
 
+    const renderizarCeldaValor = (
+        valor: string | undefined,
+        valorPrevio: string | undefined
+    ) => {
+        if (valor === undefined || valor === null) return '—';
+        const strVal = String(valor);
+
+        // Si es un arreglo (formato JSON "[...]")
+        if (strVal.startsWith('[') && strVal.endsWith(']')) {
+            try {
+                const arr = JSON.parse(strVal);
+                if (Array.isArray(arr)) {
+                    let prevArr: unknown[] | null = null;
+                    if (
+                        valorPrevio &&
+                        typeof valorPrevio === 'string' &&
+                        valorPrevio.startsWith('[') &&
+                        valorPrevio.endsWith(']')
+                    ) {
+                        const p = JSON.parse(valorPrevio);
+                        if (Array.isArray(p)) prevArr = p;
+                    }
+
+                    return (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                            <span>[</span>
+                            {arr.map((elem, idx) => {
+                                const cambio =
+                                    prevArr !== null &&
+                                    idx < prevArr.length &&
+                                    JSON.stringify(elem) !== JSON.stringify(prevArr[idx]);
+
+                                return (
+                                    <React.Fragment key={idx}>
+                                        {idx > 0 && <span style={{ opacity: 0.4, marginRight: 2 }}>,</span>}
+                                        <span
+                                            style={{
+                                                padding: cambio ? '1px 3px' : '0',
+                                                borderRadius: 3,
+                                                backgroundColor: cambio ? 'rgba(74, 222, 128, 0.28)' : 'transparent',
+                                                color: cambio ? '#4ADE80' : 'inherit',
+                                                fontWeight: cambio ? 800 : 400,
+                                                outline: cambio ? '1px solid rgba(74, 222, 128, 0.55)' : 'none',
+                                            }}
+                                            title={cambio ? `Índice [${idx + 1}] cambió a ${String(elem)}` : undefined}
+                                        >
+                                            {String(elem)}
+                                        </span>
+                                    </React.Fragment>
+                                );
+                            })}
+                            <span>]</span>
+                        </span>
+                    );
+                }
+            } catch {
+                /* no parseable */
+            }
+        }
+
+        return strVal;
+    };
+
     return (
         <div
             style={{
@@ -636,16 +699,31 @@ const PanelVariablesEjecucion = ({
                                             >
                                                 <th
                                                     style={{
-                                                        padding: '5px 12px',
+                                                        padding: '5px 10px',
                                                         fontSize: 11,
                                                         color: '#888',
                                                         textAlign: 'left',
                                                         borderBottom:
                                                             '1px solid var(--border)',
                                                         backgroundColor: 'var(--sidebar-bg)',
+                                                        whiteSpace: 'nowrap',
                                                     }}
                                                 >
                                                     paso
+                                                </th>
+                                                <th
+                                                    style={{
+                                                        padding: '5px 10px',
+                                                        fontSize: 11,
+                                                        color: '#888',
+                                                        textAlign: 'left',
+                                                        borderBottom:
+                                                            '1px solid var(--border)',
+                                                        backgroundColor: 'var(--sidebar-bg)',
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                >
+                                                    línea
                                                 </th>
                                                 {nombres.map((nombre, i) => (
                                                     <th
@@ -670,54 +748,77 @@ const PanelVariablesEjecucion = ({
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {armarFilas().map((fila, i) => {
-                                                const pasoActual = filas[i]?.paso;
-                                                const esSeleccionado = captura?.paso === pasoActual;
-                                                return (
-                                                    <tr
-                                                        key={`${pasoActual}-${i}`}
-                                                        style={{
-                                                            backgroundColor: esSeleccionado
-                                                                ? 'rgba(255,124,2,0.14)'
-                                                                : i % 2 === 0
-                                                                  ? 'transparent'
-                                                                  : 'rgba(255,255,255,0.02)',
-                                                        }}
-                                                    >
-                                                        <td
+                                            {(() => {
+                                                const filasArray = armarFilas();
+                                                return filasArray.map((fila, i) => {
+                                                    const capturaFila = filas[i];
+                                                    const pasoActual = capturaFila?.paso;
+                                                    const lineaActual = capturaFila?.linea;
+                                                    const instruccionFila = capturaFila?.instruccion;
+                                                    const esSeleccionado = captura?.paso === pasoActual;
+                                                    const filaPrevia = i > 0 ? filasArray[i - 1] : undefined;
+
+                                                    return (
+                                                        <tr
+                                                            key={`${pasoActual}-${i}`}
                                                             style={{
-                                                                padding: '4px 12px',
-                                                                fontSize: 10,
-                                                                color: esSeleccionado ? '#FF9D3D' : '#777',
-                                                                fontWeight: esSeleccionado ? 700 : 400,
+                                                                backgroundColor: esSeleccionado
+                                                                    ? 'rgba(255,124,2,0.14)'
+                                                                    : i % 2 === 0
+                                                                      ? 'transparent'
+                                                                      : 'rgba(255,255,255,0.02)',
                                                             }}
                                                         >
-                                                            {pasoActual ?? '—'}
-                                                        </td>
-                                                        {nombres.map((nombre) => (
                                                             <td
-                                                                key={nombre}
                                                                 style={{
-                                                                    padding: '4px 12px',
-                                                                    fontSize: 12,
-                                                                    fontFamily:
-                                                                        'var(--mono)',
-                                                                    whiteSpace:
-                                                                        'nowrap',
-                                                                    color:
-                                                                        fila[nombre] ===
-                                                                        undefined
-                                                                            ? '#555'
-                                                                            : 'var(--text)',
+                                                                    padding: '4px 10px',
+                                                                    fontSize: 10,
+                                                                    color: esSeleccionado ? '#FF9D3D' : '#777',
+                                                                    fontWeight: esSeleccionado ? 700 : 400,
+                                                                    whiteSpace: 'nowrap',
                                                                 }}
                                                             >
-                                                                {fila[nombre] ??
-                                                                    '—'}
+                                                                {pasoActual ?? '—'}
                                                             </td>
-                                                        ))}
-                                                    </tr>
-                                                );
-                                            })}
+                                                            <td
+                                                                style={{
+                                                                    padding: '4px 10px',
+                                                                    fontSize: 10,
+                                                                    fontFamily: 'var(--mono)',
+                                                                    color: esSeleccionado ? '#FBBF24' : '#94A3B8',
+                                                                    whiteSpace: 'nowrap',
+                                                                }}
+                                                                title={instruccionFila ? `Instrucción: ${instruccionFila}` : undefined}
+                                                            >
+                                                                {lineaActual ? `L${lineaActual}` : '—'}
+                                                            </td>
+                                                            {nombres.map((nombre) => (
+                                                                <td
+                                                                    key={nombre}
+                                                                    style={{
+                                                                        padding: '4px 12px',
+                                                                        fontSize: 12,
+                                                                        fontFamily:
+                                                                            'var(--mono)',
+                                                                        whiteSpace:
+                                                                            'nowrap',
+                                                                        color:
+                                                                            fila[nombre] ===
+                                                                            undefined
+                                                                                ? '#555'
+                                                                                : 'var(--text)',
+                                                                    }}
+                                                                >
+                                                                    {renderizarCeldaValor(
+                                                                        fila[nombre],
+                                                                        filaPrevia ? filaPrevia[nombre] : undefined
+                                                                    )}
+                                                                </td>
+                                                            ))}
+                                                        </tr>
+                                                    );
+                                                });
+                                            })()}
                                         </tbody>
                                     </table>
                                 </div>
