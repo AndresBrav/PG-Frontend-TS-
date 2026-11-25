@@ -114,6 +114,57 @@ const celdaEscritorio = {
     whiteSpace: 'nowrap' as const,
 };
 
+/** Ícono SVG de ojo para mostrar / ocultar (mismo diseño SVG de BotonMostrarPassword) */
+const IconoOjo = ({ visible, size = 14 }: { visible: boolean; size?: number }) => {
+    if (!visible) {
+        return (
+            <svg
+                width={size}
+                height={size}
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: 'inline-block', verticalAlign: 'middle' }}
+            >
+                <path
+                    d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.53 13.53 0 0 0 2 12s3 8 10 8a9.74 9.74 0 0 0 5.39-1.61M2 2l20 20"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+            </svg>
+        );
+    }
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: 'inline-block', verticalAlign: 'middle' }}
+        >
+            <path
+                d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <circle
+                cx="12"
+                cy="12"
+                r="3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+        </svg>
+    );
+};
+
 /**
  * Panel de la ejecución, con vista de película: pestañas de tabla tipo
  * PSeInt, evolution SVG, barras animadas y arreglos en casillas, más un
@@ -133,6 +184,19 @@ const PanelVariablesEjecucion = ({
     const [reproduciendo, setReproduciendo] = useState(false);
     const [velocidad, setVelocidad] = useState(2);
     const [mostrarHistorial, setMostrarHistorial] = useState(true);
+    const [variablesOcultas, setVariablesOcultas] = useState<Set<string>>(new Set());
+
+    const alternarVisibilidadVariable = (nombre: string) => {
+        setVariablesOcultas((prev) => {
+            const nuevo = new Set(prev);
+            if (nuevo.has(nombre)) {
+                nuevo.delete(nombre);
+            } else {
+                nuevo.add(nombre);
+            }
+            return nuevo;
+        });
+    };
 
     const onLineaActivaRef = useRef(onLineaActiva);
     onLineaActivaRef.current = onLineaActiva;
@@ -177,6 +241,11 @@ const PanelVariablesEjecucion = ({
         }
         return vistos;
     }, [cortado, captura]);
+
+    const nombresVisibles = useMemo(
+        () => nombres.filter((n) => !variablesOcultas.has(n)),
+        [nombres, variablesOcultas]
+    );
 
     const filas = useMemo(() => cortado.slice(-MAX_FILAS), [cortado]);
     const filasEscritorio = useMemo(() => {
@@ -597,6 +666,7 @@ const PanelVariablesEjecucion = ({
                             const previo = valoresAnteriores.get(v.nombre);
                             const cambio =
                                 anterior !== null && previo !== v.valor;
+                            const estaOculta = variablesOcultas.has(v.nombre);
                             return (
                                 <span
                                     key={v.nombre}
@@ -611,12 +681,40 @@ const PanelVariablesEjecucion = ({
                                         outline: cambio
                                             ? '1px solid rgba(74, 222, 128, 0.45)'
                                             : '1px solid transparent',
+                                        opacity: estaOculta ? 0.55 : 1,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 5,
+                                        transition: 'all 0.2s ease',
                                     }}
                                 >
                                     <b style={{ color: colorDeNombre(v.nombre) }}>
                                         {v.nombre}
                                     </b>
                                     {` = ${v.valor}`}
+                                    <button
+                                        type="button"
+                                        onClick={() => alternarVisibilidadVariable(v.nombre)}
+                                        title={
+                                            estaOculta
+                                                ? `Mostrar ${v.nombre} en la tabla de traza`
+                                                : `Ocultar ${v.nombre} de la tabla de traza`
+                                        }
+                                        style={{
+                                            background: 'transparent',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '1px 2px',
+                                            lineHeight: 1,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: estaOculta ? '#94A3B8' : '#FBBF24',
+                                            opacity: estaOculta ? 0.6 : 0.9,
+                                        }}
+                                    >
+                                        <IconoOjo visible={!estaOculta} size={14} />
+                                    </button>
                                 </span>
                             );
                         })}
@@ -646,11 +744,40 @@ const PanelVariablesEjecucion = ({
                                     justifyContent: 'space-between',
                                     flexShrink: 0,
                                     marginBottom: 4,
+                                    flexWrap: 'wrap',
+                                    gap: 6,
                                 }}
                             >
-                                <span style={{ fontSize: 11, color: '#aaa', fontWeight: 600 }}>
-                                    Traza de variables por paso ({filas.length} pasos)
-                                </span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                                    <span style={{ fontSize: 11, color: '#aaa', fontWeight: 600 }}>
+                                        Traza de variables por paso ({filas.length} pasos)
+                                    </span>
+                                    {variablesOcultas.size > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setVariablesOcultas(new Set())}
+                                            title="Volver a mostrar todas las columnas ocultas"
+                                            style={{
+                                                background: 'rgba(255, 157, 61, 0.12)',
+                                                border: '1px solid rgba(255, 157, 61, 0.35)',
+                                                color: '#FBBF24',
+                                                borderRadius: 4,
+                                                cursor: 'pointer',
+                                                fontSize: 10,
+                                                fontWeight: 600,
+                                                padding: '2px 7px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: 5,
+                                            }}
+                                        >
+                                            <IconoOjo visible={true} size={13} />
+                                            <span>
+                                                Mostrar todas ({variablesOcultas.size} oculta{variablesOcultas.size > 1 ? 's' : ''})
+                                            </span>
+                                        </button>
+                                    )}
+                                </div>
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -727,31 +854,95 @@ const PanelVariablesEjecucion = ({
                                                 >
                                                     línea
                                                 </th>
-                                                {nombres.map((nombre, i) => (
-                                                    <th
-                                                        key={nombre}
-                                                        style={{
-                                                            padding: '5px 12px',
-                                                            fontSize: 12,
-                                                            fontFamily:
-                                                                'var(--mono)',
-                                                            textAlign: 'left',
-                                                            borderBottom:
-                                                                '1px solid var(--border)',
-                                                            color: colorDe(i),
-                                                            whiteSpace:
-                                                                'nowrap',
-                                                            backgroundColor: 'var(--sidebar-bg)',
-                                                        }}
-                                                    >
-                                                        {nombre}
-                                                    </th>
-                                                ))}
+                                                {nombresVisibles.map((nombre) => {
+                                                    const idxOriginal = nombres.indexOf(nombre);
+                                                    return (
+                                                        <th
+                                                            key={nombre}
+                                                            style={{
+                                                                padding: '5px 10px',
+                                                                fontSize: 12,
+                                                                fontFamily:
+                                                                    'var(--mono)',
+                                                                textAlign: 'left',
+                                                                borderBottom:
+                                                                    '1px solid var(--border)',
+                                                                color: colorDe(idxOriginal >= 0 ? idxOriginal : 0),
+                                                                whiteSpace:
+                                                                    'nowrap',
+                                                                backgroundColor: 'var(--sidebar-bg)',
+                                                            }}
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 5,
+                                                                }}
+                                                            >
+                                                                <span>{nombre}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        alternarVisibilidadVariable(nombre);
+                                                                    }}
+                                                                    title={`Ocultar columna ${nombre} de la tabla`}
+                                                                    style={{
+                                                                        background: 'transparent',
+                                                                        border: 'none',
+                                                                        cursor: 'pointer',
+                                                                        padding: '1px 2px',
+                                                                        opacity: 0.7,
+                                                                        color: 'inherit',
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        justifyContent: 'center',
+                                                                    }}
+                                                                >
+                                                                    <IconoOjo visible={true} size={13} />
+                                                                </button>
+                                                            </div>
+                                                        </th>
+                                                    );
+                                                })}
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {(() => {
                                                 const filasArray = armarFilas();
+                                                if (nombresVisibles.length === 0) {
+                                                    return (
+                                                        <tr>
+                                                            <td
+                                                                colSpan={2}
+                                                                style={{
+                                                                    padding: '16px 10px',
+                                                                    textAlign: 'center',
+                                                                    color: '#888',
+                                                                    fontSize: 11,
+                                                                }}
+                                                            >
+                                                                Todas las columnas están ocultas.{' '}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setVariablesOcultas(new Set())}
+                                                                    style={{
+                                                                        background: 'transparent',
+                                                                        border: 'none',
+                                                                        color: '#FBBF24',
+                                                                        cursor: 'pointer',
+                                                                        textDecoration: 'underline',
+                                                                        fontWeight: 600,
+                                                                    }}
+                                                                >
+                                                                    Mostrar todas
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                }
+
                                                 return filasArray.map((fila, i) => {
                                                     const capturaFila = filas[i];
                                                     const pasoActual = capturaFila?.paso;
@@ -794,7 +985,7 @@ const PanelVariablesEjecucion = ({
                                                             >
                                                                 {lineaActual ? `L${lineaActual}` : '—'}
                                                             </td>
-                                                            {nombres.map((nombre) => (
+                                                            {nombresVisibles.map((nombre) => (
                                                                 <td
                                                                     key={nombre}
                                                                     style={{
