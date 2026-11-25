@@ -1136,13 +1136,21 @@ const PanelVariablesEjecucion = ({
                 </div>
             )}
 
-            {tab === 'evolucion' && <GraficaEvolucion perfiles={perfiles} />}
+            {tab === 'evolucion' && (
+                <GraficaEvolucion
+                    perfiles={perfiles}
+                    variablesOcultas={variablesOcultas}
+                    onToggleVariable={alternarVisibilidadVariable}
+                />
+            )}
 
             {tab === 'barras' && (
                 <BarrasEjecucion
                     perfiles={perfiles}
                     captura={captura}
                     anterior={anterior}
+                    variablesOcultas={variablesOcultas}
+                    onToggleVariable={alternarVisibilidadVariable}
                 />
             )}
 
