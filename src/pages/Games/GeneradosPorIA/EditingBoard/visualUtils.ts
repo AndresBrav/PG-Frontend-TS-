@@ -734,6 +734,7 @@ export const detectarTransferenciaVariable = (
             valorPrevioDestino,
             variableOrigen: origen,
             variablesOrigen: variablesOrigenEncontradas,
+            origenesDetalle: [{ nombre: origen, valor: valOrig }],
             valorOrigen: valOrig,
             formula: `${variableDestino} ← ${origen}`,
         };
@@ -745,6 +746,14 @@ export const detectarTransferenciaVariable = (
         valoresAnteriores?.get(primerOrigen.toLowerCase()) ??
         mapaActual.get(primerOrigen.toLowerCase()) ??
         '';
+
+    const origenesDetalle = variablesOrigenEncontradas.map((nombre) => ({
+        nombre,
+        valor:
+            valoresAnteriores?.get(nombre.toLowerCase()) ??
+            mapaActual.get(nombre.toLowerCase()) ??
+            '',
+    }));
 
     let operacionVisual = expresion;
     if (variablesOrigenEncontradas.length === 1) {
@@ -760,6 +769,7 @@ export const detectarTransferenciaVariable = (
         valorPrevioDestino,
         variableOrigen: primerOrigen,
         variablesOrigen: variablesOrigenEncontradas,
+        origenesDetalle,
         valorOrigen: valOrig,
         formula: `${variableDestino} ← ${expresion}`,
         operacionVisual: operacionVisual || expresion,

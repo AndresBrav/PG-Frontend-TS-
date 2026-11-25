@@ -330,53 +330,135 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                     </div>
                 </div>
 
-                {/* 3. Ranura Origen (Emisora - Derecha, como en ... <- b) */}
-                <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 4,
-                        minWidth: 88,
-                        zIndex: 2,
-                    }}
-                >
-                    <span
-                        style={{
-                            fontSize: 10,
-                            fontWeight: 700,
-                            color: '#94A3B8',
-                            fontFamily: 'var(--mono)',
-                        }}
-                    >
-                        {tipo === 'literal' ? 'VALOR' : `ORIGEN (${variableOrigen})`}
-                    </span>
-
+                {/* 3. Ranuras Origen (Emisoras - Derecha) */}
+                {tipo === 'literal' ? (
                     <div
                         style={{
-                            padding: '6px 14px',
-                            borderRadius: 6,
-                            background:
-                                tipo === 'literal'
-                                    ? 'rgba(96, 165, 250, 0.15)'
-                                    : 'rgba(251, 191, 36, 0.15)',
-                            border: `1px solid ${
-                                tipo === 'literal' ? '#60A5FA' : '#FBBF24'
-                            }`,
-                            color: tipo === 'literal' ? '#93C5FD' : '#FDE68A',
-                            fontFamily: 'var(--mono)',
-                            fontSize: 14,
-                            fontWeight: 700,
-                            boxShadow: `0 0 10px ${
-                                tipo === 'literal'
-                                    ? 'rgba(96, 165, 250, 0.3)'
-                                    : 'rgba(251, 191, 36, 0.3)'
-                            }`,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 3,
+                            minWidth: 78,
+                            zIndex: 2,
                         }}
                     >
-                        {tipo === 'literal' ? valorNuevo : valorOrigen}
+                        <span
+                            style={{
+                                fontSize: 9,
+                                fontWeight: 700,
+                                color: '#94A3B8',
+                                fontFamily: 'var(--mono)',
+                            }}
+                        >
+                            VALOR
+                        </span>
+
+                        <div
+                            style={{
+                                padding: '4px 10px',
+                                borderRadius: 6,
+                                background: 'rgba(96, 165, 250, 0.15)',
+                                border: '1px solid #60A5FA',
+                                color: '#93C5FD',
+                                fontFamily: 'var(--mono)',
+                                fontSize: 13,
+                                fontWeight: 700,
+                                boxShadow: '0 0 10px rgba(96, 165, 250, 0.3)',
+                            }}
+                        >
+                            {valorNuevo}
+                        </div>
                     </div>
-                </div>
+                ) : transferencia.origenesDetalle && transferencia.origenesDetalle.length > 1 ? (
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            zIndex: 2,
+                            flexWrap: 'wrap',
+                            justifyContent: 'flex-end',
+                        }}
+                    >
+                        {transferencia.origenesDetalle.map((orig) => (
+                            <div
+                                key={orig.nombre}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: 3,
+                                    minWidth: 50,
+                                }}
+                            >
+                                <span
+                                    style={{
+                                        fontSize: 9,
+                                        fontWeight: 700,
+                                        color: '#FBBF24',
+                                        fontFamily: 'var(--mono)',
+                                    }}
+                                >
+                                    ORIGEN ({orig.nombre})
+                                </span>
+
+                                <div
+                                    style={{
+                                        padding: '4px 8px',
+                                        borderRadius: 6,
+                                        background: 'rgba(251, 191, 36, 0.15)',
+                                        border: '1px solid #FBBF24',
+                                        color: '#FDE68A',
+                                        fontFamily: 'var(--mono)',
+                                        fontSize: 13,
+                                        fontWeight: 700,
+                                        boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)',
+                                    }}
+                                >
+                                    {orig.valor}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 3,
+                            minWidth: 78,
+                            zIndex: 2,
+                        }}
+                    >
+                        <span
+                            style={{
+                                fontSize: 9,
+                                fontWeight: 700,
+                                color: '#94A3B8',
+                                fontFamily: 'var(--mono)',
+                            }}
+                        >
+                            ORIGEN ({variableOrigen})
+                        </span>
+
+                        <div
+                            style={{
+                                padding: '4px 10px',
+                                borderRadius: 6,
+                                background: 'rgba(251, 191, 36, 0.15)',
+                                border: '1px solid #FBBF24',
+                                color: '#FDE68A',
+                                fontFamily: 'var(--mono)',
+                                fontSize: 13,
+                                fontWeight: 700,
+                                boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)',
+                            }}
+                        >
+                            {valorOrigen}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
