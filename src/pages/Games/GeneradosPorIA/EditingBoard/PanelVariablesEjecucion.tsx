@@ -132,7 +132,7 @@ const PanelVariablesEjecucion = ({
     const [indiceRep, setIndiceRep] = useState(0);
     const [reproduciendo, setReproduciendo] = useState(false);
     const [velocidad, setVelocidad] = useState(2);
-    const [mostrarHistorial, setMostrarHistorial] = useState(false);
+    const [mostrarHistorial, setMostrarHistorial] = useState(true);
 
     const onLineaActivaRef = useRef(onLineaActiva);
     onLineaActivaRef.current = onLineaActiva;
