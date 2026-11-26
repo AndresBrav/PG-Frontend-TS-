@@ -692,6 +692,11 @@ const ReporteEjercicioGrupo = () => {
                                                                     estudiante.codigo
                                                                 }
                                                             </span>
+                                                            {estudiante.correo && (
+                                                                <span className="mt-0.5 block text-xs text-gray-400">
+                                                                    {estudiante.correo}
+                                                                </span>
+                                                            )}
                                                         </td>
                                                         <td className="px-3 py-3">
                                                             <span className="text-gray-300">

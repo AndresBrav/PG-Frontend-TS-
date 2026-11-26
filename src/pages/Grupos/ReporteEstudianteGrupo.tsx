@@ -473,7 +473,10 @@ const ReporteEstudianteGrupo = () => {
                                 Detalle del estudiante
                             </h1>
                             <p className="mt-1 text-sm text-gray-400">
-                                {estudiante.username} · código {estudiante.codigo}{' '}
+                                {estudiante.username} · código {estudiante.codigo}
+                                {estudiante.correo && (
+                                    <> · <span className="text-gray-300">{estudiante.correo}</span></>
+                                )}{' '}
                                 · Grupo {reporte.grupo.nombre}
                             </p>
                             <p className="mt-1 text-xs text-gray-500">

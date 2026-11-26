@@ -844,6 +844,7 @@ const ReporteGrupoPage = () => {
                                                         id: estudianteId,
                                                         username,
                                                         codigo,
+                                                        correo,
                                                         metricas,
                                                     }) => (
                                                         <tr
@@ -857,6 +858,11 @@ const ReporteGrupoPage = () => {
                                                                 <span className="mt-1 block font-mono text-xs text-gray-500">
                                                                     {codigo}
                                                                 </span>
+                                                                {correo && (
+                                                                    <span className="mt-0.5 block text-xs text-gray-400">
+                                                                        {correo}
+                                                                    </span>
+                                                                )}
                                                                 <Link
                                                                     to={`/grupos/${id}/reporte/estudiantes/${estudianteId}?${new URLSearchParams(
                                                                         {

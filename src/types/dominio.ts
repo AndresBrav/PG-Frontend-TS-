@@ -141,6 +141,7 @@ export interface ReporteGrupo {
             id: number;
             codigo: string;
             username: string;
+            correo: string | null;
             fecha_union: string | null;
             porTemario: Array<
                 MetricasProgresoGrupo & { temario_id: number }
@@ -184,6 +185,7 @@ export interface EstudianteGrupo {
     id: number;
     codigo: string;
     username: string;
+    correo?: string | null;
     fecha_union: string;
 }
 
@@ -282,7 +284,7 @@ export interface EntregaGrupo {
 
 /** Fila del ranking de un grupo. */
 export interface FilaRankingGrupo {
-    estudiante: { id: number; codigo: string; username: string };
+    estudiante: { id: number; codigo: string; username: string; correo?: string | null };
     completados: number;
     puntos: number;
 }

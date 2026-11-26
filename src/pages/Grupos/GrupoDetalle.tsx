@@ -1170,7 +1170,9 @@ const TablaEstudiantesGrupo = ({
         return estudiantesOrdenados.filter(
             (estudiante) =>
                 estudiante.username.toLocaleLowerCase().includes(consulta) ||
-                estudiante.codigo.toLocaleLowerCase().includes(consulta),
+                estudiante.codigo.toLocaleLowerCase().includes(consulta) ||
+                (estudiante.correo &&
+                    estudiante.correo.toLocaleLowerCase().includes(consulta)),
         );
     }, [busqueda, estudiantesOrdenados]);
 
@@ -1186,6 +1188,9 @@ const TablaEstudiantesGrupo = ({
                 <td className="px-4 py-3">{estudiante.username}</td>
                 <td className="px-4 py-3 text-gray-400">
                     {estudiante.codigo}
+                </td>
+                <td className="px-4 py-3 text-xs text-gray-400">
+                    {estudiante.correo ?? '—'}
                 </td>
                 <td className="px-4 py-3 text-right font-bold text-[#FF7C02]">
                     {estudiante.puntos} pts
@@ -1259,6 +1264,7 @@ const TablaEstudiantesGrupo = ({
                                     <th className="px-4 py-3">Puesto</th>
                                     <th className="px-4 py-3">Estudiante</th>
                                     <th className="px-4 py-3">Código SIS</th>
+                                    <th className="px-4 py-3">Correo</th>
                                     <th className="px-4 py-3 text-right">
                                         Puntos
                                     </th>
@@ -1280,6 +1286,7 @@ const TablaEstudiantesGrupo = ({
                                     <th>Puesto</th>
                                     <th>Estudiante</th>
                                     <th>Código SIS</th>
+                                    <th>Correo</th>
                                     <th>Puntos</th>
                                 </tr>
                             </thead>
