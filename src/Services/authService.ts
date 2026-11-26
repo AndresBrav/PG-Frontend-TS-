@@ -8,7 +8,7 @@ export interface LoginResponse {
 export interface DatosRegistro {
     codigo: string;
     username: string;
-    edad: number;
+    correo: string;
     password: string;
     /** Rol elegido en el registro (estudiante o profesor). */
     rol: Rol;

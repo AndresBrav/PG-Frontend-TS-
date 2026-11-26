@@ -372,7 +372,7 @@ const TablaEstudiantes = ({
                             <tr className="text-xs uppercase tracking-wider text-gray-400">
                                 <th className="px-3 py-2">Estudiante</th>
                                 <th className="px-3 py-2">Código</th>
-                                <th className="px-3 py-2">Edad</th>
+                                <th className="px-3 py-2">Correo</th>
                                 <th className="px-3 py-2">Puntos estáticos</th>
                                 <th className="px-3 py-2">Puntos IA</th>
                                 <th className="px-3 py-2">Puntos de grupo</th>
@@ -396,8 +396,8 @@ const TablaEstudiantes = ({
                                     <td className="px-3 py-3 font-mono text-xs text-gray-300">
                                         {estudiante.codigo}
                                     </td>
-                                    <td className="px-3 py-3 text-gray-300">
-                                        {estudiante.edad}
+                                    <td className="px-3 py-3 text-xs text-gray-300">
+                                        {estudiante.correo ?? '—'}
                                     </td>
                                     <td className="px-3 py-3 font-semibold text-sky-300">
                                         {formatearNumero(
@@ -465,7 +465,7 @@ const TablaEstudiantes = ({
                                     pts
                                 </span>
                                 <span className="rounded-lg bg-white/5 px-2 py-1 text-gray-400">
-                                    {estudiante.edad} años
+                                    {estudiante.correo ?? 'Sin correo'}
                                 </span>
                                 <span className="rounded-lg bg-white/5 px-2 py-1 text-emerald-300">
                                     {estudiante.completados} ejercicios

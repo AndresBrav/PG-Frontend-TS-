@@ -2,7 +2,7 @@ import axios from "axios";
 
 interface UsuarioPerfil {
     nombre: string;
-    edad: number;
+    correo: string | null;
     idAvatar: string;
 }
 
@@ -28,8 +28,8 @@ export const traerUsuarios = async (
 
         if (!response.data) return null;
 
-        const { nombre, edad, idAvatar } = response.data;
-        return { nombre, edad, idAvatar };
+        const { nombre, correo, idAvatar } = response.data;
+        return { nombre, correo, idAvatar };
     } catch (error) {
         console.error("Error fetching user:", error);
         return null;

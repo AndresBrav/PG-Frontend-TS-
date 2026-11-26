@@ -618,10 +618,13 @@ const AppHeader = () => {
                                 </div>
                                 <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
                                     <p className="text-xs text-gray-400">
-                                        Edad
+                                        Correo
                                     </p>
-                                    <p className="mt-1 text-xl font-bold text-white">
-                                        {usuario.edad}
+                                    <p
+                                        className="mt-1 text-xs font-semibold text-white break-all line-clamp-2"
+                                        title={usuario.correo ?? undefined}
+                                    >
+                                        {usuario.correo ?? '—'}
                                     </p>
                                 </div>
                             </div>

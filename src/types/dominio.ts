@@ -4,7 +4,7 @@ export interface PerfilUsuario {
     id: number;
     codigo: string;
     username: string;
-    edad: number;
+    correo: string | null;
     rol: Rol;
     avatarUrl: string | null;
     puntos: number;
@@ -16,7 +16,7 @@ export interface MiProgreso {
         id: number;
         codigo: string;
         username: string;
-        edad: number;
+        correo: string | null;
         rol: Rol;
     };
     resumen: {
@@ -58,7 +58,7 @@ export interface EstudianteAdmin {
     id: number;
     codigo: string;
     username: string;
-    edad: number;
+    correo: string | null;
     createdAt: string;
     puntos: number;
     completados: number;

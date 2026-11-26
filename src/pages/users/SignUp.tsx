@@ -31,7 +31,7 @@ const OPCIONES_ROL: OpcionRol[] = [
 const SignUp = () => {
     const [codigo, setCodigo] = useState<string>('');
     const [username, setUsername] = useState<string>('');
-    const [edad, setEdad] = useState<string>('');
+    const [correo, setCorreo] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [confirmarPassword, setConfirmarPassword] = useState<string>('');
     const [rol, setRol] = useState<Rol>('estudiante');
@@ -49,15 +49,10 @@ const SignUp = () => {
             return 'El nombre de usuario es obligatorio.';
         }
 
-        const edadNumero = Number(edad);
-
-        if (
-            edad.trim() === '' ||
-            !Number.isInteger(edadNumero) ||
-            edadNumero <= 0 ||
-            edadNumero > 120
-        ) {
-            return 'La edad debe ser un número entero entre 1 y 120.';
+        const correoNormalizado = correo.trim().toLowerCase();
+        const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!correoNormalizado || !regexCorreo.test(correoNormalizado)) {
+            return 'Ingresa un correo electrónico válido.';
         }
 
         if (password.length < 4) {
@@ -88,7 +83,7 @@ const SignUp = () => {
             const data = await registerUser({
                 codigo: codigo.trim(),
                 username: username.trim(),
-                edad: Number(edad),
+                correo: correo.trim().toLowerCase(),
                 password,
                 rol,
             });
@@ -164,19 +159,17 @@ const SignUp = () => {
                 </div>
 
                 <div className="auth-field">
-                    <label className="auth-label" htmlFor="registro-edad">
-                        Edad
+                    <label className="auth-label" htmlFor="registro-correo">
+                        Correo electrónico
                     </label>
                     <input
-                        id="registro-edad"
+                        id="registro-correo"
                         className="flex-input-login"
-                        type="number"
-                        placeholder="Ej. 17"
-                        value={edad}
-                        onChange={(e) => setEdad(e.target.value)}
-                        min={1}
-                        max={120}
-                        inputMode="numeric"
+                        type="email"
+                        placeholder="tu.correo@ejemplo.com"
+                        value={correo}
+                        onChange={(e) => setCorreo(e.target.value)}
+                        autoComplete="email"
                         required
                     />
                 </div>
