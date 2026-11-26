@@ -22,6 +22,7 @@ import {
     obtenerGrupoProfesor,
     renombrarTemarioGrupo,
 } from '../../api/gruposApi';
+import { ModalInscribirEstudiantes } from './ModalInscribirEstudiantes';
 import type { ResultadoInscripcionSIS } from '../../api/gruposApi';
 import type {
     EjercicioGrupo,
@@ -936,6 +937,7 @@ export const EstudiantesListado = ({
         estudiantes: EstudianteGrupo[];
     } | null>(null);
     const [cargando, setCargando] = useState(true);
+    const [mostrarModalInscribir, setMostrarModalInscribir] = useState(false);
 
     useEffect(() => {
         const cargar = async () => {
@@ -1095,10 +1097,10 @@ export const EstudiantesListado = ({
                     </div>
                     <button
                         type="button"
-                        onClick={() => void agregarPorCodigoSIS()}
-                        className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-white transition hover:bg-[#e66d00]"
+                        onClick={() => setMostrarModalInscribir(true)}
+                        className="rounded-xl bg-[#FF7C02] px-4 py-2 text-sm font-bold text-black hover:brightness-110 transition"
                     >
-                        + Agregar por código SIS
+                        + Inscribir estudiantes
                     </button>
                 </div>
                 <TablaEstudiantesGrupo
@@ -1110,6 +1112,21 @@ export const EstudiantesListado = ({
                     }))}
                 />
             </section>
+
+            {mostrarModalInscribir && claveAcceso && (
+                <ModalInscribirEstudiantes
+                    claveAcceso={claveAcceso}
+                    grupoId={grupoId}
+                    onCerrar={() => setMostrarModalInscribir(false)}
+                    onExito={async () => {
+                        try {
+                            setGrupo(await obtenerGrupoProfesor(claveAcceso, grupoId));
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }}
+                />
+            )}
         </div>
     );
 };

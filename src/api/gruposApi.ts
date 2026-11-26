@@ -61,6 +61,26 @@ export interface ResultadoInscripcionSIS {
     estado: EstadoInscripcionSIS;
 }
 
+export interface UsuarioBusquedaGrupo {
+    id: number;
+    username: string;
+    codigo: string;
+    correo: string | null;
+    yaInscrito: boolean;
+}
+
+export const buscarEstudiantesParaGrupo = async (
+    clave: string,
+    grupoId: number | string,
+    query: string,
+): Promise<UsuarioBusquedaGrupo[]> => {
+    const { data } = await api.get<{ estudiantes: UsuarioBusquedaGrupo[] }>(
+        `/profesor/grupos/${grupoId}/buscar-estudiantes?q=${encodeURIComponent(query)}`,
+        configConToken(clave),
+    );
+    return data.estudiantes;
+};
+
 export const agregarEstudiantesPorCodigo = async (
     clave: string,
     grupoId: number | string,
@@ -68,7 +88,7 @@ export const agregarEstudiantesPorCodigo = async (
 ): Promise<ResultadoInscripcionSIS[]> => {
     const { data } = await api.post<{ resultados: ResultadoInscripcionSIS[] }>(
         `/profesor/grupos/${grupoId}/estudiantes`,
-        { codigos },
+        { identificadores: codigos },
         configConToken(clave),
     );
     return data.resultados;
