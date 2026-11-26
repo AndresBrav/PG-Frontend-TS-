@@ -669,6 +669,7 @@ const ReporteEstudianteGrupo = () => {
                                 <p>
                                     Estudiante: {estudiante.username} · SIS{' '}
                                     {estudiante.codigo}
+                                    {estudiante.correo && ` · Correo: ${estudiante.correo}`}
                                 </p>
                                 <p>Grupo: {reporte.grupo.nombre}</p>
                                 <p>

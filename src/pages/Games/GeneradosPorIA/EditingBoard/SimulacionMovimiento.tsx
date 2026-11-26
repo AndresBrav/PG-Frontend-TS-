@@ -642,7 +642,7 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                                     <span
                                                                         style={{
                                                                             color: ptr.color,
-                                                                            fontSize: 9,
+                                                                            fontSize: 12,
                                                                             lineHeight: 1,
                                                                         }}
                                                                     >
@@ -650,14 +650,14 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                                                                     </span>
                                                                     <span
                                                                         style={{
-                                                                            fontSize: 9,
-                                                                            fontWeight: 700,
+                                                                            fontSize: 11,
+                                                                            fontWeight: 800,
                                                                             color: '#000',
                                                                             background: ptr.color,
-                                                                            padding: '1px 4px',
-                                                                            borderRadius: 3,
+                                                                            padding: '2px 6px',
+                                                                            borderRadius: 4,
                                                                             whiteSpace: 'nowrap',
-                                                                            boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                                                                            boxShadow: '0 2px 5px rgba(0,0,0,0.4)',
                                                                         }}
                                                                     >
                                                                         {ptr.variable}

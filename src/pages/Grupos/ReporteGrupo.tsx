@@ -942,11 +942,17 @@ const ReporteGrupoPage = () => {
                                                         id: estudianteId,
                                                         username,
                                                         codigo,
+                                                        correo,
                                                         metricas,
                                                     }) => (
                                                         <tr key={estudianteId}>
                                                             <td>
-                                                                {username} ({codigo})
+                                                                <div>{username} ({codigo})</div>
+                                                                {correo && (
+                                                                    <div style={{ fontSize: '7pt', color: '#555' }}>
+                                                                        {correo}
+                                                                    </div>
+                                                                )}
                                                             </td>
                                                             <td>
                                                                 {metricas.completados}/

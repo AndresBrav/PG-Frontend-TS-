@@ -734,15 +734,17 @@ class Compilador {
             );
         }
         const pasoVar = `__pi${this.contador++}`;
+        const limVar = `__lim${this.contador++}`;
+        const ctrlVar = `__ctrl${this.contador++}`;
         const contadorIteracion = this.debug
             ? `__debugIter${this.contador++}`
             : null;
         this.declararVariable(vNombre);
         this.out.push(
-            `{ const ${pasoVar} = ${pasoVal};${contadorIteracion ? ` let ${contadorIteracion} = 0;` : ''}`
+            `{ const ${pasoVar} = ${pasoVal}; const ${limVar} = ${fin};${contadorIteracion ? ` let ${contadorIteracion} = 0;` : ''}`
         );
         this.out.push(
-            `for (${vNombre} = ${ini}; ${pasoVar} > 0 ? ${vNombre} <= ${fin} : ${vNombre} >= ${fin}; ${vNombre} = ${vNombre} + ${pasoVar}) { ${contadorIteracion ? `${contadorIteracion}++; ` : ''}__paso();`
+            `for (let ${ctrlVar} = ${ini}; ${pasoVar} > 0 ? ${ctrlVar} <= ${limVar} : ${ctrlVar} >= ${limVar}; ) { ${vNombre} = ${ctrlVar}; ${contadorIteracion ? `${contadorIteracion}++; ` : ''}__paso();`
         );
         if (contadorIteracion) {
             this.ciclosDebug.push({
@@ -764,6 +766,9 @@ class Compilador {
         if (contadorIteracion) {
             this.ciclosDebug.pop();
         }
+        this.out.push(
+            `${ctrlVar} += ${pasoVar}; if (${pasoVar} > 0 ? ${ctrlVar} <= ${limVar} : ${ctrlVar} >= ${limVar}) { ${vNombre} = ${ctrlVar}; }`
+        );
         this.out.push('}');
         this.out.push('}');
     }

@@ -307,11 +307,19 @@ export const detectarPunterosArreglo = (
             const nombreTipico = ES_NOMBRE_INDICE.test(nombreLower);
 
             if (esIterador || indexa || nombreTipico) {
+                // Alinear color con el de la variable en variablesEscalares / perfiles
+                const idxEnVariables = variables.findIndex(
+                    (varItem) => varItem.nombre.toLowerCase() === nombreLower
+                );
+                const colorPuntero = colorDeVariable(
+                    idxEnVariables >= 0 ? idxEnVariables : idx
+                );
+
                 punteros.push({
                     variable: v.nombre,
                     posicion1Based: num,
                     indice0Based: num - 1,
-                    color: colorDeVariable(idx),
+                    color: colorPuntero,
                 });
             }
         }
