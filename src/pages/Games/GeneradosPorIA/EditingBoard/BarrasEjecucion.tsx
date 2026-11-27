@@ -146,20 +146,20 @@ const BarrasEjecucion = ({
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 4,
-                                    padding: '2px 7px',
+                                    gap: 5,
+                                    padding: '3px 9px',
                                     borderRadius: 12,
                                     border: `1px solid ${oculta ? 'var(--border)' : color}`,
                                     backgroundColor: oculta ? 'transparent' : `${color}22`,
                                     cursor: 'pointer',
                                     fontFamily: 'var(--mono)',
-                                    fontSize: 11,
+                                    fontSize: 13,
                                     fontWeight: 700,
                                     color: oculta ? '#888' : color,
                                     opacity: oculta ? 0.6 : 1,
                                 }}
                             >
-                                <IconoOjoBarras visible={!oculta} size={12} />
+                                <IconoOjoBarras visible={!oculta} size={14} />
                                 {p.nombre}
                             </button>
                         );
@@ -189,7 +189,7 @@ const BarrasEjecucion = ({
                             <span
                                 style={{
                                     fontFamily: 'var(--mono)',
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     fontWeight: 700,
                                     color,
                                 }}
@@ -199,7 +199,7 @@ const BarrasEjecucion = ({
                             <span
                                 style={{
                                     fontFamily: 'var(--mono)',
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     fontWeight: 700,
                                     color: barra.cambio
                                         ? '#FBBF24'
@@ -207,7 +207,7 @@ const BarrasEjecucion = ({
                                     backgroundColor: barra.cambio
                                         ? 'rgba(251,191,36,0.12)'
                                         : 'transparent',
-                                    padding: '1px 7px',
+                                    padding: '2px 8px',
                                     borderRadius: 5,
                                     outline: barra.cambio
                                         ? '1px solid rgba(251,191,36,0.5)'

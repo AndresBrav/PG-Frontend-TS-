@@ -110,20 +110,20 @@ const GraficaEvolucion = ({
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: 4,
-                                    padding: '2px 7px',
+                                    gap: 5,
+                                    padding: '3px 9px',
                                     borderRadius: 12,
                                     border: `1px solid ${oculta ? 'var(--border)' : color}`,
                                     backgroundColor: oculta ? 'transparent' : `${color}22`,
                                     cursor: 'pointer',
                                     fontFamily: 'var(--mono)',
-                                    fontSize: 11,
+                                    fontSize: 13,
                                     fontWeight: 700,
                                     color: oculta ? '#888' : color,
                                     opacity: oculta ? 0.6 : 1,
                                 }}
                             >
-                                <IconoOjoEvolucion visible={!oculta} size={12} />
+                                <IconoOjoEvolucion visible={!oculta} size={14} />
                                 {p.nombre}
                             </button>
                         );
@@ -177,7 +177,7 @@ const GraficaEvolucion = ({
                             <span
                                 style={{
                                     fontFamily: 'var(--mono)',
-                                    fontSize: 12,
+                                    fontSize: 14,
                                     fontWeight: 700,
                                     color,
                                 }}
@@ -187,7 +187,7 @@ const GraficaEvolucion = ({
                             <span
                                 style={{
                                     fontFamily: 'var(--mono)',
-                                    fontSize: 13,
+                                    fontSize: 15,
                                     fontWeight: 700,
                                     color: 'var(--text)',
                                 }}

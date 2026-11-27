@@ -111,8 +111,8 @@ const describirControl = (iteraciones: ContextoIteracion[]): string =>
         : 'Fuera del ciclo';
 
 const celdaEscritorio = {
-    padding: '5px 10px',
-    fontSize: 11,
+    padding: '6px 12px',
+    fontSize: 13,
     borderBottom: '1px solid var(--border)',
     whiteSpace: 'nowrap' as const,
 };
@@ -1612,8 +1612,8 @@ const PanelVariablesEjecucion = ({
                                                 <th
                                                     key={titulo}
                                                     style={{
-                                                        padding: '6px 10px',
-                                                        fontSize: 10,
+                                                        padding: '6px 12px',
+                                                        fontSize: 13,
                                                         color: '#888',
                                                         textAlign: 'left',
                                                         whiteSpace: 'nowrap',
