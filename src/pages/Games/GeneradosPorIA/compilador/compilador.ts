@@ -79,10 +79,12 @@ class Compilador {
     private compilarSentencia(): void {
         const lineaSentencia = this.lineas[this.i];
         const k = this.clave();
-        // Las declaraciones puras y Finalizar no generan captura de variables
+        // Las declaraciones puras, Finalizar y Si no generan captura de debug al finalizar la sentencia
+        // (el 'Si' emite su captura inmediatamente al evaluar la condición, antes de ejecutar su cuerpo)
         const esDeclaracion =
             k === 'definir' ||
             k === 'dimension' ||
+            k === 'si' ||
             k === 'finalizar' ||
             k === 'terminar' || k === 'romper' || k === 'interrumpir' || k === 'continuar';
         switch (k) {
@@ -524,6 +526,9 @@ class Compilador {
                 linea,
                 `no se esperaba '${extra.val}' después de 'Entonces' (las instrucciones del Si van en las líneas siguientes).`
             );
+        }
+        if (this.debug) {
+            this.emitirDebug(linea);
         }
         this.out.push(`if (${cond}) {`);
         this.i++;
