@@ -238,6 +238,23 @@ const PanelVariablesEjecucion = ({
                 }
             }
         }
+
+        // Agregar también como columnas independientes los accesos a arreglos detectados en las instrucciones (ej: numeros[i], numeros[j])
+        for (const capturaDe of cortado.slice(-MAX_FILAS)) {
+            const instruccion = capturaDe?.instruccion ?? '';
+            const accesos =
+                instruccion.match(
+                    /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g,
+                ) ?? [];
+            for (const acc of accesos) {
+                const accNorm = acc.replace(/\s+/g, '');
+                if (!presentes.has(accNorm)) {
+                    presentes.add(accNorm);
+                    vistos.push(accNorm);
+                }
+            }
+        }
+
         return vistos;
     }, [cortado, captura]);
 
@@ -250,15 +267,17 @@ const PanelVariablesEjecucion = ({
     const accesosArregloPorFila = useMemo(
         () =>
             filas.map((capturaDe) => {
-                const asignacion = capturaDe.instruccion?.match(
-                    /(?:<-|:=|=)\s*(.+)$/,
-                );
+                const instruccion = capturaDe.instruccion ?? '';
+                // Extraer todos los accesos a arreglos en cualquier parte de la instrucción (Si, <-, Leer, Escribir, etc.)
                 const accesos =
-                    asignacion?.[1].match(
+                    instruccion.match(
                         /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g,
                     ) ?? [];
 
-                return accesos.flatMap((expresion) => {
+                // Deduplicar expresiones idénticas dentro de la misma línea si las hubiera
+                const accesosUnicos = Array.from(new Set(accesos));
+
+                return accesosUnicos.flatMap((expresion) => {
                     const acceso = evaluarAccesoArreglo(
                         expresion,
                         capturaDe.variables,
@@ -277,6 +296,28 @@ const PanelVariablesEjecucion = ({
             }),
         [filas],
     );
+
+    // Accesos activos a arreglos en la captura actual (para chips de inspección en tiempo real)
+    const accesosCapturaActual = useMemo(() => {
+        if (!captura?.instruccion) return [];
+        const matches =
+            captura.instruccion.match(
+                /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g,
+            ) ?? [];
+        const unicos = Array.from(new Set(matches));
+        return unicos.flatMap((expresion) => {
+            const acceso = evaluarAccesoArreglo(expresion, captura.variables);
+            if (!acceso || acceso.valorCelda === null) return [];
+            return [
+                {
+                    expresion,
+                    nombreArr: acceso.nombreArr,
+                    celdaConcreta: acceso.celdaConcreta,
+                    valor: acceso.valorCelda,
+                },
+            ];
+        });
+    }, [captura]);
     const filasEscritorio = useMemo(() => {
         const filasGeneradas: FilaPruebaEscritorio[] = [];
         const asignacionesFueraDeCiclo = new Set<string>();
@@ -503,11 +544,20 @@ const PanelVariablesEjecucion = ({
         colorDe(perfiles.find((p) => p.nombre === nombre)?.indice ?? 0);
 
     const armarFilas = (): Record<string, string>[] =>
-        filas.map((capturaDe) => {
+        filas.map((capturaDe, idxFila) => {
             const fila: Record<string, string> = {};
             for (const v of capturaDe.variables) {
                 fila[v.nombre] = v.valor;
             }
+
+            // Llenar valores evaluados para columnas de accesos indexados (ej: numeros[i])
+            const accesosDeEstaFila = accesosArregloPorFila[idxFila] ?? [];
+            for (const acceso of accesosDeEstaFila) {
+                const accNorm = acceso.expresion.replace(/\s+/g, '');
+                // Formato descriptivo: "valor [índice]" ej: "4 [2]" o simplemente el valor "4"
+                fila[accNorm] = acceso.valor;
+            }
+
             return fila;
         });
 
@@ -753,6 +803,41 @@ const PanelVariablesEjecucion = ({
                                 variables aquí.
                             </span>
                         )}
+
+                        {/* Chips de inspección en vivo de elementos de arreglo (ej: numeros[i], numeros[j]) */}
+                        {accesosCapturaActual.map((acceso) => {
+                            const colorArr = colorDeNombre(acceso.nombreArr);
+                            return (
+                                <span
+                                    key={`acceso-${acceso.expresion}-${acceso.celdaConcreta}`}
+                                    title={`En este paso: ${acceso.expresion} equivale a la posición ${acceso.celdaConcreta}`}
+                                    style={{
+                                        fontFamily: 'var(--mono)',
+                                        fontSize: 12,
+                                        padding: '3px 8px',
+                                        borderRadius: 6,
+                                        backgroundColor: 'rgba(96, 165, 250, 0.12)',
+                                        border: '1px solid rgba(96, 165, 250, 0.45)',
+                                        boxShadow: '0 0 8px rgba(96, 165, 250, 0.25)',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: 5,
+                                        animation: 'pulse 1.8s infinite',
+                                    }}
+                                >
+                                    <span style={{ fontSize: 11, color: '#93C5FD' }}>🔍</span>
+                                    <b style={{ color: colorArr }}>
+                                        {acceso.expresion}
+                                    </b>
+                                    <span style={{ color: '#94A3B8', fontSize: 11 }}>
+                                        ({acceso.celdaConcreta})
+                                    </span>
+                                    <span style={{ color: '#FBBF24', fontWeight: 700 }}>
+                                        = {acceso.valor}
+                                    </span>
+                                </span>
+                            );
+                        })}
                     </div>
 
                     {/* Traza histórica tipo PSeInt */}
@@ -1016,12 +1101,21 @@ const PanelVariablesEjecucion = ({
                                                                 {lineaActual ? `L${lineaActual}` : '—'}
                                                             </td>
                                                             {nombresVisibles.map((nombre) => {
-                                                                const celdasAccedidas =
-                                                                    accesosArreglo.filter(
-                                                                        (acceso) =>
-                                                                            normVar(acceso.nombreArr) ===
-                                                                            normVar(nombre),
-                                                                    );
+                                                                const esColumnaAcceso = nombre.includes('[');
+                                                                const celdasAccedidas = !esColumnaAcceso
+                                                                    ? accesosArreglo.filter(
+                                                                          (acceso) =>
+                                                                              normVar(acceso.nombreArr) ===
+                                                                              normVar(nombre),
+                                                                      )
+                                                                    : [];
+
+                                                                const valorCeldaActual = fila[nombre];
+                                                                const accesoPropio = esColumnaAcceso
+                                                                    ? accesosArreglo.find(
+                                                                          (a) => a.expresion.replace(/\s+/g, '') === nombre
+                                                                      )
+                                                                    : null;
 
                                                                 return (
                                                                     <td
@@ -1034,46 +1128,96 @@ const PanelVariablesEjecucion = ({
                                                                             whiteSpace:
                                                                                 'nowrap',
                                                                             color:
-                                                                                fila[nombre] ===
+                                                                                valorCeldaActual ===
                                                                                 undefined
                                                                                     ? '#555'
-                                                                                    : 'var(--text)',
+                                                                                    : esColumnaAcceso
+                                                                                      ? '#FBBF24'
+                                                                                      : 'var(--text)',
                                                                         }}
                                                                     >
-                                                                        {renderizarCeldaValor(
-                                                                            fila[nombre],
-                                                                            filaPrevia
-                                                                                ? filaPrevia[nombre]
-                                                                                : undefined,
+                                                                        {esColumnaAcceso ? (
+                                                                            valorCeldaActual !== undefined ? (
+                                                                                <span
+                                                                                    style={{
+                                                                                        display: 'inline-flex',
+                                                                                        alignItems: 'center',
+                                                                                        gap: 4,
+                                                                                        padding: '1px 5px',
+                                                                                        borderRadius: 4,
+                                                                                        background: 'rgba(251, 191, 36, 0.12)',
+                                                                                        border: '1px solid rgba(251, 191, 36, 0.4)',
+                                                                                        fontWeight: 700,
+                                                                                    }}
+                                                                                    title={
+                                                                                        accesoPropio
+                                                                                            ? `${accesoPropio.expresion} = ${accesoPropio.celdaConcreta} (${valorCeldaActual})`
+                                                                                            : undefined
+                                                                                    }
+                                                                                >
+                                                                                    <b style={{ color: '#FBBF24' }}>
+                                                                                        {valorCeldaActual}
+                                                                                    </b>
+                                                                                    {accesoPropio && (
+                                                                                        <span
+                                                                                            style={{
+                                                                                                fontSize: 9.5,
+                                                                                                color: '#94A3B8',
+                                                                                                fontWeight: 500,
+                                                                                            }}
+                                                                                        >
+                                                                                            [{accesoPropio.celdaConcreta.replace(/^[^[]*\[(.*)\]$/, '$1')}]
+                                                                                        </span>
+                                                                                    )}
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span style={{ color: '#555', opacity: 0.5 }}>—</span>
+                                                                            )
+                                                                        ) : (
+                                                                            renderizarCeldaValor(
+                                                                                valorCeldaActual,
+                                                                                filaPrevia
+                                                                                    ? filaPrevia[nombre]
+                                                                                    : undefined,
+                                                                            )
                                                                         )}
                                                                         {celdasAccedidas.map(
                                                                             (acceso) => (
                                                                                 <div
                                                                                     key={`${acceso.celdaConcreta}-${acceso.expresion}`}
-                                                                                    title={`${acceso.expresion} corresponde a ${acceso.celdaConcreta}`}
+                                                                                    title={`${acceso.expresion} evaluado en este paso es la celda ${acceso.celdaConcreta} con valor ${acceso.valor}`}
                                                                                     style={{
-                                                                                        display: 'flex',
-                                                                                        gap: 3,
-                                                                                        alignItems:
-                                                                                            'baseline',
+                                                                                        display: 'inline-flex',
+                                                                                        gap: 4,
+                                                                                        alignItems: 'center',
                                                                                         marginTop: 3,
+                                                                                        marginRight: 6,
+                                                                                        padding: '1px 5px',
+                                                                                        borderRadius: 4,
+                                                                                        background: 'rgba(96, 165, 250, 0.12)',
+                                                                                        border: '1px solid rgba(96, 165, 250, 0.35)',
                                                                                         fontSize: 10,
-                                                                                        whiteSpace:
-                                                                                            'normal',
+                                                                                        whiteSpace: 'nowrap',
                                                                                     }}
                                                                                 >
                                                                                     <span
                                                                                         style={{
-                                                                                            color: '#94A3B8',
+                                                                                            color: '#93C5FD',
+                                                                                            fontWeight: 600,
                                                                                         }}
                                                                                     >
-                                                                                        ↳{' '}
-                                                                                        {acceso.expresion}{' '}
-                                                                                        =
+                                                                                        ↳ {acceso.expresion}
+                                                                                        {acceso.expresion !== acceso.celdaConcreta && (
+                                                                                            <span style={{ opacity: 0.75, fontSize: 9.5 }}>
+                                                                                                [{acceso.celdaConcreta.replace(/^[^[]*\[(.*)\]$/, '$1')}]
+                                                                                            </span>
+                                                                                        )}
+                                                                                        :
                                                                                     </span>
                                                                                     <b
                                                                                         style={{
-                                                                                            color: '#60A5FA',
+                                                                                            color: '#FBBF24',
+                                                                                            fontWeight: 700,
                                                                                         }}
                                                                                     >
                                                                                         {acceso.valor}
