@@ -1,20 +1,21 @@
-import React, {
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { normVar } from '../compilador';
 import type {
     ContextoIteracion,
     EstadoEjecucion,
     VariableEstado,
 } from '../compilador';
-import { colorDeVariable, evaluarAccesoArreglo, perfilesDe } from './visualUtils';
+import {
+    colorDeVariable,
+    detectarTransferenciaVariable,
+    evaluarAccesoArreglo,
+    perfilesDe,
+} from './visualUtils';
 import GraficaEvolucion from './GraficaEvolucion';
 import BarrasEjecucion from './BarrasEjecucion';
 import SimulacionMovimiento from './SimulacionMovimiento';
 import ReproductorEjecucion from './ReproductorEjecucion';
+import PistaTransferencia from './PistaTransferencia';
 
 interface PanelVariablesEjecucionProps {
     /** Captura más reciente de las variables (null si aún no se ejecuta). */
@@ -27,12 +28,7 @@ interface PanelVariablesEjecucionProps {
     onLineaActiva?: (linea: number | null) => void;
 }
 
-type TabVisual =
-    | 'tabla'
-    | 'escritorio'
-    | 'evolucion'
-    | 'barras'
-    | 'simulacion';
+type TabVisual = 'tabla' | 'escritorio' | 'evolucion' | 'barras' | 'simulacion';
 
 const TABS: { id: TabVisual; etiqueta: string; titulo: string }[] = [
     { id: 'tabla', etiqueta: '📋 Tabla', titulo: 'chips y traza tipo PSeInt' },
@@ -41,8 +37,16 @@ const TABS: { id: TabVisual; etiqueta: string; titulo: string }[] = [
         etiqueta: '🧾 Escritorio',
         titulo: 'valores antes y después de cada asignación',
     },
-    { id: 'evolucion', etiqueta: '📈 Evolución', titulo: 'cómo cambia cada variable en el tiempo' },
-    { id: 'barras', etiqueta: '📊 Barras', titulo: 'variables numéricas contra una escala común' },
+    {
+        id: 'evolucion',
+        etiqueta: '📈 Evolución',
+        titulo: 'cómo cambia cada variable en el tiempo',
+    },
+    {
+        id: 'barras',
+        etiqueta: '📊 Barras',
+        titulo: 'variables numéricas contra una escala común',
+    },
     {
         id: 'simulacion',
         etiqueta: '🎬 Simulación',
@@ -79,18 +83,18 @@ interface FilaPruebaEscritorio {
 
 const sustituirVariables = (
     expresion: string,
-    valores: Map<string, string>,
+    valores: Map<string, string>
 ): string =>
     expresion.replace(
         /("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)/g,
         (
             coincidencia,
             textoLiteral: string | undefined,
-            nombre: string | undefined,
+            nombre: string | undefined
         ) => {
             if (textoLiteral || !nombre) return coincidencia;
             return valores.get(normVar(nombre)) ?? nombre;
-        },
+        }
     );
 
 const describirControl = (iteraciones: ContextoIteracion[]): string =>
@@ -114,7 +118,13 @@ const celdaEscritorio = {
 };
 
 /** Ícono SVG de ojo para mostrar / ocultar (mismo diseño SVG de BotonMostrarPassword) */
-const IconoOjo = ({ visible, size = 14 }: { visible: boolean; size?: number }) => {
+const IconoOjo = ({
+    visible,
+    size = 14,
+}: {
+    visible: boolean;
+    size?: number;
+}) => {
     if (!visible) {
         return (
             <svg
@@ -183,7 +193,9 @@ const PanelVariablesEjecucion = ({
     const [reproduciendo, setReproduciendo] = useState(false);
     const [velocidad, setVelocidad] = useState(2);
     const [mostrarHistorial, setMostrarHistorial] = useState(true);
-    const [variablesOcultas, setVariablesOcultas] = useState<Set<string>>(new Set());
+    const [variablesOcultas, setVariablesOcultas] = useState<Set<string>>(
+        new Set()
+    );
 
     const alternarVisibilidadVariable = (nombre: string) => {
         setVariablesOcultas((prev) => {
@@ -203,7 +215,8 @@ const PanelVariablesEjecucion = ({
     const total = historial.length;
     const ultima = total > 0 ? historial[total - 1] : null;
     const idxSeguro = Math.min(indiceRep, Math.max(total - 1, 0));
-    const captura = modoVivo || total === 0 ? ultima : historial[idxSeguro] ?? ultima;
+    const captura =
+        modoVivo || total === 0 ? ultima : (historial[idxSeguro] ?? ultima);
     const anterior = modoVivo
         ? total > 1
             ? historial[total - 2]
@@ -216,10 +229,7 @@ const PanelVariablesEjecucion = ({
         () => (modoVivo ? historial : historial.slice(0, idxSeguro + 1)),
         [modoVivo, historial, idxSeguro]
     );
-    const perfiles = useMemo(
-        () => perfilesDe(cortado.slice(-400)),
-        [cortado]
-    );
+    const perfiles = useMemo(() => perfilesDe(cortado.slice(-400)), [cortado]);
 
     // Valores de la captura anterior, para resaltar el cambio en chips
     const valoresAnteriores = useMemo(() => {
@@ -244,7 +254,7 @@ const PanelVariablesEjecucion = ({
             const instruccion = capturaDe?.instruccion ?? '';
             const accesos =
                 instruccion.match(
-                    /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g,
+                    /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g
                 ) ?? [];
             for (const acc of accesos) {
                 const accNorm = acc.replace(/\s+/g, '');
@@ -271,7 +281,7 @@ const PanelVariablesEjecucion = ({
                 // Extraer todos los accesos a arreglos en cualquier parte de la instrucción (Si, <-, Leer, Escribir, etc.)
                 const accesos =
                     instruccion.match(
-                        /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g,
+                        /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g
                     ) ?? [];
 
                 // Deduplicar expresiones idénticas dentro de la misma línea si las hubiera
@@ -280,7 +290,7 @@ const PanelVariablesEjecucion = ({
                 return accesosUnicos.flatMap((expresion) => {
                     const acceso = evaluarAccesoArreglo(
                         expresion,
-                        capturaDe.variables,
+                        capturaDe.variables
                     );
                     if (!acceso || acceso.valorCelda === null) return [];
 
@@ -294,7 +304,7 @@ const PanelVariablesEjecucion = ({
                     ];
                 });
             }),
-        [filas],
+        [filas]
     );
 
     // Accesos activos a arreglos en la captura actual (para chips de inspección en tiempo real)
@@ -302,7 +312,7 @@ const PanelVariablesEjecucion = ({
         if (!captura?.instruccion) return [];
         const matches =
             captura.instruccion.match(
-                /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g,
+                /[A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*\s*\[\s*[^\]]+?\s*\]/g
             ) ?? [];
         const unicos = Array.from(new Set(matches));
         return unicos.flatMap((expresion) => {
@@ -318,6 +328,16 @@ const PanelVariablesEjecucion = ({
             ];
         });
     }, [captura]);
+
+    // Detección de transferencia de memoria (Destino <- Origen o Asignación) para el paso activo
+    const transferenciaActiva = useMemo(() => {
+        if (!captura?.instruccion) return null;
+        return detectarTransferenciaVariable(
+            captura.instruccion,
+            captura.variables,
+            valoresAnteriores
+        );
+    }, [captura, valoresAnteriores]);
     const filasEscritorio = useMemo(() => {
         const filasGeneradas: FilaPruebaEscritorio[] = [];
         const asignacionesFueraDeCiclo = new Set<string>();
@@ -331,20 +351,20 @@ const PanelVariablesEjecucion = ({
                 (capturaAnterior?.variables ?? []).map((variable) => [
                     normVar(variable.nombre),
                     variable.valor,
-                ]),
+                ])
             );
             const valoresActuales = new Map<string, string>(
                 capturaDe.variables.map((variable) => [
                     normVar(variable.nombre),
                     variable.valor,
-                ]),
+                ])
             );
             const iteraciones = capturaDe.iteraciones ?? [];
             const cicloActivo = iteraciones[iteraciones.length - 1];
 
             // 1. Asignaciones con <-
             const asignacion = instruccion.match(
-                /^([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*(?:\s*\[[^\]]+\])?)\s*<-\s*(.+)$/,
+                /^([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*(?:\s*\[[^\]]+\])?)\s*<-\s*(.+)$/
             );
             if (asignacion) {
                 const objetivo = asignacion[1].trim();
@@ -368,15 +388,28 @@ const PanelVariablesEjecucion = ({
                         const parsed = JSON.parse(valorNuevoTotal);
                         const corcheteMatch = objetivo.match(/\[([^\]]+)\]/);
                         if (corcheteMatch) {
-                            const subIndices = corcheteMatch[1].split(',').map((s) => s.trim());
+                            const subIndices = corcheteMatch[1]
+                                .split(',')
+                                .map((s) => s.trim());
                             let valCur: unknown = parsed;
                             for (const s of subIndices) {
-                                const idxNum = parseInt(sustituirVariables(s, valoresAnteriores), 10);
-                                if (!Number.isNaN(idxNum) && Array.isArray(valCur) && idxNum >= 1 && idxNum <= valCur.length) {
+                                const idxNum = parseInt(
+                                    sustituirVariables(s, valoresAnteriores),
+                                    10
+                                );
+                                if (
+                                    !Number.isNaN(idxNum) &&
+                                    Array.isArray(valCur) &&
+                                    idxNum >= 1 &&
+                                    idxNum <= valCur.length
+                                ) {
                                     valCur = (valCur as unknown[])[idxNum - 1];
                                 }
                             }
-                            if (valCur !== undefined && !Array.isArray(valCur)) {
+                            if (
+                                valCur !== undefined &&
+                                !Array.isArray(valCur)
+                            ) {
                                 valorCeldaNuevo = String(valCur);
                             }
                         }
@@ -399,7 +432,7 @@ const PanelVariablesEjecucion = ({
                     operacion: cicloActivo
                         ? sustituirVariables(
                               asignacion[2].trim(),
-                              valoresAnteriores,
+                              valoresAnteriores
                           )
                         : `${objetivo} ← ${asignacion[2].trim()}`,
                     nuevo: valorCeldaNuevo,
@@ -413,14 +446,15 @@ const PanelVariablesEjecucion = ({
 
             // 2. Cabecera del ciclo Para (iterador)
             const esPara = instruccion.match(
-                /^para\s+([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)\s*<-\s*(.+?)\s+hasta\s+(.+)$/i,
+                /^para\s+([A-Za-zÀ-ÿ_][A-Za-zÀ-ÿ0-9_]*)\s*<-\s*(.+?)\s+hasta\s+(.+)$/i
             );
             if (esPara && cicloActivo && cicloActivo.tipo === 'Para') {
                 const varPara = esPara[1].trim();
                 const varParaNorm = normVar(varPara);
                 const valorNuevo = valoresActuales.get(varParaNorm);
                 if (valorNuevo !== undefined) {
-                    const valorAnterior = valoresAnteriores.get(varParaNorm) ?? '—';
+                    const valorAnterior =
+                        valoresAnteriores.get(varParaNorm) ?? '—';
                     filasGeneradas.push({
                         paso: capturaDe.paso,
                         linea: capturaDe.linea ?? 0,
@@ -430,7 +464,10 @@ const PanelVariablesEjecucion = ({
                         anterior: valorAnterior,
                         operacion:
                             cicloActivo.iteracion === 1
-                                ? sustituirVariables(esPara[2].trim(), valoresAnteriores)
+                                ? sustituirVariables(
+                                      esPara[2].trim(),
+                                      valoresAnteriores
+                                  )
                                 : `${varPara} + paso`,
                         nuevo: valorNuevo,
                     });
@@ -441,13 +478,16 @@ const PanelVariablesEjecucion = ({
             // 3. Lectura de entrada (Leer v1, v2, ...)
             const esLeer = instruccion.match(/^leer\s+(.+)$/i);
             if (esLeer) {
-                const variablesLeidas = esLeer[1].split(',').map((v) => v.trim());
+                const variablesLeidas = esLeer[1]
+                    .split(',')
+                    .map((v) => v.trim());
                 for (const v of variablesLeidas) {
                     const nombreBase = v.split('[')[0].trim();
                     const nombreNorm = normVar(nombreBase);
                     const valorNuevo = valoresActuales.get(nombreNorm);
                     if (valorNuevo !== undefined) {
-                        const valorAnterior = valoresAnteriores.get(nombreNorm) ?? '—';
+                        const valorAnterior =
+                            valoresAnteriores.get(nombreNorm) ?? '—';
                         filasGeneradas.push({
                             paso: capturaDe.paso,
                             linea: capturaDe.linea ?? 0,
@@ -585,27 +625,55 @@ const PanelVariablesEjecucion = ({
                     }
 
                     return (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                        <span
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 2,
+                            }}
+                        >
                             <span>[</span>
                             {arr.map((elem, idx) => {
                                 const cambio =
                                     prevArr !== null &&
                                     idx < prevArr.length &&
-                                    JSON.stringify(elem) !== JSON.stringify(prevArr[idx]);
+                                    JSON.stringify(elem) !==
+                                        JSON.stringify(prevArr[idx]);
 
                                 return (
                                     <React.Fragment key={idx}>
-                                        {idx > 0 && <span style={{ opacity: 0.4, marginRight: 2 }}>,</span>}
+                                        {idx > 0 && (
+                                            <span
+                                                style={{
+                                                    opacity: 0.4,
+                                                    marginRight: 2,
+                                                }}
+                                            >
+                                                ,
+                                            </span>
+                                        )}
                                         <span
                                             style={{
-                                                padding: cambio ? '1px 3px' : '0',
+                                                padding: cambio
+                                                    ? '1px 3px'
+                                                    : '0',
                                                 borderRadius: 3,
-                                                backgroundColor: cambio ? 'rgba(74, 222, 128, 0.28)' : 'transparent',
-                                                color: cambio ? '#4ADE80' : 'inherit',
+                                                backgroundColor: cambio
+                                                    ? 'rgba(74, 222, 128, 0.28)'
+                                                    : 'transparent',
+                                                color: cambio
+                                                    ? '#4ADE80'
+                                                    : 'inherit',
                                                 fontWeight: cambio ? 800 : 400,
-                                                outline: cambio ? '1px solid rgba(74, 222, 128, 0.55)' : 'none',
+                                                outline: cambio
+                                                    ? '1px solid rgba(74, 222, 128, 0.55)'
+                                                    : 'none',
                                             }}
-                                            title={cambio ? `Índice [${idx + 1}] cambió a ${String(elem)}` : undefined}
+                                            title={
+                                                cambio
+                                                    ? `Índice [${idx + 1}] cambió a ${String(elem)}`
+                                                    : undefined
+                                            }
                                         >
                                             {String(elem)}
                                         </span>
@@ -702,8 +770,7 @@ const PanelVariablesEjecucion = ({
                                 tab === item.id
                                     ? 'rgba(255,124,2,0.18)'
                                     : 'transparent',
-                            color:
-                                tab === item.id ? '#FF9D3D' : 'var(--text)',
+                            color: tab === item.id ? '#FF9D3D' : 'var(--text)',
                             cursor: 'pointer',
                             fontSize: 11,
                             fontWeight: tab === item.id ? 700 : 500,
@@ -728,661 +795,913 @@ const PanelVariablesEjecucion = ({
                     gap: 8,
                     paddingRight: 4,
                     scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(255, 157, 61, 0.4) rgba(255, 255, 255, 0.03)',
+                    scrollbarColor:
+                        'rgba(255, 157, 61, 0.4) rgba(255, 255, 255, 0.03)',
                 }}
             >
-            {tab === 'tabla' && (
-                <>
-                    {/* Valores actuales */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: '6px 10px',
-                        }}
-                    >
-                        {captura.variables.map((v) => {
-                            const previo = valoresAnteriores.get(v.nombre);
-                            const cambio =
-                                anterior !== null && previo !== v.valor;
-                            const estaOculta = variablesOcultas.has(v.nombre);
-                            return (
-                                <span
-                                    key={v.nombre}
+                {tab === 'tabla' && (
+                    <>
+                        {/* Valores actuales */}
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '6px 10px',
+                            }}
+                        >
+                            {captura.variables.map((v) => {
+                                const previo = valoresAnteriores.get(v.nombre);
+                                const cambio =
+                                    anterior !== null && previo !== v.valor;
+                                const estaOculta = variablesOcultas.has(
+                                    v.nombre
+                                );
+                                return (
+                                    <span
+                                        key={v.nombre}
+                                        style={{
+                                            fontFamily: 'var(--mono)',
+                                            fontSize: 14,
+                                            padding: '4px 10px',
+                                            borderRadius: 6,
+                                            backgroundColor: cambio
+                                                ? 'rgba(74, 222, 128, 0.12)'
+                                                : 'rgba(255,255,255,0.04)',
+                                            outline: cambio
+                                                ? '1px solid rgba(74, 222, 128, 0.45)'
+                                                : '1px solid transparent',
+                                            opacity: estaOculta ? 0.55 : 1,
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: 6,
+                                            transition: 'all 0.2s ease',
+                                        }}
+                                    >
+                                        <b
+                                            style={{
+                                                color: colorDeNombre(v.nombre),
+                                            }}
+                                        >
+                                            {v.nombre}
+                                        </b>
+                                        {` = ${v.valor}`}
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                alternarVisibilidadVariable(
+                                                    v.nombre
+                                                )
+                                            }
+                                            title={
+                                                estaOculta
+                                                    ? `Mostrar ${v.nombre} en la tabla de traza`
+                                                    : `Ocultar ${v.nombre} de la tabla de traza`
+                                            }
+                                            style={{
+                                                background: 'transparent',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                padding: '1px 2px',
+                                                lineHeight: 1,
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                color: estaOculta
+                                                    ? '#94A3B8'
+                                                    : '#FBBF24',
+                                                opacity: estaOculta ? 0.6 : 0.9,
+                                            }}
+                                        >
+                                            <IconoOjo
+                                                visible={!estaOculta}
+                                                size={14}
+                                            />
+                                        </button>
+                                    </span>
+                                );
+                            })}
+                            {captura.variables.length === 0 && (
+                                <span style={{ fontSize: 12, color: '#888' }}>
+                                    Ejecuta un algoritmo con «Definir» para ver
+                                    sus variables aquí.
+                                </span>
+                            )}
+
+                            {/* Chips de inspección en vivo de elementos de arreglo (ej: numeros[i], numeros[j]) */}
+                            {accesosCapturaActual.map((acceso) => {
+                                const colorArr = colorDeNombre(
+                                    acceso.nombreArr
+                                );
+                                return (
+                                    <span
+                                        key={`acceso-${acceso.expresion}-${acceso.celdaConcreta}`}
+                                        title={`En este paso: ${acceso.expresion} equivale a la posición ${acceso.celdaConcreta}`}
+                                        style={{
+                                            fontFamily: 'var(--mono)',
+                                            fontSize: 14,
+                                            padding: '4px 10px',
+                                            borderRadius: 6,
+                                            backgroundColor:
+                                                'rgba(96, 165, 250, 0.12)',
+                                            border: '1px solid rgba(96, 165, 250, 0.45)',
+                                            boxShadow:
+                                                '0 0 8px rgba(96, 165, 250, 0.25)',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: 6,
+                                            animation: 'pulse 1.8s infinite',
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                fontSize: 13,
+                                                color: '#93C5FD',
+                                            }}
+                                        >
+                                            🔍
+                                        </span>
+                                        <b style={{ color: colorArr }}>
+                                            {acceso.expresion}
+                                        </b>
+                                        <span
+                                            style={{
+                                                color: '#94A3B8',
+                                                fontSize: 12,
+                                            }}
+                                        >
+                                            ({acceso.celdaConcreta})
+                                        </span>
+                                        <span
+                                            style={{
+                                                color: '#FBBF24',
+                                                fontWeight: 700,
+                                            }}
+                                        >
+                                            = {acceso.valor}
+                                        </span>
+                                    </span>
+                                );
+                            })}
+                        </div>
+
+                        {/* Traza histórica tipo PSeInt */}
+                        {nombres.length > 0 && filas.length > 0 && (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    flex: 1,
+                                    minHeight: 0,
+                                    marginTop: 4,
+                                }}
+                            >
+                                <div
                                     style={{
-                                        fontFamily: 'var(--mono)',
-                                        fontSize: 12,
-                                        padding: '3px 8px',
-                                        borderRadius: 6,
-                                        backgroundColor: cambio
-                                            ? 'rgba(74, 222, 128, 0.12)'
-                                            : 'rgba(255,255,255,0.04)',
-                                        outline: cambio
-                                            ? '1px solid rgba(74, 222, 128, 0.45)'
-                                            : '1px solid transparent',
-                                        opacity: estaOculta ? 0.55 : 1,
-                                        display: 'inline-flex',
+                                        display: 'flex',
                                         alignItems: 'center',
-                                        gap: 5,
-                                        transition: 'all 0.2s ease',
+                                        justifyContent: 'space-between',
+                                        flexShrink: 0,
+                                        marginBottom: 4,
+                                        flexWrap: 'wrap',
+                                        gap: 6,
                                     }}
                                 >
-                                    <b style={{ color: colorDeNombre(v.nombre) }}>
-                                        {v.nombre}
-                                    </b>
-                                    {` = ${v.valor}`}
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                            flexWrap: 'wrap',
+                                        }}
+                                    >
+                                        <span
+                                            style={{
+                                                fontSize: 11,
+                                                color: '#aaa',
+                                                fontWeight: 600,
+                                            }}
+                                        >
+                                            Traza de variables por paso (
+                                            {filas.length} pasos)
+                                        </span>
+                                        {variablesOcultas.size > 0 && (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setVariablesOcultas(
+                                                        new Set()
+                                                    )
+                                                }
+                                                title="Volver a mostrar todas las columnas ocultas"
+                                                style={{
+                                                    background:
+                                                        'rgba(255, 157, 61, 0.12)',
+                                                    border: '1px solid rgba(255, 157, 61, 0.35)',
+                                                    color: '#FBBF24',
+                                                    borderRadius: 4,
+                                                    cursor: 'pointer',
+                                                    fontSize: 10,
+                                                    fontWeight: 600,
+                                                    padding: '2px 7px',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: 5,
+                                                }}
+                                            >
+                                                <IconoOjo
+                                                    visible={true}
+                                                    size={13}
+                                                />
+                                                <span>
+                                                    Mostrar todas (
+                                                    {variablesOcultas.size}{' '}
+                                                    oculta
+                                                    {variablesOcultas.size > 1
+                                                        ? 's'
+                                                        : ''}
+                                                    )
+                                                </span>
+                                            </button>
+                                        )}
+                                    </div>
                                     <button
                                         type="button"
-                                        onClick={() => alternarVisibilidadVariable(v.nombre)}
-                                        title={
-                                            estaOculta
-                                                ? `Mostrar ${v.nombre} en la tabla de traza`
-                                                : `Ocultar ${v.nombre} de la tabla de traza`
+                                        onClick={() =>
+                                            setMostrarHistorial((prev) => !prev)
                                         }
                                         style={{
                                             background: 'transparent',
                                             border: 'none',
+                                            color: '#8ab4f8',
                                             cursor: 'pointer',
-                                            padding: '1px 2px',
-                                            lineHeight: 1,
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: estaOculta ? '#94A3B8' : '#FBBF24',
-                                            opacity: estaOculta ? 0.6 : 0.9,
+                                            fontSize: 11,
+                                            whiteSpace: 'nowrap',
+                                            padding: 0,
                                         }}
                                     >
-                                        <IconoOjo visible={!estaOculta} size={14} />
+                                        {mostrarHistorial
+                                            ? 'Ocultar traza ▲'
+                                            : 'Ver traza ▼'}
                                     </button>
-                                </span>
-                            );
-                        })}
-                        {captura.variables.length === 0 && (
-                            <span style={{ fontSize: 12, color: '#888' }}>
-                                Ejecuta un algoritmo con «Definir» para ver sus
-                                variables aquí.
-                            </span>
-                        )}
+                                </div>
 
-                        {/* Chips de inspección en vivo de elementos de arreglo (ej: numeros[i], numeros[j]) */}
-                        {accesosCapturaActual.map((acceso) => {
-                            const colorArr = colorDeNombre(acceso.nombreArr);
-                            return (
-                                <span
-                                    key={`acceso-${acceso.expresion}-${acceso.celdaConcreta}`}
-                                    title={`En este paso: ${acceso.expresion} equivale a la posición ${acceso.celdaConcreta}`}
-                                    style={{
-                                        fontFamily: 'var(--mono)',
-                                        fontSize: 12,
-                                        padding: '3px 8px',
-                                        borderRadius: 6,
-                                        backgroundColor: 'rgba(96, 165, 250, 0.12)',
-                                        border: '1px solid rgba(96, 165, 250, 0.45)',
-                                        boxShadow: '0 0 8px rgba(96, 165, 250, 0.25)',
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        gap: 5,
-                                        animation: 'pulse 1.8s infinite',
-                                    }}
-                                >
-                                    <span style={{ fontSize: 11, color: '#93C5FD' }}>🔍</span>
-                                    <b style={{ color: colorArr }}>
-                                        {acceso.expresion}
-                                    </b>
-                                    <span style={{ color: '#94A3B8', fontSize: 11 }}>
-                                        ({acceso.celdaConcreta})
-                                    </span>
-                                    <span style={{ color: '#FBBF24', fontWeight: 700 }}>
-                                        = {acceso.valor}
-                                    </span>
-                                </span>
-                            );
-                        })}
-                    </div>
-
-                    {/* Traza histórica tipo PSeInt */}
-                    {nombres.length > 0 && filas.length > 0 && (
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                flex: 1,
-                                minHeight: 0,
-                                marginTop: 4,
-                            }}
-                        >
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    flexShrink: 0,
-                                    marginBottom: 4,
-                                    flexWrap: 'wrap',
-                                    gap: 6,
-                                }}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                                    <span style={{ fontSize: 11, color: '#aaa', fontWeight: 600 }}>
-                                        Traza de variables por paso ({filas.length} pasos)
-                                    </span>
-                                    {variablesOcultas.size > 0 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setVariablesOcultas(new Set())}
-                                            title="Volver a mostrar todas las columnas ocultas"
+                                {mostrarHistorial && (
+                                    <div
+                                        style={{
+                                            overflow: 'auto',
+                                            flex: 1,
+                                            minHeight: 120,
+                                            maxHeight: 220,
+                                            border: '1px solid var(--border)',
+                                            borderRadius: 8,
+                                        }}
+                                    >
+                                        <table
                                             style={{
-                                                background: 'rgba(255, 157, 61, 0.12)',
-                                                border: '1px solid rgba(255, 157, 61, 0.35)',
-                                                color: '#FBBF24',
-                                                borderRadius: 4,
-                                                cursor: 'pointer',
-                                                fontSize: 10,
-                                                fontWeight: 600,
-                                                padding: '2px 7px',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: 5,
+                                                borderCollapse: 'collapse',
+                                                minWidth: '100%',
                                             }}
                                         >
-                                            <IconoOjo visible={true} size={13} />
-                                            <span>
-                                                Mostrar todas ({variablesOcultas.size} oculta{variablesOcultas.size > 1 ? 's' : ''})
-                                            </span>
-                                        </button>
-                                    )}
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setMostrarHistorial((prev) => !prev)
-                                    }
-                                    style={{
-                                        background: 'transparent',
-                                        border: 'none',
-                                        color: '#8ab4f8',
-                                        cursor: 'pointer',
-                                        fontSize: 11,
-                                        whiteSpace: 'nowrap',
-                                        padding: 0,
-                                    }}
-                                >
-                                    {mostrarHistorial
-                                        ? 'Ocultar traza ▲'
-                                        : 'Ver traza ▼'}
-                                </button>
-                            </div>
-
-                            {mostrarHistorial && (
-                                <div
-                                    style={{
-                                        overflow: 'auto',
-                                        flex: 1,
-                                        minHeight: 120,
-                                        maxHeight: 220,
-                                        border: '1px solid var(--border)',
-                                        borderRadius: 8,
-                                    }}
-                                >
-                                    <table
-                                        style={{
-                                            borderCollapse: 'collapse',
-                                            minWidth: '100%',
-                                        }}
-                                    >
-                                        <thead>
-                                            <tr
-                                                style={{
-                                                    backgroundColor:
-                                                        'rgba(255,255,255,0.05)',
-                                                    position: 'sticky',
-                                                    top: 0,
-                                                    zIndex: 2,
-                                                }}
-                                            >
-                                                <th
+                                            <thead>
+                                                <tr
                                                     style={{
-                                                        padding: '5px 10px',
-                                                        fontSize: 11,
-                                                        color: '#888',
-                                                        textAlign: 'left',
-                                                        borderBottom:
-                                                            '1px solid var(--border)',
-                                                        backgroundColor: 'var(--sidebar-bg)',
-                                                        whiteSpace: 'nowrap',
+                                                        backgroundColor:
+                                                            'rgba(255,255,255,0.05)',
+                                                        position: 'sticky',
+                                                        top: 0,
+                                                        zIndex: 2,
                                                     }}
                                                 >
-                                                    paso
-                                                </th>
-                                                <th
-                                                    style={{
-                                                        padding: '5px 10px',
-                                                        fontSize: 11,
-                                                        color: '#888',
-                                                        textAlign: 'left',
-                                                        borderBottom:
-                                                            '1px solid var(--border)',
-                                                        backgroundColor: 'var(--sidebar-bg)',
-                                                        whiteSpace: 'nowrap',
-                                                    }}
-                                                >
-                                                    línea
-                                                </th>
-                                                {nombresVisibles.map((nombre) => {
-                                                    const idxOriginal = nombres.indexOf(nombre);
-                                                    return (
-                                                        <th
-                                                            key={nombre}
-                                                            style={{
-                                                                padding: '5px 10px',
-                                                                fontSize: 12,
-                                                                fontFamily:
-                                                                    'var(--mono)',
-                                                                textAlign: 'left',
-                                                                borderBottom:
-                                                                    '1px solid var(--border)',
-                                                                color: colorDe(idxOriginal >= 0 ? idxOriginal : 0),
-                                                                whiteSpace:
-                                                                    'nowrap',
-                                                                backgroundColor: 'var(--sidebar-bg)',
-                                                            }}
-                                                        >
-                                                            <div
-                                                                style={{
-                                                                    display: 'inline-flex',
-                                                                    alignItems: 'center',
-                                                                    gap: 5,
-                                                                }}
-                                                            >
-                                                                <span>{nombre}</span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        alternarVisibilidadVariable(nombre);
-                                                                    }}
-                                                                    title={`Ocultar columna ${nombre} de la tabla`}
+                                                    <th
+                                                        style={{
+                                                            padding: '6px 12px',
+                                                            fontSize: 13,
+                                                            color: '#888',
+                                                            textAlign: 'left',
+                                                            borderBottom:
+                                                                '1px solid var(--border)',
+                                                            backgroundColor:
+                                                                'var(--sidebar-bg)',
+                                                            whiteSpace:
+                                                                'nowrap',
+                                                        }}
+                                                    >
+                                                        paso
+                                                    </th>
+                                                    <th
+                                                        style={{
+                                                            padding: '6px 12px',
+                                                            fontSize: 13,
+                                                            color: '#888',
+                                                            textAlign: 'left',
+                                                            borderBottom:
+                                                                '1px solid var(--border)',
+                                                            backgroundColor:
+                                                                'var(--sidebar-bg)',
+                                                            whiteSpace:
+                                                                'nowrap',
+                                                        }}
+                                                    >
+                                                        línea
+                                                    </th>
+                                                    {nombresVisibles.map(
+                                                        (nombre) => {
+                                                            const idxOriginal =
+                                                                nombres.indexOf(
+                                                                    nombre
+                                                                );
+                                                            return (
+                                                                <th
+                                                                    key={nombre}
                                                                     style={{
-                                                                        background: 'transparent',
-                                                                        border: 'none',
-                                                                        cursor: 'pointer',
-                                                                        padding: '1px 2px',
-                                                                        opacity: 0.7,
-                                                                        color: 'inherit',
-                                                                        display: 'inline-flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
+                                                                        padding:
+                                                                            '6px 12px',
+                                                                        fontSize: 14,
+                                                                        fontFamily:
+                                                                            'var(--mono)',
+                                                                        textAlign:
+                                                                            'left',
+                                                                        borderBottom:
+                                                                            '1px solid var(--border)',
+                                                                        color: colorDe(
+                                                                            idxOriginal >=
+                                                                                0
+                                                                                ? idxOriginal
+                                                                                : 0
+                                                                        ),
+                                                                        whiteSpace:
+                                                                            'nowrap',
+                                                                        backgroundColor:
+                                                                            'var(--sidebar-bg)',
                                                                     }}
                                                                 >
-                                                                    <IconoOjo visible={true} size={13} />
-                                                                </button>
-                                                            </div>
-                                                        </th>
-                                                    );
-                                                })}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {(() => {
-                                                const filasArray = armarFilas();
-                                                if (nombresVisibles.length === 0) {
-                                                    return (
-                                                        <tr>
-                                                            <td
-                                                                colSpan={2}
-                                                                style={{
-                                                                    padding: '16px 10px',
-                                                                    textAlign: 'center',
-                                                                    color: '#888',
-                                                                    fontSize: 11,
-                                                                }}
-                                                            >
-                                                                Todas las columnas están ocultas.{' '}
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setVariablesOcultas(new Set())}
-                                                                    style={{
-                                                                        background: 'transparent',
-                                                                        border: 'none',
-                                                                        color: '#FBBF24',
-                                                                        cursor: 'pointer',
-                                                                        textDecoration: 'underline',
-                                                                        fontWeight: 600,
-                                                                    }}
-                                                                >
-                                                                    Mostrar todas
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                }
-
-                                                return filasArray.map((fila, i) => {
-                                                    const capturaFila = filas[i];
-                                                    const pasoActual = capturaFila?.paso;
-                                                    const lineaActual = capturaFila?.linea;
-                                                    const instruccionFila = capturaFila?.instruccion;
-                                                    const esSeleccionado = captura?.paso === pasoActual;
-                                                    const filaPrevia = i > 0 ? filasArray[i - 1] : undefined;
-                                                    const accesosArreglo = accesosArregloPorFila[i] ?? [];
-
-                                                    return (
-                                                        <tr
-                                                            key={`${pasoActual}-${i}`}
-                                                            style={{
-                                                                backgroundColor: esSeleccionado
-                                                                    ? 'rgba(255,124,2,0.14)'
-                                                                    : i % 2 === 0
-                                                                      ? 'transparent'
-                                                                      : 'rgba(255,255,255,0.02)',
-                                                            }}
-                                                        >
-                                                            <td
-                                                                style={{
-                                                                    padding: '4px 10px',
-                                                                    fontSize: 10,
-                                                                    color: esSeleccionado ? '#FF9D3D' : '#777',
-                                                                    fontWeight: esSeleccionado ? 700 : 400,
-                                                                    whiteSpace: 'nowrap',
-                                                                }}
-                                                            >
-                                                                {pasoActual ?? '—'}
-                                                            </td>
-                                                            <td
-                                                                style={{
-                                                                    padding: '4px 10px',
-                                                                    fontSize: 10,
-                                                                    fontFamily: 'var(--mono)',
-                                                                    color: esSeleccionado ? '#FBBF24' : '#94A3B8',
-                                                                    whiteSpace: 'nowrap',
-                                                                }}
-                                                                title={instruccionFila ? `Instrucción: ${instruccionFila}` : undefined}
-                                                            >
-                                                                {lineaActual ? `L${lineaActual}` : '—'}
-                                                            </td>
-                                                            {nombresVisibles.map((nombre) => {
-                                                                const esColumnaAcceso = nombre.includes('[');
-                                                                const celdasAccedidas = !esColumnaAcceso
-                                                                    ? accesosArreglo.filter(
-                                                                          (acceso) =>
-                                                                              normVar(acceso.nombreArr) ===
-                                                                              normVar(nombre),
-                                                                      )
-                                                                    : [];
-
-                                                                const valorCeldaActual = fila[nombre];
-                                                                const accesoPropio = esColumnaAcceso
-                                                                    ? accesosArreglo.find(
-                                                                          (a) => a.expresion.replace(/\s+/g, '') === nombre
-                                                                      )
-                                                                    : null;
-
-                                                                return (
-                                                                    <td
-                                                                        key={nombre}
+                                                                    <div
                                                                         style={{
-                                                                            padding: '4px 12px',
+                                                                            display:
+                                                                                'inline-flex',
+                                                                            alignItems:
+                                                                                'center',
+                                                                            gap: 5,
+                                                                        }}
+                                                                    >
+                                                                        <span>
+                                                                            {
+                                                                                nombre
+                                                                            }
+                                                                        </span>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(
+                                                                                e
+                                                                            ) => {
+                                                                                e.stopPropagation();
+                                                                                alternarVisibilidadVariable(
+                                                                                    nombre
+                                                                                );
+                                                                            }}
+                                                                            title={`Ocultar columna ${nombre} de la tabla`}
+                                                                            style={{
+                                                                                background:
+                                                                                    'transparent',
+                                                                                border: 'none',
+                                                                                cursor: 'pointer',
+                                                                                padding:
+                                                                                    '1px 2px',
+                                                                                opacity: 0.7,
+                                                                                color: 'inherit',
+                                                                                display:
+                                                                                    'inline-flex',
+                                                                                alignItems:
+                                                                                    'center',
+                                                                                justifyContent:
+                                                                                    'center',
+                                                                            }}
+                                                                        >
+                                                                            <IconoOjo
+                                                                                visible={
+                                                                                    true
+                                                                                }
+                                                                                size={
+                                                                                    13
+                                                                                }
+                                                                            />
+                                                                        </button>
+                                                                    </div>
+                                                                </th>
+                                                            );
+                                                        }
+                                                    )}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {(() => {
+                                                    const filasArray =
+                                                        armarFilas();
+                                                    if (
+                                                        nombresVisibles.length ===
+                                                        0
+                                                    ) {
+                                                        return (
+                                                            <tr>
+                                                                <td
+                                                                    colSpan={2}
+                                                                    style={{
+                                                                        padding:
+                                                                            '16px 10px',
+                                                                        textAlign:
+                                                                            'center',
+                                                                        color: '#888',
+                                                                        fontSize: 11,
+                                                                    }}
+                                                                >
+                                                                    Todas las
+                                                                    columnas
+                                                                    están
+                                                                    ocultas.{' '}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() =>
+                                                                            setVariablesOcultas(
+                                                                                new Set()
+                                                                            )
+                                                                        }
+                                                                        style={{
+                                                                            background:
+                                                                                'transparent',
+                                                                            border: 'none',
+                                                                            color: '#FBBF24',
+                                                                            cursor: 'pointer',
+                                                                            textDecoration:
+                                                                                'underline',
+                                                                            fontWeight: 600,
+                                                                        }}
+                                                                    >
+                                                                        Mostrar
+                                                                        todas
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    }
+
+                                                    return filasArray.map(
+                                                        (fila, i) => {
+                                                            const capturaFila =
+                                                                filas[i];
+                                                            const pasoActual =
+                                                                capturaFila?.paso;
+                                                            const lineaActual =
+                                                                capturaFila?.linea;
+                                                            const instruccionFila =
+                                                                capturaFila?.instruccion;
+                                                            const esSeleccionado =
+                                                                captura?.paso ===
+                                                                pasoActual;
+                                                            const filaPrevia =
+                                                                i > 0
+                                                                    ? filasArray[
+                                                                          i - 1
+                                                                      ]
+                                                                    : undefined;
+                                                            const accesosArreglo =
+                                                                accesosArregloPorFila[
+                                                                    i
+                                                                ] ?? [];
+
+                                                            return (
+                                                                <tr
+                                                                    key={`${pasoActual}-${i}`}
+                                                                    style={{
+                                                                        backgroundColor:
+                                                                            esSeleccionado
+                                                                                ? 'rgba(255,124,2,0.14)'
+                                                                                : i %
+                                                                                        2 ===
+                                                                                    0
+                                                                                  ? 'transparent'
+                                                                                  : 'rgba(255,255,255,0.02)',
+                                                                    }}
+                                                                >
+                                                                    <td
+                                                                        style={{
+                                                                            padding:
+                                                                                '6px 12px',
+                                                                            fontSize: 12,
+                                                                            color: esSeleccionado
+                                                                                ? '#FF9D3D'
+                                                                                : '#777',
+                                                                            fontWeight:
+                                                                                esSeleccionado
+                                                                                    ? 700
+                                                                                    : 400,
+                                                                            whiteSpace:
+                                                                                'nowrap',
+                                                                        }}
+                                                                    >
+                                                                        {pasoActual ??
+                                                                            '—'}
+                                                                    </td>
+                                                                    <td
+                                                                        style={{
+                                                                            padding:
+                                                                                '6px 12px',
                                                                             fontSize: 12,
                                                                             fontFamily:
                                                                                 'var(--mono)',
+                                                                            color: esSeleccionado
+                                                                                ? '#FBBF24'
+                                                                                : '#94A3B8',
                                                                             whiteSpace:
                                                                                 'nowrap',
-                                                                            color:
-                                                                                valorCeldaActual ===
-                                                                                undefined
-                                                                                    ? '#555'
-                                                                                    : esColumnaAcceso
-                                                                                      ? '#FBBF24'
-                                                                                      : 'var(--text)',
                                                                         }}
+                                                                        title={
+                                                                            instruccionFila
+                                                                                ? `Instrucción: ${instruccionFila}`
+                                                                                : undefined
+                                                                        }
                                                                     >
-                                                                        {esColumnaAcceso ? (
-                                                                            valorCeldaActual !== undefined ? (
-                                                                                <span
-                                                                                    style={{
-                                                                                        display: 'inline-flex',
-                                                                                        alignItems: 'center',
-                                                                                        gap: 4,
-                                                                                        padding: '1px 5px',
-                                                                                        borderRadius: 4,
-                                                                                        background: 'rgba(251, 191, 36, 0.12)',
-                                                                                        border: '1px solid rgba(251, 191, 36, 0.4)',
-                                                                                        fontWeight: 700,
-                                                                                    }}
-                                                                                    title={
-                                                                                        accesoPropio
-                                                                                            ? `${accesoPropio.expresion} = ${accesoPropio.celdaConcreta} (${valorCeldaActual})`
-                                                                                            : undefined
-                                                                                    }
-                                                                                >
-                                                                                    <b style={{ color: '#FBBF24' }}>
-                                                                                        {valorCeldaActual}
-                                                                                    </b>
-                                                                                    {accesoPropio && (
-                                                                                        <span
-                                                                                            style={{
-                                                                                                fontSize: 9.5,
-                                                                                                color: '#94A3B8',
-                                                                                                fontWeight: 500,
-                                                                                            }}
-                                                                                        >
-                                                                                            [{accesoPropio.celdaConcreta.replace(/^[^[]*\[(.*)\]$/, '$1')}]
-                                                                                        </span>
-                                                                                    )}
-                                                                                </span>
-                                                                            ) : (
-                                                                                <span style={{ color: '#555', opacity: 0.5 }}>—</span>
-                                                                            )
-                                                                        ) : (
-                                                                            renderizarCeldaValor(
-                                                                                valorCeldaActual,
-                                                                                filaPrevia
-                                                                                    ? filaPrevia[nombre]
-                                                                                    : undefined,
-                                                                            )
-                                                                        )}
-                                                                        {celdasAccedidas.map(
-                                                                            (acceso) => (
-                                                                                <div
-                                                                                    key={`${acceso.celdaConcreta}-${acceso.expresion}`}
-                                                                                    title={`${acceso.expresion} evaluado en este paso es la celda ${acceso.celdaConcreta} con valor ${acceso.valor}`}
-                                                                                    style={{
-                                                                                        display: 'inline-flex',
-                                                                                        gap: 4,
-                                                                                        alignItems: 'center',
-                                                                                        marginTop: 3,
-                                                                                        marginRight: 6,
-                                                                                        padding: '1px 5px',
-                                                                                        borderRadius: 4,
-                                                                                        background: 'rgba(96, 165, 250, 0.12)',
-                                                                                        border: '1px solid rgba(96, 165, 250, 0.35)',
-                                                                                        fontSize: 10,
-                                                                                        whiteSpace: 'nowrap',
-                                                                                    }}
-                                                                                >
-                                                                                    <span
-                                                                                        style={{
-                                                                                            color: '#93C5FD',
-                                                                                            fontWeight: 600,
-                                                                                        }}
-                                                                                    >
-                                                                                        ↳ {acceso.expresion}
-                                                                                        {acceso.expresion !== acceso.celdaConcreta && (
-                                                                                            <span style={{ opacity: 0.75, fontSize: 9.5 }}>
-                                                                                                [{acceso.celdaConcreta.replace(/^[^[]*\[(.*)\]$/, '$1')}]
-                                                                                            </span>
-                                                                                        )}
-                                                                                        :
-                                                                                    </span>
-                                                                                    <b
-                                                                                        style={{
-                                                                                            color: '#FBBF24',
-                                                                                            fontWeight: 700,
-                                                                                        }}
-                                                                                    >
-                                                                                        {acceso.valor}
-                                                                                    </b>
-                                                                                </div>
-                                                                            ),
-                                                                        )}
+                                                                        {lineaActual
+                                                                            ? `L${lineaActual}`
+                                                                            : '—'}
                                                                     </td>
-                                                                );
-                                                            })}
-                                                        </tr>
+                                                                    {nombresVisibles.map(
+                                                                        (
+                                                                            nombre
+                                                                        ) => {
+                                                                            const esColumnaAcceso =
+                                                                                nombre.includes(
+                                                                                    '['
+                                                                                );
+                                                                            const celdasAccedidas =
+                                                                                !esColumnaAcceso
+                                                                                    ? accesosArreglo.filter(
+                                                                                          (
+                                                                                              acceso
+                                                                                          ) =>
+                                                                                              normVar(
+                                                                                                  acceso.nombreArr
+                                                                                              ) ===
+                                                                                              normVar(
+                                                                                                  nombre
+                                                                                              )
+                                                                                      )
+                                                                                    : [];
+
+                                                                            const valorCeldaActual =
+                                                                                fila[
+                                                                                    nombre
+                                                                                ];
+                                                                            const accesoPropio =
+                                                                                esColumnaAcceso
+                                                                                    ? accesosArreglo.find(
+                                                                                          (
+                                                                                              a
+                                                                                          ) =>
+                                                                                              a.expresion.replace(
+                                                                                                  /\s+/g,
+                                                                                                  ''
+                                                                                              ) ===
+                                                                                              nombre
+                                                                                      )
+                                                                                    : null;
+
+                                                                            return (
+                                                                                <td
+                                                                                    key={
+                                                                                        nombre
+                                                                                    }
+                                                                                    style={{
+                                                                                        padding:
+                                                                                            '6px 14px',
+                                                                                        fontSize: 14,
+                                                                                        fontFamily:
+                                                                                            'var(--mono)',
+                                                                                        whiteSpace:
+                                                                                            'nowrap',
+                                                                                        color:
+                                                                                            valorCeldaActual ===
+                                                                                            undefined
+                                                                                                ? '#555'
+                                                                                                : esColumnaAcceso
+                                                                                                  ? '#FBBF24'
+                                                                                                  : 'var(--text)',
+                                                                                    }}
+                                                                                >
+                                                                                    {esColumnaAcceso ? (
+                                                                                        valorCeldaActual !==
+                                                                                        undefined ? (
+                                                                                            <span
+                                                                                                style={{
+                                                                                                    display:
+                                                                                                        'inline-flex',
+                                                                                                    alignItems:
+                                                                                                        'center',
+                                                                                                    gap: 4,
+                                                                                                    padding:
+                                                                                                        '1px 5px',
+                                                                                                    borderRadius: 4,
+                                                                                                    background:
+                                                                                                        'rgba(251, 191, 36, 0.12)',
+                                                                                                    border: '1px solid rgba(251, 191, 36, 0.4)',
+                                                                                                    fontWeight: 700,
+                                                                                                }}
+                                                                                                title={
+                                                                                                    accesoPropio
+                                                                                                        ? `${accesoPropio.expresion} = ${accesoPropio.celdaConcreta} (${valorCeldaActual})`
+                                                                                                        : undefined
+                                                                                                }
+                                                                                            >
+                                                                                                <b
+                                                                                                    style={{
+                                                                                                        color: '#FBBF24',
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {
+                                                                                                        valorCeldaActual
+                                                                                                    }
+                                                                                                </b>
+                                                                                                {accesoPropio && (
+                                                                                                    <span
+                                                                                                        style={{
+                                                                                                            fontSize: 9.5,
+                                                                                                            color: '#94A3B8',
+                                                                                                            fontWeight: 500,
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        [
+                                                                                                        {accesoPropio.celdaConcreta.replace(
+                                                                                                            /^[^[]*\[(.*)\]$/,
+                                                                                                            '$1'
+                                                                                                        )}
+                                                                                                        ]
+                                                                                                    </span>
+                                                                                                )}
+                                                                                            </span>
+                                                                                        ) : (
+                                                                                            <span
+                                                                                                style={{
+                                                                                                    color: '#555',
+                                                                                                    opacity: 0.5,
+                                                                                                }}
+                                                                                            >
+                                                                                                —
+                                                                                            </span>
+                                                                                        )
+                                                                                    ) : (
+                                                                                        renderizarCeldaValor(
+                                                                                            valorCeldaActual,
+                                                                                            filaPrevia
+                                                                                                ? filaPrevia[
+                                                                                                      nombre
+                                                                                                  ]
+                                                                                                : undefined
+                                                                                        )
+                                                                                    )}
+                                                                                    {celdasAccedidas.map(
+                                                                                        (
+                                                                                            acceso
+                                                                                        ) => (
+                                                                                            <div
+                                                                                                key={`${acceso.celdaConcreta}-${acceso.expresion}`}
+                                                                                                title={`${acceso.expresion} evaluado en este paso es la celda ${acceso.celdaConcreta} con valor ${acceso.valor}`}
+                                                                                                style={{
+                                                                                                    display:
+                                                                                                        'inline-flex',
+                                                                                                    gap: 4,
+                                                                                                    alignItems:
+                                                                                                        'center',
+                                                                                                    marginTop: 3,
+                                                                                                    marginRight: 6,
+                                                                                                    padding:
+                                                                                                        '2px 6px',
+                                                                                                    borderRadius: 4,
+                                                                                                    background:
+                                                                                                        'rgba(96, 165, 250, 0.12)',
+                                                                                                    border: '1px solid rgba(96, 165, 250, 0.35)',
+                                                                                                    fontSize: 12,
+                                                                                                    whiteSpace:
+                                                                                                        'nowrap',
+                                                                                                }}
+                                                                                            >
+                                                                                                <span
+                                                                                                    style={{
+                                                                                                        color: '#93C5FD',
+                                                                                                        fontWeight: 600,
+                                                                                                    }}
+                                                                                                >
+                                                                                                    ↳{' '}
+                                                                                                    {
+                                                                                                        acceso.expresion
+                                                                                                    }
+                                                                                                    {acceso.expresion !==
+                                                                                                        acceso.celdaConcreta && (
+                                                                                                        <span
+                                                                                                            style={{
+                                                                                                                opacity: 0.75,
+                                                                                                                fontSize: 9.5,
+                                                                                                            }}
+                                                                                                        >
+                                                                                                            [
+                                                                                                            {acceso.celdaConcreta.replace(
+                                                                                                                /^[^[]*\[(.*)\]$/,
+                                                                                                                '$1'
+                                                                                                            )}
+                                                                                                            ]
+                                                                                                        </span>
+                                                                                                    )}
+
+                                                                                                    :
+                                                                                                </span>
+                                                                                                <b
+                                                                                                    style={{
+                                                                                                        color: '#FBBF24',
+                                                                                                        fontWeight: 700,
+                                                                                                    }}
+                                                                                                >
+                                                                                                    {
+                                                                                                        acceso.valor
+                                                                                                    }
+                                                                                                </b>
+                                                                                            </div>
+                                                                                        )
+                                                                                    )}
+                                                                                </td>
+                                                                            );
+                                                                        }
+                                                                    )}
+                                                                </tr>
+                                                            );
+                                                        }
                                                     );
-                                                });
-                                            })()}
-                                        </tbody>
-                                    </table>
+                                                })()}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Tarjeta de Transferencia Directa de Memoria (Destino ← Origen) para el paso activo */}
+                        {transferenciaActiva &&
+                            transferenciaActiva.hayTransferencia && (
+                                <div style={{ marginTop: 8 }}>
+                                    <PistaTransferencia
+                                        transferencia={transferenciaActiva}
+                                        paso={captura.paso}
+                                    />
                                 </div>
                             )}
-                        </div>
-                    )}
-                </>
-            )}
+                    </>
+                )}
 
-            {tab === 'escritorio' && (
-                <div>
-                    <div style={{ marginBottom: 6 }}>
-                        <strong style={{ fontSize: 12 }}>
-                            Prueba de escritorio
-                        </strong>
-                        <p style={{ fontSize: 10, color: '#888', margin: 0 }}>
-                            Cada fila muestra una asignación y los valores
-                            anteriores y nuevos. La traza completa sigue
-                            disponible en la pestaña Tabla.
-                        </p>
-                    </div>
-                    {filasEscritorio.length === 0 ? (
-                        <span style={{ fontSize: 11, color: '#888' }}>
-                            Ejecuta un algoritmo con asignaciones para generar
-                            esta tabla.
-                        </span>
-                    ) : (
-                        <div
-                            style={{
-                                overflow: 'auto',
-                                maxHeight: 220,
-                                border: '1px solid var(--border)',
-                                borderRadius: 8,
-                            }}
-                        >
-                            <table
+                {tab === 'escritorio' && (
+                    <div>
+                        <div style={{ marginBottom: 6 }}>
+                            <strong style={{ fontSize: 12 }}>
+                                Prueba de escritorio
+                            </strong>
+                            <p
                                 style={{
-                                    borderCollapse: 'collapse',
-                                    minWidth: '100%',
+                                    fontSize: 10,
+                                    color: '#888',
+                                    margin: 0,
                                 }}
                             >
-                                <thead>
-                                    <tr
-                                        style={{
-                                            backgroundColor:
-                                                'rgba(255,255,255,0.05)',
-                                            position: 'sticky',
-                                            top: 0,
-                                        }}
-                                    >
-                                        {[
-                                            'iteración',
-                                            'control',
-                                            'variable',
-                                            'valor anterior',
-                                            'operación',
-                                            'valor nuevo',
-                                        ].map((titulo) => (
-                                            <th
-                                                key={titulo}
-                                                style={{
-                                                    padding: '6px 10px',
-                                                    fontSize: 10,
-                                                    color: '#888',
-                                                    textAlign: 'left',
-                                                    whiteSpace: 'nowrap',
-                                                    borderBottom:
-                                                        '1px solid var(--border)',
-                                                }}
-                                            >
-                                                {titulo}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filasEscritorio.map((fila, indice) => (
-                                        <tr
-                                            key={`${fila.paso}-${fila.linea}-${indice}`}
-                                        >
-                                            <td style={celdaEscritorio}>
-                                                {fila.iteracion}
-                                            </td>
-                                            <td style={celdaEscritorio}>
-                                                {fila.control}
-                                            </td>
-                                            <td
-                                                style={{
-                                                    ...celdaEscritorio,
-                                                    fontWeight: 700,
-                                                    color: '#60A5FA',
-                                                }}
-                                            >
-                                                {fila.variable}
-                                            </td>
-                                            <td
-                                                style={{
-                                                    ...celdaEscritorio,
-                                                    color: '#FBBF24',
-                                                }}
-                                            >
-                                                {fila.anterior}
-                                            </td>
-                                            <td style={celdaEscritorio}>
-                                                {fila.operacion}
-                                            </td>
-                                            <td
-                                                style={{
-                                                    ...celdaEscritorio,
-                                                    color: '#4ADE80',
-                                                    fontWeight: 700,
-                                                }}
-                                            >
-                                                {fila.nuevo}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                Cada fila muestra una asignación y los valores
+                                anteriores y nuevos. La traza completa sigue
+                                disponible en la pestaña Tabla.
+                            </p>
                         </div>
-                    )}
-                </div>
-            )}
+                        {filasEscritorio.length === 0 ? (
+                            <span style={{ fontSize: 11, color: '#888' }}>
+                                Ejecuta un algoritmo con asignaciones para
+                                generar esta tabla.
+                            </span>
+                        ) : (
+                            <div
+                                style={{
+                                    overflow: 'auto',
+                                    maxHeight: 220,
+                                    border: '1px solid var(--border)',
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <table
+                                    style={{
+                                        borderCollapse: 'collapse',
+                                        minWidth: '100%',
+                                    }}
+                                >
+                                    <thead>
+                                        <tr
+                                            style={{
+                                                backgroundColor:
+                                                    'rgba(255,255,255,0.05)',
+                                                position: 'sticky',
+                                                top: 0,
+                                            }}
+                                        >
+                                            {[
+                                                'iteración',
+                                                'control',
+                                                'variable',
+                                                'valor anterior',
+                                                'operación',
+                                                'valor nuevo',
+                                            ].map((titulo) => (
+                                                <th
+                                                    key={titulo}
+                                                    style={{
+                                                        padding: '6px 10px',
+                                                        fontSize: 10,
+                                                        color: '#888',
+                                                        textAlign: 'left',
+                                                        whiteSpace: 'nowrap',
+                                                        borderBottom:
+                                                            '1px solid var(--border)',
+                                                    }}
+                                                >
+                                                    {titulo}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filasEscritorio.map((fila, indice) => (
+                                            <tr
+                                                key={`${fila.paso}-${fila.linea}-${indice}`}
+                                            >
+                                                <td style={celdaEscritorio}>
+                                                    {fila.iteracion}
+                                                </td>
+                                                <td style={celdaEscritorio}>
+                                                    {fila.control}
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        ...celdaEscritorio,
+                                                        fontWeight: 700,
+                                                        color: '#60A5FA',
+                                                    }}
+                                                >
+                                                    {fila.variable}
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        ...celdaEscritorio,
+                                                        color: '#FBBF24',
+                                                    }}
+                                                >
+                                                    {fila.anterior}
+                                                </td>
+                                                <td style={celdaEscritorio}>
+                                                    {fila.operacion}
+                                                </td>
+                                                <td
+                                                    style={{
+                                                        ...celdaEscritorio,
+                                                        color: '#4ADE80',
+                                                        fontWeight: 700,
+                                                    }}
+                                                >
+                                                    {fila.nuevo}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
 
-            {tab === 'evolucion' && (
-                <GraficaEvolucion
-                    perfiles={perfiles}
-                    variablesOcultas={variablesOcultas}
-                    onToggleVariable={alternarVisibilidadVariable}
-                />
-            )}
+                {tab === 'evolucion' && (
+                    <GraficaEvolucion
+                        perfiles={perfiles}
+                        variablesOcultas={variablesOcultas}
+                        onToggleVariable={alternarVisibilidadVariable}
+                    />
+                )}
 
-            {tab === 'barras' && (
-                <BarrasEjecucion
-                    perfiles={perfiles}
-                    captura={captura}
-                    anterior={anterior}
-                    variablesOcultas={variablesOcultas}
-                    onToggleVariable={alternarVisibilidadVariable}
-                />
-            )}
+                {tab === 'barras' && (
+                    <BarrasEjecucion
+                        perfiles={perfiles}
+                        captura={captura}
+                        anterior={anterior}
+                        variablesOcultas={variablesOcultas}
+                        onToggleVariable={alternarVisibilidadVariable}
+                    />
+                )}
 
-            {tab === 'simulacion' && (
-                <SimulacionMovimiento
-                    perfiles={perfiles}
-                    captura={captura}
-                    anterior={anterior}
-                    historial={cortado}
-                    velocidad={velocidad}
-                />
-            )}
+                {tab === 'simulacion' && (
+                    <SimulacionMovimiento
+                        perfiles={perfiles}
+                        captura={captura}
+                        anterior={anterior}
+                        historial={cortado}
+                        velocidad={velocidad}
+                    />
+                )}
             </div>
 
             {/* Reproductor de Modo Película (Fijo y Estático abajo de todo) */}
@@ -1444,7 +1763,7 @@ export const construirHtmlVariablesEnModal = (
         .join('');
 
     return `<div style="margin-top:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;background:#fafafa;">
-<div style="font-size:12px;font-weight:bold;color:#4b5563;margin-bottom:6px;">🔍 Variables en Ejecución <span style="color:#9ca3af;font-weight:500;font-size:11px;">(paso ${estado?.paso ?? 0})</span></div>
+<div style="font-size:12px;font-weight:bold;color:#4b5563;margin-bottom:6px;">🔍 Variables en Ejecución <span style="color:#9ca3af;font-weight:500;font-size:15px;">(paso ${estado?.paso ?? 0})</span></div>
 <div style="line-height:1.6;">${chips}</div>
 </div>`;
 };
