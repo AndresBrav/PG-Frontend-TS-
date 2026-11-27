@@ -1,16 +1,164 @@
 import React from 'react';
-import type { TransferenciaVariable } from './visualUtils';
+import type { ComparacionActiva, TransferenciaVariable } from './visualUtils';
 
 interface PistaTransferenciaProps {
-    transferencia: TransferenciaVariable;
+    transferencia?: TransferenciaVariable | null;
+    comparacion?: ComparacionActiva | null;
+    instruccion?: string;
     paso: number;
 }
 
 export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
     transferencia,
+    comparacion,
+    instruccion,
     paso,
 }) => {
-    if (!transferencia.hayTransferencia) {
+    const hayTransferencia = Boolean(transferencia?.hayTransferencia);
+    const hayComparacion = Boolean(comparacion?.activa);
+
+    if (!hayTransferencia && !hayComparacion) {
+        return null;
+    }
+
+    // SI ES COMPARACIÓN LÓGICA (Si, Mientras, etc.) Y NO HAY TRANSFERENCIA EN EL MISMO PASO
+    if (hayComparacion && !hayTransferencia && comparacion) {
+        return (
+            <div
+                key={`pista-comp-${paso}`}
+                style={{
+                    background:
+                        'linear-gradient(135deg, rgba(30, 41, 59, 0.55), rgba(15, 23, 42, 0.75))',
+                    border: '1px solid rgba(129, 140, 248, 0.45)',
+                    borderRadius: 8,
+                    padding: '10px 12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                }}
+            >
+                {/* Cabecera */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: 6,
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 14 }}>⚖️</span>
+                        <span
+                            style={{
+                                fontSize: 12,
+                                fontWeight: 700,
+                                color: '#A5B4FC',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px',
+                            }}
+                        >
+                            Evaluación de Condición (Comparación Lógica)
+                        </span>
+                    </div>
+
+                    <div
+                        style={{
+                            fontFamily: 'var(--mono)',
+                            fontSize: 12,
+                            background: 'rgba(255, 255, 255, 0.06)',
+                            padding: '2px 8px',
+                            borderRadius: 6,
+                            color: '#E2E8F0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 4,
+                        }}
+                    >
+                        <span>Condición:</span>
+                        <span style={{ color: '#FCD34D', fontWeight: 700 }}>
+                            {comparacion.texto}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Cuerpo de evaluación */}
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-around',
+                        gap: 12,
+                        background: 'rgba(0, 0, 0, 0.25)',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        borderRadius: 6,
+                        padding: '10px 14px',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={{ fontSize: 11, color: '#94A3B8' }}>
+                            Expresión evaluada:
+                        </span>
+                        <code
+                            style={{
+                                fontFamily: 'var(--mono)',
+                                fontSize: 14,
+                                color: '#FCD34D',
+                                fontWeight: 700,
+                            }}
+                        >
+                            {comparacion.texto}
+                        </code>
+                    </div>
+
+                    {comparacion.textoDesglosado && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <span style={{ fontSize: 11, color: '#94A3B8' }}>
+                                Sustitución de valores:
+                            </span>
+                            <div
+                                style={{
+                                    fontFamily: 'var(--mono)',
+                                    fontSize: 14,
+                                    color: '#60A5FA',
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 6,
+                                }}
+                            >
+                                <span>📐</span>
+                                <span>{comparacion.textoDesglosado}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {instruccion && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <span style={{ fontSize: 11, color: '#94A3B8' }}>
+                                Instrucción activa:
+                            </span>
+                            <span
+                                style={{
+                                    fontFamily: 'var(--mono)',
+                                    fontSize: 12,
+                                    color: '#E2E8F0',
+                                }}
+                            >
+                                {instruccion}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    if (!transferencia) {
         return null;
     }
 
@@ -29,7 +177,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
         <div
             key={`pista-${paso}-${variableDestino}`}
             style={{
-                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.45), rgba(15, 23, 42, 0.65))',
+                background:
+                    'linear-gradient(135deg, rgba(30, 41, 59, 0.45), rgba(15, 23, 42, 0.65))',
                 border: '1px solid rgba(255, 157, 61, 0.35)',
                 borderRadius: 8,
                 padding: '8px 10px',
@@ -102,8 +251,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                         {tipo === 'literal'
                             ? '📥'
                             : tipo === 'directa'
-                            ? '🔄'
-                            : '⚡'}
+                              ? '🔄'
+                              : '⚡'}
                     </span>
                     <span
                         style={{
@@ -113,8 +262,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                                 tipo === 'literal'
                                     ? '#60A5FA'
                                     : tipo === 'directa'
-                                    ? '#FBBF24'
-                                    : '#A78BFA',
+                                      ? '#FBBF24'
+                                      : '#A78BFA',
                             textTransform: 'uppercase',
                             letterSpacing: '0.5px',
                         }}
@@ -122,8 +271,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                         {tipo === 'literal'
                             ? 'Asignación de Valor Constante'
                             : tipo === 'directa'
-                            ? 'Transferencia Directa de Memoria (Destino ← Origen)'
-                            : 'Cálculo Matemático y Asignación (Destino ← Operación)'}
+                              ? 'Transferencia Directa de Memoria (Destino ← Origen)'
+                              : 'Cálculo Matemático y Asignación (Destino ← Operación)'}
                     </span>
                 </div>
 
@@ -140,7 +289,11 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                         gap: 4,
                     }}
                 >
-                    <span>{formula ? formula : `${variableDestino} ← ${valorNuevo}`}</span>
+                    <span>
+                        {formula
+                            ? formula
+                            : `${variableDestino} ← ${valorNuevo}`}
+                    </span>
                 </div>
             </div>
 
@@ -212,7 +365,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                             fontFamily: 'var(--mono)',
                             fontSize: 13,
                             fontWeight: 700,
-                            animation: 'pulsoReceptor 0.8s ease-out 0.4s forwards',
+                            animation:
+                                'pulsoReceptor 0.8s ease-out 0.4s forwards',
                             display: 'flex',
                             alignItems: 'baseline',
                             gap: 5,
@@ -220,18 +374,19 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                         }}
                     >
                         <span>{valorNuevo}</span>
-                        {valorPrevioDestino && valorPrevioDestino !== valorNuevo && (
-                            <span
-                                style={{
-                                    fontSize: 9,
-                                    color: '#9CA3AF',
-                                    textDecoration: 'line-through',
-                                    opacity: 0.7,
-                                }}
-                            >
-                                {valorPrevioDestino}
-                            </span>
-                        )}
+                        {valorPrevioDestino &&
+                            valorPrevioDestino !== valorNuevo && (
+                                <span
+                                    style={{
+                                        fontSize: 9,
+                                        color: '#9CA3AF',
+                                        textDecoration: 'line-through',
+                                        opacity: 0.7,
+                                    }}
+                                >
+                                    {valorPrevioDestino}
+                                </span>
+                            )}
                     </div>
                 </div>
 
@@ -296,7 +451,6 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                                 boxShadow: '0 0 12px rgba(167, 139, 250, 0.4)',
                             }}
                         >
-                            <span>⚡</span>
                             <span>{operacionVisual}</span>
                         </div>
                     )}
@@ -313,8 +467,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                                 tipo === 'calculo'
                                     ? '#A78BFA'
                                     : tipo === 'directa'
-                                    ? '#FBBF24'
-                                    : '#60A5FA',
+                                      ? '#FBBF24'
+                                      : '#60A5FA',
                             color: '#000',
                             fontWeight: 800,
                             fontFamily: 'var(--mono)',
@@ -369,7 +523,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                             {valorNuevo}
                         </div>
                     </div>
-                ) : transferencia.origenesDetalle && transferencia.origenesDetalle.length > 1 ? (
+                ) : transferencia.origenesDetalle &&
+                  transferencia.origenesDetalle.length > 1 ? (
                     <div
                         style={{
                             display: 'flex',
@@ -412,7 +567,8 @@ export const PistaTransferencia: React.FC<PistaTransferenciaProps> = ({
                                         fontFamily: 'var(--mono)',
                                         fontSize: 13,
                                         fontWeight: 700,
-                                        boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)',
+                                        boxShadow:
+                                            '0 0 10px rgba(251, 191, 36, 0.3)',
                                     }}
                                 >
                                     {orig.valor}

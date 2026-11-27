@@ -163,41 +163,6 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                             </span>
                         )}
                     </span>
-
-                    {comparacion.activa && (
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                gap: 2,
-                                background: 'rgba(129, 140, 248, 0.18)',
-                                border: '1px solid rgba(129, 140, 248, 0.4)',
-                                color: '#A5B4FC',
-                                padding: '3px 10px',
-                                borderRadius: 8,
-                                fontSize: 11,
-                                fontWeight: 600,
-                            }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <span>⚖️ Comparando:</span>
-                                <code>{comparacion.texto}</code>
-                            </div>
-                            {comparacion.textoDesglosado && (
-                                <div
-                                    style={{
-                                        fontSize: 10,
-                                        fontFamily: 'var(--mono)',
-                                        color: '#FCD34D',
-                                        fontWeight: 700,
-                                    }}
-                                >
-                                    📐 {comparacion.textoDesglosado}
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 {instruccionActual && (
@@ -1161,10 +1126,12 @@ export const SimulacionMovimiento: React.FC<SimulacionMovimientoProps> = ({
                 </div>
             </div>
 
-            {/* SECCIÓN INFERIOR: PISTA DE TRANSFERENCIA DIRECTA (100% ANCHO, ABAJO DE TODO) */}
-            {transferencia.hayTransferencia && (
+            {/* SECCIÓN INFERIOR: CARD UNIFICADO DE OPERACIÓN (EVALUACIÓN O TRANSFERENCIA) */}
+            {(transferencia.hayTransferencia || comparacion.activa) && (
                 <PistaTransferencia
                     transferencia={transferencia}
+                    comparacion={comparacion}
+                    instruccion={instruccionActual}
                     paso={captura.paso}
                 />
             )}

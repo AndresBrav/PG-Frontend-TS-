@@ -7,6 +7,7 @@ import type {
 } from '../compilador';
 import {
     colorDeVariable,
+    detectarComparacion,
     detectarTransferenciaVariable,
     evaluarAccesoArreglo,
     perfilesDe,
@@ -338,6 +339,12 @@ const PanelVariablesEjecucion = ({
             valoresAnteriores
         );
     }, [captura, valoresAnteriores]);
+
+    // Detección de comparación lógica (Si, Mientras) para el paso activo
+    const comparacionActiva = useMemo(() => {
+        if (!captura?.instruccion) return null;
+        return detectarComparacion(captura.instruccion, captura.variables);
+    }, [captura]);
     const filasEscritorio = useMemo(() => {
         const filasGeneradas: FilaPruebaEscritorio[] = [];
         const asignacionesFueraDeCiclo = new Set<string>();
@@ -1541,16 +1548,18 @@ const PanelVariablesEjecucion = ({
                             </div>
                         )}
 
-                        {/* Tarjeta de Transferencia Directa de Memoria (Destino ← Origen) para el paso activo */}
-                        {transferenciaActiva &&
-                            transferenciaActiva.hayTransferencia && (
-                                <div style={{ marginTop: 8 }}>
-                                    <PistaTransferencia
-                                        transferencia={transferenciaActiva}
-                                        paso={captura.paso}
-                                    />
-                                </div>
-                            )}
+                        {/* Tarjeta Unificada de Operación (Evaluación o Transferencia) para el paso activo */}
+                        {(Boolean(transferenciaActiva?.hayTransferencia) ||
+                            Boolean(comparacionActiva?.activa)) && (
+                            <div style={{ marginTop: 8 }}>
+                                <PistaTransferencia
+                                    transferencia={transferenciaActiva}
+                                    comparacion={comparacionActiva}
+                                    instruccion={captura.instruccion}
+                                    paso={captura.paso}
+                                />
+                            </div>
+                        )}
                     </>
                 )}
 
